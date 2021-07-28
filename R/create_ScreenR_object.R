@@ -1,5 +1,4 @@
-#' Create the Screen Object
-#' @title create_Screen_object
+#' @title Create the Screen Object
 #' @description Initial function to create the Screen Object.
 #' @param count_table The count table obtained from the read alignment that
 #'                    contains the Barcodes as rows and samples as columns.
@@ -12,7 +11,7 @@
 #'
 #' @return An object containing all the information for the analysis.
 
-create_Screen_object <- function(count_table, annotation_table,
+create_ScreenR_object <- function(count_table, annotation_table,
                                  groups, replicates, color_palette) {
   setClass("Screen_object",
            slots = list(count_table = count_table,

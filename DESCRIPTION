@@ -1,12 +1,15 @@
 Package: ScreenR
 Type: Package
-Title: Performin High Throughput BiologicalScreening
+Title: Performin High Throughput Biological Screening
 Version: 0.1.0
 Author: Emanuel Michele Soda
 Maintainer: The package maintainer <emanuelsoda@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: This package helps Bioinformaticians perform analysis on 
+             High Throughput Biological Screening using pooled shRNA.
+License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
