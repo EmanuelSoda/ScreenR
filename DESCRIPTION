@@ -6,10 +6,18 @@ Author: Emanuel Michele Soda
 Maintainer: The package maintainer <emanuelsoda@gmail.com>
 Description: This package helps Bioinformaticians perform analysis on 
              High Throughput Biological Screening using pooled shRNA.
-License: GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
+License: LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Imports:
+    tidyverse
 Suggests: 
+    rmarkdown,
+    knitr,
+    methods,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
+VignetteBuilder: knitr

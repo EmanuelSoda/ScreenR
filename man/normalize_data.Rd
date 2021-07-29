@@ -8,10 +8,10 @@ normalize_data(screenR_Object)
 }
 \arguments{
 \item{screenR_object}{The ScreenR object obtained using the
-\code{\link{create_ScreenR_object}}}
+\code{\link{create_screenR_object}}}
 }
 \value{
-An object containing all the information for the analysis.
+return the screenR object with the normalize data
 }
 \description{
 This function perform a normalization on the data considering

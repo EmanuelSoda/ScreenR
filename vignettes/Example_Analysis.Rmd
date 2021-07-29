@@ -1,0 +1,67 @@
+---
+title: "Example Analysis Workdflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example Analysis}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r packages}
+library(ScreenR)
+```
+
+
+```{r read datara}
+groups <- factor(c("T0/T48", "T0/T48",
+                   "Treated", "Treated", "Treated",
+                    "Control", "Control", "Control",
+                    "Treated", "Treated", "Treated",
+                    "Control", "Control", "Control"))
+
+palette <- c("#1B9E77", "#1B9E77",
+             "#D95F02", "#D95F02", "#D95F02",
+             "#7570B3", "#7570B3", "#7570B3",
+             "#E7298A", "#E7298A", "#E7298A",
+             "#66A61E", "#66A61E", "#66A61E")
+
+object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                annotation = Table_Annotation,
+                                groups = groups,
+                                replicates = c(""),
+                                palette = palette)
+object 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

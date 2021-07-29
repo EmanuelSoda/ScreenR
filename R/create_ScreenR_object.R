@@ -1,4 +1,4 @@
-#' @title Create the Screen Object
+#' @title Create the ScreenR Object
 #' @description Initial function to create the Screen Object.
 #' @param count_table The count table obtained from the read alignment that
 #'                    contains the Barcodes as rows and samples as columns.
@@ -6,17 +6,31 @@
 #'                        for each Barcode and the association to the
 #'                        corresponding Gene
 #' @param groups A factor containing the experimental design label
-#' @param replicates A factor containing the replicates
+#' @param replicates A vector containing the replicates label
 #' @param color_palette a vector containing the color palette
 #'
-#' @return An object containing all the information for the analysis.
-
-create_ScreenR_object <- function(count_table, annotation_table,
-                                 groups, replicates, color_palette) {
-  setClass("Screen_object",
-           slots = list(count_table = count_table,
-                        annotation_table = annotation_table,
-                        groups = groups,
-                        replicates = replicates,
-                        color_palette =  color_palette))
+#' @return An object containing all the needed information for the analysis.
+#' @export
+create_screenR_object <- function(table = NULL, annotation = NULL,
+                                  groups = NULL, replicates = NULL,
+                                  palette = NULL){
+  if (is.null(table)) {
+    stop("The table is NULL")
+  } else if (is.null(annotation)) {
+    stop("The annotation is NULL")
+  } else if (is.null(groups)) {
+    stop("The groups is NULL")
+  } else if (is.null(replicates)) {
+    stop("The replicates is NULL")
+  } else if (is.null(palette)) {
+    stop("The palette is NULL")
+  }
+  object <- new("screenR_object",
+                count_table = table,
+                annotation_table = annotation,
+                groups = groups,
+                replicates = replicates,
+                color_palette = palette,
+                normalized_count_table = data.frame())
+  return(object)
 }
