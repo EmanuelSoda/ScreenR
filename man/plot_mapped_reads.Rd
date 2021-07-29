@@ -7,6 +7,8 @@
 plot_mapped_reads(screenR_Object, palette = NULL, alpha = 1)
 }
 \arguments{
+\item{palette}{The alpha parameter for the opacity of the plot}
+
 \item{screenR_object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}}
 }

@@ -7,7 +7,8 @@
 #'
 #' @param screenR_object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
-#'
+#' @param palette A vector of color
+#' @param palette The alpha parameter for the opacity of the plot
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' @return return a ggplot object

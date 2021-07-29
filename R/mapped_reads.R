@@ -14,17 +14,10 @@
 
 
 mapped_reads <- function(screenR_Object){
-  # Get only the numeric column (so the sample)
-  numericColumn <-
-    screenR_Object@count_table %>%
-    dplyr::select(where(is.numeric)) %>%
-    colnames()
-
-
-  table <- screenR_Object@count_table %>%
-    tidyr::gather(Sample, Mapped, numericColumn) %>%
+  table <- count_mapped_reads(screenR_Object)
+  table <- table %>%
     dplyr::select(Sample, Mapped) %>%
     dplyr::group_by(Sample) %>%
-    dplyr::mutate(Mapped = sum(Mapped), Sample = factor(Sample, levels = numericColumn))
+    dplyr::mutate(Mapped = sum(Mapped))
   return(table)
 }
