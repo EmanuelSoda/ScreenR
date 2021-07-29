@@ -7,13 +7,11 @@
 #'                        corresponding Gene
 #' @param groups A factor containing the experimental design label
 #' @param replicates A vector containing the replicates label
-#' @param color_palette a vector containing the color palette
 #'
 #' @return An object containing all the needed information for the analysis.
 #' @export
 create_screenR_object <- function(table = NULL, annotation = NULL,
-                                  groups = NULL, replicates = NULL,
-                                  palette = NULL){
+                                  groups = NULL, replicates = NULL){
   if (is.null(table)) {
     stop("The table is NULL")
   } else if (is.null(annotation)) {
@@ -22,15 +20,12 @@ create_screenR_object <- function(table = NULL, annotation = NULL,
     stop("The groups is NULL")
   } else if (is.null(replicates)) {
     stop("The replicates is NULL")
-  } else if (is.null(palette)) {
-    stop("The palette is NULL")
   }
   object <- new("screenR_object",
                 count_table = table,
                 annotation_table = annotation,
                 groups = groups,
                 replicates = replicates,
-                color_palette = palette,
                 normalized_count_table = data.frame())
   return(object)
 }

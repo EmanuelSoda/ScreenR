@@ -25,6 +25,6 @@ mapped_reads <- function(screenR_Object){
     tidyr::gather(Sample, Mapped, numericColumn) %>%
     dplyr::select(Sample, Mapped) %>%
     dplyr::group_by(Sample) %>%
-    dplyr::mutate(Mapped = sum(Mapped))
+    dplyr::mutate(Mapped = sum(Mapped), Sample = factor(Sample, levels = numericColumn))
   return(table)
 }

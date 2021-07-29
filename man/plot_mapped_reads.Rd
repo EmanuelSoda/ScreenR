@@ -4,7 +4,7 @@
 \alias{plot_mapped_reads}
 \title{Plot Mapped Reads}
 \usage{
-plot_mapped_reads(screenR_Object)
+plot_mapped_reads(screenR_Object, palette = NULL, alpha = 1)
 }
 \arguments{
 \item{screenR_object}{The ScreenR object obtained using the

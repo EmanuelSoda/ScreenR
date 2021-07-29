@@ -8,8 +8,7 @@ create_screenR_object(
   table = NULL,
   annotation = NULL,
   groups = NULL,
-  replicates = NULL,
-  palette = NULL
+  replicates = NULL
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ contains the Barcodes as rows and samples as columns.}
 \item{annotation_table}{The annotation table containing the information
 for each Barcode and the association to the
 corresponding Gene}
-
-\item{color_palette}{a vector containing the color palette}
 }
 \value{
 An object containing all the needed information for the analysis.
