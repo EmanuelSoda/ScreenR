@@ -71,6 +71,53 @@ test_that("Plot number mapped reads", {
 #> Test passed 🎉
 
 
+test_that("Boxplot mapped reads", {
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E77", "#1B9E77",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  plot <- distribution_mapped_reads(object, palette, alpha = 0.8, type = "boxplot")
+  expect_equal(class(plot)[2], "ggplot")
+})
+#> Test passed 🎉
+
+test_that("Density mapped reads", {
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E77", "#1B9E77",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  plot <- distribution_mapped_reads(object, palette, alpha = 0.8, type = "density")
+  expect_equal(class(plot)[2], "ggplot")
+})
+#> Test passed 🎉
+
+
 test_that("Number of Barcode Lost", {
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -117,3 +164,4 @@ test_that("Plot number of Barcode Lost", {
   expect_equal(class(plot)[2], "ggplot")
 })
 #> Test passed 🎉
+

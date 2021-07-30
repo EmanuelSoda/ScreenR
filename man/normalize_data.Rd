@@ -18,7 +18,7 @@ This function perform a normalization on the data considering
              the fact that Barcode has a defined length so they will not
              influence the data. So, basically is computed the sum for
              each row and then multiply by 1e6. At the end we will obtain a
-             sort of transcript per milion.
+             sort of transcript per million.
 }
 \details{
 Normalize data

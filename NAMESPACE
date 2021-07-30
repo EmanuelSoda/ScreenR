@@ -2,6 +2,7 @@
 
 export(barcode_lost)
 export(create_screenR_object)
+export(distribution_mapped_reads)
 export(mapped_reads)
 export(normalize_data)
 export(plot_barcode_lost)
