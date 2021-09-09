@@ -2,7 +2,7 @@
 % Please edit documentation in R/distribution_mapped_reads.R
 \name{distribution_mapped_reads}
 \alias{distribution_mapped_reads}
-\title{Plot the distribution of the mapped reads using a boxplot}
+\title{Plot the distribution of the mapped reads}
 \usage{
 distribution_mapped_reads(
   screenR_Object,
@@ -12,14 +12,15 @@ distribution_mapped_reads(
 )
 }
 \arguments{
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}.}
+
 \item{palette}{The color vector for the plot.}
 
 \item{alpha}{The opacity of the plot.}
 
-\item{type}{The type of plot. THe default is boxplot the other option is density.}
-
-\item{screenR_object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}.}
+\item{type}{The type of plot. THe default is boxplot the other option is density.
+impo}
 }
 \value{
 return a tibble containing the number of mapped read for sample

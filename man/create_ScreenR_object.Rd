@@ -12,16 +12,16 @@ create_screenR_object(
 )
 }
 \arguments{
+\item{table}{The count table obtained from the read alignment that
+contains the Barcodes as rows and samples as columns.}
+
+\item{annotation}{The annotation table containing the information
+for each Barcode and the association to the
+corresponding Gene}
+
 \item{groups}{A factor containing the experimental design label}
 
 \item{replicates}{A vector containing the replicates label}
-
-\item{count_table}{The count table obtained from the read alignment that
-contains the Barcodes as rows and samples as columns.}
-
-\item{annotation_table}{The annotation table containing the information
-for each Barcode and the association to the
-corresponding Gene}
 }
 \value{
 An object containing all the needed information for the analysis.

@@ -5,10 +5,11 @@
 #'
 #'
 #'
-#' @param screenR_object The ScreenR object obtained using the
+#' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
-#' @importFrom magrittr %>%
+#' @import dplyr
+#' @importFrom  magrittr %>%
 #' @return return a tibble containing the number of barcode lost for sample
 #' @export
 

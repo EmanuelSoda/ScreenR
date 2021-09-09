@@ -7,7 +7,7 @@
 barcode_lost(screenR_Object)
 }
 \arguments{
-\item{screenR_object}{The ScreenR object obtained using the
+\item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}}
 }
 \value{

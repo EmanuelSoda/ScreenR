@@ -7,8 +7,12 @@
 plot_barcode_lost(screenR_Object, palette = NULL, alpha = 1)
 }
 \arguments{
-\item{screenR_object}{The ScreenR object obtained using the
+\item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}}
+
+\item{palette}{A vector of colors}
+
+\item{alpha}{A value for the opacity of the plot}
 }
 \value{
 return a tibble containing the number of mapped read for sample

@@ -9,7 +9,7 @@
 #'
 #'
 #'
-#' @param screenR_object The ScreenR object obtained using the
+#' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
 #' @importFrom magrittr %>%

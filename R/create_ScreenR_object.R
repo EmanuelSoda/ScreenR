@@ -1,8 +1,8 @@
 #' @title Create the ScreenR Object
 #' @description Initial function to create the Screen Object.
-#' @param count_table The count table obtained from the read alignment that
+#' @param table The count table obtained from the read alignment that
 #'                    contains the Barcodes as rows and samples as columns.
-#' @param annotation_table The annotation table containing the information
+#' @param annotation The annotation table containing the information
 #'                        for each Barcode and the association to the
 #'                        corresponding Gene
 #' @param groups A factor containing the experimental design label

@@ -37,9 +37,8 @@ palette <- c("#1B9E77", "#1B9E77",
 object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
                                 annotation = Table_Annotation,
                                 groups = groups,
-                                replicates = c(""),
-                                palette = palette)
-object 
+                                replicates = c(""))
+
 ```
 
 

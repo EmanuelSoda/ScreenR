@@ -5,9 +5,10 @@
 #'
 #'
 #'
-#' @param screenR_object The ScreenR object obtained using the
+#' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
-#'
+#' @param palette A vector of colors
+#' @param alpha A value for the opacity of the plot
 #' @importFrom magrittr %>%
 #' @return return a tibble containing the number of mapped read for sample
 #' @export

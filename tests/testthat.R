@@ -1,5 +1,6 @@
 library(testthat)
 library(ScreenR)
+library(tibble)
 test_that("Creation of the screenR object", {
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -43,7 +44,7 @@ test_that("Number mapped reads", {
                                   groups = groups,
                                   replicates = c(""))
 
-  expect_equal(tibble::is_tibble(mapped_reads(object)), TRUE)
+  expect_equal(is_tibble(mapped_reads(object)), TRUE)
 })
 #> Test passed 🎉
 
@@ -137,7 +138,7 @@ test_that("Number of Barcode Lost", {
                                   groups = groups,
                                   replicates = c(""))
   barcode_lost <- barcode_lost(object)
-  expect_equal(tibble::is_tibble(barcode_lost), TRUE)
+  expect_equal(is_tibble(barcode_lost), TRUE)
 })
 #> Test passed 🎉
 
