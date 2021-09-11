@@ -7,7 +7,8 @@
 #'                        corresponding Gene
 #' @param groups A factor containing the experimental design label
 #' @param replicates A vector containing the replicates label
-#'
+#' @importFrom rlang .data
+#' @importFrom methods new
 #' @return An object containing all the needed information for the analysis.
 #' @export
 create_screenR_object <- function(table = NULL, annotation = NULL,

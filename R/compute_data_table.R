@@ -4,9 +4,9 @@
 #'
 #' @param screenR_Object The ScreenR object
 #'
-#' @return
+#' @return screenR_Object
 #' @export
-#'
+#' @importFrom rlang .data
 #' @examples
 #' \dontrun{
 #' compute_data_table(object)
@@ -17,10 +17,10 @@ compute_data_table <- function(screenR_Object){
  # count table
   table <-
      screenR_Object@normalized_count_table %>%
-     tidyr::gather(Sample, Frequency, -Barcode) %>%
+     tidyr::gather(.data$Sample, .data$Frequency, -.data$Barcode) %>%
      dplyr::left_join(screenR_Object@annotation_table,
                       by = "Barcode") %>%
-     select(Barcode, Gene, Sample, Frequency)
+     select(.data$Barcode, .data$Gene, .data$Sample, .data$Frequency)
 
   # Then the table is put into the object
   screenR_Object@data_table <- table

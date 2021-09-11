@@ -1,7 +1,7 @@
 library(testthat)
 library(ScreenR)
-library(tibble)
 test_that("Creation of the screenR object", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -16,6 +16,7 @@ test_that("Creation of the screenR object", {
 #> Test passed 🌈
 
 test_that("Normalize Data", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -33,6 +34,7 @@ test_that("Normalize Data", {
 #> Test passed 🎉
 
 test_that("Number mapped reads", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -49,6 +51,7 @@ test_that("Number mapped reads", {
 #> Test passed 🎉
 
 test_that("Plot number mapped reads", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -73,6 +76,7 @@ test_that("Plot number mapped reads", {
 
 
 test_that("Boxplot mapped reads", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -96,6 +100,7 @@ test_that("Boxplot mapped reads", {
 #> Test passed 🎉
 
 test_that("Density mapped reads", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -120,6 +125,7 @@ test_that("Density mapped reads", {
 
 
 test_that("Number of Barcode Lost", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -143,6 +149,7 @@ test_that("Number of Barcode Lost", {
 #> Test passed 🎉
 
 test_that("Plot number of Barcode Lost", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -168,6 +175,7 @@ test_that("Plot number of Barcode Lost", {
 
 
 test_that("Create data_table", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -195,6 +203,7 @@ test_that("Create data_table", {
 
 
 test_that("Compute Metrics ", {
+  library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",

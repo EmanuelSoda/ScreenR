@@ -10,14 +10,15 @@
 #'
 #' @import dplyr
 #' @importFrom  magrittr %>%
+#' @importFrom rlang .data
 #' @return return a tibble containing the number of barcode lost for sample
 #' @export
 
 barcode_lost <- function(screenR_Object){
   table <- count_mapped_reads(screenR_Object)
   table <- table %>%
-    group_by(Sample) %>%
-    filter(Mapped == 0) %>%
+    group_by(.data$Sample) %>%
+    filter(.data$Mapped == 0) %>%
     summarise(LostBarcode = n())
 
   return(table)

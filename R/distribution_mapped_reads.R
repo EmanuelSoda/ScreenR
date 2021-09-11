@@ -4,6 +4,7 @@
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}.
+#'
 #' @param palette The color vector for the plot.
 #' @param alpha The opacity of the plot.
 #' @param type The type of plot. THe default is boxplot the other option is density.
@@ -16,10 +17,11 @@ distribution_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1,
                                       type = "boxplot"){
   table <- count_mapped_reads(screenR_Object)
   if(type == "boxplot")
-    plot <- ggplot(data = table, aes(x=Sample, y=Mapped, fill=Sample)) +
+    plot <- ggplot(data = table, aes(x=.data$Sample,
+                                     y=.data$Mapped, fill=.data$Sample)) +
       geom_boxplot(alpha=alpha)
   else if(type == "density"){
-    plot <- ggplot(data = table, aes(x=Mapped, fill=Sample)) +
+    plot <- ggplot(data = table, aes(x=.data$Mapped, fill=.data$Sample)) +
       geom_density(alpha=alpha)
   }
 

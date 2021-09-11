@@ -10,7 +10,7 @@ compute_data_table(screenR_Object)
 \item{screenR_Object}{The ScreenR object}
 }
 \value{
-
+screenR_Object
 }
 \description{
 Initial function to create the Screen Object.

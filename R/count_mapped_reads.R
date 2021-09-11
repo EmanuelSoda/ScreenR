@@ -4,7 +4,7 @@
 #'
 #'
 #'
-#'
+#' @importFrom rlang .data
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
@@ -15,11 +15,13 @@ count_mapped_reads <- function(screenR_Object){
   # Get only the numeric column (so the sample)
   numericColumn <-
     screenR_Object@count_table %>%
-    dplyr::select(where(is.numeric)) %>%
+    dplyr::select_if(is.numeric) %>%
     colnames()
 
   table <- screenR_Object@count_table %>%
-    tidyr::gather(Sample, Mapped, numericColumn) %>%
-    dplyr::mutate(Sample = factor(Sample, levels = numericColumn))
+
+    tidyr::gather(.data$Sample, .data$Mapped, .data$numericColumn) %>%
+    dplyr::mutate(Sample = factor(.data$Sample,
+                                        levels = .data$numericColumn))
   return(table)
 }
