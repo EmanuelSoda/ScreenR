@@ -21,11 +21,15 @@ create_screenR_object <- function(table = NULL, annotation = NULL,
   } else if (is.null(replicates)) {
     stop("The replicates is NULL")
   }
+
+  table$Barcode <- as.factor(table$Barcode)
+  annotation$Barcode <- as.factor(annotation$Barcode)
   object <- new("screenR_object",
                 count_table = table,
                 annotation_table = annotation,
                 groups = groups,
                 replicates = replicates,
-                normalized_count_table = data.frame())
+                normalized_count_table = data.frame(),
+                data_table = data.frame())
   return(object)
 }

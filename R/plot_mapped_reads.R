@@ -2,9 +2,6 @@
 #' @description This function perform plot the number of reads mapped for each
 #'              sample.
 #'
-#'
-#'
-#'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of color
