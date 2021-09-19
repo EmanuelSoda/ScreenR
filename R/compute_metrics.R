@@ -14,33 +14,38 @@
 #' @importFrom dplyr mutate
 #' @importFrom stats sd median
 #'
-#' @return return a tibble containing the number of mapped read for sample
+#' @return return a tibble  with all the mesures computed
 #' @export
 
 compute_metrics <- function (screenR_Object){
   # create a vector of index
-  treated <- screenR_Object@groups == 'Treated'
-  control <- screenR_Object@groups == 'Control'
+  treated <- object@groups == 'Treated'
+  control <- object@groups == 'Control'
 
-  # select the name of the column according to the index created group_by
-  treated <- screenR_Object@count_table[treated]
-  control <- screenR_Object@count_table[control]
+  # select the name of the column that are NOT Barcode
+  names <- colnames(object@count_table)[colnames(object@count_table)
+                                                != 'Barcode']
 
+  treated <- names[treated]
+  control <- names[control]
+
+  table <- object@data_table[object@data_table$Sample %in%
+                               c(treated, control), ]
   table <-
-    screenR_Object@data_table %>%
-    filter(.data$Sample %in% c(treated, control)) %>%
-    mutate(Treatment = ifelse(.data$Sample %in% treated,
+    table %>%
+    dplyr::mutate(Treatment = ifelse(.data$Sample %in% treated,
                               "Treated", "Control")) %>%
-    group_by(.data$Treatment, .data$Barcode) %>%
-    mutate(Mean = mean(.data$frequency)) %>%
-    summarise(Mean = unique(.data$Mean),
-              Gene = unique(.data$Gene), .groups = "drop") %>%
-    spread(.data$Treatment, .data$Mean) %>%
-    filter(.data$Control > 0) %>%
-    mutate(Log2FC = log2(.data$Treated/.data$Control + 0.0000001))  %>%
-    mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
-    mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /
+    dplyr::group_by(.data$Treatment, .data$Barcode) %>%
+    dplyr::mutate(Mean = mean(.data$Frequency)) %>%
+    dplyr::summarise(Gene = unique(.data$Gene),
+                     Mean = unique(.data$Mean),.groups = "drop") %>%
+    tidyr::spread(.data$Treatment, .data$Mean) %>%
+    dplyr::filter(.data$Control > 0) %>%
+    dplyr::mutate(Log2FC = log2(.data$Treated/.data$Control + 0.0000001))  %>%
+    dplyr::mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
+    dplyr::mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /
                                     median(abs(.data$Log2FC - median(.data$Log2FC))))
+  return(table)
 }
 
 

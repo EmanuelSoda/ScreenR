@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • ScreenR</title>
+<title>Compute metrics — compute_metrics • ScreenR</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,12 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Compute metrics — compute_metrics" />
+<meta property="og:description" content="Compute the metrics of the data_table.
+             The metrix computed are:
+             - Log2FC of Treated vs Control.
+             - Z score of the Log2FC.
+             - Robust Z score." />
 
 
 
@@ -58,7 +63,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -112,144 +117,38 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Compute metrics</h1>
+    
+    <div class="hidden name"><code>compute_metrics.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Compute the metrics of the data_table.
+             The metrix computed are:
+             - Log2FC of Treated vs Control.
+             - Z score of the Log2FC.
+             - Robust Z score.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>compute_metrics</span><span class='op'>(</span><span class='va'>screenR_Object</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="CountTable_THP1_CONTROL_vs_MET.html">CountTable_THP1_CONTROL_vs_MET</a></code> </p>
-        </td>
-        <td><p>Table od the count table</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Table_Annotation.html">Table_Annotation</a></code> </p>
-        </td>
-        <td><p>Table for the annotation of Barcode</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="barcode_lost.html">barcode_lost()</a></code> </p>
-        </td>
-        <td><p>Count Barcode Lost</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="compute_camera.html">compute_camera()</a></code> </p>
-        </td>
-        <td><p>Compute Camera</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="compute_data_table.html">compute_data_table()</a></code> </p>
-        </td>
-        <td><p>Create the ScreenR Object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="compute_metrics.html">compute_metrics()</a></code> </p>
-        </td>
-        <td><p>Compute metrics</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="count_mapped_reads.html">count_mapped_reads()</a></code> </p>
-        </td>
-        <td><p>Count the number of mapped read</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="create_edgeR_obj.html">create_edgeR_obj()</a></code> </p>
-        </td>
-        <td><p>Create EdgeR Object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="create_screenR_object.html">create_screenR_object()</a></code> </p>
-        </td>
-        <td><p>Create the ScreenR Object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="distribution_mapped_reads.html">distribution_mapped_reads()</a></code> </p>
-        </td>
-        <td><p>Plot the distribution of the mapped reads</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="find_camera_hit.html">find_camera_hit()</a></code> </p>
-        </td>
-        <td><p>Find Camera Hit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="find_robust_zscore_hit.html">find_robust_zscore_hit()</a></code> </p>
-        </td>
-        <td><p>Title Find robust Z-score Hit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="find_zscore_hit.html">find_zscore_hit()</a></code> </p>
-        </td>
-        <td><p>Title Find Z-score Hit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="mapped_reads.html">mapped_reads()</a></code> </p>
-        </td>
-        <td><p>Mapped Reads</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="normalize_data.html">normalize_data()</a></code> </p>
-        </td>
-        <td><p>Normalize data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_MDS.html">plot_MDS()</a></code> </p>
-        </td>
-        <td><p>PLot the Sample in vector Space</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_barcode_lost.html">plot_barcode_lost()</a></code> </p>
-        </td>
-        <td><p>Plot number of barcode lost</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_mapped_reads.html">plot_mapped_reads()</a></code> </p>
-        </td>
-        <td><p>Plot Mapped Reads</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>screenR_Object</th>
+      <td><p>The ScreenR object obtained using the
+<code><a href='create_screenR_object.html'>create_screenR_object</a></code>.</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>return a tibble  with all the mesures computed</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

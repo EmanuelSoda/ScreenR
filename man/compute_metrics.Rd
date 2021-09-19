@@ -11,7 +11,7 @@ compute_metrics(screenR_Object)
 \code{\link{create_screenR_object}}.}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+return a tibble  with all the mesures computed
 }
 \description{
 Compute the metrics of the data_table.

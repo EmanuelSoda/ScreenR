@@ -20,7 +20,8 @@ Suggests:
     rmarkdown,
     knitr,
     tibble,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    covr
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10),

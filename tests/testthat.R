@@ -196,8 +196,8 @@ test_that("Create data_table", {
   object <- normalize_data(object)
 
 
-  res <- compute_data_table(object)
-  expect_equal(class(res@data_table)[1], "tbl_df")
+  object <- compute_data_table(object)
+  expect_equal(class(object@data_table)[1], "tbl_df")
 })
 #> Test passed 🎉
 
@@ -222,12 +222,152 @@ test_that("Compute Metrics ", {
                                   groups = groups,
                                   replicates = c(""))
   object <- normalize_data(object)
-
-
   object <- compute_data_table(object)
 
-
-
-  expect_equal(class(res@data_table)[1], "tbl_df")
+  table <- compute_metrics(object)
+  expect_equal(class(table)[1], "tbl_df")
 })
 
+test_that("Hit Z-score", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E77", "#1B9E77",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  object <- compute_data_table(object)
+
+  table <- compute_metrics(object)
+  hit_table <- find_zscore_hit(table, 6)
+  expect_equal(class(hit_table)[1], "tbl_df")
+
+  # Devo verificare meglio ma secondo me sto sbagliando perché qui non credo
+  # siano divisi per giorni credo faccia trattato su controllo di tutto e
+  # non so come dividerli...
+  # si È così e non so assolutamente come dividerli
+})
+
+test_that("Plot MDS 2D", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  plot <- plot_MDS(screenR_Object = object, palette = palette)
+  expect_equal(class(plot), "function")
+})
+
+test_that("Plot MDS 3D", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  plot <- plot_MDS(screenR_Object = object, palette = palette, dimension = 3)
+  expect_equal(class(plot), "function")
+})
+
+test_that("Camera", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0/T48", "Treated")
+  camera_hit <- find_camera_hit(screenR_Object = object,
+                                matrix_model = matrix,
+                                contrast = "Treated")
+  expect_equal(class(camera_hit), "data.frame")
+})
+
+test_that("ROAST", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0/T48", "Treated")
+  roast_hit <- find_roast_hit(screenR_Object = object,
+                                matrix_model = matrix,
+                                contrast = "Treated")
+  expect_equal(class(roast_hit), "data.frame")
+})

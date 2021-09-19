@@ -16,8 +16,8 @@ compute_data_table <- function(screenR_Object){
  # First the table is created with the join of the annotation and the
  # count table
   table <-
-     screenR_Object@normalized_count_table %>%
-     tidyr::gather(.data$Sample, .data$Frequency, -.data$Barcode) %>%
+    screenR_Object@normalized_count_table %>%
+     tidyr::gather(Sample, Frequency, -.data$Barcode) %>%
      dplyr::left_join(screenR_Object@annotation_table,
                       by = "Barcode") %>%
      select(.data$Barcode, .data$Gene, .data$Sample, .data$Frequency)

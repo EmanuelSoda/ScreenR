@@ -1,10 +1,6 @@
 #' @title Plot number of barcode lost
 #' @description This fuction count the number of Barcode lost during the
 #'              sequenceing. A barcode is lost if it has zero mapped read
-#'
-#'
-#'
-#'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of colors
