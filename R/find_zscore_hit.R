@@ -15,7 +15,8 @@ find_zscore_hit <- function(table_treate_vs_control, number_barcode){
     dplyr::group_by(Gene) %>%
     dplyr::summarise(numberOfBarcode = n()) %>%
     dplyr::group_by(numberOfBarcode) %>%
-    dplyr::filter(numberOfBarcode > number_barcode)
+    dplyr::filter(numberOfBarcode > number_barcode) %>%
+    column_to_rownames(., var = "Gene")
 
   return(hit_table)
 }

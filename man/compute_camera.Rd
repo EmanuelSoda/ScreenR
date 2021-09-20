@@ -4,7 +4,16 @@
 \alias{compute_camera}
 \title{Compute Camera}
 \usage{
-compute_camera(xglm, lrt, DGEList, matrix_model, contrast, number_barcode = 3)
+compute_camera(
+  xglm,
+  lrt,
+  DGEList,
+  matrix_model,
+  contrast,
+  number_barcode = 3,
+  thresh = 1e-04,
+  lfc = 1
+)
 }
 \arguments{
 \item{xglm}{object created with \code{link{edgeR::estimateDisp}}}
@@ -15,6 +24,10 @@ compute_camera(xglm, lrt, DGEList, matrix_model, contrast, number_barcode = 3)
 
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
+
+\item{thresh}{The threshold}
+
+\item{lfc}{The Log2FC}
 
 \item{model_matrix}{the matrix that will be used to perform the
 linear model analysis}

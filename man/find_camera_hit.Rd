@@ -4,7 +4,14 @@
 \alias{find_camera_hit}
 \title{Find Camera Hit}
 \usage{
-find_camera_hit(screenR_Object, matrix_model, contrast, number_barcode = 3)
+find_camera_hit(
+  screenR_Object,
+  matrix_model,
+  contrast,
+  number_barcode = 3,
+  thresh = 1e-04,
+  lfc = 1
+)
 }
 \arguments{
 \item{screenR_Object}{The Object of the package}
@@ -12,7 +19,11 @@ find_camera_hit(screenR_Object, matrix_model, contrast, number_barcode = 3)
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
 
-\item{model_matrix}{the matrix that will be used to perform the
+\item{thresh}{The threshold}
+
+\item{lfc}{The Log2FC}
+
+\item{model_matrix}{The matrix that will be used to perform the
 linear model analysis}
 }
 \value{
