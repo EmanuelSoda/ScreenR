@@ -7,6 +7,10 @@
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}.
+#' @param treated List of Column names corresponding to treatment
+#'                we want to test
+#' @param control List of Column names corresponding to control
+#'                we want to test
 
 #' @importFrom rlang .data
 #' @importFrom tidyr spread
@@ -17,19 +21,21 @@
 #' @return return a tibble  with all the mesures computed
 #' @export
 
-compute_metrics <- function (screenR_Object){
-  # create a vector of index
-  treated <- object@groups == 'Treated'
-  control <- object@groups == 'Control'
+compute_metrics <- function (screenR_Object, treated = NULL, control = NULL){
+  if(is.null(treated) && is.null(control)){
+    # create a vector of index
+    treated <- screenR_Object@groups == 'Treated'
+    control <- screenR_Object@groups == 'Control'
 
-  # select the name of the column that are NOT Barcode
-  names <- colnames(object@count_table)[colnames(object@count_table)
-                                                != 'Barcode']
+    # select the name of the column that are NOT Barcode
+    names <- colnames(screenR_Object@count_table)[colnames(screenR_Object@count_table)
+                                          != 'Barcode']
 
-  treated <- names[treated]
-  control <- names[control]
+    treated <- names[treated]
+    control <- names[control]
+  }
 
-  table <- object@data_table[object@data_table$Sample %in%
+  table <- screenR_Object@data_table[screenR_Object@data_table$Sample %in%
                                c(treated, control), ]
   table <-
     table %>%

@@ -45,9 +45,10 @@ test_that("Number mapped reads", {
                                   annotation = Table_Annotation,
                                   groups = groups,
                                   replicates = c(""))
+  mapped <- mapped_reads(object)
 
-  expect_equal(is_tibble(mapped_reads(object)), TRUE)
-})
+  expect_equal(is_tibble(mapped), TRUE)
+ })
 #> Test passed 🎉
 
 test_that("Plot number mapped reads", {
@@ -228,7 +229,7 @@ test_that("Compute Metrics ", {
   expect_equal(class(table)[1], "tbl_df")
 })
 
-test_that("Hit Z-score", {
+test_that("Hit Z-score per tutti i giorni ", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -251,6 +252,7 @@ test_that("Hit Z-score", {
   object <- compute_data_table(object)
 
   table <- compute_metrics(object)
+
   hit_table <- find_zscore_hit(table, 6)
   expect_equal(class(hit_table)[1], "tbl_df")
 
@@ -258,7 +260,47 @@ test_that("Hit Z-score", {
   # siano divisi per giorni credo faccia trattato su controllo di tutto e
   # non so come dividerli...
   # si È così e non so assolutamente come dividerli
+
+  ############
+  # Ahhhh ho capito quale è il problema, qui prendo tutti i trattatti
+  # su tutti i controlli ma io voglio un Z-score per giorno!
+
+  ### però si risolve facilmente specificando i trattamenti che voglio
+
 })
+
+test_that("Hit Z-score per giorno", {
+  library(tibble)
+  library(data.table)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E77", "#1B9E77",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table1 <- compute_metrics(object,treated = treated, control = control)
+
+
+  hit_table <- find_zscore_hit(table, 6)
+  expect_equal(class(hit_table)[1], "tbl_df")
+})
+
 
 test_that("Plot MDS 2D", {
   library(tibble)
@@ -309,7 +351,7 @@ test_that("Plot MDS 3D", {
                                   replicates = c(""))
   object <- normalize_data(object)
   plot <- plot_MDS(screenR_Object = object, palette = palette, dimension = 3)
-  expect_equal(class(plot), "function")
+  expect_equal(class(plot)[1], "plotly")
 })
 
 test_that("Camera", {
@@ -386,9 +428,11 @@ test_that("Plot Barcode", {
                "#7570B3", "#7570B3", "#7570B3",
                "#E7298A", "#E7298A", "#E7298A",
                "#66A61E", "#66A61E", "#66A61E")
+
   CountTable_THP1_CONTROL_vs_MET <-
     CountTable_THP1_CONTROL_vs_MET %>%
     dplyr::filter(Barcode != '*')
+
   object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
                                   annotation = Table_Annotation,
                                   groups = groups,
@@ -402,13 +446,24 @@ test_that("Plot Barcode", {
   camera_hit <- find_camera_hit(screenR_Object = object,
                                 matrix_model = matrix,
                                 contrast = "Treated")
-  zscore_hit <- find_zscore_hit(table, 6)
+
+  object <- normalize_data(object)
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  zscore_hit <- find_zscore_hit(table, number_barcode = 6)
 
   find_common_hit <- find_common_hit(zscore_hit, camera_hit, roast_hit)
   contrast <- limma::makeContrasts(Treated-Control,
                                         levels=matrix)
-  plot_barcode_hit(object, matrix, find_common_hit,
-                   contrast = contrast)
+  plot_barcode_hit(object, matrix,
+                   find_common_hit,
+                   contrast = contrast,
+                   gene = "ACAA1",
+                   number_plot_row = 1,
+                   number_plot_col = 1)
 })
 
 

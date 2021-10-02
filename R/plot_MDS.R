@@ -23,7 +23,7 @@ plot_MDS <- function(screenR_Object, palette, dimension = 2){
     colnames(PLTdata) <- c("x", "y")
     PLTdata$group <- DGEList$samples$group
 
-    ggplot(PLTdata, aes(x=x, y=y, fill = group)) +
+    plot <- ggplot(PLTdata, aes(x=x, y=y, fill = group)) +
       geom_label(aes(label = rownames(PLTdata)),
                  color = 'black', size = 2.5,
                  max.overlaps = 60, alpha = 0.8) +
@@ -31,25 +31,23 @@ plot_MDS <- function(screenR_Object, palette, dimension = 2){
       xlab("First Dimension") +
       ylab("Second Dimension") +
       theme_minimal()
+
   } else if (dimension == 3){ # 3D plot
       colnames(PLTdata) <- c("x", "y", "z")
       PLTdata$group <- DGEList$samples$group
-      t <- list(
-        family = "sans serif",
-        size = 14,
-        color = "0,0,0")
+      PLTdata$names <- row.names(DGEList$samples)
 
-      fig <- plot_ly(PLTdata,
+
+      plot <- plotly::plot_ly(PLTdata,
                      x = ~x,
                      y = ~y,
                      z = ~z,
-                     text = row.names(DGEList$samples),
+                     text = ~names,
                      color = ~group,
                      colors = ~palette,
                      alpha= 0.9,
-                     size = 100) %>%
+                     size = 100)
+  }
 
-      fig <- fig %>%
-        add_markers()
-    }
+  return(plot)
 }

@@ -19,8 +19,10 @@ plot_barcode_hit <- function(screenR_Object, matrix_model, hit_common,
                              number_barcode = 3,
                              number_plot_row = 3,
                              number_plot_col = 3,
+                             gene,
                              quantile = c(-0.5, 0.5),
                              labels = c("Negative logFC", "Positive logFC")){
+
   DGEList <- create_edgeR_obj(screenR_Object)
   xglm <- edgeR::estimateDisp(DGEList, matrix_model)
   fit <- edgeR::glmFit(xglm, matrix_model)
@@ -32,12 +34,11 @@ plot_barcode_hit <- function(screenR_Object, matrix_model, hit_common,
   genesymbols <- DGEList$genes[, 1]
   genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
-
   par(mfrow=c(number_plot_row, number_plot_col))
-  for (gene in hit_common) {
-    limma::barcodeplot(lrt$table$logFC, index=genesymbollist[[gene]],
-                       main= paste("Barcode plot for Gene", gene) ,
-                       labels=labels,
-                       quantile=quantile)
-  }
+  limma::barcodeplot(lrt$table$logFC, index=genesymbollist[[gene]],
+                     main= paste("Barcode plot for Gene", gene),
+                     labels=labels,
+                     quantile=quantile)
+
 }
+

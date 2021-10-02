@@ -4,11 +4,17 @@
 \alias{compute_metrics}
 \title{Compute metrics}
 \usage{
-compute_metrics(screenR_Object)
+compute_metrics(screenR_Object, treated = NULL, control = NULL)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}.}
+
+\item{treated}{List of Column names corresponding to treatment
+we want to test}
+
+\item{control}{List of Column names corresponding to control
+we want to test}
 }
 \value{
 return a tibble  with all the mesures computed

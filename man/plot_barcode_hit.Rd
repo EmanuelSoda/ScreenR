@@ -12,6 +12,7 @@ plot_barcode_hit(
   number_barcode = 3,
   number_plot_row = 3,
   number_plot_col = 3,
+  gene,
   quantile = c(-0.5, 0.5),
   labels = c("Negative logFC", "Positive logFC")
 )

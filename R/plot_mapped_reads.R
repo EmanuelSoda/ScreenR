@@ -12,22 +12,24 @@
 #' @return return a ggplot object
 #' @export
 
-plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1){
+plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1, legende_position = "none"){
 
-  table <- ScreenR::mapped_reads(screenR_Object)
+  table <- ScreenR::mapped_reads(object)
   if (is.null(palette)) {
     plot <-
-      table %>%
-      ggplot(.data, aes(x = .data$Sample, y = .data$Mapped,
+      ggplot(table, aes(x = .data$Sample,
+                        y = .data$Mapped,
                         fill = .data$Sample)) +
-      geom_bar(stat = "identity", color = "black")
+      geom_bar(stat = "identity", color = "black") +
+      theme(legend.position = legende_position)
   } else {
     plot <-
-      table  %>%
-      ggplot(.data, aes(x = .data$Sample, y = .data$Mapped,
+      ggplot(table, aes(x = .data$Sample,
+                        y = .data$Mapped,
                         fill = .data$Sample)) +
       geom_bar(alpha = alpha, stat = "identity") +
-      scale_fill_manual(values=palette)
+      scale_fill_manual(values=palette) +
+      theme(legend.position = legende_position)
   }
 
   return(plot)

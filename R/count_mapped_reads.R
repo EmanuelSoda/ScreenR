@@ -19,9 +19,8 @@ count_mapped_reads <- function(screenR_Object){
     colnames()
 
   table <- screenR_Object@count_table %>%
-
-    tidyr::gather(.data$Sample, .data$Mapped, .data$numericColumn) %>%
+    tidyr::gather(Sample, Mapped, numericColumn) %>%
     dplyr::mutate(Sample = factor(.data$Sample,
-                                        levels = .data$numericColumn))
+                                        levels = numericColumn))
   return(table)
 }

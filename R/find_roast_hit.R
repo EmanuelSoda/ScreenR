@@ -17,7 +17,7 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
                            nrot = 9999, number_barcode = 3){
   DGEList <- create_edgeR_obj(screenR_Object)
   xglm <- edgeR::estimateDisp(DGEList, matrix_model)
-
+  genesymbols <- DGEList$genes[, 1]
   genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
   roast_hit <- limma::mroast(xglm,

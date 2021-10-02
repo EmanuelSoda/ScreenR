@@ -4,7 +4,7 @@
 \alias{find_zscore_hit}
 \title{Title Find Z-score Hit}
 \usage{
-find_zscore_hit(table_treate_vs_control, number_barcode)
+find_zscore_hit(table_treate_vs_control, number_barcode = 6)
 }
 \arguments{
 \item{table_treate_vs_control}{table computet with the function
