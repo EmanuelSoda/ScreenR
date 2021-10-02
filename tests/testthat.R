@@ -23,6 +23,8 @@ test_that("Normalize Data", {
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control"))
 
+T0/T48,T0/T48,Treated,Treated,Treated,Control,Control,Control,Treated,Treated,Treated,Control,Control,Control
+
   object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
                                   annotation = Table_Annotation,
                                   groups = groups,

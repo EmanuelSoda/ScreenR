@@ -14,7 +14,7 @@
 
 plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1, legende_position = "none"){
 
-  table <- ScreenR::mapped_reads(object)
+  table <- ScreenR::mapped_reads(screenR_Object)
   if (is.null(palette)) {
     plot <-
       ggplot(table, aes(x = .data$Sample,
