@@ -15,7 +15,8 @@
 #' @examples
 
 find_camera_hit <- function(screenR_Object, matrix_model, contrast,
-                            number_barcode = 3, thresh = 0.0001, lfc = 1 ){
+                            number_barcode = 3, thresh = 0.0001,
+                            lfc = 1, direction = "Down"){
   # We have to convert the screenR obj into an edgeR obj
   DGEList <- create_edgeR_obj(screenR_Object)
   xglm <- edgeR::estimateDisp(DGEList, matrix_model)
@@ -30,6 +31,14 @@ find_camera_hit <- function(screenR_Object, matrix_model, contrast,
                                number_barcode = number_barcode,
                                thresh = thresh,
                                lfc = lfc)
+  camera_hit <-
+    camera_hit %>%
+    tibble::rownames_to_column("Gene") %>%
+    dplyr::tibble() %>%
+    dplyr::mutate(Direction = factor(.data$Direction)) %>%
+    dplyr::filter(.data$Direction == direction)
+
+
   return(camera_hit)
 }
 

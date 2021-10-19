@@ -46,7 +46,7 @@ compute_metrics <- function (screenR_Object, treated = NULL, control = NULL){
     dplyr::summarise(Gene = unique(.data$Gene),
                      Mean = unique(.data$Mean),.groups = "drop") %>%
     tidyr::spread(.data$Treatment, .data$Mean) %>%
-    dplyr::filter(.data$Control > 0) %>%
+    dplyr::filter(.data$Control != 0) %>%
     dplyr::mutate(Log2FC = log2(.data$Treated/.data$Control + 0.0000001))  %>%
     dplyr::mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
     dplyr::mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /

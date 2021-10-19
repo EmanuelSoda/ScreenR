@@ -4,7 +4,7 @@
 \alias{find_common_hit}
 \title{Find common hit}
 \usage{
-find_common_hit(hit_zscore, hit_camera, hit_roast)
+find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 3)
 }
 \arguments{
 \item{hit_zscore}{The matrix obtained by the \code{\link{find_zscore_hit}}

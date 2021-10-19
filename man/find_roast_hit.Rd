@@ -9,7 +9,9 @@ find_roast_hit(
   matrix_model,
   contrast,
   nrot = 9999,
-  number_barcode = 3
+  number_barcode = 3,
+  direction = "Down",
+  p_val = 0.05
 )
 }
 \arguments{

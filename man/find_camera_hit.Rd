@@ -10,7 +10,8 @@ find_camera_hit(
   contrast,
   number_barcode = 3,
   thresh = 1e-04,
-  lfc = 1
+  lfc = 1,
+  direction = "Down"
 )
 }
 \arguments{

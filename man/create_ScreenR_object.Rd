@@ -8,7 +8,7 @@ create_screenR_object(
   table = NULL,
   annotation = NULL,
   groups = NULL,
-  replicates = NULL
+  replicates = c("")
 )
 }
 \arguments{

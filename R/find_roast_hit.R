@@ -14,7 +14,8 @@
 #' @examples
 
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
-                           nrot = 9999, number_barcode = 3){
+                           nrot = 9999, number_barcode = 3,
+                           direction = "Down", p_val = 0.05){
   DGEList <- create_edgeR_obj(screenR_Object)
   xglm <- edgeR::estimateDisp(DGEList, matrix_model)
   genesymbols <- DGEList$genes[, 1]
@@ -25,6 +26,27 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
                       design = matrix_model,
                       contrast = contrast,
                       nrot = nrot)
+  select <- roast_hit$Direction == "Down" &&
+    roast_hit$PValue < 0.05 &&
+    roast_hit$NGenes > 3
+
+  roast_hit <-
+    roast_hit %>%
+    tibble::rownames_to_column("Gene") %>%
+    dplyr::tibble() %>%
+    dplyr::mutate(Direction = factor(.data$Direction)) %>%
+    dplyr::filter(.data$Direction == direction) %>%
+    dplyr::filter(.data$PValue < p_val) %>%
+    dplyr::filter(.data$NGenes  > number_barcode)
+
+
   return(roast_hit)
 }
+
+
+
+
+
+
+
 
