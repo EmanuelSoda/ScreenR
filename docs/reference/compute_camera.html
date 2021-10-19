@@ -124,18 +124,27 @@
     <p>Compute the actual hit using camera</p>
     </div>
 
-    <pre class="usage"><span class='fu'>compute_camera</span><span class='op'>(</span><span class='va'>xglm</span>, <span class='va'>lrt</span>, <span class='va'>DGEList</span>, <span class='va'>matrix_model</span>, <span class='va'>contrast</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>compute_camera</span><span class='op'>(</span>
+  <span class='va'>xglm</span>,
+  <span class='va'>lrt</span>,
+  <span class='va'>DGEList</span>,
+  <span class='va'>matrix_model</span>,
+  <span class='va'>contrast</span>,
+  number_barcode <span class='op'>=</span> <span class='fl'>3</span>,
+  thresh <span class='op'>=</span> <span class='fl'>1e-04</span>,
+  lfc <span class='op'>=</span> <span class='fl'>1</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>xglm</th>
-      <td><p>object created with <code>link{estimateDisp}</code></p></td>
+      <td><p>object created with <code>link{edgeR::estimateDisp}</code></p></td>
     </tr>
     <tr>
       <th>lrt</th>
-      <td><p>object created with <code>link{glmFit}</code></p></td>
+      <td><p>object created with <code>link{edgeR::glmFit}</code></p></td>
     </tr>
     <tr>
       <th>DGEList</th>
@@ -145,6 +154,14 @@
       <th>contrast</th>
       <td><p>A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis</p></td>
+    </tr>
+    <tr>
+      <th>thresh</th>
+      <td><p>The threshold</p></td>
+    </tr>
+    <tr>
+      <th>lfc</th>
+      <td><p>The Log2FC</p></td>
     </tr>
     <tr>
       <th>model_matrix</th>

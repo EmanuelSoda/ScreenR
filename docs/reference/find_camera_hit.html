@@ -124,7 +124,15 @@
     <p>Find the hit using the camera method</p>
     </div>
 
-    <pre class="usage"><span class='fu'>find_camera_hit</span><span class='op'>(</span><span class='va'>screenR_Object</span>, <span class='va'>model_matrix</span>, <span class='va'>contrast</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>find_camera_hit</span><span class='op'>(</span>
+  <span class='va'>screenR_Object</span>,
+  <span class='va'>matrix_model</span>,
+  <span class='va'>contrast</span>,
+  number_barcode <span class='op'>=</span> <span class='fl'>3</span>,
+  thresh <span class='op'>=</span> <span class='fl'>1e-04</span>,
+  lfc <span class='op'>=</span> <span class='fl'>1</span>,
+  direction <span class='op'>=</span> <span class='st'>"Down"</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -134,14 +142,22 @@
       <td><p>The Object of the package</p></td>
     </tr>
     <tr>
-      <th>model_matrix</th>
-      <td><p>the matrix that will be used to perform the
-linear model analysis</p></td>
-    </tr>
-    <tr>
       <th>contrast</th>
       <td><p>A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis</p></td>
+    </tr>
+    <tr>
+      <th>thresh</th>
+      <td><p>The threshold</p></td>
+    </tr>
+    <tr>
+      <th>lfc</th>
+      <td><p>The Log2FC</p></td>
+    </tr>
+    <tr>
+      <th>model_matrix</th>
+      <td><p>The matrix that will be used to perform the
+linear model analysis</p></td>
     </tr>
     </table>
 

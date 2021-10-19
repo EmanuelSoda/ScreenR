@@ -132,7 +132,7 @@
              - Robust Z score.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>compute_metrics</span><span class='op'>(</span><span class='va'>screenR_Object</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>compute_metrics</span><span class='op'>(</span><span class='va'>screenR_Object</span>, treated <span class='op'>=</span> <span class='cn'>NULL</span>, control <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,6 +141,16 @@
       <th>screenR_Object</th>
       <td><p>The ScreenR object obtained using the
 <code><a href='create_screenR_object.html'>create_screenR_object</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>treated</th>
+      <td><p>List of Column names corresponding to treatment
+we want to test</p></td>
+    </tr>
+    <tr>
+      <th>control</th>
+      <td><p>List of Column names corresponding to control
+we want to test</p></td>
     </tr>
     </table>
 
