@@ -28,4 +28,3 @@ Depends:
     ggplot2,
     magrittr
 VignetteBuilder: knitr
-Config/testthat/parallel: true
