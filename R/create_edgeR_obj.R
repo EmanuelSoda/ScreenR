@@ -2,6 +2,7 @@
 #' @description Utility function that using the \code{\link{screenR-class}}
 #'              object create the corresponding edgeR object
 #' @param screenR_Object The Object of the package
+#' @import edgeR
 
 #' @return The edgeR object \code{link{edgeR}}
 #'
