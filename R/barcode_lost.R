@@ -77,11 +77,11 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
                                   levels = numericColumn))
 
   table %>%
-    left_join(screenR_Object@annotation_table, by = Barcode) %>%
-    group_by(Sample, Gene) %>%
-    mutate(barcode_lost = Mapped == 0) %>%
-    summarise(Sample = unique(Sample), barcode_lost = sum(barcode_lost)) %>%
-    filter(barcode_lost != 0) %>%
+    dplyr::left_join(screenR_Object@annotation_table, by = Barcode) %>%
+    dplyr::group_by(Sample, Gene) %>%
+    dplyr::mutate(barcode_lost = Mapped == 0) %>%
+    dplyr::summarise(Sample = unique(Sample), barcode_lost = sum(barcode_lost)) %>%
+    dplyr::filter(barcode_lost != 0) %>%
     tidyr::drop_na() %>%
     ggplot(., aes(Gene, barcode_lost, fill = Sample)) +
     geom_bar(stat="identity", position=position_dodge()) +

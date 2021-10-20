@@ -13,9 +13,6 @@ library(seqinr)
 ```
 
 
-
-
-
 ```{r Data}
 data <- 
   read_delim(file = "data/Sequence_data.txt", delim = "\t",
