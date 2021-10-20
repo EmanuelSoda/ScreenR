@@ -20,7 +20,7 @@ plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1, legende
       ggplot(table, aes(x = .data$Sample,
                         y = .data$Mapped,
                         fill = .data$Sample)) +
-      geom_bar(stat = "identity", color = "black") +
+      geom_bar(stat = "identity") +
       theme(legend.position = legende_position)
   } else {
     plot <-

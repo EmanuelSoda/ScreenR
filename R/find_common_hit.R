@@ -15,8 +15,8 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast,
                             common_in = 3){
   # First we gets all the Gene name of the different table
   hit_zscore_Gene <- as.vector(hit_zscore$Gene)
-  hit_camera_Gene<- as.vector(camera_hit$Gene)
-  hit_roast_Gene <- as.vector(roast_hit$Gene)
+  hit_camera_Gene<- as.vector(hit_camera$Gene)
+  hit_roast_Gene <- as.vector(hit_roast$Gene)
 
   hit_common <- c("")
   if (common_in == 3) {
@@ -32,18 +32,18 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast,
 
     hit_common <-
       tibble(Gene = name) %>%
-      dplyr::mutate(zscore_hit =
+      dplyr::mutate(hit_zscore =
                       ifelse(test = .data$Gene %in% rownames(hit_zscore),
                              yes = 1, no = 0)) %>%
-      dplyr::mutate(camera_hit =
-                      ifelse(test = .data$Gene %in% camera_hit$Gene,
+      dplyr::mutate(hit_camera =
+                      ifelse(test = .data$Gene %in% hit_camera$Gene,
                              yes = 1, no = 0)) %>%
-      dplyr::mutate(roast_hit =
-                      ifelse(test = .data$Gene  %in% roast_hit$Gene,
+      dplyr::mutate(hit_roast =
+                      ifelse(test = .data$Gene  %in% hit_roast$Gene,
                              yes = 1, no = 0)) %>%
       dplyr::rowwise() %>%
-      dplyr::mutate(common = sum(.data$zscore_hit, .data$camera_hit,
-                                 .data$roast_hit)) %>%
+      dplyr::mutate(common = sum(.data$hit_zscore, .data$hit_camera,
+                                 .data$hit_roast)) %>%
       dplyr::filter(.data$common > 1) %>%
       dplyr::pull(Gene)
   }
