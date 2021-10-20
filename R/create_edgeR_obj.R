@@ -3,7 +3,6 @@
 #'              object create the corresponding edgeR object
 #' @param screenR_Object The Object of the package
 
-#' @importFrom edgeR DGEList
 #' @return The edgeR object \code{link{edgeR}}
 #'
 #' @examples

@@ -1,15 +1,18 @@
 #' @title Find Roast Hit
 #' @description Find the hit using the Roast method
 #' @param screenR_Object The Object of the package
-#' @param model_matrix the matrix that will be used to perform the
+#' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix wo which perform the analysis
 #' @param nrot Number of rotation to perform the test
-#' @importFrom edgeR estimateDisp
-#' @importFrom limma mroast
-#' @return The hit find with the Roast method
+#' @param number_barcode Number of barcode to consider
+#' @param direction Direction of variation
+#' @param number_barcode The hit find with the Roast method
+#' @param p_val P val cut off
+#' @return The hit found by roast
 #' @export
+
 #'
 #' @examples
 

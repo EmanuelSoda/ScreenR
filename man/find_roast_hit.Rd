@@ -17,16 +17,22 @@ find_roast_hit(
 \arguments{
 \item{screenR_Object}{The Object of the package}
 
+\item{matrix_model}{the matrix that will be used to perform the
+linear model analysis}
+
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
 
 \item{nrot}{Number of rotation to perform the test}
 
-\item{model_matrix}{the matrix that will be used to perform the
-linear model analysis}
+\item{number_barcode}{The hit find with the Roast method}
+
+\item{direction}{Direction of variation}
+
+\item{p_val}{P val cut off}
 }
 \value{
-The hit find with the Roast method
+The hit found by roast
 }
 \description{
 Find the hit using the Roast method

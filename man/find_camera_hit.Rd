@@ -17,15 +17,19 @@ find_camera_hit(
 \arguments{
 \item{screenR_Object}{The Object of the package}
 
+\item{matrix_model}{The matrix that will be used to perform the
+linear model analysis}
+
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
+
+\item{number_barcode}{Number of barcode to use}
 
 \item{thresh}{The threshold}
 
 \item{lfc}{The Log2FC}
 
-\item{model_matrix}{The matrix that will be used to perform the
-linear model analysis}
+\item{direction}{String containing the direction of the variation}
 }
 \value{
 The hit find with the camera method

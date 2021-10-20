@@ -3,7 +3,7 @@
 #' @param table_treate_vs_control table computet with the function
 #'                                \code{compute_data_table}
 #' @param number_barcode Number of barcode to have under the median
-#'
+#' @param metric A string containing the metric too use
 #' @return return a tibble containing the hit for the Z-score
 #' @export
 #'

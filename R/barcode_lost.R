@@ -17,9 +17,9 @@
 barcode_lost <- function(screenR_Object){
   table <- count_mapped_reads(screenR_Object)
   table <- table %>%
-    group_by(.data$Sample) %>%
-    filter(.data$Mapped == 0) %>%
-    summarise(LostBarcode = n())
+    dplyr::group_by(.data$Sample) %>%
+    dplyr::filter(.data$Mapped == 0) %>%
+    dplyr::summarise(LostBarcode = n())
 
   return(table)
 }
@@ -93,15 +93,6 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
 }
 
 
-
-
-
-
-
-
-
-
-
 #' @title Plot distribution of barcode lost
 #' @description The function plot the distribution of the lost barcode in each
 #'              sample
@@ -109,6 +100,7 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of colors
 #' @param alpha A value for the opacity of the plot
+#' @param type Type of plot
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @return return a tibble containing the number of mapped read for sample

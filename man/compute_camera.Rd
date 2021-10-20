@@ -22,15 +22,17 @@ compute_camera(
 
 \item{DGEList}{object of edgeR}
 
+\item{matrix_model}{the matrix that will be used to perform the
+linear model analysis}
+
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
+
+\item{number_barcode}{Number of barcode to use}
 
 \item{thresh}{The threshold}
 
 \item{lfc}{The Log2FC}
-
-\item{model_matrix}{the matrix that will be used to perform the
-linear model analysis}
 }
 \value{
 The hit find with the camera method

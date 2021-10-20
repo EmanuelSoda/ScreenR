@@ -1,14 +1,14 @@
 #' @title Find Camera Hit
 #' @description Find the hit using the camera method
 #' @param screenR_Object The Object of the package
-#' @param model_matrix The matrix that will be used to perform the
+#' @param matrix_model The matrix that will be used to perform the
 #'                     linear model analysis
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix wo which perform the analysis
-#' @importFrom edgeR estimateDisp glmFit glmLRT
 #' @param  thresh The threshold
 #' @param lfc The Log2FC
-#'
+#' @param number_barcode Number of barcode to use
+#' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
 #' @export
 #'
@@ -47,14 +47,13 @@ find_camera_hit <- function(screenR_Object, matrix_model, contrast,
 #' @param xglm object created with \code{link{edgeR::estimateDisp}}
 #' @param lrt object created with \code{link{edgeR::glmFit}}
 #' @param DGEList object of edgeR
-#' @param model_matrix the matrix that will be used to perform the
+#' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix wo which perform the analysis
 #' @param  thresh The threshold
+#' @param  number_barcode Number of barcode to use
 #' @param lfc The Log2FC
-#' @importFrom edgeR estimateDisp glmFit glmLRT
-#' @importFrom limma camera
 #' @return The hit find with the camera method
 #' @export
 #'
@@ -91,7 +90,11 @@ compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
 #
 # }
 
-
+#' @title Unique gene Symbols
+#' @description Compute a unique gene symbol for gene
+#' @param gene_symbols The gene symbool list
+#' @param number_barcode The number of barcode to select
+#' @return A list of unique gene symbols
 unique_gene_symbols <- function(gene_symbols, number_barcode = 3){
   un_genesymbols <- unique(gene_symbols)
   un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
@@ -104,10 +107,19 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3){
   return(gene_symbol_list)
 }
 
+
+#' @title Select  number of Barcode
+#' @description Compute a unique gene symbol for gene
+#' @param gene The gene name
+#' @param genesymbols The gene symbols  list
+#' @param number_barcode The number of barcode to select
+#' @return The barcode of the gene passed as input
 select_number_barcode <- function(gene, genesymbols,  number_barcode){
   sel <- genesymbols == gene & !is.na(genesymbols)
   if (sum(sel) > number_barcode) {
     which(sel)
   }
+
+  return(sel)
 }
 

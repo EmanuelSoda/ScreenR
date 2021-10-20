@@ -5,7 +5,6 @@
 #' @param screenR_Object The Object of the package
 #' @param palette palette to use to color the groups
 #' @param dimension number of plotting dimensions
-#' @importFrom plotly plot_ly add_markers add_text
 #' @return The MDS Plot
 #' @export
 #'

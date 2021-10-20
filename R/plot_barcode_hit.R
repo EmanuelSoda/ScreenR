@@ -11,10 +11,12 @@
 #' @param number_plot_col Number of col for the plot
 #' @param quantile Quantile to diplay on the plot
 #' @param labels Title of the plot
-#'
+#' @param gene gene
 #' @return A vector containing the common hit
 #' @export
-plot_barcode_hit <- function(screenR_Object, matrix_model, hit_common,
+plot_barcode_hit <- function(screenR_Object,
+                             matrix_model,
+                             hit_common,
                              contrast,
                              number_barcode = 3,
                              number_plot_row = 3,

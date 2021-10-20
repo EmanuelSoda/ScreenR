@@ -6,7 +6,8 @@
 #'                   method
 #' @param hit_roast The matrix obtained by the \code{\link{find_roast_hit}}
 #'                  method
-#'
+#' @param common_in Number of method in which the hit should be part at the same
+#'                  time
 #' @return A vector containing the common hit
 #' @export
 
@@ -32,7 +33,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast,
     hit_common <-
       tibble(Gene = name) %>%
       dplyr::mutate(zscore_hit =
-                      ifelse(test = .data$Gene %in% rownames(zscore_hit),
+                      ifelse(test = .data$Gene %in% rownames(hit_zscore),
                              yes = 1, no = 0)) %>%
       dplyr::mutate(camera_hit =
                       ifelse(test = .data$Gene %in% camera_hit$Gene,

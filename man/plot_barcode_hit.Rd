@@ -34,6 +34,8 @@ function}
 
 \item{number_plot_col}{Number of col for the plot}
 
+\item{gene}{gene}
+
 \item{quantile}{Quantile to diplay on the plot}
 
 \item{labels}{Title of the plot}

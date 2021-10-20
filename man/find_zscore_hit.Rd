@@ -11,6 +11,8 @@ find_zscore_hit(table_treate_vs_control, number_barcode = 6, metric = "median")
 \code{compute_data_table}}
 
 \item{number_barcode}{Number of barcode to have under the median}
+
+\item{metric}{A string containing the metric too use}
 }
 \value{
 return a tibble containing the hit for the Z-score

@@ -307,7 +307,6 @@ test_that("Hit Z-score per tutti i giorni ", {
 
 test_that("Hit Z-score per giorno", {
   library(tibble)
-  library(data.table)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
                      "Control", "Control", "Control",
@@ -450,7 +449,7 @@ test_that("ROAST", {
   expect_equal(class(roast_hit)[[1]], "tbl_df")
 })
 
-test_that("Plot Barcode", {
+test_that("find_common_hit 2", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -490,7 +489,7 @@ test_that("Plot Barcode", {
   table <- compute_metrics(object, treated = treated, control = control)
   hit_zscore <- find_zscore_hit(table, number_barcode = 6)
 
-  find_common_hit <- find_common_hit(zscore_hit, camera_hit,
+  find_common_hit <- find_common_hit(hit_zscore, camera_hit,
                                      roast_hit, common_in = 2)
 
   contrast <- limma::makeContrasts(Treated-Control,
@@ -506,7 +505,56 @@ test_that("Plot Barcode", {
 
 
 
+test_that("Plot find_common_hit 3", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
 
 
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
 
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
 
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0_T48", "Treated")
+  hit_roast <- find_roast_hit(screenR_Object = object,
+                              matrix_model = matrix,
+                              contrast = "Treated")
+  hit_camera <- find_camera_hit(screenR_Object = object,
+                                matrix_model = matrix,
+                                contrast = "Treated")
+
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore <- find_zscore_hit(table, number_barcode = 6)
+
+  find_common_hit <- find_common_hit(hit_zscore, camera_hit,
+                                     roast_hit, common_in = 3)
+
+  contrast <- limma::makeContrasts(Treated-Control,
+                                   levels=matrix)
+  p <- plot_barcode_hit(object, matrix,
+                        find_common_hit,
+                        contrast = contrast,
+                        gene = "ACAA1",
+                        number_plot_row = 1,
+                        number_plot_col = 1)
+  expect_equal(p, NULL)
+})
