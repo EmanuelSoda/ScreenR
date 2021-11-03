@@ -89,8 +89,6 @@ test_that("Plot number mapped reads", {
 })
 #> Test passed 🎉
 
-
-
 test_that("Plot number mapped reads", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
@@ -260,7 +258,7 @@ test_that("Create data_table", {
 #> Test passed 🎉
 
 
-test_that("Compute Metrics ", {
+test_that("Compute Metrics", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -560,7 +558,7 @@ test_that("find_common_hit 3", {
   expect_equal(class(find_common_hit), "character")
 })
 
-test_that("Find_Score_hit", {
+test_that("Find_Score_hit mean ", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -596,7 +594,7 @@ test_that("Find_Score_hit", {
 
 
 
-test_that("Find_Score_hit", {
+test_that("Find_Score_hit median ", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
                      "Treated", "Treated", "Treated",
@@ -629,3 +627,76 @@ test_that("Find_Score_hit", {
 
   expect_equal(class(hit_zscore)[[1]], "tbl_df")
 })
+
+test_that("find_robust_zscore_hit median ", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 6)
+
+  expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
+})
+
+
+test_that("Plot barcode hit ", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  object <- compute_data_table(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0_T48", "Treated")
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 6)
+  hit <- c("ACACB", "ACLY", "ACOX2", "ACSL6")
+  plot_barcode_hit(screenR_Object = object,
+                   matrix_model = matrix,
+                   hit_common = hit, )
+})
+

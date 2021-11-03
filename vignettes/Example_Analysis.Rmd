@@ -18,23 +18,65 @@ knitr::opts_chunk$set(
 
 ```{r packages}
 library(ScreenR)
+library(tidyverse)
 ```
 
 
-```{r read datara}
-groups <- factor(c("T0/T48", "T0/T48",
-                   "Treated", "Treated", "Treated",
-                    "Control", "Control", "Control",
-                    "Treated", "Treated", "Treated",
-                    "Control", "Control", "Control"))
+```{r read data}
+data <-
+  dir(pattern = "*.txt", path = "data/vignette/", full.names = T) %>%
+  tibble(filename = .) %>%
+  mutate(file_contents = map(filename, ~ read_delim(file = ., delim = "\t")))  %>%
+  unnest(., cols = "file_contents")  %>%
+  select(- filename) %>%
+  drop_na() 
 
-palette <- c("#1B9E77", "#1B9E77",
-             "#D95F02", "#D95F02", "#D95F02",
-             "#7570B3", "#7570B3", "#7570B3",
-             "#E7298A", "#E7298A", "#E7298A",
-             "#66A61E", "#66A61E", "#66A61E")
 
-object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+data <-
+  data %>%
+  mutate(Barcode = as.factor(.$Barcode)) %>%
+  filter(.$Barcode != "*") %>% 
+  select(., "Barcode", "T0", "T48_postPURO_A", "T48_postPURO_B", "T48_postPURO_C",
+         "Day7_DMSO_A", "Day7_DMSO_B", "Day7_DMSO_C",
+         "Day7_IACS_A", "Day7_IACS_B", "Day7_IACS_C",
+         "Day7_MET_A" , "Day7_MET_B", "Day7_MET_C",
+         "Day7_DDP_A", "Day7_DDP_B", "Day7_DDP_C",
+         "Day7_2DG_A", "Day7_2DG_B", "Day7_2DG_C",
+         "Day7_VEN_A", "Day7_VEN_B", "Day7_VEN_C",
+         "Day14_DMSO_A", "Day14_DMSO_B", "Day14_DMSO_C",
+         "Day14_IACS_A", "Day14_IACS_B", "Day14_IACS_C",
+         "Day14_MET_A", "Day14_MET_B", "Day14_MET_C",
+         "Day14_DDP_A", "Day14_DDP_B", "Day14_DDP_C",
+         "Day14_2DG_A", "Day14_2DG_B", "Day14_2DG_C",
+         "Day14_VEN_A", "Day14_VEN_B", "Day14_VEN_C",
+         "Day21_DMSO_A", "Day21_DMSO_B", "Day21_DMSO_C",
+         "Day21_IACS_A", "Day21_IACS_B", "Day21_IACS_C",
+         "Day21_MET_A", "Day21_MET_B", "Day21_MET_C",
+         "Day21_DDP_A", "Day21_DDP_B", "Day21_DDP_C",
+         "Day21_2DG_A", "Day21_2DG_B", "Day21_2DG_C",
+         "Day21_VEN_A", "Day21_VEN_B", "Day18_VEN_C") %>%
+  rename(., Day21_VEN_C = "Day18_VEN_C")
+
+total_Annotation <-
+  Table_Annotation %>% tibble() %>%
+  mutate(Barcode = as.factor(.$Barcode))
+```
+
+```{r Createe Object}
+groups <- gsub('(.*)_\\w+', '\\1', data %>%  colnames())
+groups <- factor(groups[2:length(groups)])
+
+
+palette <-
+  c("#771155", rep("#AA4488", 3), rep("#CC99BB", 3),
+    rep("#114477", 3), rep("#4477AA", 3), rep("#77AADD", 3),
+    rep("#117777", 3), rep("#44AAAA", 3), rep("#77CCCC", 3),
+    rep("#117744", 3), rep("#44AA77", 3), rep("#88CCAA", 3),
+    rep("#777711", 3), rep("#AAAA44", 3), rep("#DDDD77", 3),
+    rep("#774411", 3), rep("#AA7744", 3), rep("#DDAA77", 3),
+    rep("#771122", 3), rep("#AA4455", 3))
+
+object <- create_screenR_object(table = data,
                                 annotation = Table_Annotation,
                                 groups = groups,
                                 replicates = c(""))
@@ -42,19 +84,91 @@ object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
 ```
 
 
+# Start Analysis
+```{r normalizzation}
+object <- normalize_data(object)
+object <- compute_data_table(object)
+
+```
 
 
+## Mapped Reads
+```{r plot_mapped_reads}
+plot <- plot_mapped_reads(object, palette) +
+  theme_light() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 40, hjust = 1)) +
+  ggtitle("Number of Mapped Reads in each sample")
+
+plot
+```
 
 
+## Boxplot
+```{r  distribution_mapped_reads boxplot}
+plot <-  distribution_mapped_reads(object, palette,
+                                   alpha = 0.8,
+                                   type = "boxplot") +
+  theme_light() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 40, hjust = 1)) +
+  ylim(0, 800)
+
+plot
+```
+
+## Boxplot
+```{r  distribution_mapped_reads density}
+plot <-  distribution_mapped_reads(object, palette,
+                                   alpha = 0.8,
+                                   type = "density") +
+  theme_light() +
+  theme(legend.position = "none") +
+  xlim(0, 4500)
+plot
+```
+
+## Control Genes
+```{r Control Genes}
+object@data_table %>%
+  filter(Gene %in% c("RPL30", "PSMA1", "LUC")) %>%
+ggplot(., aes(x=Sample, y=Frequency, fill=Sample)) +
+    geom_boxplot(alpha = 0.9, outlier.shape = NA) +
+  geom_jitter(shape=16, size = 0.7, aes(colour = Sample)) +
+     scale_fill_manual(values = palette) +
+   scale_color_manual(values = palette) +
+    scale_alpha_manual(values=c(1,0.1)) +
+  #ggtitle("RPL30 gene") +
+    theme_light()  +
+  ylab("Normalized Mapped Reads") +
+  #ylim(0, 200)  +
+  theme(axis.ticks = element_line(size = 0.3),
+       # axis.text.x = element_text(angle = 25),
+        legend.position = "none", legend.direction = "horizontal")  +
+  coord_flip()  +
+  scale_x_discrete(limits = rev(unique(object@data_table$Sample))) +
+  facet_wrap("Gene", scales = "free")
+```
 
 
+## Barcode Lost
+```{r  plot_barcode_lost}
+plot <-  plot_barcode_lost(screenR_Object = object,
+                           palette = palette) +
+  theme_light() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 40, hjust = 1))
+plot
+```
 
 
+## Compute Metrics
+```{r  compute_metrics}
+object <- compute_data_table(object)
 
 
-
-
-
+metrics <- compute_metrics(object)
+```
 
 
 

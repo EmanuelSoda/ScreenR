@@ -13,15 +13,7 @@
 #' @export
 create_screenR_object <- function(table = NULL, annotation = NULL,
                                   groups = NULL, replicates = c("")){
-  if (is.null(table)) {
-    stop("The table is NULL")
-  } else if (is.null(annotation)) {
-    stop("The annotation is NULL")
-  } else if (is.null(groups)) {
-    stop("The groups is NULL")
-  }
-
-  table$Barcode <- as.factor(table$Barcode)
+arcode <- as.factor(table$Barcode)
   annotation$Barcode <- as.factor(annotation$Barcode)
   object <- new("screenR_object",
                 count_table = table,

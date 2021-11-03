@@ -34,7 +34,8 @@ Barcode_creation_Dataframe <- function(path_file) {
   Mapped_barcode_all_Samples <-
     Mapped_barcode_all_Samples %>%
     tidyr::drop_na() %>%
-    dplyr::filter(Barcode!= "*")
+    dplyr::filter(Barcode!= "*") %>%
+    tibble()
 
   return(Mapped_barcode_all_Samples)
 }

@@ -37,6 +37,28 @@ compute_metrics <- function (screenR_Object, treated = NULL, control = NULL){
 
   table <- screenR_Object@data_table[screenR_Object@data_table$Sample %in%
                                c(treated, control), ]
+
+  control <-  screenR_Object@data_table %>%
+    filter(Treatment == control) %>%
+    pull(Sample) %>%
+    unique() %>%
+    as.character()
+
+  treated <-  screenR_Object@data_table %>%
+    filter(Treatment == treatment) %>%
+    pull(Sample) %>%
+    unique() %>%
+    as.character()
+
+
+  table <- screenR_Object@data_table %>%
+    filter(Sample %in% c(control, treated))
+
+  table$Group <-
+    as.factor(ifelse(table$Sample %in% treated,"Treated", "Control"))
+
+  table <- table %>% mutate(Day = gsub("\\_.*","", Sample))
+
   table <-
     table %>%
     dplyr::mutate(Treatment = ifelse(.data$Sample %in% treated,
@@ -53,6 +75,5 @@ compute_metrics <- function (screenR_Object, treated = NULL, control = NULL){
                                     median(abs(.data$Log2FC - median(.data$Log2FC))))
   return(table)
 }
-
 
 
