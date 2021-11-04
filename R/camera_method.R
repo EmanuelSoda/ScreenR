@@ -100,7 +100,9 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3){
   un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
 
   gene_symbol_list  <- lapply(X = un_genesymbols,
-                              FUN = select_number_barcode, gene_symbols, number_barcode)
+                              FUN = select_number_barcode,
+                              gene_symbols,
+                              number_barcode)
   names(gene_symbol_list) <- un_genesymbols
 
   gene_symbol_list[sapply(gene_symbol_list, is.null)] <- NULL

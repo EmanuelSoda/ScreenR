@@ -19,10 +19,12 @@ compute_data_table <- function(screenR_Object){
     screenR_Object@normalized_count_table %>%
     tidyr::gather(., Sample, Frequency, colnames(.)[2]:last(colnames(.))) %>%
     dplyr::mutate(Barcode = as.factor(.$Barcode)) %>%
-     dplyr::left_join(screenR_Object@annotation_table,
+    dplyr::left_join(screenR_Object@annotation_table,
                       by = "Barcode") %>%
      select(.data$Barcode, .data$Gene, .data$Sample,.data$Frequency,
-            .data$Sequence, .data$Library, .data$Gene_ID)
+            .data$Sequence, .data$Library, .data$Gene_ID) %>%
+    mutate(Day = str_split_fixed(Sample, pattern = "_", n = 3) [,1],
+           Treatment = gsub(".*_","",gsub('(.*)_\\w+', '\\1', Sample)))
 
   # Then the table is put into the object
   screenR_Object@data_table <- table

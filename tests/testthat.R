@@ -692,11 +692,13 @@ test_that("Plot barcode hit ", {
   colnames(matrix) <- c("Control", "T0_T48", "Treated")
   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
   control <- c("Day3_A", "Day3_B", "Day3_C")
-  table <- compute_metrics(object, treated = treated, control = control)
+  table <- compute_metrics(object, treatment = treated,
+                           control = control,
+                           day = "Day3")
   hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 6)
   hit <- c("ACACB", "ACLY", "ACOX2", "ACSL6")
   plot_barcode_hit(screenR_Object = object,
                    matrix_model = matrix,
-                   hit_common = hit, )
+                   hit_common = hit)
 })
 

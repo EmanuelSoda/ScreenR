@@ -4,7 +4,7 @@
 \alias{plot_MDS}
 \title{PLot the Sample in vector Space}
 \usage{
-plot_MDS(screenR_Object, palette, dimension = 2)
+plot_MDS(screenR_Object, palette, dimension = 2, groups = NULL)
 }
 \arguments{
 \item{screenR_Object}{The Object of the package}
@@ -12,6 +12,8 @@ plot_MDS(screenR_Object, palette, dimension = 2)
 \item{palette}{palette to use to color the groups}
 
 \item{dimension}{number of plotting dimensions}
+
+\item{groups}{variable to fill the plot}
 }
 \value{
 The MDS Plot
