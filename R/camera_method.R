@@ -12,7 +12,7 @@
 #' @return The hit find with the camera method
 #' @export
 #'
-#' @examples
+#'
 
 find_camera_hit <- function(screenR_Object, matrix_model, contrast,
                             number_barcode = 3, thresh = 0.0001,
@@ -57,7 +57,7 @@ find_camera_hit <- function(screenR_Object, matrix_model, contrast,
 #' @return The hit find with the camera method
 #' @export
 #'
-#' @examples
+#'
 
 compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
                            number_barcode = 3, thresh = 0.0001, lfc = 1) {

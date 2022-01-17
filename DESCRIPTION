@@ -1,21 +1,27 @@
 Package: ScreenR
 Type: Package
-Title: Performin High Throughput Biological Screening
+Title: Package to Perform High Throughput Biological Screening
 Version: 0.1.0
-Author: Emanuel Michele Soda
-Maintainer: The package maintainer <emanuelsoda@gmail.com>
-Description: This package helps Bioinformaticians perform analysis on 
-             High Throughput Biological Screening using pooled shRNA.
+Authors@R: person("Emanuel Michele", "Soda", role = c("aut", "cre"),
+                  email = "emanuelsoda@gmail.com")
+Maintainer: Emanuel Michele Soda <emanuelsoda@gmail.com>
+Description: The aim of ScreenR is to help in the analysis of 
+             High Throughput Biological Screening using pooled shRNAs.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 RoxygenNote: 7.1.2
 Imports:
-    dplyr,
     methods,
-    purrr,
     rlang,
-    tidyr
+    tidyr,
+    stringr,
+    limma,
+    patchwork,
+    plotly,
+    strex,
+    scales
 Suggests: 
     rmarkdown,
     knitr,
@@ -26,5 +32,8 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 2.10),
     ggplot2,
-    magrittr
-VignetteBuilder: knitr
+    magrittr,
+    dplyr,
+    edgeR,
+    purrr
+VignetteBuilder: rmarkdown

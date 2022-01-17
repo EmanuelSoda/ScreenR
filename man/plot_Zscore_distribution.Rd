@@ -11,8 +11,6 @@ plot_Zscore_distribution(time_point_measure, alpha = 1)
 point}
 
 \item{alpha}{the alpha value for the plot}
-
-\item{fill_var}{the variable to color the plot}
 }
 \value{
 return the density plot of the distribution of the Z-score

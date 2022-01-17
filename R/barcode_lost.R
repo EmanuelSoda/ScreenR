@@ -30,8 +30,10 @@ barcode_lost <- function(screenR_Object){
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of colors
 #' @param alpha A value for the opacity of the plot
+#' @param legende_position Where to positioning the legend of the plot
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
+#' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
 plot_barcode_lost <- function(screenR_Object, palette = NULL,
@@ -63,6 +65,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #'                       \code{\link{create_screenR_object}}
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
+#' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object){
@@ -72,24 +75,23 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
     colnames()
 
   table <- screenR_Object@count_table %>%
-    tidyr::gather(Sample, Mapped, all_of(numericColumn)) %>%
+    tidyr::gather(.data$Sample, .data$Mapped, all_of(numericColumn)) %>%
     dplyr::mutate(Sample = factor(.data$Sample,
                                   levels = numericColumn))
 
   table %>%
-    dplyr::left_join(screenR_Object@annotation_table, by = Barcode) %>%
-    dplyr::group_by(Sample, Gene) %>%
-    dplyr::mutate(barcode_lost = Mapped == 0) %>%
-    dplyr::summarise(Sample = unique(Sample), barcode_lost = sum(barcode_lost)) %>%
-    dplyr::filter(barcode_lost != 0) %>%
+    dplyr::left_join(screenR_Object@annotation_table, by = .data$Barcode) %>%
+    dplyr::group_by(.data$Sample, .data$Gene) %>%
+    dplyr::mutate(barcode_lost = .data$Mapped == 0) %>%
+    dplyr::summarise(Sample = unique(.data$Sample), barcode_lost = sum(.data$barcode_lost)) %>%
+    dplyr::filter(.data$barcode_lost != 0) %>%
     tidyr::drop_na() %>%
-    ggplot(., aes(Gene, barcode_lost, fill = Sample)) +
-    geom_bar(stat="identity", position=position_dodge()) +
-    scale_fill_discrete(type = palette) +
+    ggplot(aes(.data$Gene, .data$barcode_lost, fill = .data$Sample)) +
+    geom_bar(stat="identity", position=position_dodge())
     theme(axis.ticks = element_line(size = 0.3),
           legend.position = "none", legend.direction = "horizontal",
           axis.text.x = element_text(angle = 40, hjust = 1)) +
-    facet_grid(rows = vars(Sample))
+    facet_grid(rows = vars(.data$Sample))
 }
 
 
@@ -103,6 +105,7 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
 #' @param type Type of plot
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
+#' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
 
@@ -125,13 +128,7 @@ plot_distribution_of_barcode_lost <- function(screenR_Object, palette = NULL,
   if (!is.null(palette))
     plot <- plot + scale_fill_manual(values=palette)
 
-
   return(plot)
-
-
-
-
-
 }
 
 

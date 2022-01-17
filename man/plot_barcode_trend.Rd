@@ -16,14 +16,18 @@ plot_barcode_trend(
 \item{list_data_measure}{A list containing the measure table of the different
 time point}
 
+\item{genes}{vector of genes name}
+
 \item{n_col}{The number of col to use in the facette wrap}
 
 \item{size_line}{the dimension of the line}
+
+\item{color}{vector of colors}
 }
 \value{
 The the plot of the
 }
 \description{
-Plot the log2FC over time of the barcode ein the differen
+Plot the log2FC over time of the barcode in the different
 time point
 }

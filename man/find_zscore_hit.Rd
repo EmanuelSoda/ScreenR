@@ -7,10 +7,10 @@
 find_zscore_hit(table_treate_vs_control, number_barcode = 6, metric = "median")
 }
 \arguments{
-\item{table_treate_vs_control}{table computet with the function
+\item{table_treate_vs_control}{table computed with the function
 \code{compute_data_table}}
 
-\item{number_barcode}{Number of barcode to have under the median}
+\item{number_barcode}{Number of barcode to have under the median or the mean}
 
 \item{metric}{A string containing the metric too use}
 }

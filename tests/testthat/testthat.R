@@ -1,5 +1,34 @@
 library(testthat)
 library(ScreenR)
+
+create_test_object <- function(){
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  obj <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  obj <- normalize_data(obj)
+  obj <- compute_data_table(obj)
+
+  return(obj)
+}
+
 test_that("Creation of the screenR object", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
@@ -562,29 +591,7 @@ test_that("find_common_hit 3", {
 
 test_that("Find_Score_hit mean ", {
   library(tibble)
-  groups <- factor(c("T0/T48", "T0/T48",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control"))
-
-
-  palette <- c("#1B9E75", "#1B9E75",
-               "#D95F02", "#D95F02", "#D95F02",
-               "#7570B3", "#7570B3", "#7570B3",
-               "#E7298A", "#E7298A", "#E7298A",
-               "#66A61E", "#66A61E", "#66A61E")
-
-  CountTable_THP1_CONTROL_vs_MET <-
-    CountTable_THP1_CONTROL_vs_MET %>%
-    dplyr::filter(Barcode != '*')
-
-  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-                                  annotation = Table_Annotation,
-                                  groups = groups,
-                                  replicates = c(""))
-  object <- normalize_data(object)
-  object <- compute_data_table(object)
+  object <- create_test_object()
 
   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
   control <- c("Day3_A", "Day3_B", "Day3_C")
@@ -597,30 +604,7 @@ test_that("Find_Score_hit mean ", {
 
 
 test_that("Find_Score_hit median ", {
-  library(tibble)
-  groups <- factor(c("T0/T48", "T0/T48",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control"))
-
-
-  palette <- c("#1B9E75", "#1B9E75",
-               "#D95F02", "#D95F02", "#D95F02",
-               "#7570B3", "#7570B3", "#7570B3",
-               "#E7298A", "#E7298A", "#E7298A",
-               "#66A61E", "#66A61E", "#66A61E")
-
-  CountTable_THP1_CONTROL_vs_MET <-
-    CountTable_THP1_CONTROL_vs_MET %>%
-    dplyr::filter(Barcode != '*')
-
-  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-                                  annotation = Table_Annotation,
-                                  groups = groups,
-                                  replicates = c(""))
-  object <- normalize_data(object)
-  object <- compute_data_table(object)
+  object <- create_test_object()
 
   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
   control <- c("Day3_A", "Day3_B", "Day3_C")
@@ -632,29 +616,7 @@ test_that("Find_Score_hit median ", {
 
 test_that("find_robust_zscore_hit median ", {
   library(tibble)
-  groups <- factor(c("T0/T48", "T0/T48",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control"))
-
-
-  palette <- c("#1B9E75", "#1B9E75",
-               "#D95F02", "#D95F02", "#D95F02",
-               "#7570B3", "#7570B3", "#7570B3",
-               "#E7298A", "#E7298A", "#E7298A",
-               "#66A61E", "#66A61E", "#66A61E")
-
-  CountTable_THP1_CONTROL_vs_MET <-
-    CountTable_THP1_CONTROL_vs_MET %>%
-    dplyr::filter(Barcode != '*')
-
-  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-                                  annotation = Table_Annotation,
-                                  groups = groups,
-                                  replicates = c(""))
-  object <- normalize_data(object)
-  object <- compute_data_table(object)
+  object <- create_test_object()
 
   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
   control <- c("Day3_A", "Day3_B", "Day3_C")
@@ -667,29 +629,9 @@ test_that("find_robust_zscore_hit median ", {
 
 test_that("Plot barcode hit ", {
   library(tibble)
-  groups <- factor(c("T0/T48", "T0/T48",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control",
-                     "Treated", "Treated", "Treated",
-                     "Control", "Control", "Control"))
+  object <- create_test_object()
 
 
-  palette <- c("#1B9E75", "#1B9E75",
-               "#D95F02", "#D95F02", "#D95F02",
-               "#7570B3", "#7570B3", "#7570B3",
-               "#E7298A", "#E7298A", "#E7298A",
-               "#66A61E", "#66A61E", "#66A61E")
-
-  CountTable_THP1_CONTROL_vs_MET <-
-    CountTable_THP1_CONTROL_vs_MET %>%
-    dplyr::filter(Barcode != '*')
-
-  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-                                  annotation = Table_Annotation,
-                                  groups = groups,
-                                  replicates = c(""))
-  object <- normalize_data(object)
-  object <- compute_data_table(object)
   matrix <- model.matrix(~object@groups)
   colnames(matrix) <- c("Control", "T0_T48", "Treated")
   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
@@ -700,5 +642,52 @@ test_that("Plot barcode hit ", {
   plot_barcode_hit(screenR_Object = object,
                    matrix_model = matrix,
                    hit_common = hit, )
+})
+
+
+
+test_that("plot_PC_explained_variance", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <- plot_PC_explained_variance(object, cumulative = F)
+  expect_equal(class(plot)[[1]], "gg")
+})
+
+
+test_that("plot_PC_explained_variance", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <-
+    plot_PC_explained_variance(screenR_Object = object,
+                               cumulative = T)
+  expect_equal(class(plot)[[1]], "gg")
+})
+
+test_that("plot trend hit", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <-
+    plot_trend(screenR_Object = object,
+               genes = c("SEPT5", "GLS"),
+               group_var = c("T0", "T48","Met"),
+               nrow = 1, ncol = 2)
+
+})
+
+
+test_that("filter_by_slope", {
+  library(tibble)
+  object <- create_test_object()
+
+  object <- filter_by_slope(screenR_Object = object,
+                  genes = c("SEPT5", "GLS"),
+                  group_var_treatment  = c("T0", "T48","Met"),
+                  group_var_control   = c("T0", "T48","Day3", "Day6"),
+                  slope_treatment = 1)
+  expect_equal(class(object)[1], "screenR_object")
+
 })
 

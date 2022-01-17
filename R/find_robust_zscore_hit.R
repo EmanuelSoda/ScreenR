@@ -7,15 +7,14 @@
 #' @return return a tibble containing the hit for the robust Z-score
 #' @export
 #'
-#' @examples
 find_robust_zscore_hit <- function(table_treate_vs_control, number_barcode){
   hit_table <-
     table_treate_vs_control %>%
-    dplyr::filter(ZscoreRobust < median(ZscoreRobust)) %>%
-    dplyr::group_by(Gene) %>%
+    dplyr::filter(.data$ZscoreRobust < median(.data$ZscoreRobust)) %>%
+    dplyr::group_by(.data$Gene) %>%
     dplyr::summarise(numberOfBarcode = n()) %>%
-    dplyr::group_by(numberOfBarcode) %>%
-    dplyr::filter(numberOfBarcode > number_barcode)
+    dplyr::group_by(.data$numberOfBarcode) %>%
+    dplyr::filter(.data$numberOfBarcode > number_barcode)
 
   return(hit_table)
 }

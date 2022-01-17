@@ -18,6 +18,8 @@ plot_barcode_lost(
 \item{palette}{A vector of colors}
 
 \item{alpha}{A value for the opacity of the plot}
+
+\item{legende_position}{Where to positioning the legend of the plot}
 }
 \value{
 return a tibble containing the number of mapped read for sample

@@ -6,11 +6,11 @@
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
-#' @param control
+#' @param control The control Samples
 #'
-#' @param treatment
+#' @param treatment The treatment Samples
 #'
-#' @param day
+#' @param day The day of the treatment
 
 #' @importFrom rlang .data
 #' @importFrom tidyr spread
@@ -24,38 +24,38 @@
 compute_metrics <- function(screenR_Object, control, treatment, day){
 
   control <- screenR_Object@data_table %>%
-    filter(Treatment %in% control) %>%
-    pull(Sample) %>%
+    filter(.data$Treatment %in% control) %>%
+    pull(.data$Sample) %>%
     unique() %>%
     as.character()
 
   treated <- screenR_Object@data_table %>%
-    filter(Treatment %in% treatment) %>%
-    pull(Sample) %>%
+    filter(.data$Treatment %in% treatment) %>%
+    pull(.data$Sample) %>%
     unique() %>%
     as.character()
 
   data_trt <-
     screenR_Object@data_table %>%
-    filter(Sample %in% c(control, treated)) %>%
-    mutate(Group = as.factor(if_else(condition = Sample %in% treated,
+    filter(.data$Sample %in% c(control, treated)) %>%
+    mutate(Group = as.factor(if_else(condition = .data$Sample %in% treated,
                                      true = "Treated",
                                      false = "Control")))
 
 
 
   data_trt <- data_trt %>%
-    filter(Day %in% day) %>%
-    group_by(Group, Barcode) %>%
-    mutate(Mean = mean(Frequency)) %>%
-    summarise(Barcode = unique(Barcode), Mean = unique(Mean),
-              Gene = unique(Gene), .groups = "drop") %>%
-    spread(Group, Mean) %>%
-    filter(Control > 0) %>%
-    mutate(Log2FC = log2(Treated/Control + 1e-07))  %>%
-    mutate(Zscore = (Log2FC - mean(Log2FC)) / sd(Log2FC))  %>%
-    mutate(ZscoreRobust = 1.4826 * (Log2FC - mean(Log2FC)) /
-             median(abs(Log2FC- median(Log2FC)))) %>%
+    filter(.data$Day %in% day) %>%
+    group_by(.data$Group, .data$Barcode) %>%
+    mutate(Mean = mean(.data$Frequency)) %>%
+    summarise(Barcode = unique(.data$Barcode), Mean = unique(.data$Mean),
+              Gene = unique(.data$Gene), .groups = "drop") %>%
+    spread(.data$Group, .data$Mean) %>%
+    filter(.data$Control > 0) %>%
+    mutate(Log2FC = log2(.data$Treated/.data$Control + 1e-07))  %>%
+    mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
+    mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /
+             median(abs(.data$Log2FC- median(.data$Log2FC)))) %>%
     mutate(Day = day, Treatment = treatment) %>%
 
 

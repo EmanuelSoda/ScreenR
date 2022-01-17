@@ -4,14 +4,13 @@
 #' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
 #' @param hit_common The vector of the common hit
-#' @param contrast An object created with \code{\link{limma::makeContrasts}}
+#' @param contrast An object created with makeContrasts
 #'                 function
 #' @param number_barcode Number of barcode to have under the median
-#' @param number_plot_row Number of row for the plot
-#' @param number_plot_col Number of col for the plot
 #' @param quantile Quantile to diplay on the plot
 #' @param labels Title of the plot
 #' @param gene un singolo gene
+#' @concept  plot
 #' @return A vector containing the common hit
 #' @export
 plot_barcode_hit <- function(screenR_Object,

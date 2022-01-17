@@ -9,69 +9,47 @@ editor_options:
   chunk_output_type: console
 ---
 
-
+# Importing Pacakge
 ```{r packages, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 library(ScreenR)
-library(tidyverse)
-library(dplyr)
-library(RColorBrewer)
-library(wesanderson)
-library(limma)
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
+# Read Data
 
+We will use as example a Loss of Function Genetic Screening Performed on THP1
+using Metforming at Day3 and Day6. First of all the data are read.
 ```{r read data,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-data <- read_delim(dir(pattern = "*.txt", path = "data/vignette/", full.names = T)[3],
-                   delim = "\t") %>% 
-  bind_rows(read_delim(dir(pattern = "*.txt", path = "data/vignette/", full.names = T)[1],
-                   delim = "\t")) %>% 
-  bind_rows(read_delim(dir(pattern = "*.txt", path = "data/vignette/", full.names = T)[2],
-                   delim = "\t"))
-  
-
+data <-  tidyr::tibble(CountTable_THP1_CONTROL_vs_MET)
+colnames(data) <- 
+  c("Barcode", "T0", "T48_postPURO", "Day3_Met_A", "Day3_Met_B",
+    "Day3_Met_C", "Day3_DMSO_A" ,"Day3_DMSO_B","Day3_DMSO_C",
+    "Day6_Met_A", "Day6_Met_B","Day6_Met_C", "Day6_DMSO_A", 
+    "Day6_DMSO_B", "Day6_DMSO_C")
 data <-
   data %>%
-  mutate(Barcode = as.factor(Barcode)) %>%
-  filter(Barcode != "*") %>% 
-  select(., "Barcode", "T0", "T48_postPURO_A", "T48_postPURO_B", "T48_postPURO_C",
-         "Day7_DMSO_A", "Day7_DMSO_B", "Day7_DMSO_C",
-         "Day7_IACS_A", "Day7_IACS_B", "Day7_IACS_C",
-         "Day7_MET_A" , "Day7_MET_B", "Day7_MET_C",
-         "Day7_DDP_A", "Day7_DDP_B", "Day7_DDP_C",
-         "Day7_2DG_A", "Day7_2DG_B", "Day7_2DG_C",
-         "Day7_VEN_A", "Day7_VEN_B", "Day7_VEN_C",
-         "Day14_DMSO_A", "Day14_DMSO_B", "Day14_DMSO_C",
-         "Day14_IACS_A", "Day14_IACS_B", "Day14_IACS_C",
-         "Day14_MET_A", "Day14_MET_B", "Day14_MET_C",
-         "Day14_DDP_A", "Day14_DDP_B", "Day14_DDP_C",
-         "Day14_2DG_A", "Day14_2DG_B", "Day14_2DG_C",
-         "Day14_VEN_A", "Day14_VEN_B", "Day14_VEN_C",
-         "Day21_DMSO_A", "Day21_DMSO_B", "Day21_DMSO_C",
-         "Day21_IACS_A", "Day21_IACS_B", "Day21_IACS_C",
-         "Day21_MET_A", "Day21_MET_B", "Day21_MET_C",
-         "Day21_DDP_A", "Day21_DDP_B", "Day21_DDP_C",
-         "Day21_2DG_A", "Day21_2DG_B", "Day21_2DG_C",
-         "Day21_VEN_A", "Day21_VEN_B", "Day18_VEN_C") %>%
-  rename(., Day21_VEN_C = "Day18_VEN_C")
+  dplyr::mutate(Barcode = as.factor(Barcode)) %>%
+  dplyr::filter(Barcode != "*") 
+
 
 total_Annotation <-
-  Table_Annotation %>% tibble() %>%
-  mutate(Barcode = as.factor(.$Barcode))
+  Table_Annotation %>% tibble::tibble() %>%
+  dplyr::mutate(Barcode = as.factor(.$Barcode))
+
 ```
 
-```{r Createe Object,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-groups <- gsub('(.*)_\\w+', '\\1', data %>%  colnames())
-groups <- factor(groups[2:length(groups)])
+# Object Creation 
+The ScreenR object is created using the function **create_screenR_object()**
 
+```{r Createe Object,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+groups <- colnames(data)[2:length(colnames(data))]
+groups <- gsub('(.*)_\\w+', '\\1', groups)
+groups <- factor(x = groups, levels = unique(groups))
+groups
 
 palette <-
-  c("#771155", rep("#AA4488", 3), rep("#CC99BB", 3),
-    rep("#114477", 3), rep("#4477AA", 3), rep("#77AADD", 3),
-    rep("#117777", 3), rep("#44AAAA", 3), rep("#77CCCC", 3),
-    rep("#117744", 3), rep("#44AA77", 3), rep("#88CCAA", 3),
-    rep("#777711", 3), rep("#AAAA44", 3), rep("#DDDD77", 3),
-    rep("#774411", 3), rep("#AA7744", 3), rep("#DDAA77", 3),
-    rep("#771122", 3), rep("#AA4455", 3))
+  c("#66c2a5", "#fc8d62", rep("#8da0cb", 3), rep("#e78ac3", 3),
+    rep("#a6d854", 3), rep("#ffd92f", 3))
 
 object <- create_screenR_object(table = data,
                                 annotation = total_Annotation,
@@ -90,11 +68,10 @@ object <- compute_data_table(object)
 
 ## Mapped Reads
 ```{r plot_mapped_reads,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-plot <- plot_mapped_reads(object, palette) +
-  theme_light() +
-  theme(legend.position = "none",
+plot <- plot_mapped_reads(object, palette) + 
+  ggplot2::theme(legend.position = "none",
         axis.text.x = element_text(angle = 40, hjust = 1)) +
-  ggtitle("Number of Mapped Reads in each sample")
+  ggplot2::ggtitle("Number of Mapped Reads in each sample")
 
 plot
 ```
@@ -105,45 +82,39 @@ plot
 plot <-  distribution_mapped_reads(object, palette,
                                    alpha = 0.8,
                                    type = "boxplot") +
-  theme_light() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 40, hjust = 1)) +
-  ylim(0, 800)
+  ggplot2::theme(legend.position = "none",
+        axis.text.x = element_text(angle = 40, hjust = 1))  
 
-plot
+plot 
 ```
 
 ## Boxplot
 ```{r  distribution_mapped_reads density,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-plot <-  distribution_mapped_reads(object, palette,
-                                   alpha = 0.8,
+plot <- distribution_mapped_reads(object, palette,
+                                   alpha = 0.5,
                                    type = "density") +
-  theme_light() +
-  theme(legend.position = "none") +
-  xlim(0, 4500)
-plot
+  ggplot2::theme(legend.position = "none")  
 ```
 
 ## Control Genes
 ```{r Control Genes,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 object@data_table %>%
-  filter(Gene %in% c("RPL30", "PSMA1", "LUC")) %>%
-ggplot(., aes(x=Sample, y=Frequency, fill=Sample)) +
-    geom_boxplot(alpha = 0.9, outlier.shape = NA) +
-  geom_jitter(shape=16, size = 0.7, aes(colour = Sample)) +
-     scale_fill_manual(values = palette) +
-   scale_color_manual(values = palette) +
-    scale_alpha_manual(values=c(1,0.1)) +
-  #ggtitle("RPL30 gene") +
-    theme_light()  +
-  ylab("Normalized Mapped Reads") +
-  #ylim(0, 200)  +
-  theme(axis.ticks = element_line(size = 0.3),
+  dplyr::filter(Gene %in% c("RPL30", "PSMA1", "LUC")) %>%
+  
+  ggplot2::ggplot(., aes(x=Sample, y=Frequency, fill=Treatment)) +
+  ggplot2::geom_boxplot(alpha = 0.9, outlier.shape = NA) +
+  ggplot2::geom_jitter(shape=16, size = 0.7, aes(colour = Treatment)) +
+  ggplot2::scale_fill_manual(values = unique(palette)) +
+  ggplot2::scale_color_manual(values =  unique(palette)) +
+  ggplot2::scale_alpha_manual(values=c(1, 0.1)) +
+  ggplot2::theme_light()  +
+  ggplot2::ylab("Normalized Mapped Reads") +
+  ggplot2::theme(axis.ticks = element_line(size = 0.3),
        # axis.text.x = element_text(angle = 25),
         legend.position = "none", legend.direction = "horizontal")  +
-  coord_flip()  +
-  scale_x_discrete(limits = rev(unique(object@data_table$Sample))) +
-  facet_wrap("Gene", scales = "free")
+  ggplot2::coord_flip()  +
+  ggplot2::scale_x_discrete(limits = rev(unique(object@data_table$Sample))) +
+  ggplot2::facet_wrap("Gene", scales = "free")
 ```
 
 
@@ -151,8 +122,8 @@ ggplot(., aes(x=Sample, y=Frequency, fill=Sample)) +
 ```{r  plot_barcode_lost,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 plot <-  plot_barcode_lost(screenR_Object = object,
                            palette = palette) +
-  theme_light() +
-  theme(legend.position = "none",
+  ggplot2::theme_light() +
+  ggplot2::theme(legend.position = "none",
         axis.text.x = element_text(angle = 40, hjust = 1))
 plot
 ```
@@ -161,25 +132,28 @@ plot
 
 ### For Sample
 ```{r  Plot MDS Sample,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-plot_MDS(screenR_Object = object, 
-         palette = palette)
+plot_MDS(screenR_Object = object, palette = palette)
 ```
 
 
 ### For Treatment
 ```{r  Plot MDS Treatment,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 GGgroups <- gsub(".*_","", groups)
+pal <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A", 
+         "#66A61E", "#E6AB02", "#A6761D","#666666")
 plot_MDS(screenR_Object = object, 
-         palette = brewer.pal(n = 8, "Dark2"), 
+         palette = pal, 
          groups = factor(x = GGgroups,
                          levels = unique(GGgroups)))
+
+
 ```
 
 ### For Day
 ```{r  Plot MDS Day,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 GGgroups <- sub("_.*", "", groups)
 plot_MDS(screenR_Object = object, 
-         palette = wes_palette("FantasticFox1"), 
+         palette = c("#1B9E77", "#D95F02", "#7570B3", "#E7298A"), 
          groups = factor(x = GGgroups,
                          levels = unique(GGgroups)))
 ```
@@ -187,33 +161,27 @@ plot_MDS(screenR_Object = object,
 ## Compute Metrics
 ```{r  compute_metrics,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 # 2DG
-data_with_measure_2DG <- list(
-  Day7 = compute_metrics(object, control = "DMSO", 
-                         treatment = "2DG", day = "Day7"),
-  Day14 = compute_metrics(object, control = "DMSO", 
-                          treatment = "2DG", day = "Day14"),
-  Day21 = compute_metrics(object, 
-                          control = "DMSO", treatment = "2DG", day = "Day21"))
+data_with_measure_Met <- list(
+  Day3 = compute_metrics(object, control = "DMSO", 
+                         treatment = "Met", day = "Day3"),
+  Day6 = compute_metrics(object, control = "DMSO", 
+                         treatment = "Met", day = "Day6"))
 
 
-plot_Zscore_distribution(data_with_measure_2DG,
+plot_Zscore_distribution(data_with_measure_Met,
                          alpha = 0.8)  +
-  scale_fill_manual(values = wes_palette(name = "Royal1")) + 
-  theme_light() +
-  theme(legend.position = "top") + 
-  xlim(-2, 2)
+  ggplot2::scale_fill_manual(values =  c("#1B9E77", "#D95F02")) + 
+  ggplot2::theme(legend.position = "top") 
 ```
+
 
 ## Z-score hit
 ```{r  Z-score hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-zscore_hit_2DG <- list(
-  Day7 = find_zscore_hit(table_treate_vs_control = data_with_measure_2DG$Day7,
+zscore_hit_Met <- list(
+  Day3 = find_zscore_hit(table_treate_vs_control = data_with_measure_Met$Day3,
                 number_barcode = 7,
                 metric = "median"),
-  Day14 = find_zscore_hit(table_treate_vs_control = data_with_measure_2DG$Day14,
-                number_barcode = 7,
-                metric = "median"),
-  Day21 = find_zscore_hit(table_treate_vs_control = data_with_measure_2DG$Day21,
+  Day6 = find_zscore_hit(table_treate_vs_control = data_with_measure_Met$Day6,
                 number_barcode = 7,
                 metric = "median"))
 ```   
@@ -222,129 +190,126 @@ zscore_hit_2DG <- list(
 ## CAMERA
 ```{r  CAMERA, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
 groupss <- c(rep("T0/T48",4),as.character(groups[5:length(groups)]))
-matrix_model <- model.matrix(~ 0 + groupss)
-colnames(matrix_model) <- c("Day14_2DG", "Day14_DDP", "Day14_DMSO", 
-                            "Day14_IACS", "Day14_MET", "Day14_Ven",
-                            
-                            "Day21_2DG", "Day21_DDP", "Day21_DMSO", 
-                            "Day21_IACS", "Day21_MET", "Day21_VEN",
-                            
-                            "Day7_2DG", "Day7_DDP", "Day7_DMSO", 
-                            "Day7_IACS", "Day7_MET", "Day7_VEN",
-                            "T0_T48")
 
-camera_hit_2DG <- list(
-  Day7 =find_camera_hit(screenR_Object = object,
+
+matrix_model <- model.matrix(~ 0 + groups)
+colnames(matrix_model) <- unique(groups)
+
+camera_hit_Met <- list(
+  Day3 = find_camera_hit(screenR_Object = object,
                               matrix_model = matrix_model,
-                              contrast = "Day7_2DG"),
-  Day14 = find_camera_hit(screenR_Object = object,
+                              contrast = "Day3_Met"),
+  Day6 = find_camera_hit(screenR_Object = object,
                               matrix_model = matrix_model,
-                              contrast = "Day14_2DG"),
-  Day21 = find_camera_hit(screenR_Object = object,
-                              matrix_model = matrix_model,
-                              contrast = "Day21_2DG"))
+                              contrast = "Day6_Met"))
 ```
 
 ## ROAST
 ```{r ROAST, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-roast_hit_2DG <- list(
-  Day7 = find_roast_hit(screenR_Object = object,
+roast_hit_Met <- list(
+  Day3 = find_roast_hit(screenR_Object = object,
                               matrix_model = matrix_model,
-                              contrast = "Day7_2DG"),
-  Day14 = find_roast_hit(screenR_Object = object,
+                              contrast = "Day3_Met"),
+  Day6 = find_roast_hit(screenR_Object = object,
                               matrix_model = matrix_model,
-                              contrast = "Day14_2DG"),
-  Day21 = find_roast_hit(screenR_Object = object,
-                              matrix_model = matrix_model,
-                              contrast = "Day21_2DG"))
+                              contrast = "Day6_Met"))
 ```
 
 
 ## Find Common Hit 
-```{r ROAST, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-common_hit_2DG_at_least_2 <- list(
-  Day7 = find_common_hit(zscore_hit_2DG$Day7, camera_hit_2DG$Day7,
-                         roast_hit_2DG$Day7, common_in = 2),
-  Day14 = find_common_hit(zscore_hit_2DG$Day14, camera_hit_2DG$Day14,
-                         roast_hit_2DG$Day14, common_in = 2),
-  Day21 = find_common_hit(zscore_hit_2DG$Day21, camera_hit_2DG$Day21,
-                         roast_hit_2DG$Day21, common_in = 2))
+```{r Common Hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+common_hit_Met_at_least_2 <- list(
+  Day3 = find_common_hit(zscore_hit_Met$Day3, camera_hit_Met$Day3,
+                         roast_hit_Met$Day3, common_in = 2),
+  Day6 = find_common_hit(zscore_hit_Met$Day6, camera_hit_Met$Day6,
+                         roast_hit_Met$Day6, common_in = 2))
 
-common_hit_2DG_at_least_3  <- list(
-  Day7 = find_common_hit(zscore_hit_2DG$Day7, camera_hit_2DG$Day7,
-                         roast_hit_2DG$Day7, common_in = 3),
-  Day14 = find_common_hit(zscore_hit_2DG$Day14, camera_hit_2DG$Day14,
-                         roast_hit_2DG$Day14, common_in = 3),
-  Day21 = find_common_hit(zscore_hit_2DG$Day21, camera_hit_2DG$Day21,
-                         roast_hit_2DG$Day21, common_in = 3))
+common_hit_Met_at_least_3  <- list(
+  Day3 = find_common_hit(zscore_hit_Met$Day3, camera_hit_Met$Day3,
+                         roast_hit_Met$Day3, common_in = 3),
+  Day6 = find_common_hit(zscore_hit_Met$Day6, camera_hit_Met$Day6,
+                         roast_hit_Met$Day6, common_in = 3))
 ```
 
-## Plot Barcode Hit
-```{r ROAST, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
-contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model)
-plot_barcode_hit(screenR_Object = object,
-                 matrix_model = matrix_model,
-                 contrast = contrast_Day21_2DG,
-                 hit_common = common_hit_2DG_at_least_3$Day21,
-                 gene = "KDM1A")
-
-plot_barcode_trend(list_data_measure = data_with_measure_2DG,
-                   genes = c("KDM1A"),
-                   n_col = 1,color = ggsci::pal_jco()(10)) 
-
-data_with_measure_2DG$Day21  %>% arrange(Log2FC) %>%  filter(Gene == "KDM1A")
-
-library(edgeR)
-matrix <-
-  as.matrix(data[, 2: dim(data)[2]])
-
-
-rownames(matrix) <- data$Barcode
-
-DGEList <- DGEList(counts = matrix,
-                   group = factor(groups), genes = total_Annotation)
-xglm <- estimateDisp(DGEList, matrix_model)
-fit <- glmFit(xglm, matrix_model)
-
-contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model)
-lrt_Day21_2DG <- glmLRT(fit, contrast = contrast_Day21_2DG)
-
-genesymbols <- as.character(DGEList$genes[, 1])
-genesymbollist2 <- list()
-unq <- unique(genesymbols)
-unq <- unq[!is.na(unq)]
-for(i in unq) {
-  sel <- genesymbols == i & !is.na(genesymbols)
-  if(sum(sel)>3)
-    genesymbollist2[[i]] <- which(sel)
-}
-
-
-barcodeplot(statistics = lrt_Day21_2DG$table$logFC,
-            index=genesymbollist2[["KDM1A"]],
- main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") ,
- labels=c("Negative logFC", "Positive logFC"),
- quantile=c(-0.5,0.5))
 
 
 
-prova <- object@annotation_table  %>% 
-  select(Gene, Barcode,Library)
 
 
-prova <- prova %>% 
-  mutate(Barcode = as.numeric(Barcode))  %>% 
-  group_by(Gene) %>% 
-  split(.$Gene, .$Barcode) 
-  
-prova <- map(.x = prova,.f = function(x){x %>% pull(Barcode)})
 
-barcodeplot(lrt_Day21_2DG$table$logFC,index=prova[["KDM1A"]],
- main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") ,
- labels=c("Negative logFC", "Positive logFC"),
- quantile=c(-0.5,0.5))
 
-```
+
+
+
+
+
+
+<!-- ## Plot Barcode Hit -->
+<!-- ```{r Barcode Hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE} -->
+<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model) -->
+<!-- plot_barcode_hit(screenR_Object = object, -->
+<!--                  matrix_model = matrix_model, -->
+<!--                  contrast = contrast_Day21_2DG, -->
+<!--                  hit_common = common_hit_2DG_at_least_3$Day21, -->
+<!--                  gene = "KDM1A") -->
+
+<!-- plot_barcode_trend(list_data_measure = data_with_measure_2DG, -->
+<!--                    genes = c("KDM1A"), -->
+<!--                    n_col = 1,color = ggsci::pal_jco()(10))  -->
+
+<!-- data_with_measure_2DG$Day21  %>% arrange(Log2FC) %>%  filter(Gene == "KDM1A") -->
+
+<!-- library(edgeR) -->
+<!-- matrix <- -->
+<!--   as.matrix(data[, 2: dim(data)[2]]) -->
+
+
+<!-- rownames(matrix) <- data$Barcode -->
+
+<!-- DGEList <- DGEList(counts = matrix, -->
+<!--                    group = factor(groups), genes = total_Annotation) -->
+<!-- xglm <- estimateDisp(DGEList, matrix_model) -->
+<!-- fit <- glmFit(xglm, matrix_model) -->
+
+<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model) -->
+<!-- lrt_Day21_2DG <- glmLRT(fit, contrast = contrast_Day21_2DG) -->
+
+<!-- genesymbols <- as.character(DGEList$genes[, 1]) -->
+<!-- genesymbollist2 <- list() -->
+<!-- unq <- unique(genesymbols) -->
+<!-- unq <- unq[!is.na(unq)] -->
+<!-- for(i in unq) { -->
+<!--   sel <- genesymbols == i & !is.na(genesymbols) -->
+<!--   if(sum(sel)>3) -->
+<!--     genesymbollist2[[i]] <- which(sel) -->
+<!-- } -->
+
+
+<!-- barcodeplot(statistics = lrt_Day21_2DG$table$logFC, -->
+<!--             index=genesymbollist2[["KDM1A"]], -->
+<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
+<!--  labels=c("Negative logFC", "Positive logFC"), -->
+<!--  quantile=c(-0.5,0.5)) -->
+
+
+
+<!-- prova <- object@annotation_table  %>%  -->
+<!--   select(Gene, Barcode,Library) -->
+
+
+<!-- prova <- prova %>%  -->
+<!--   mutate(Barcode = as.numeric(Barcode))  %>%  -->
+<!--   group_by(Gene) %>%  -->
+<!--   split(.$Gene, .$Barcode)  -->
+
+<!-- prova <- map(.x = prova,.f = function(x){x %>% pull(Barcode)}) -->
+
+<!-- barcodeplot(lrt_Day21_2DG$table$logFC,index=prova[["KDM1A"]], -->
+<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
+<!--  labels=c("Negative logFC", "Positive logFC"), -->
+<!--  quantile=c(-0.5,0.5)) -->
+
+<!-- ``` -->
 
 
 

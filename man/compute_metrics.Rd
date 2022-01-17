@@ -10,9 +10,11 @@ compute_metrics(screenR_Object, control, treatment, day)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}}
 
-\item{control}{}
+\item{control}{The control Samples}
 
-\item{treatment}{}
+\item{treatment}{The treatment Samples}
+
+\item{day}{The day of the treatment}
 }
 \value{
 return a tibble  with all the measure computed

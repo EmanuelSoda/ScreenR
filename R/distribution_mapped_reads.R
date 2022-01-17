@@ -7,8 +7,9 @@
 #'
 #' @param palette The color vector for the plot.
 #' @param alpha The opacity of the plot.
-#' @param type The type of plot. THe default is boxplot the other option is density.
-#'impo
+#' @param type The type of plot. THe default is boxplot the other option is
+#'             density.
+#' @concept plot
 #'
 #' @return return a tibble containing the number of mapped read for sample
 #' @export

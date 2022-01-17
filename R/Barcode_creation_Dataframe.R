@@ -6,19 +6,18 @@
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
+#' @importFrom purrr map
 #' @return return the table containing barcode that have mapped to the samples
 #' @export
 
 Barcode_creation_Dataframe <- function(path_file) {
-
-  dataFrames <- lapply(list.files(path = path_file, full.names = T),
-                       FUN = function(x)  {
-                         read.table(file = x, header = F, sep = "\t",
-                                    col.names = c("Barcode", "Length", "Mapped",
-                                                  "Unmapped"))})
+  dataFrames <- purrr::map(.x = list.files(path = path_file, full.names = T),
+                           .f = ~ read.table(file = .x, header = F, sep = "\t",
+                                             col.names = c("Barcode", "Length", "Mapped",
+                                                           "Unmapped")))
   # remove the useless one
-  dataFrames <- lapply(dataFrames,
-                       function(x) {x[(names(x) %in% c("Barcode", "Mapped"))]})
+  dataFrames <- purrr::map(.x = dataFrames,
+                           .f = ~.x[(names(.x) %in% c("Barcode", "Mapped"))])
 
   Mapped_barcode_all_Samples <- dataFrames %>% purrr::reduce(left_join, by = "Barcode")
 
@@ -34,7 +33,7 @@ Barcode_creation_Dataframe <- function(path_file) {
   Mapped_barcode_all_Samples <-
     Mapped_barcode_all_Samples %>%
     tidyr::drop_na() %>%
-    dplyr::filter(Barcode!= "*") %>%
+    dplyr::filter(.data$Barcode!= "*") %>%
     tibble()
 
   return(Mapped_barcode_all_Samples)

@@ -23,3 +23,4 @@ Plot samples on a two or three-dimensional scatterplot so that
              distances on the plot approximate the typical log2 fold
              changes between the samples.
 }
+\keyword{internal}
