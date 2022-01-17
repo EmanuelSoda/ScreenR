@@ -2,27 +2,24 @@
 % Please edit documentation in R/compute_metrics.R
 \name{compute_metrics}
 \alias{compute_metrics}
-\title{Compute metrics}
+\title{Create the Z-score table}
 \usage{
-compute_metrics(screenR_Object, treated = NULL, control = NULL)
+compute_metrics(screenR_Object, control, treatment, day)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}.}
+\code{\link{create_screenR_object}}}
 
-\item{treated}{List of Column names corresponding to treatment
-we want to test}
+\item{control}{The control Samples}
 
-\item{control}{List of Column names corresponding to control
-we want to test}
+\item{treatment}{The treatment Samples}
+
+\item{day}{The day of the treatment}
 }
 \value{
-return a tibble  with all the mesures computed
+return a tibble  with all the measure computed
 }
 \description{
-Compute the metrics of the data_table.
-             The metrix computed are:
-             - Log2FC of Treated vs Control.
-             - Z score of the Log2FC.
-             - Robust Z score.
+This function compute the  Z-score tablestarting from
+the screenR object for a given treatment in a given day
 }

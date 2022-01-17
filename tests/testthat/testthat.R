@@ -1,5 +1,34 @@
 library(testthat)
 library(ScreenR)
+
+create_test_object <- function(){
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  obj <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  obj <- normalize_data(obj)
+  obj <- compute_data_table(obj)
+
+  return(obj)
+}
+
 test_that("Creation of the screenR object", {
   library(tibble)
   groups <- factor(c("T0/T48", "T0/T48",
@@ -89,6 +118,27 @@ test_that("Plot number mapped reads", {
 })
 #> Test passed 🎉
 
+
+
+test_that("Plot number mapped reads", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  plot <- plot_mapped_reads(object, NULL) + theme_minimal()
+  plot + theme(legend.position = "bottom", legend.direction = "horizontal",
+               axis.text.x = element_text(angle = 40, hjust = 1)) +
+    ggtitle("Number of Mapped Reads in each sample")
+  expect_equal(class(plot)[2], "ggplot")
+})
+#> Test passed 🎉
 
 test_that("Boxplot mapped reads", {
   library(tibble)
@@ -449,112 +499,195 @@ test_that("ROAST", {
   expect_equal(class(roast_hit)[[1]], "tbl_df")
 })
 
-# test_that("find_common_hit 2", {
-#   library(tibble)
-#   groups <- factor(c("T0/T48", "T0/T48",
-#                      "Treated", "Treated", "Treated",
-#                      "Control", "Control", "Control",
-#                      "Treated", "Treated", "Treated",
-#                      "Control", "Control", "Control"))
-#
-#
-#   palette <- c("#1B9E75", "#1B9E75",
-#                "#D95F02", "#D95F02", "#D95F02",
-#                "#7570B3", "#7570B3", "#7570B3",
-#                "#E7298A", "#E7298A", "#E7298A",
-#                "#66A61E", "#66A61E", "#66A61E")
-#
-#   CountTable_THP1_CONTROL_vs_MET <-
-#     CountTable_THP1_CONTROL_vs_MET %>%
-#     dplyr::filter(Barcode != '*')
-#
-#   object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-#                                   annotation = Table_Annotation,
-#                                   groups = groups,
-#                                   replicates = c(""))
-#   object <- normalize_data(object)
-#   matrix <- model.matrix(~object@groups)
-#   colnames(matrix) <- c("Control", "T0_T48", "Treated")
-#   hit_roast <- find_roast_hit(screenR_Object = object,
-#                               matrix_model = matrix,
-#                               contrast = "Treated")
-#   hit_camera <- find_camera_hit(screenR_Object = object,
-#                                 matrix_model = matrix,
-#                                 contrast = "Treated")
-#
-#   object <- compute_data_table(object)
-#
-#   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
-#   control <- c("Day3_A", "Day3_B", "Day3_C")
-#   table <- compute_metrics(object, treated = treated, control = control)
-#   hit_zscore <- find_zscore_hit(table, number_barcode = 6)
-#
-#   find_common_hit <- find_common_hit(hit_zscore, camera_hit,
-#                                      roast_hit, common_in = 2)
-#
-#   contrast <- limma::makeContrasts(Treated-Control,
-#                                    levels=matrix)
-#   p <- plot_barcode_hit(object, matrix,
-#                         find_common_hit,
-#                         contrast = contrast,
-#                         gene = "ACAA1",
-#                         number_plot_row = 1,
-#                         number_plot_col = 1)
-#   expect_equal(p, NULL)
-# })
+test_that("find_common_hit 2", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
 
 
-#
-# test_that("Plot find_common_hit 3", {
-#   library(tibble)
-#   groups <- factor(c("T0/T48", "T0/T48",
-#                      "Treated", "Treated", "Treated",
-#                      "Control", "Control", "Control",
-#                      "Treated", "Treated", "Treated",
-#                      "Control", "Control", "Control"))
-#
-#
-#   palette <- c("#1B9E75", "#1B9E75",
-#                "#D95F02", "#D95F02", "#D95F02",
-#                "#7570B3", "#7570B3", "#7570B3",
-#                "#E7298A", "#E7298A", "#E7298A",
-#                "#66A61E", "#66A61E", "#66A61E")
-#
-#   CountTable_THP1_CONTROL_vs_MET <-
-#     CountTable_THP1_CONTROL_vs_MET %>%
-#     dplyr::filter(Barcode != '*')
-#
-#   object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
-#                                   annotation = Table_Annotation,
-#                                   groups = groups,
-#                                   replicates = c(""))
-#   object <- normalize_data(object)
-#   matrix <- model.matrix(~object@groups)
-#   colnames(matrix) <- c("Control", "T0_T48", "Treated")
-#   hit_roast <- find_roast_hit(screenR_Object = object,
-#                               matrix_model = matrix,
-#                               contrast = "Treated")
-#   hit_camera <- find_camera_hit(screenR_Object = object,
-#                                 matrix_model = matrix,
-#                                 contrast = "Treated")
-#
-#   object <- compute_data_table(object)
-#
-#   treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
-#   control <- c("Day3_A", "Day3_B", "Day3_C")
-#   table <- compute_metrics(object, treated = treated, control = control)
-#   hit_zscore <- find_zscore_hit(table, number_barcode = 6)
-#
-#   find_common_hit <- find_common_hit(hit_zscore, camera_hit,
-#                                      roast_hit, common_in = 3)
-#
-#   contrast <- limma::makeContrasts(Treated-Control,
-#                                    levels=matrix)
-#   p <- plot_barcode_hit(object, matrix,
-#                         find_common_hit,
-#                         contrast = contrast,
-#                         gene = "ACAA1",
-#                         number_plot_row = 1,
-#                         number_plot_col = 1)
-#   expect_equal(p, NULL)
-# })
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0_T48", "Treated")
+  hit_roast <- find_roast_hit(screenR_Object = object,
+                              matrix_model = matrix,
+                              contrast = "Treated")
+  hit_camera <- find_camera_hit(screenR_Object = object,
+                                matrix_model = matrix,
+                                contrast = "Treated")
+
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore <- find_zscore_hit(table, number_barcode = 6)
+
+  find_common_hit <- find_common_hit(hit_zscore, hit_camera,
+                                     hit_zscore, common_in = 2)
+  expect_equal(class(find_common_hit), "character")
+})
+
+test_that("find_common_hit 3", {
+  library(tibble)
+  groups <- factor(c("T0/T48", "T0/T48",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control",
+                     "Treated", "Treated", "Treated",
+                     "Control", "Control", "Control"))
+
+
+  palette <- c("#1B9E75", "#1B9E75",
+               "#D95F02", "#D95F02", "#D95F02",
+               "#7570B3", "#7570B3", "#7570B3",
+               "#E7298A", "#E7298A", "#E7298A",
+               "#66A61E", "#66A61E", "#66A61E")
+
+  CountTable_THP1_CONTROL_vs_MET <-
+    CountTable_THP1_CONTROL_vs_MET %>%
+    dplyr::filter(Barcode != '*')
+
+  object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+                                  annotation = Table_Annotation,
+                                  groups = groups,
+                                  replicates = c(""))
+  object <- normalize_data(object)
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0_T48", "Treated")
+  hit_roast <- find_roast_hit(screenR_Object = object,
+                              matrix_model = matrix,
+                              contrast = "Treated")
+  hit_camera <- find_camera_hit(screenR_Object = object,
+                                matrix_model = matrix,
+                                contrast = "Treated")
+
+  object <- compute_data_table(object)
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore <- find_zscore_hit(table, number_barcode = 6)
+
+  find_common_hit <- find_common_hit(hit_zscore, hit_camera,
+                                     hit_zscore, common_in = 3)
+  expect_equal(class(find_common_hit), "character")
+})
+
+test_that("Find_Score_hit mean ", {
+  library(tibble)
+  object <- create_test_object()
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
+
+  expect_equal(class(hit_zscore)[[1]], "tbl_df")
+})
+
+
+
+test_that("Find_Score_hit median ", {
+  object <- create_test_object()
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore <- find_zscore_hit(table, number_barcode = 6)
+
+  expect_equal(class(hit_zscore)[[1]], "tbl_df")
+})
+
+test_that("find_robust_zscore_hit median ", {
+  library(tibble)
+  object <- create_test_object()
+
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 6)
+
+  expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
+})
+
+
+test_that("Plot barcode hit ", {
+  library(tibble)
+  object <- create_test_object()
+
+
+  matrix <- model.matrix(~object@groups)
+  colnames(matrix) <- c("Control", "T0_T48", "Treated")
+  treated <- c("Day3_Met_A", "Day3_Met_B", "Day3_Met_C")
+  control <- c("Day3_A", "Day3_B", "Day3_C")
+  table <- compute_metrics(object, treated = treated, control = control)
+  hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 6)
+  hit <- c("ACACB", "ACLY", "ACOX2", "ACSL6")
+  plot_barcode_hit(screenR_Object = object,
+                   matrix_model = matrix,
+                   hit_common = hit, )
+})
+
+
+
+test_that("plot_PC_explained_variance", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <- plot_PC_explained_variance(object, cumulative = F)
+  expect_equal(class(plot)[[1]], "gg")
+})
+
+
+test_that("plot_PC_explained_variance", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <-
+    plot_PC_explained_variance(screenR_Object = object,
+                               cumulative = T)
+  expect_equal(class(plot)[[1]], "gg")
+})
+
+test_that("plot trend hit", {
+  library(tibble)
+  object <- create_test_object()
+
+  plot <-
+    plot_trend(screenR_Object = object,
+               genes = c("SEPT5", "GLS"),
+               group_var = c("T0", "T48","Met"),
+               nrow = 1, ncol = 2)
+
+})
+
+
+test_that("filter_by_slope", {
+  library(tibble)
+  object <- create_test_object()
+
+  object <- filter_by_slope(screenR_Object = object,
+                  genes = c("SEPT5", "GLS"),
+                  group_var_treatment  = c("T0", "T48","Met"),
+                  group_var_control   = c("T0", "T48","Day3", "Day6"),
+                  slope_treatment = 1)
+  expect_equal(class(object)[1], "screenR_object")
+
+})
+

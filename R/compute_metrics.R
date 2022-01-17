@@ -1,16 +1,16 @@
-#' @title Compute metrics
-#' @description Compute the metrics of the data_table.
-#'              The metrix computed are:
-#'              - Log2FC of Treated vs Control.
-#'              - Z score of the Log2FC.
-#'              - Robust Z score.
+#' @title Create the Z-score table
+#' @description This function compute the  Z-score tablestarting from
+#' the screenR object for a given treatment in a given day
 #'
+
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}.
-#' @param treated List of Column names corresponding to treatment
-#'                we want to test
-#' @param control List of Column names corresponding to control
-#'                we want to test
+#'                       \code{\link{create_screenR_object}}
+#'
+#' @param control The control Samples
+#'
+#' @param treatment The treatment Samples
+#'
+#' @param day The day of the treatment
 
 #' @importFrom rlang .data
 #' @importFrom tidyr spread
@@ -18,41 +18,48 @@
 #' @importFrom dplyr mutate
 #' @importFrom stats sd median
 #'
-#' @return return a tibble  with all the mesures computed
+#' @return return a tibble  with all the measure computed
 #' @export
 
-compute_metrics <- function (screenR_Object, treated = NULL, control = NULL){
-  if(is.null(treated) && is.null(control)){
-    # create a vector of index
-    treated <- screenR_Object@groups == 'Treated'
-    control <- screenR_Object@groups == 'Control'
+compute_metrics <- function(screenR_Object, control, treatment, day){
 
-    # select the name of the column that are NOT Barcode
-    names <- colnames(screenR_Object@count_table)[colnames(screenR_Object@count_table)
-                                          != 'Barcode']
+  control <- screenR_Object@data_table %>%
+    filter(.data$Treatment %in% control) %>%
+    pull(.data$Sample) %>%
+    unique() %>%
+    as.character()
 
-    treated <- names[treated]
-    control <- names[control]
-  }
+  treated <- screenR_Object@data_table %>%
+    filter(.data$Treatment %in% treatment) %>%
+    pull(.data$Sample) %>%
+    unique() %>%
+    as.character()
 
-  table <- screenR_Object@data_table[screenR_Object@data_table$Sample %in%
-                               c(treated, control), ]
-  table <-
-    table %>%
-    dplyr::mutate(Treatment = ifelse(.data$Sample %in% treated,
-                              "Treated", "Control")) %>%
-    dplyr::group_by(.data$Treatment, .data$Barcode) %>%
-    dplyr::mutate(Mean = mean(.data$Frequency)) %>%
-    dplyr::summarise(Gene = unique(.data$Gene),
-                     Mean = unique(.data$Mean),.groups = "drop") %>%
-    tidyr::spread(.data$Treatment, .data$Mean) %>%
-    dplyr::filter(.data$Control != 0) %>%
-    dplyr::mutate(Log2FC = log2(.data$Treated/.data$Control + 0.0000001))  %>%
-    dplyr::mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
-    dplyr::mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /
-                                    median(abs(.data$Log2FC - median(.data$Log2FC))))
-  return(table)
+  data_trt <-
+    screenR_Object@data_table %>%
+    filter(.data$Sample %in% c(control, treated)) %>%
+    mutate(Group = as.factor(if_else(condition = .data$Sample %in% treated,
+                                     true = "Treated",
+                                     false = "Control")))
+
+
+
+  data_trt <- data_trt %>%
+    filter(.data$Day %in% day) %>%
+    group_by(.data$Group, .data$Barcode) %>%
+    mutate(Mean = mean(.data$Frequency)) %>%
+    summarise(Barcode = unique(.data$Barcode), Mean = unique(.data$Mean),
+              Gene = unique(.data$Gene), .groups = "drop") %>%
+    spread(.data$Group, .data$Mean) %>%
+    filter(.data$Control > 0) %>%
+    mutate(Log2FC = log2(.data$Treated/.data$Control + 1e-07))  %>%
+    mutate(Zscore = (.data$Log2FC - mean(.data$Log2FC)) / sd(.data$Log2FC))  %>%
+    mutate(ZscoreRobust = 1.4826 * (.data$Log2FC - mean(.data$Log2FC)) /
+             median(abs(.data$Log2FC- median(.data$Log2FC)))) %>%
+    mutate(Day = day, Treatment = treatment) %>%
+
+
+  return(data_trt)
 }
-
 
 

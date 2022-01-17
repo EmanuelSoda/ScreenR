@@ -18,6 +18,8 @@ plot_mapped_reads(
 \item{palette}{A vector of color}
 
 \item{alpha}{The alpha parameter for the opacity of the plot}
+
+\item{legende_position}{Where to positioning the legend of the plot}
 }
 \value{
 return a ggplot object

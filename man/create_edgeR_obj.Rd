@@ -10,9 +10,9 @@ create_edgeR_obj(screenR_Object)
 \item{screenR_Object}{The Object of the package}
 }
 \value{
-The edgeR object \code{link{edgeR}}
+The edgeR object edgeR
 }
 \description{
-Utility function that using the \code{\link{screenR-class}}
+Utility function that using the screenR-class
              object create the corresponding edgeR object
 }

@@ -12,7 +12,7 @@
 #' @return The hit find with the camera method
 #' @export
 #'
-#' @examples
+#'
 
 find_camera_hit <- function(screenR_Object, matrix_model, contrast,
                             number_barcode = 3, thresh = 0.0001,
@@ -57,7 +57,7 @@ find_camera_hit <- function(screenR_Object, matrix_model, contrast,
 #' @return The hit find with the camera method
 #' @export
 #'
-#' @examples
+#'
 
 compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
                            number_barcode = 3, thresh = 0.0001, lfc = 1) {
@@ -100,7 +100,9 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3){
   un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
 
   gene_symbol_list  <- lapply(X = un_genesymbols,
-                              FUN = select_number_barcode, gene_symbols, number_barcode)
+                              FUN = select_number_barcode,
+                              gene_symbols,
+                              number_barcode)
   names(gene_symbol_list) <- un_genesymbols
 
   gene_symbol_list[sapply(gene_symbol_list, is.null)] <- NULL

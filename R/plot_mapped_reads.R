@@ -6,13 +6,15 @@
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of color
 #' @param alpha The alpha parameter for the opacity of the plot
+#' @param legende_position Where to positioning the legend of the plot
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' @importFrom rlang .data
 #' @return return a ggplot object
 #' @export
 
-plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1, legende_position = "none"){
+plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1,
+                              legende_position = "none"){
 
   table <- ScreenR::mapped_reads(screenR_Object)
   if (is.null(palette)) {

@@ -13,8 +13,6 @@
 #' @return The hit found by roast
 #' @export
 
-#'
-#' @examples
 
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
                            nrot = 9999, number_barcode = 3,
@@ -29,9 +27,6 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
                       design = matrix_model,
                       contrast = contrast,
                       nrot = nrot)
-  select <- roast_hit$Direction == "Down" &&
-    roast_hit$PValue < 0.05 &&
-    roast_hit$NGenes > 3
 
   roast_hit <-
     roast_hit %>%
@@ -40,7 +35,7 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     dplyr::mutate(Direction = factor(.data$Direction)) %>%
     dplyr::filter(.data$Direction == direction) %>%
     dplyr::filter(.data$PValue < p_val) %>%
-    dplyr::filter(.data$NGenes  > number_barcode)
+    dplyr::filter(.data$NGenes > number_barcode)
 
 
   return(roast_hit)

@@ -10,8 +10,6 @@ plot_barcode_hit(
   hit_common,
   contrast,
   number_barcode = 3,
-  number_plot_row = 3,
-  number_plot_col = 3,
   gene,
   quantile = c(-0.5, 0.5),
   labels = c("Negative logFC", "Positive logFC")
@@ -25,16 +23,12 @@ linear model analysis}
 
 \item{hit_common}{The vector of the common hit}
 
-\item{contrast}{An object created with \code{\link{limma::makeContrasts}}
+\item{contrast}{An object created with makeContrasts
 function}
 
 \item{number_barcode}{Number of barcode to have under the median}
 
-\item{number_plot_row}{Number of row for the plot}
-
-\item{number_plot_col}{Number of col for the plot}
-
-\item{gene}{gene}
+\item{gene}{un singolo gene}
 
 \item{quantile}{Quantile to diplay on the plot}
 

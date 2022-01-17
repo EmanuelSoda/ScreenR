@@ -45,7 +45,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast,
       dplyr::mutate(common = sum(.data$hit_zscore, .data$hit_camera,
                                  .data$hit_roast)) %>%
       dplyr::filter(.data$common > 1) %>%
-      dplyr::pull(Gene)
+      dplyr::pull(.data$Gene)
   }
   return(hit_common)
 }
