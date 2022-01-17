@@ -100,7 +100,7 @@ plot_PC_explained_variance <- function(screenR_Object,
 
   PC <- compute_explained_variance(screenR_Object)
   # Remove the Standard deviation row
-  PC <- filter(PC, Name != "Standard deviation")
+  PC <- filter(PC, .data$Name != "Standard deviation")
 
   # Get only the numeric columns which corresponds to the PCs
   numeric_col <- colnames(PC[,  unlist(lapply(PC, is.numeric))])
@@ -108,17 +108,18 @@ plot_PC_explained_variance <- function(screenR_Object,
   # Transform the data in a longer format
   PC <- tidyr::pivot_longer(data = PC, cols = all_of(numeric_col),
                             names_to = "name")
-  PC <- dplyr::mutate(PC, name = factor(x = name, levels = unique(name)))
+  PC <- dplyr::mutate(PC, name = factor(x = .data$name,
+                                        levels = unique(.data$name)))
 
   plot <- NULL
   if (cumulative) {
     # Select only the Cumulative Proportion
     PC <- dplyr::filter(PC, Name == "Cumulative Proportion")
 
-    plot <- ggplot2::ggplot(PC, aes(x = name, y = value)) +
-      geom_bar(stat="identity", fill=color, col="black") +
+    plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
+      geom_bar(stat="identity", fill=.data$color, col="black") +
       geom_point() +
-      geom_line(aes(group=Name))  +
+      geom_line(aes(group=.data$Name))  +
       scale_y_continuous(labels = percent) +
       labs(x= NULL, y = "Cumulative Expressed Variance (%)")
 
@@ -126,10 +127,10 @@ plot_PC_explained_variance <- function(screenR_Object,
     # Select only the Proportion of Variance
     PC <- dplyr::filter(PC, Name == "Proportion of Variance")
 
-    plot <- ggplot2::ggplot(PC, aes(x = name, y = value)) +
-      geom_bar(stat="identity", fill=color, col="black") +
+    plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
+      geom_bar(stat="identity", fill=.data$color, col="black") +
       geom_point() +
-      geom_line(aes(group=Name)) +
+      geom_line(aes(group=.data$Name)) +
       labs(x= NULL, y = "Expressed Variance (%)")
   }
 
@@ -139,6 +140,7 @@ plot_PC_explained_variance <- function(screenR_Object,
 #' @title Compute the Explained Variance
 #' @description This function compute the explained variance by each of the
 #'              Principal Components
+#' @importFrom stats  prcomp
 #' @param screenR_Object The Object of the package
 #' @return A data.frame containing all the information of the variance expressed
 #'         by the components

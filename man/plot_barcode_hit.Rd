@@ -40,3 +40,4 @@ A vector containing the common hit
 \description{
 Create a Barcode plot for the Hit
 }
+\concept{plot}

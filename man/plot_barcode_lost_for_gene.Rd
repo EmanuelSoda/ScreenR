@@ -16,3 +16,4 @@ return a tibble containing the number of mapped read for sample
 \description{
 This function plots the number of barcode lost in each sample
 }
+\concept{plot}

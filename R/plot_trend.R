@@ -8,9 +8,10 @@
 #' @param alpha The opacity of the regression line
 #' @param se A boolean to indicate where or not to plot the standard error
 #' @param point_size The dimension of each dot
-#' @param size_line The dimension of the line
+#' @param line_size The dimension of the line
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
+#' @param genes The vector of genes to use
 #' @return The the plot of the
 #' @export
 

@@ -2,7 +2,7 @@
 #' @description This function is used to improve the quality of the hits.
 #'              It computes a regression line in the different samples ad uses
 #'              the slope of this line to see the trend
-#'
+#' @importFrom stats lm
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       create_screenR_object
 #'

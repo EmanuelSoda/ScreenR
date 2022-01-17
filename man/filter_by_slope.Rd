@@ -7,7 +7,8 @@
 filter_by_slope(
   screenR_Object,
   genes,
-  group_var,
+  group_var_treatment,
+  group_var_control,
   slope_control = NULL,
   slope_treatment
 )
@@ -19,11 +20,19 @@ create_screenR_object}
 \item{genes}{The genes for which the slope as to be computed. Those genes are
 the result of the three statistical methods selection}
 
-\item{group_var}{The variable to use as X for the linear model}
+\item{group_var_treatment}{The variable to use as X for the linear model
+for the Treatment}
+
+\item{group_var_control}{The variable to use as X for the linear model
+for the the control}
 
 \item{slope_control}{The control slope}
 
 \item{slope_treatment}{The treatment slope}
+}
+\value{
+The screenR_object with the slope for the treatment and the control
+        for each gene
 }
 \description{
 This function is used to improve the quality of the hits.

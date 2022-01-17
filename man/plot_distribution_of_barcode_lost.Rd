@@ -28,3 +28,4 @@ return a tibble containing the number of mapped read for sample
 The function plot the distribution of the lost barcode in each
              sample
 }
+\concept{plot}

@@ -19,8 +19,8 @@ distribution_mapped_reads(
 
 \item{alpha}{The opacity of the plot.}
 
-\item{type}{The type of plot. THe default is boxplot the other option is density.
-impo}
+\item{type}{The type of plot. THe default is boxplot the other option is
+density.}
 }
 \value{
 return a tibble containing the number of mapped read for sample
@@ -29,3 +29,4 @@ return a tibble containing the number of mapped read for sample
 Create a boxplot to show the distribution of the mapped reads
              in different sample
 }
+\concept{plot}
