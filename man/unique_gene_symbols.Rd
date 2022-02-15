@@ -7,7 +7,7 @@
 unique_gene_symbols(gene_symbols, number_barcode = 3)
 }
 \arguments{
-\item{gene_symbols}{The gene symbool list}
+\item{gene_symbols}{The gene symbols list}
 
 \item{number_barcode}{The number of barcode to select}
 }

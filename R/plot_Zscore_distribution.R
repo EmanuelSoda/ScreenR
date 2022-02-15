@@ -10,10 +10,8 @@
 #' @export
 
 
-plot_Zscore_distribution <- function(time_point_measure,
-                                     alpha = 1){
-  dplyr::bind_rows(time_point_measure) %>%
-    ggplot(aes(x=.data$Log2FC, fill = .data$Day)) +
-    geom_density(alpha = alpha)
+plot_Zscore_distribution <- function(time_point_measure, alpha = 1) {
+    dplyr::bind_rows(time_point_measure) %>%
+        ggplot(aes(x = .data$Log2FC, fill = .data$Day)) + geom_density(alpha = alpha)
 }
 

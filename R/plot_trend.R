@@ -15,34 +15,32 @@
 #' @return The the plot of the
 #' @export
 
-plot_trend <- function(screenR_Object, genes, group_var, alpha = 0.5, se = F,
-                       point_size = 1, line_size = 1, nrow = 1, ncol = 1){
-  data <- screenR_Object@data_table
+plot_trend <- function(screenR_Object, genes, group_var, alpha = 0.5,
+    se = F, point_size = 1, line_size = 1, nrow = 1, ncol = 1) {
+    data <- screenR_Object@data_table
 
-  # Select only the hit gene
-  data <- dplyr::filter(data, .data$Gene %in% genes)
+    # Select only the hit gene
+    data <- dplyr::filter(data, .data$Gene %in% genes)
 
-  # Select only the sample of interest
-  data <- dplyr::filter(data, .data$Treatment %in% group_var)
+    # Select only the sample of interest
+    data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
-  data <- dplyr::group_by(data, .data$Sample)
+    data <- dplyr::group_by(data, .data$Sample)
 
-  # Consider only the gene (which are the mean of the different shRNAs)
-  data <- dplyr::summarise(data, Gene = unique(.data$Gene),
-                           Sample = unique(.data$Sample),
-                           Frequency = mean(.data$Frequency), .groups='drop')
+    # Consider only the gene (which are the mean of the different
+    # shRNAs)
+    data <- dplyr::summarise(data, Gene = unique(.data$Gene), Sample = unique(.data$Sample),
+        Frequency = mean(.data$Frequency), .groups = "drop")
 
-  plot <-
-    ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency)) +
-    ggplot2::geom_point(size = point_size) +
-    ggplot2::geom_smooth(aes(group=.data$Gene), method = "lm", formula = y ~ x,
-                         alpha = alpha, se = se, size = line_size)
+    plot <- ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency)) +
+        ggplot2::geom_point(size = point_size) + ggplot2::geom_smooth(aes(group = .data$Gene),
+        method = "lm", formula = y ~ x, alpha = alpha, se = se, size = line_size)
 
-  if (length(genes) > 1) {
-    plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol)
-  }
+    if (length(genes) > 1) {
+        plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol)
+    }
 
-  return(plot)
+    return(plot)
 }
 
 

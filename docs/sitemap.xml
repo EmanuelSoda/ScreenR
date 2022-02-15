@@ -70,6 +70,9 @@
     <loc>/reference/filter_by_slope.html</loc>
   </url>
   <url>
+    <loc>/reference/filter_by_variance.html</loc>
+  </url>
+  <url>
     <loc>/reference/find_camera_hit.html</loc>
   </url>
   <url>
@@ -113,6 +116,12 @@
   </url>
   <url>
     <loc>/reference/plot_barcode_trend.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_boxplot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_common_hit.html</loc>
   </url>
   <url>
     <loc>/reference/plot_distribution_of_barcode_lost.html</loc>

@@ -13,27 +13,28 @@ LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 7.1.2
 Imports:
-    methods,
-    rlang,
-    tidyr,
-    stringr,
-    limma,
-    patchwork,
-    plotly,
-    strex,
-    scales
+    methods (>= 4.0),
+    rlang (>= 0.4),
+    stringr (>= 1.4),
+    limma (>= 3.46),
+    patchwork (>= 1.1),
+    strex (>= 1.4.2),
+    tibble (>= 3.1.6),
+    scales (>= 1.1.1),
+    ggvenn,
+    purrr (>= 0.3.4),
+    ggplot2 (>= 3.3),
+    forcats
 Suggests: 
-    rmarkdown,
-    knitr,
-    tibble,
+    rmarkdown (>= 2.11),
+    knitr (>= 1.37),
     testthat (>= 3.0.0),
-    covr
+    covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 2.10),
-    ggplot2,
-    magrittr,
-    dplyr,
-    edgeR,
-    purrr
-VignetteBuilder: rmarkdown
+    R (>= 4.0),
+    tidyr (>= 1.2),
+    magrittr (>= 1.0),
+    dplyr (>= 1.0),
+    edgeR (>= 3.32)
+VignetteBuilder: knitr

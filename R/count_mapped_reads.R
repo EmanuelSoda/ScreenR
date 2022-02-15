@@ -11,16 +11,14 @@
 #'
 #' @return return a tibble containing the number of mapped read for sample
 
-count_mapped_reads <- function(screenR_Object){
-  # Get only the numeric column (so the sample)
-  numericColumn <-
-    screenR_Object@count_table %>%
-    dplyr::select_if(is.numeric) %>%
-    colnames()
+count_mapped_reads <- function(screenR_Object) {
+    # Get only the numeric column (so the sample)
+    numericColumn <- screenR_Object@count_table %>%
+        dplyr::select_if(is.numeric) %>%
+        colnames()
 
-  table <- screenR_Object@count_table %>%
-    tidyr::gather("Sample", "Mapped", all_of(numericColumn)) %>%
-    dplyr::mutate(Sample = factor(.data$Sample,
-                                  levels = numericColumn))
-  return(table)
+    table <- screenR_Object@count_table %>%
+        tidyr::gather("Sample", "Mapped", all_of(numericColumn)) %>%
+        dplyr::mutate(Sample = factor(.data$Sample, levels = numericColumn))
+    return(table)
 }

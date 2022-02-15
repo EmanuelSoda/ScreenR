@@ -12,41 +12,32 @@
 #' @export
 #'
 
-plot_barcode_trend <- function(list_data_measure,
-                               genes,
-                               n_col=2,
-                               size_line =1,
-                               color = NULL){
+plot_barcode_trend <- function(list_data_measure, genes, n_col = 2,
+    size_line = 1, color = NULL) {
 
-  data <- bind_rows(list_data_measure) %>%
-    filter(.data$Gene %in% genes) %>%
-    mutate(Day = factor(x = .data$Day, levels = unique(.data$Day)))
-  if (is.null(color)) {
-    gg_l <- map(.x = split(data, f = as.character(data$Gene)),
-                .f =  function(x) {
-                  ggplot(x, aes(x=.data$Day, y=.data$Log2FC,
-                                group=.data$Barcode, col = .data$Barcode)) +
-                    geom_line(size = size_line) +
-                    geom_point() +
-                    theme_light() +
-                    theme(legend.position = "top") +
-                    facet_wrap(facets = "Gene", scales = "free")
-                })
-  } else {
-    gg_l <- map(.x = split(data, f = as.character(data$Gene)),
-                .f =  function(x) {
-                  ggplot(x, aes(x=.data$Day, y=.data$Log2FC,
-                                group=.data$Barcode, col = .data$Barcode)) +
-                    geom_line(size = size_line) +
-                    geom_point() +
-                    theme_light() +
-                    scale_color_manual(values = color) +
-                    theme(legend.position = "top") +
-                    facet_wrap(facets = "Gene", scales = "free")
-                })
+    data <- bind_rows(list_data_measure) %>%
+        filter(.data$Gene %in% genes) %>%
+        mutate(Day = factor(x = .data$Day, levels = unique(.data$Day)))
+    if (is.null(color)) {
+        gg_l <- map(.x = split(data, f = as.character(data$Gene)),
+            .f = function(x) {
+                ggplot(x, aes(x = .data$Day, y = .data$Log2FC, group = .data$Barcode,
+                  col = .data$Barcode)) + geom_line(size = size_line) +
+                  geom_point() + theme_light() + theme(legend.position = "top") +
+                  facet_wrap(facets = "Gene", scales = "free")
+            })
+    } else {
+        gg_l <- map(.x = split(data, f = as.character(data$Gene)),
+            .f = function(x) {
+                ggplot(x, aes(x = .data$Day, y = .data$Log2FC, group = .data$Barcode,
+                  col = .data$Barcode)) + geom_line(size = size_line) +
+                  geom_point() + theme_light() + scale_color_manual(values = color) +
+                  theme(legend.position = "top") + facet_wrap(facets = "Gene",
+                  scales = "free")
+            })
     }
 
 
-  patchwork::wrap_plots(gg_l, ncol = n_col)
+    patchwork::wrap_plots(gg_l, ncol = n_col)
 
 }

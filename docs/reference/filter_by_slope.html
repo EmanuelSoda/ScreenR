@@ -61,7 +61,8 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">filter_by_slope</span><span class="op">(</span>
   <span class="va">screenR_Object</span>,
   <span class="va">genes</span>,
-  <span class="va">group_var</span>,
+  <span class="va">group_var_treatment</span>,
+  <span class="va">group_var_control</span>,
   slope_control <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">slope_treatment</span>
 <span class="op">)</span></code></pre></div>
@@ -75,13 +76,22 @@ create_screenR_object</p></dd>
 <dt>genes</dt>
 <dd><p>The genes for which the slope as to be computed. Those genes are
 the result of the three statistical methods selection</p></dd>
-<dt>group_var</dt>
-<dd><p>The variable to use as X for the linear model</p></dd>
+<dt>group_var_treatment</dt>
+<dd><p>The variable to use as X for the linear model
+for the Treatment</p></dd>
+<dt>group_var_control</dt>
+<dd><p>The variable to use as X for the linear model
+for the the control</p></dd>
 <dt>slope_control</dt>
 <dd><p>The control slope</p></dd>
 <dt>slope_treatment</dt>
 <dd><p>The treatment slope</p></dd>
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    <p>A data frame with the slope for the treatment and the control
+        for each gene</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

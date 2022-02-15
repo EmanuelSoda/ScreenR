@@ -14,25 +14,17 @@
 #' @export
 
 plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1,
-                              legende_position = "none"){
+    legende_position = "none") {
 
-  table <- ScreenR::mapped_reads(screenR_Object)
-  if (is.null(palette)) {
-    plot <-
-      ggplot(table, aes(x = .data$Sample,
-                        y = .data$Mapped,
-                        fill = .data$Sample)) +
-      geom_bar(stat = "identity") +
-      theme(legend.position = legende_position)
-  } else {
-    plot <-
-      ggplot(table, aes(x = .data$Sample,
-                        y = .data$Mapped,
-                        fill = .data$Sample)) +
-      geom_bar(alpha = alpha, stat = "identity") +
-      scale_fill_manual(values=palette) +
-      theme(legend.position = legende_position)
-  }
+    table <- ScreenR::mapped_reads(screenR_Object)
+    if (is.null(palette)) {
+        plot <- ggplot(table, aes(x = .data$Sample, y = .data$Mapped,
+            fill = .data$Sample)) + geom_bar(stat = "identity") + theme(legend.position = legende_position)
+    } else {
+        plot <- ggplot(table, aes(x = .data$Sample, y = .data$Mapped,
+            fill = .data$Sample)) + geom_bar(alpha = alpha, stat = "identity") +
+            scale_fill_manual(values = palette) + theme(legend.position = legende_position)
+    }
 
-  return(plot)
+    return(plot)
 }

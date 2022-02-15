@@ -23,5 +23,5 @@ time}
 A vector containing the common hit
 }
 \description{
-This method find the hit in common between the three metod
+This method find the hit in common between the three methods
 }

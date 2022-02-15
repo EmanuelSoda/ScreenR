@@ -16,11 +16,11 @@
 #' @return return the screenR object with the normalize data
 #' @export
 normalize_data <- function(screenR_Object) {
-  screenR_Object@normalized_count_table <-
-    screenR_Object@count_table %>%
-    # divede each cell for tthe sum of the column and than multiply 1e6
-    purrr::map_if(is.numeric, ~ ./sum(.) * 1e6) %>%
-    dplyr::as_tibble()
+    screenR_Object@normalized_count_table <- screenR_Object@count_table %>%
+        # divede each cell for tthe sum of the column and than
+        # multiply 1e6
+    purrr::map_if(is.numeric, ~./sum(.) * 1e+06) %>%
+        dplyr::as_tibble()
 
-  return(screenR_Object)
+    return(screenR_Object)
 }

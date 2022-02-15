@@ -11,30 +11,30 @@
 #' @export
 
 Barcode_creation_Dataframe <- function(path_file) {
-  dataFrames <- purrr::map(.x = list.files(path = path_file, full.names = T),
-                           .f = ~ read.table(file = .x, header = F, sep = "\t",
-                                             col.names = c("Barcode", "Length", "Mapped",
-                                                           "Unmapped")))
-  # remove the useless one
-  dataFrames <- purrr::map(.x = dataFrames,
-                           .f = ~.x[(names(.x) %in% c("Barcode", "Mapped"))])
+    dataFrames <- purrr::map(.x = list.files(path = path_file, full.names = T),
+        .f = ~read.table(file = .x, header = F, sep = "\t",
+                         col.names = c("Barcode","Length", "Mapped",
+                                       "Unmapped")))
+    # remove the useless one
+    dataFrames <- purrr::map(.x = dataFrames, .f = ~.x[(names(.x) %in%
+        c("Barcode", "Mapped"))])
 
-  Mapped_barcode_all_Samples <- dataFrames %>% purrr::reduce(left_join, by = "Barcode")
+    Mapped_barcode_all_Samples <- dataFrames %>%
+        purrr::reduce(left_join, by = "Barcode")
 
-  name <- basename(list.files(path = path_file, full.names = T))
-  name <- unlist(strsplit(name, ".", fixed = TRUE))
-  name <- name[seq(1, length(name), 3)]
-  name <- strex::str_after_nth(name, "_", 3)
-  name <- strex::str_before_last(name, "_")
-  name <- strex::str_before_last(name, "_")
-  name
-  colnames(Mapped_barcode_all_Samples) <- c("Barcode", name)
+    name <- basename(list.files(path = path_file, full.names = T))
+    name <- unlist(strsplit(name, ".", fixed = TRUE))
+    name <- name[seq(1, length(name), 3)]
+    name <- strex::str_after_nth(name, "_", 3)
+    name <- strex::str_before_last(name, "_")
+    name <- strex::str_before_last(name, "_")
+    name
+    colnames(Mapped_barcode_all_Samples) <- c("Barcode", name)
 
-  Mapped_barcode_all_Samples <-
-    Mapped_barcode_all_Samples %>%
-    tidyr::drop_na() %>%
-    dplyr::filter(.data$Barcode!= "*") %>%
-    tibble()
+    Mapped_barcode_all_Samples <- Mapped_barcode_all_Samples %>%
+        tidyr::drop_na() %>%
+        dplyr::filter(.data$Barcode != "*") %>%
+        tibble()
 
-  return(Mapped_barcode_all_Samples)
+    return(Mapped_barcode_all_Samples)
 }

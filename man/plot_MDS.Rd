@@ -4,16 +4,24 @@
 \alias{plot_MDS}
 \title{PLot the Sample in vector Space}
 \usage{
-plot_MDS(screenR_Object, palette, dimension = 2, groups = NULL)
+plot_MDS(
+  screenR_Object,
+  groups = NULL,
+  alpha = 0.8,
+  size = 2.5,
+  color = "black"
+)
 }
 \arguments{
 \item{screenR_Object}{The Object of the package}
 
-\item{palette}{palette to use to color the groups}
+\item{groups}{The vector to fill the plot}
 
-\item{dimension}{number of plotting dimensions}
+\item{alpha}{The opacity of the labels}
 
-\item{groups}{variable to fill the plot}
+\item{size}{The dimension of the labels}
+
+\item{color}{The color of the labels}
 }
 \value{
 The MDS Plot
@@ -23,5 +31,4 @@ Plot samples on a two or three-dimensional scatterplot so that
              distances on the plot approximate the typical log2 fold
              changes between the samples.
 }
-\concept{plot}
 \keyword{internal}

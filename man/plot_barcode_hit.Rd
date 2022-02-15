@@ -28,9 +28,9 @@ function}
 
 \item{number_barcode}{Number of barcode to have under the median}
 
-\item{gene}{un singolo gene}
+\item{gene}{a single gene}
 
-\item{quantile}{Quantile to diplay on the plot}
+\item{quantile}{Quantile to display on the plot}
 
 \item{labels}{Title of the plot}
 }

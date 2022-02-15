@@ -10,19 +10,19 @@ editor_options:
 ---
 
 # Importing Pacakge
-```{r packages, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 library(ScreenR)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-theme_set(theme_light())
+library(tidyverse)
+ggplot2::theme_set(ggplot2::theme_light())
 ```
 
 # Read Data
 
 We will use as example a Loss of Function Genetic Screening Performed on THP1
 using Metforming at Day3 and Day6. First of all the data are read.
-```{r read data,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 data <-  tidyr::tibble(CountTable_THP1_CONTROL_vs_MET)
 colnames(data) <- 
   c("Barcode", "T0", "T48_postPURO", "Day3_Met_A", "Day3_Met_B",
@@ -38,18 +38,26 @@ data <-
 total_Annotation <-
   Table_Annotation %>% tibble::tibble() %>%
   dplyr::mutate(Barcode = as.factor(.$Barcode))
-
 ```
 
 # Object Creation 
 The ScreenR object is created using the function **create_screenR_object()**
 
-```{r Createe Object,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 groups <- colnames(data)[2:length(colnames(data))]
 groups <- gsub('(.*)_\\w+', '\\1', groups)
 groups <- factor(x = groups, levels = unique(groups))
 groups
+```
 
+```
+##  [1] T0        T48       Day3_Met  Day3_Met  Day3_Met  Day3_DMSO Day3_DMSO
+##  [8] Day3_DMSO Day6_Met  Day6_Met  Day6_Met  Day6_DMSO Day6_DMSO Day6_DMSO
+## Levels: T0 T48 Day3_Met Day3_DMSO Day6_Met Day6_DMSO
+```
+
+```r
 palette <-
   c("#66c2a5", "#fc8d62", rep("#8da0cb", 3), rep("#e78ac3", 3),
     rep("#a6d854", 3), rep("#ffd92f", 3))
@@ -58,31 +66,35 @@ object <- create_screenR_object(table = data,
                                 annotation = total_Annotation,
                                 groups = groups,
                                 replicates = c(""))
-
 ```
 
 
 # Start Analysis
-```{r normalizzation,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 object <- normalize_data(object)
 object <- compute_data_table(object)
 ```
 
 
 ## Mapped Reads
-```{r plot_mapped_reads,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 plot <- plot_mapped_reads(object, palette) + 
-  ggplot2::coord_flip() +
-  ggplot2::scale_y_continuous(labels = scales::number_format()) +
-  ggplot2::theme(legend.position = "none") +
-  ggplot2::ggtitle("Number of Mapped Reads in each sample")
+  coord_flip() +
+  scale_y_continuous(labels = scales::number_format()) +
+  theme(legend.position = "none") +
+  ggtitle("Number of Mapped Reads in each sample")
 
 plot
 ```
 
+![plot of chunk plot_mapped_reads](figure/plot_mapped_reads-1.png)
+
 
 ## Boxplot
-```{r  distribution_mapped_reads boxplot,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 plot <-  distribution_mapped_reads(object, palette,
                                    alpha = 0.8,
                                    type = "boxplot") +
@@ -92,8 +104,11 @@ plot <-  distribution_mapped_reads(object, palette,
 plot 
 ```
 
+![plot of chunk distribution_mapped_reads boxplot](figure/distribution_mapped_reads boxplot-1.png)
+
 ## Boxplot
-```{r  distribution_mapped_reads density,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 plot <- distribution_mapped_reads(object, palette,
                                    alpha = 0.5,
                                    type = "density") +
@@ -102,8 +117,11 @@ plot <- distribution_mapped_reads(object, palette,
 plot
 ```
 
+![plot of chunk distribution_mapped_reads density](figure/distribution_mapped_reads density-1.png)
+
 ## Control Genes
-```{r Control Genes,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 object@data_table %>%
   dplyr::filter(Gene %in% c("RPL30", "PSMA1", "LUC")) %>%
   
@@ -123,9 +141,12 @@ object@data_table %>%
  facet_wrap("Gene", scales = "free")
 ```
 
+![plot of chunk Control Genes](figure/Control Genes-1.png)
+
 
 ## Barcode Lost
-```{r  plot_barcode_lost,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 plot <-  plot_barcode_lost(screenR_Object = object,
                            palette = palette) +
   theme(legend.position = "none",
@@ -133,34 +154,44 @@ plot <-  plot_barcode_lost(screenR_Object = object,
 plot
 ```
 
+![plot of chunk plot_barcode_lost](figure/plot_barcode_lost-1.png)
+
 ## Plot MDS {.tabset}
 
 ### For Sample
-```{r  Plot MDS Sample,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 plot_MDS(screenR_Object = object) 
 ```
 
+![plot of chunk Plot MDS Sample](figure/Plot MDS Sample-1.png)
+
 
 ### For Treatment
-```{r  Plot MDS Treatment,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 GGgroups <- gsub(".*_","", groups)
 
 plot_MDS(screenR_Object = object, 
          groups = factor(x = GGgroups, levels = unique(GGgroups)))
-
-
 ```
 
+![plot of chunk Plot MDS Treatment](figure/Plot MDS Treatment-1.png)
+
 ### For Day
-```{r  Plot MDS Day,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 GGgroups <- sub("_.*", "", groups)
 plot_MDS(screenR_Object = object, 
          groups = factor(x = GGgroups,
                          levels = unique(GGgroups)))
 ```
 
+![plot of chunk Plot MDS Day](figure/Plot MDS Day-1.png)
+
 ## Compute Metrics
-```{r  compute_metrics,fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 # 2DG
 data_with_measure_Met <- list(
   Day3 = compute_metrics(object, control = "DMSO", 
@@ -173,9 +204,12 @@ plot_Zscore_distribution(data_with_measure_Met,
                          alpha = 0.8) 
 ```
 
+![plot of chunk compute_metrics](figure/compute_metrics-1.png)
+
 
 ## Z-score hit
-```{r  Z-score hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 zscore_hit_Met <- list(
   Day3 = find_zscore_hit(table_treate_vs_control = data_with_measure_Met$Day3,
                 number_barcode = 7,
@@ -184,11 +218,46 @@ zscore_hit_Met <- list(
                 number_barcode = 7,
                 metric = "median"))
 zscore_hit_Met
-```   
+```
+
+```
+## $Day3
+## # A tibble: 30 × 2
+##    Gene   numberOfBarcode
+##    <fct>            <int>
+##  1 ASF1A                8
+##  2 BRD3                 8
+##  3 CBX1                 8
+##  4 CBX8                 9
+##  5 CHST13               8
+##  6 EED                  8
+##  7 ENO3                 8
+##  8 FBP2                 8
+##  9 HDAC1                8
+## 10 HERC3                9
+## # … with 20 more rows
+## 
+## $Day6
+## # A tibble: 30 × 2
+##    Gene   numberOfBarcode
+##    <fct>            <int>
+##  1 ACOX2                9
+##  2 BAZ1B                8
+##  3 BAZ2B                8
+##  4 BRD9                 8
+##  5 CHAF1A               8
+##  6 CLOCK                9
+##  7 EP300                8
+##  8 GPT                  8
+##  9 H2AFV                9
+## 10 HECTD3               9
+## # … with 20 more rows
+```
 
 
 ## CAMERA
-```{r  CAMERA, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 groupss <- c(rep("T0/T48",4),as.character(groups[5:length(groups)]))
 
 
@@ -206,8 +275,43 @@ camera_hit_Met <- list(
 camera_hit_Met
 ```
 
+```
+## $Day3
+## # A tibble: 281 × 5
+##    Gene    NGenes Direction PValue   FDR
+##    <chr>    <dbl> <fct>      <dbl> <dbl>
+##  1 INPP5E      10 Down      0.0131 0.522
+##  2 LDHAL6B     10 Down      0.0189 0.674
+##  3 CHD2        10 Down      0.0324 0.906
+##  4 TRIM43B     10 Down      0.0414 0.906
+##  5 TRIM9        9 Down      0.0447 0.906
+##  6 TYMS         9 Down      0.0528 0.906
+##  7 PDHA2       10 Down      0.0584 0.906
+##  8 PRDM4       10 Down      0.0594 0.906
+##  9 HUWE1       10 Down      0.0646 0.906
+## 10 LUC         32 Down      0.0698 0.906
+## # … with 271 more rows
+## 
+## $Day6
+## # A tibble: 269 × 5
+##    Gene    NGenes Direction PValue   FDR
+##    <chr>    <dbl> <fct>      <dbl> <dbl>
+##  1 INPP5E      10 Down      0.0131 0.779
+##  2 LDHAL6B     10 Down      0.0201 0.941
+##  3 CHD2        10 Down      0.0285 0.969
+##  4 PDHA2       10 Down      0.0316 0.969
+##  5 TRIM9        9 Down      0.0355 0.969
+##  6 TYMS         9 Down      0.0370 0.969
+##  7 TRIM62       9 Down      0.0437 0.969
+##  8 TRIM43B     10 Down      0.0491 0.969
+##  9 ME3         10 Down      0.0500 0.969
+## 10 HUWE1       10 Down      0.0584 0.969
+## # … with 259 more rows
+```
+
 ## ROAST
-```{r ROAST, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 roast_hit_Met <- list(
   Day3 = find_roast_hit(screenR_Object = object,
                               matrix_model = matrix_model,
@@ -219,9 +323,44 @@ roast_hit_Met <- list(
 roast_hit_Met
 ```
 
+```
+## $Day3
+## # A tibble: 534 × 9
+##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
+##    <chr>   <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
+##  1 LUC        32        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  2 PSMA1      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  3 RPL30      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  4 SEPT5      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  5 SEPT9      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  6 ACAA1      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  7 ACAA2      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  8 ACACA      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  9 ACACB      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+## 10 ACAD11     10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+## # … with 524 more rows
+## 
+## $Day6
+## # A tibble: 534 × 9
+##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
+##    <chr>   <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
+##  1 LUC        32        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  2 PSMA1      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  3 RPL30      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  4 SEPT5      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  5 SEPT9      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  6 ACAA1      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  7 ACAA2      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  8 ACACA      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##  9 ACACB      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+## 10 ACAD11     10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+## # … with 524 more rows
+```
+
 
 ## Find Common Hit 
-```{r Common Hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE}
+
+```r
 common_hit_Met_at_least_2 <- list(
   Day3 = find_common_hit(zscore_hit_Met$Day3, camera_hit_Met$Day3,
                          roast_hit_Met$Day3, common_in = 2),
@@ -235,19 +374,18 @@ common_hit_Met_at_least_3  <- list(
                          roast_hit_Met$Day6, common_in = 3))
 ```
 
-```{r Venn diagram in at least 2}
+
+```r
 plot_common_hit(hit_zscore = zscore_hit_Met$Day3, 
                 hit_camera = camera_hit_Met$Day3,  roast_hit_Met$Day3)
-
-
-
-
-
-
-
-
+```
 
 ```
+## Warning in sprintf("%d", n, 100 * n/sum(n)): un argomento non usato per il
+## formato '%d'
+```
+
+![plot of chunk Venn diagram in at least 2](figure/Venn diagram in at least 2-1.png)
 
 
 

@@ -3,84 +3,39 @@
 #'              distances on the plot approximate the typical log2 fold
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
-#' @param palette palette to use to color the groups
-#' @param dimension number of plotting dimensions
-#' @param groups variable to fill the plot
+#' @param groups The vector to fill the plot
+#' @param alpha The opacity of the labels
+#' @param size The dimension of the labels
+#' @param color The color of the labels
 #' @return The MDS Plot
-#' @concept  plot
 #' @keywords internal
 #' @export
 
-plot_MDS <- function(screenR_Object, palette, dimension = 2,
-                     groups = NULL){
-  # We have to convert the screenR obj into an edgeR obj
-  DGEList <- create_edgeR_obj(screenR_Object)
+plot_MDS <- function(screenR_Object, groups = NULL,
+                     alpha = 0.8, size = 2.5, color = "black") {
+    # We have to convert the screenR obj into an edgeR obj
+    DGEList <- create_edgeR_obj(screenR_Object)
 
-  # The Standard plotMDS
-  plotMDS <- limma::plotMDS(DGEList, plot = F, ndim	= dimension)
+    # The Standard plotMDS
+    plotMDS <- limma::plotMDS(DGEList, plot = F, ndim = 2)
 
-  # Create the Updated plot MDS
-  PLTdata <- data.frame(plotMDS$cmdscale.out)
-  if(dimension == 2){ # 2D plot
-    colnames(PLTdata) <- c("x", "y")
+    # Create the Updated plot MDS
+    PLTdata <- data.frame(Sample = rownames(plotMDS$distance.matrix.squared),
+                          x = plotMDS$x, y = plotMDS$y)
 
-  if (is.null(groups)) {
-    PLTdata$group <- DGEList$samples$group
+    if (is.null(groups)) {
+            PLTdata$group <- DGEList$samples$group
+     } else {
+            PLTdata$group <- groups
+     }
 
-    plot <- ggplot(PLTdata, aes(x=.data$x, y=.data$y, fill = .data$group)) +
-      geom_label(aes(label = rownames(PLTdata)),
-                 color = 'black', size = 2.5, alpha = 0.8,
-                 check_overlap = TRUE) +
-      scale_fill_manual(values = unique(palette)) +
-      xlab("First Dimension") +
-      ylab("Second Dimension") +
-      theme_minimal()
-  } else {
-    PLTdata$group <- groups
+    plot <- ggplot2::ggplot(PLTdata, aes(x = .data$x, y = .data$y,
+                                         fill = .data$group)) +
+        ggplot2::geom_label(aes(label = .data$Sample), color = color,
+                       size = size, alpha = alpha, check_overlap = TRUE) +
+        ggplot2::labs(x = "First Dimension", y = "Second Dimension")
 
-    plot <- ggplot(PLTdata, aes(x=.data$x, y=.data$y, fill = .data$group)) +
-      geom_label(aes(label = rownames(PLTdata)),
-                 color = 'black', size = 2.5, alpha = 0.8,
-                 check_overlap = TRUE) +
-      scale_fill_manual(values = unique(palette)) +
-      xlab("First Dimension") +
-      ylab("Second Dimension") +
-      theme_minimal()
-  }
-
-
-  } else if (dimension == 3){ # 3D plot
-      colnames(PLTdata) <- c("x", "y", "z")
-      if (is.null(groups)) {
-        PLTdata$group <- DGEList$samples$group
-        PLTdata$names <- row.names(DGEList$samples)
-
-        plot <- plotly::plot_ly(PLTdata,
-                                x = ~x,
-                                y = ~y,
-                                z = ~z,
-                                text = ~names,
-                                color = ~group,
-                                colors = ~palette,
-                                alpha= 0.9,
-                                size = 100)
-      } else{
-        PLTdata$group <- groups
-        PLTdata$names <- row.names(DGEList$samples)
-
-        plot <- plotly::plot_ly(PLTdata,
-                                x = ~x,
-                                y = ~y,
-                                z = ~z,
-                                text = ~names,
-                                color = ~group,
-                                colors = ~palette,
-                                alpha= 0.9,
-                                size = 100)
-      }
-  }
-
-  return(plot)
+    return(plot)
 }
 
 #' @title PLot the explained variance by the PC
@@ -94,47 +49,48 @@ plot_MDS <- function(screenR_Object, palette, dimension = 2,
 #' @return The explained variance  plot
 #' @export
 
-plot_PC_explained_variance <- function(screenR_Object,
-                                       cumulative = F,
-                                       color = "steelblue"){
+plot_PC_explained_variance <- function(screenR_Object, cumulative = F,
+    color = "steelblue") {
 
-  PC <- compute_explained_variance(screenR_Object)
-  # Remove the Standard deviation row
-  PC <- filter(PC, .data$Name != "Standard deviation")
+    PC <- compute_explained_variance(screenR_Object)
+    # Remove the Standard deviation row
+    PC <- filter(PC, .data$Name != "Standard deviation")
 
-  # Get only the numeric columns which corresponds to the PCs
-  numeric_col <- colnames(PC[,  unlist(lapply(PC, is.numeric))])
+    # Get only the numeric columns which corresponds to the PCs
+    numeric_col <- colnames(PC[, unlist(lapply(PC, is.numeric))])
 
-  # Transform the data in a longer format
-  PC <- tidyr::pivot_longer(data = PC, cols = all_of(numeric_col),
-                            names_to = "name")
-  PC <- dplyr::mutate(PC, name = factor(x = .data$name,
-                                        levels = unique(.data$name)))
+    # Transform the data in a longer format
+    PC <- tidyr::pivot_longer(data = PC, cols = all_of(numeric_col),
+        names_to = "name")
+    PC <- dplyr::mutate(PC, name = factor(x = .data$name,
+                                          levels = unique(.data$name)))
+    plot <- NULL
 
-  plot <- NULL
-  if (cumulative) {
-    # Select only the Cumulative Proportion
-    PC <- dplyr::filter(PC, Name == "Cumulative Proportion")
 
-    plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
-      geom_bar(stat="identity", fill=.data$color, col="black") +
-      geom_point() +
-      geom_line(aes(group=.data$Name))  +
-      scale_y_continuous(labels = percent) +
-      labs(x= NULL, y = "Cumulative Expressed Variance (%)")
+    if (cumulative) {
+        # Select only the Cumulative Proportion
+        PC <- dplyr::filter(PC, .data$Name == "Cumulative Proportion")
 
-  } else {
-    # Select only the Proportion of Variance
-    PC <- dplyr::filter(PC, Name == "Proportion of Variance")
+        plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
+            geom_bar(stat = "identity", fill = color, col = "black") +
+            geom_point() +
+            geom_line(aes(group = .data$Name)) +
+            scale_y_continuous(labels = percent) +
+            labs(x = NULL, y = "Cumulative Expressed Variance (%)")
 
-    plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
-      geom_bar(stat="identity", fill=.data$color, col="black") +
-      geom_point() +
-      geom_line(aes(group=.data$Name)) +
-      labs(x= NULL, y = "Expressed Variance (%)")
-  }
+    } else {
+        # Select only the Proportion of Variance
+        PC <- dplyr::filter(PC, .data$Name == "Proportion of Variance")
 
-  return(plot)
+        plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
+            geom_bar(stat = "identity", fill = color, col = "black") +
+            geom_point() +
+            geom_line(aes(group = .data$Name)) +
+            scale_y_continuous(labels = percent) +
+            labs(x = NULL, y = "Expressed Variance (%)")
+    }
+
+    return(plot)
 }
 
 #' @title Compute the Explained Variance
@@ -147,31 +103,32 @@ plot_PC_explained_variance <- function(screenR_Object,
 #' @keywords internal
 #' @export
 
-compute_explained_variance <- function(screenR_Object){
-  data <- screenR_Object@count_table
-  # Get only the numeric columns
-  numeric_col <- unlist(lapply(data, is.numeric))
+compute_explained_variance <- function(screenR_Object) {
+    data <- screenR_Object@count_table
+    # Get only the numeric columns
+    numeric_col <- unlist(lapply(data, is.numeric))
 
-  # The data for the PC corresponds only on the numeric column
-  data_PC <- data[, numeric_col]
+    # The data for the PC corresponds only on the numeric column
+    data_PC <- data[, numeric_col]
 
-  # To compute the PC the features has to be columns
-  data_PC <- t(data_PC)
+    # To compute the PC the features has to be columns
+    data_PC <- t(data_PC)
 
-  #  Rename the columns
-  colnames(data_PC) <- data$Barcode
+    # Rename the columns
+    colnames(data_PC) <- data$Barcode
 
-  # Computing the PCS
-  PC <- prcomp(data_PC)
+    # Computing the PCS
+    PC <- prcomp(data_PC)
 
-  # Extract the importance ad create a data.frame
-  PC <- data.frame(summary(PC)$importance)
+    # Extract the importance ad create a data.frame
+    PC <- data.frame(summary(PC)$importance)
 
-  PC <- tibble::rownames_to_column(PC, var = "Name")
+    PC <- tibble::rownames_to_column(PC, var = "Name")
 
-  PC <- dplyr::mutate(PC, Name = factor(x = Name, levels = unique(Name)))
+    PC <- dplyr::mutate(PC, Name = factor(x = .data$Name,
+                                          levels = unique(.data$Name)))
 
-  return(PC)
+    return(PC)
 
-  }
+}
 

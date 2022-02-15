@@ -14,14 +14,14 @@
 #' @return return a tibble containing the number of barcode lost for sample
 #' @export
 
-barcode_lost <- function(screenR_Object){
-  table <- count_mapped_reads(screenR_Object)
-  table <- table %>%
-    dplyr::group_by(.data$Sample) %>%
-    dplyr::filter(.data$Mapped == 0) %>%
-    dplyr::summarise(LostBarcode = n())
+barcode_lost <- function(screenR_Object) {
+    table <- count_mapped_reads(screenR_Object)
+    table <- table %>%
+        dplyr::group_by(.data$Sample) %>%
+        dplyr::filter(.data$Mapped == 0) %>%
+        dplyr::summarise(LostBarcode = n())
 
-  return(table)
+    return(table)
 }
 
 #' @title Plot number of barcode lost
@@ -36,27 +36,24 @@ barcode_lost <- function(screenR_Object){
 #' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
-plot_barcode_lost <- function(screenR_Object, palette = NULL,
-                                        alpha = 1, legende_position = "none"){
-  table <- barcode_lost(screenR_Object)
+plot_barcode_lost <- function(screenR_Object, palette = NULL, alpha = 1,
+    legende_position = "none") {
+    table <- barcode_lost(screenR_Object)
 
-  plot <-
-    ggplot(table, aes(x = .data$Sample,
-                      y = .data$LostBarcode,
-                      fill = .data$Sample)) +
-    geom_bar(stat = "identity", color = "black") +
-    theme(legend.position = legende_position) +
-    geom_bar(alpha = alpha, stat = "identity", color = "black") +
-    geom_text(aes(label=.data$LostBarcode),
-              position= position_stack(vjust = 0.8),
-              color = "black", size = 5) +
-    theme_minimal()
+    plot <- ggplot(table, aes(x = .data$Sample, y = .data$LostBarcode,
+        fill = .data$Sample)) +
+        geom_bar(stat = "identity", color = "black") +
+        theme(legend.position = legende_position) +
+        geom_bar(alpha = alpha,
+        stat = "identity", color = "black") +
+        geom_text(aes(label = .data$LostBarcode),
+        position = position_stack(vjust = 0.8), color = "black", size = 5)
 
-  if(!is.null(palette)){
-    plot <- plot + scale_fill_manual(values=palette)
+    if (!is.null(palette)) {
+        plot <- plot + scale_fill_manual(values = palette)
 
-  }
-  return(plot)
+    }
+    return(plot)
 }
 
 #' @title Plot number of barcode lost for gene
@@ -68,30 +65,28 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
-plot_barcode_lost_for_gene <- function(screenR_Object){
-  numericColumn <-
-    screenR_Object@count_table %>%
-    dplyr::select_if(is.numeric) %>%
-    colnames()
+plot_barcode_lost_for_gene <- function(screenR_Object) {
+    numericColumn <- screenR_Object@count_table %>%
+        dplyr::select_if(is.numeric) %>%
+        colnames()
 
-  table <- screenR_Object@count_table %>%
-    tidyr::gather(.data$Sample, .data$Mapped, all_of(numericColumn)) %>%
-    dplyr::mutate(Sample = factor(.data$Sample,
-                                  levels = numericColumn))
+    table <- screenR_Object@count_table %>%
+        tidyr::gather(.data$Sample, .data$Mapped, all_of(numericColumn)) %>%
+        dplyr::mutate(Sample = factor(.data$Sample, levels = numericColumn))
 
-  table %>%
-    dplyr::left_join(screenR_Object@annotation_table, by = .data$Barcode) %>%
-    dplyr::group_by(.data$Sample, .data$Gene) %>%
-    dplyr::mutate(barcode_lost = .data$Mapped == 0) %>%
-    dplyr::summarise(Sample = unique(.data$Sample), barcode_lost = sum(.data$barcode_lost)) %>%
-    dplyr::filter(.data$barcode_lost != 0) %>%
-    tidyr::drop_na() %>%
-    ggplot(aes(.data$Gene, .data$barcode_lost, fill = .data$Sample)) +
-    geom_bar(stat="identity", position=position_dodge())
-    theme(axis.ticks = element_line(size = 0.3),
-          legend.position = "none", legend.direction = "horizontal",
-          axis.text.x = element_text(angle = 40, hjust = 1)) +
-    facet_grid(rows = vars(.data$Sample))
+    table %>%
+        dplyr::left_join(screenR_Object@annotation_table, by = .data$Barcode) %>%
+        dplyr::group_by(.data$Sample, .data$Gene) %>%
+        dplyr::mutate(barcode_lost = .data$Mapped == 0) %>%
+        dplyr::summarise(Sample = unique(.data$Sample),
+                         barcode_lost = sum(.data$barcode_lost)) %>%
+        dplyr::filter(.data$barcode_lost != 0) %>%
+        tidyr::drop_na() %>%
+        ggplot(aes(.data$Gene, .data$barcode_lost, fill = .data$Sample)) +
+        geom_bar(stat = "identity", position = position_dodge())
+    theme(axis.ticks = element_line(size = 0.3), legend.position = "none",
+        legend.direction = "horizontal", axis.text.x = element_text(angle = 40,
+            hjust = 1)) + facet_grid(rows = vars(.data$Sample))
 }
 
 
@@ -110,25 +105,31 @@ plot_barcode_lost_for_gene <- function(screenR_Object){
 #' @export
 
 plot_distribution_of_barcode_lost <- function(screenR_Object, palette = NULL,
-                                              alpha = 1, type = "boxplot"){
-  table <- barcode_lost(screenR_Object)
-  table <- table %>%
+                                              alpha = 1, type = "boxplot") {
+    table <- barcode_lost(screenR_Object)
 
-  if(type == "boxplot")
-    plot <-
-      ggplot(data = table,
-             aes(x=.data$Sample, y=.data$LostBarcode, fill=.data$Sample)) +
-      geom_boxplot(alpha=alpha)
+    if (toupper(type) == toupper("boxplot")) {
+        plot <- ggplot(data = table, aes(x = .data$Sample,
+                                         y = .data$LostBarcode,
+                                         fill = .data$Sample)) +
+            geom_boxplot(alpha = alpha)
 
-  else if(type == "density")
-    plot <- ggplot(data = table,
-                   aes(x=.data$LostBarcode , fill=.data$Sample)) +
-      geom_density(alpha=alpha)
+    } else if (toupper(type) == toupper("density")) {
+        plot <- ggplot(data = table, aes(x = .data$LostBarcode,
+                                         fill = .data$Sample)) +
+            geom_density(alpha = alpha)
+    } else {
+            warning(paste(paste("You have selected:\n", type, sep = ""),
+                          "Please select the right type", sep = "\n"))
+        }
 
-  if (!is.null(palette))
-    plot <- plot + scale_fill_manual(values=palette)
+    if (!is.null(palette)) {
+        plot <- plot + scale_fill_manual(values = palette)
+    }  else {
+        warning("The palette is null")
+    }
 
-  return(plot)
+    return(plot)
 }
 
 

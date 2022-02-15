@@ -26,17 +26,17 @@ compute_camera(
 linear model analysis}
 
 \item{contrast}{A vector or a single value indicating the index or the name
-of the column the model_matrix wo which perform the analysis}
+of the column of model_matrix to which perform the analysis}
 
-\item{number_barcode}{Number of barcode to use}
+\item{number_barcode}{Number of barcode to be considered a hit}
 
-\item{thresh}{The threshold}
+\item{thresh}{The threshold used to select the hits}
 
-\item{lfc}{The Log2FC}
+\item{lfc}{The Log2FC threshold}
 }
 \value{
-The hit find with the camera method
+The list of hits found by the camera method
 }
 \description{
-Compute the actual hit using camera
+Compute the actual hits using camera
 }
