@@ -3,7 +3,7 @@
 \docType{data}
 \name{CountTable_THP1_CONTROL_vs_MET}
 \alias{CountTable_THP1_CONTROL_vs_MET}
-\title{Table od the count table}
+\title{Table of the count table}
 \format{
 A data frame with 53940 rows and 10 variables:
 \describe{
@@ -12,39 +12,47 @@ A data frame with 53940 rows and 10 variables:
  \item{T0}{It contais the counts at time zero}
   \item{T48_postPURO}{It contains the counts after
         \href{https://en.wikipedia.org/wiki/Puromycin}{Puromycin} }
-  \item{Day3_A}{It contains the counts for the first replicate  of the control
-                at 3 days}
-  \item{Day3_B}{It contains the counts for the second replicate of the control
-                at 3 days}
-  \item{Day3_C}{It contains the counts for the third replicate of the control
-                at 3 days}
+  \item{Day3_A}{It contains the counts for the first replicate
+                of the control at 3 days}
+
+  \item{Day3_B}{It contains the counts for the second replicate of the
+                control at 3 days}
+
+  \item{Day3_C}{It contains the counts for the third replicate of the
+                control at 3 days}
+
   \item{Day3_Met_A}{It contains the counts for the first replicate of the
                     treatment at 3 days}
+
   \item{Day3_Met_B}{It contains the counts for second first replicate of the
                     treatment at 3 days}
+
   \item{Day3_Met_C}{It contains the counts for third first replicate of the
                    treatment at 3 days}
 
-  \item{Day6_A}{It contains the counts for the first replicate  of the control
-                at 6 days}
-  \item{Day6_B}{It contains the counts for the second replicate of the control
-                at 6 days}
-  \item{Day6_C}{It contains the counts for the third replicate of the control
-                at 6 days}
+  \item{Day6_A}{It contains the counts for the first replicate  of the
+                control at 6 days}
+
+  \item{Day6_B}{It contains the counts for the second replicate of the
+                control at 6 days}
+
+  \item{Day6_C}{It contains the counts for the third replicate of the
+                control at 6 days}
+
   \item{Day6_Met_A}{It contains the counts for the first replicate of the
                     treatment at 6 days}
+
   \item{Day6_Met_B}{It contains the counts for second first replicate of the
                     treatment at 6 days}
+
   \item{Day6_Met_C}{It contains the counts for third first replicate of the
                    treatment at 6 days}
-
 }
 }
 \usage{
-CountTable_THP1_CONTROL_vs_MET
+data(CountTable_THP1_CONTROL_vs_MET)
 }
 \description{
-A dataset containing the prices and other attributes of almost 54,000
-diamonds.
+Table of the count table
 }
 \keyword{datasets}

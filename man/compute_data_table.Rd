@@ -16,8 +16,8 @@ screenR_Object
 Initial function to create the Screen Object.
 }
 \examples{
-\dontrun{
-compute_data_table(object)
-}
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+compute_data_table(obj)
 
 }

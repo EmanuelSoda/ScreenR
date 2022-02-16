@@ -39,3 +39,11 @@ This function is used to improve the quality of the hits.
              It computes a regression line in the different samples ad uses
              the slope of this line to see the trend
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+filter_by_slope(screenR_Object = obj, genes = c("SEPT5", "GLS"),
+                group_var_treatment = c("T0", "T48", "Met"),
+                group_var_control = c("T0", "T48", "Day3", "Day6"),
+                slope_control = 0.5, slope_treatment = 1)
+}

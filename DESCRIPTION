@@ -4,12 +4,16 @@ Title: Package to Perform High Throughput Biological Screening
 Version: 0.1.0
 Authors@R: person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com")
-Maintainer: Emanuel Michele Soda <emanuelsoda@gmail.com>
 Description: The aim of ScreenR is to help in the analysis of 
-             High Throughput Biological Screening using pooled shRNAs.
+             High Throughput Biological Screening using pooled shRNAs. Those
+             type of screening uses RNA-seq expression data to find candidate 
+             hits. ScreenR tries to combine together the power of software like
+             edgeR with the semplicity of package like the metapackage 
+             Tydiverse. Using ScreenR a pipeline able to find candidate hits can 
+             be applied oon RNA-seq data moreover it integrates a wide range 
+             of visualization in order to shows the results obtained.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 7.1.2
 Imports:
@@ -24,7 +28,8 @@ Imports:
     ggvenn,
     purrr (>= 0.3.4),
     ggplot2 (>= 3.3),
-    forcats
+    stats,
+    tidyselect
 Suggests: 
     rmarkdown (>= 2.11),
     knitr (>= 1.37),
@@ -32,9 +37,11 @@ Suggests:
     covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.0),
+    R (>= 4.1),
     tidyr (>= 1.2),
     magrittr (>= 1.0),
     dplyr (>= 1.0),
     edgeR (>= 3.32)
 VignetteBuilder: knitr
+biocViews: Software, AssayDomain, GeneExpression
+LazyData: true

@@ -17,3 +17,7 @@ return a tibble containing the number of mapped read for sample
 This function perform plot the number of reads mapped for each
              sample.
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+mapped_reads(obj)
+}

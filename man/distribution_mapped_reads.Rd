@@ -29,4 +29,13 @@ return a tibble containing the number of mapped read for sample
 Create a boxplot to show the distribution of the mapped reads
              in different sample
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+distribution_mapped_reads(obj)
+
+distribution_mapped_reads(obj, type = "density")
+
+distribution_mapped_reads(obj, type = "density", alpha = 0.5)
+}
 \concept{plot}

@@ -10,11 +10,16 @@ compute_explained_variance(screenR_Object)
 \item{screenR_Object}{The Object of the package}
 }
 \value{
-A data.frame containing all the information of the variance expressed
-        by the components
+A data.frame containing all the information of the variance
+        expressed by the components
 }
 \description{
 This function compute the explained variance by each of the
              Principal Components
+}
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+compute_explained_variance(obj)
 }
 \keyword{internal}

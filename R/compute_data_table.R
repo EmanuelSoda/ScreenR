@@ -8,16 +8,18 @@
 #' @importFrom rlang .data
 #' @importFrom stringr str_split_fixed
 #' @examples
-#' \dontrun{
-#' compute_data_table(object)
-#' }
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#'
+#' compute_data_table(obj)
+
 #'
 compute_data_table <- function(screenR_Object) {
-    # First the table is created with the join of the annotation
-    # and the count table
+    # First the table is created with the join of the annotation and the count
+    # table
     data <- screenR_Object@normalized_count_table
     table <- data %>%
-        tidyr::gather("Sample", "Frequency", colnames(data)[2]:last(colnames(data))) %>%
+        tidyr::pivot_longer(!.data$Barcode, names_to = "Sample",
+                            values_to = "Frequency") %>%
         dplyr::mutate(Barcode = as.factor(.data$Barcode)) %>%
         dplyr::left_join(screenR_Object@annotation_table, by = "Barcode") %>%
         select(.data$Barcode, .data$Gene, .data$Sample, .data$Frequency,

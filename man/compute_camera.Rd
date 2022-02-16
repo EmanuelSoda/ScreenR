@@ -40,3 +40,4 @@ The list of hits found by the camera method
 \description{
 Compute the actual hits using camera
 }
+\keyword{internal}

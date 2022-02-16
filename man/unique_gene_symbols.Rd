@@ -17,3 +17,4 @@ A list of unique gene symbols
 \description{
 Compute a unique gene symbol for gene
 }
+\keyword{internal}

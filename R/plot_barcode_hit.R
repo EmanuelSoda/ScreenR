@@ -3,22 +3,30 @@
 #' @param screenR_Object The Object of the package
 #' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
-#' @param hit_common The vector of the common hit
+
 #' @param contrast An object created with makeContrasts
 #'                 function
 #' @param number_barcode Number of barcode to have under the median
 #' @param quantile Quantile to display on the plot
 #' @param labels Title of the plot
-#' @param gene a single gene
+#' @param gene a single gene to plot
 #' @concept  plot
 #' @return A vector containing the common hit
 #' @export
-plot_barcode_hit <- function(screenR_Object, matrix_model, hit_common,
+#' @examples
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' matrix_model <- model.matrix(~slot(obj, "groups"))
+#' colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+#' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+#'
+#' plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = "ACACB")
+plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene, quantile = c(-0.5, 0.5),
-    labels = c("Negative logFC","Positive logFC")) {
+    labels = c("Negative logFC", "Positive logFC")) {
 
     DGEList <- create_edgeR_obj(screenR_Object)
-    xglm <- edgeR::estimateDisp(DGEList, coef = 1:length(colnames(matrix_model)))
+    xglm <- edgeR::estimateDisp(DGEList, coef = seq(1,
+        length(colnames(matrix_model)), 1))
     fit <- edgeR::glmFit(xglm, matrix_model)
 
     lrt <- edgeR::glmLRT(fit, contrast = contrast)
@@ -35,11 +43,9 @@ plot_barcode_hit <- function(screenR_Object, matrix_model, hit_common,
     }
 
 
-    limma::barcodeplot(lrt$table$logFC, index = genesymbollist[[gene]],
+    plot <- limma::barcodeplot(lrt$table$logFC, index = genesymbollist[[gene]],
         main = paste("Barcode plot for Gene", gene), labels = labels,
         quantile = quantile)
 
+    return(plot)
 }
-
-
-

@@ -13,15 +13,26 @@
 #'
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
+#'
+#' @examples
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#'
+#' distribution_mapped_reads(obj)
+#'
+#' distribution_mapped_reads(obj, type = "density")
+#'
+#' distribution_mapped_reads(obj, type = "density", alpha = 0.5)
 
-distribution_mapped_reads <- function(screenR_Object, palette = NULL,
-    alpha = 1, type = "boxplot") {
+distribution_mapped_reads <- function(screenR_Object,
+    palette = NULL, alpha = 1, type = "boxplot") {
     table <- count_mapped_reads(screenR_Object)
+
     if (type == "boxplot")
-        plot <- ggplot(data = table, aes(x = .data$Sample, y = .data$Mapped,
-            fill = .data$Sample)) + geom_boxplot(alpha = alpha) else if (type == "density") {
-        plot <- ggplot(data = table, aes(x = .data$Mapped, fill = .data$Sample)) +
-            geom_density(alpha = alpha)
+        plot <- ggplot(data = table, aes(x = .data$Sample,
+            y = .data$Mapped, fill = .data$Sample)) +
+            geom_boxplot(alpha = alpha) else if (type == "density") {
+        plot <- ggplot(data = table, aes(x = .data$Mapped,
+            fill = .data$Sample)) + geom_density(alpha = alpha)
     }
 
     if (!is.null(palette)) {

@@ -18,31 +18,40 @@
 #' @return A data frame with the slope for the treatment and the control
 #'         for each gene
 #' @export
+#' @examples
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#'
+#' filter_by_slope(screenR_Object = obj, genes = c("SEPT5", "GLS"),
+#'                 group_var_treatment = c("T0", "T48", "Met"),
+#'                 group_var_control = c("T0", "T48", "Day3", "Day6"),
+#'                 slope_control = 0.5, slope_treatment = 1)
 
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
-                            group_var_control, slope_control = NULL, slope_treatment) {
+    group_var_control, slope_control = NULL, slope_treatment) {
 
-  # Compute the slope of the hits in the treatment Samples
-  slope_treatment <- compute_slope(screenR_Object, genes, group_var_treatment)
+    # Compute the slope of the hits in the treatment Samples
+    slope_treatment <- compute_slope(screenR_Object, genes,
+                                     group_var =  group_var_treatment)
 
-  # Compute the slope of the hits in the control Samples
-  slope_DMSO <- compute_slope(screenR_Object, genes, group_var_control)
+    # Compute the slope of the hits in the control Samples
+    slope_DMSO <- compute_slope(screenR_Object, genes,
+                                group_var = group_var_control)
 
-  data <- screenR_Object@data_table
+    data <- screenR_Object@data_table
 
-  data <- dplyr::left_join(data, slope_treatment, by = "Gene")
-  data <- dplyr::rename(data, slope_treatment = .data$Slope)
+    data <- dplyr::left_join(data, slope_treatment, by = "Gene")
+    data <- dplyr::rename(data, slope_treatment = .data$Slope)
 
-  data <- dplyr::left_join(data, slope_DMSO, by = "Gene")
-  data <- dplyr::rename(data, slope_control = .data$Slope)
+    data <- dplyr::left_join(data, slope_DMSO, by = "Gene")
+    data <- dplyr::rename(data, slope_control = .data$Slope)
 
-  if (!is.null(slope_control)) {
-    data <- dplyr::filter(data, .data$slope_control <= slope_control)
-  }
+    if (!is.null(slope_control)) {
+        data <- dplyr::filter(data, .data$slope_control <= slope_control)
+    }
 
-  data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
+    data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
 
-  return(data)
+    return(data)
 }
 
 #' @title Compute Slope for Gene
@@ -57,23 +66,29 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @param group_var The variable to use as X for the linear model
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
+#' @examples
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#'
+#' compute_slope(obj, genes = c("SEPT5", "GLS"),
+#'               group_var = c("T0", "T48", "Met"))
+#'
 
 compute_slope <- function(screenR_Object, genes, group_var) {
-  data <- screenR_Object@data_table
-  data <- dplyr::filter(data, .data$Gene %in% genes)
-  data <- dplyr::filter(data, .data$Treatment %in% group_var)
+    data <- screenR_Object@data_table
+    data <- dplyr::filter(data, .data$Gene %in% genes)
+    data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
-  # in order to perform the linear regression as samples are a
-  # time series the ordered Sample are encoded as number
-  data <- dplyr::group_by(data, .data$Gene)
-  data <- dplyr::mutate(data, encode = 1:n())
-  data <- dplyr::ungroup(data)
+    # in order to perform the linear regression as samples are a time series
+    # the ordered Sample are encoded as number
+    data <- dplyr::group_by(data, .data$Gene)
+    data <- dplyr::mutate(data, encode = seq(1, n(), 1))
+    data <- dplyr::ungroup(data)
 
-  data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
-                        Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"])
-  slope_tibble <- select(data, .data$Gene, .data$Slope)
+    data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
+        Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"])
+    slope_tibble <- select(data, .data$Gene, .data$Slope)
 
-  return(slope_tibble)
+    return(slope_tibble)
 }
 
 
@@ -94,40 +109,42 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #' @return A data frame with the variance for the treatment and the control
 #'         for each gene
 #' @export
+#' @examples
+#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' matrix_model <- model.matrix(~slot(obj, "groups"))
+#' colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+#' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+#'
+#' data <- filter_by_variance(screenR_Object = obj, genes = c("SEPT5"),
+#'                            matrix_model = matrix_model, contrast = contrast)
 
-filter_by_variance <- function(screenR_Object,
-                               genes,
-                               matrix_model,
-                               variance = 0.5,
-                               contrast) {
+filter_by_variance <- function(screenR_Object, genes, matrix_model,
+    variance = 0.5, contrast) {
 
 
-  # Save the data_table in a temporary variable
-  data <- screenR_Object@data_table
+    # Save the data_table in a temporary variable
+    data <- screenR_Object@data_table
 
-  # Create the edgeR object and computing the LogFC
-  DGEList <- create_edgeR_obj(screenR_Object)
-  xglm <- edgeR::estimateDisp(DGEList, matrix_model)
-  fit <- edgeR::glmFit(xglm, matrix_model)
-  lrt <- edgeR::glmLRT(fit, contrast = contrast)
+    # Create the edgeR object and computing the LogFC
+    DGEList <- create_edgeR_obj(screenR_Object)
+    xglm <- edgeR::estimateDisp(DGEList, matrix_model)
+    fit <- edgeR::glmFit(xglm, matrix_model)
+    lrt <- edgeR::glmLRT(fit, contrast = contrast)
 
-  lrt <- data.frame(lrt$table)
-  lrt$Gene <- fit$genes$Gene
-  lrt <- dplyr::filter(lrt, .data$Gene %in% genes)
-  lrt <- dplyr::group_by(lrt, .data$Gene)
-  lrt <- dplyr::mutate(lrt, variance = stats::var(.data$logFC))
-  lrt <- dplyr::summarise(lrt, Gene = unique(.data$Gene),
-                          variance = mean(.data$variance),
-                          .groups = "drop")
+    lrt <- data.frame(lrt$table)
+    lrt$Gene <- fit$genes$Gene
+    lrt <- dplyr::filter(lrt, .data$Gene %in% genes)
+    lrt <- dplyr::group_by(lrt, .data$Gene)
+    lrt <- dplyr::mutate(lrt, variance = stats::var(.data$logFC))
+    lrt <- dplyr::summarise(lrt, Gene = unique(.data$Gene),
+        variance = mean(.data$variance), .groups = "drop")
 
-  # Bind the temporary data_table  to the table with the fold change
-  data <-
-    dplyr::left_join(data, lrt, by="Gene")
+    # Bind the temporary data_table to the table with the fold change
+    data <- dplyr::left_join(data, lrt, by = "Gene")
 
-  data <- dplyr::filter(data, .data$variance <= variance)
-  data <- dplyr::rename(data, Variance = .data$variance)
+    data <- dplyr::filter(data, .data$variance <= variance)
+    data <- dplyr::rename(data, Variance = .data$variance)
 
-  return(data)
-
+    return(data)
 }
 

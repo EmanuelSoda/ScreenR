@@ -7,7 +7,7 @@
 plot_Zscore_distribution(time_point_measure, alpha = 1)
 }
 \arguments{
-\item{time_point_measure}{A list containing the time the table for each time
+\item{time_point_measure}{A list containing the table for each time
 point}
 
 \item{alpha}{the alpha value for the plot}
@@ -16,6 +16,15 @@ point}
 return the density plot of the distribution of the Z-score
 }
 \description{
-This function plot the distribution of the Z-score of the Log2FC of the treated
-vs control in the different timepoint
+This function plot the distribution of the Z-score of the
+             Log2FC of the treated vs control in the different timepoint
+}
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+table1 <- compute_metrics(obj, control = "Met", treatment = "DMSO",
+                         day = "Day3")
+table2 <- compute_metrics(obj, control = "Met", treatment = "DMSO",
+                         day = "Day6")
+
+plot_Zscore_distribution(list(table1, table2), alpha = 0.5)
 }

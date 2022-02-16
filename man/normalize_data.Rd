@@ -20,6 +20,7 @@ This function perform a normalization on the data considering
              each row and then multiply by 1e6. At the end we will obtain a
              sort of transcript per million.
 }
-\details{
-Normalize data
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+normalize_data(obj)
 }

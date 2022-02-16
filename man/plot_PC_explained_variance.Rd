@@ -4,7 +4,11 @@
 \alias{plot_PC_explained_variance}
 \title{PLot the explained variance by the PC}
 \usage{
-plot_PC_explained_variance(screenR_Object, cumulative = F, color = "steelblue")
+plot_PC_explained_variance(
+  screenR_Object,
+  cumulative = FALSE,
+  color = "steelblue"
+)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object}
@@ -20,4 +24,12 @@ The explained variance  plot
 \description{
 This function plot the explained variance by the
              Principal Component.
+}
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+plot_PC_explained_variance(obj)
+
+# For the cumulative plote
+plot_PC_explained_variance(obj, cumulative = TRUE)
 }

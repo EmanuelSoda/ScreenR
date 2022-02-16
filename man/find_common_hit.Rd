@@ -16,12 +16,23 @@ method}
 \item{hit_roast}{The matrix obtained by the \code{\link{find_roast_hit}}
 method}
 
-\item{common_in}{Number of method in which the hit should be part at the same
-time}
+\item{common_in}{Number of method in which the hit should be part at
+the same time}
 }
 \value{
 A vector containing the common hit
 }
 \description{
 This method find the hit in common between the three methods
+}
+\examples{
+hit_zscore <- tibble(Gene = c("A", "B", "C", "D", "E"))
+hit_camera <- tibble(Gene = c("A", "B", "C", "F", "H", "G"))
+hit_roast <- tibble(Gene = c("A", "L", "N"))
+
+# common among all the three methods
+find_common_hit(hit_zscore, hit_camera, hit_roast)
+
+# common among at least twoo of the three methods
+find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
 }

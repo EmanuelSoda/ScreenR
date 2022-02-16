@@ -13,8 +13,8 @@ plot_barcode_trend(
 )
 }
 \arguments{
-\item{list_data_measure}{A list containing the measure table of the different
-time point}
+\item{list_data_measure}{A list containing the measure table of the
+different time point}
 
 \item{genes}{vector of genes name}
 

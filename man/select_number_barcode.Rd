@@ -19,3 +19,4 @@ The barcode of the gene passed as input
 \description{
 Compute a unique gene symbol for gene
 }
+\keyword{internal}

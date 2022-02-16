@@ -8,13 +8,14 @@
 #' @importFrom rlang .data
 #' @importFrom purrr map
 #' @return return the table containing barcode that have mapped to the samples
+#'
 #' @export
 
 Barcode_creation_Dataframe <- function(path_file) {
-    dataFrames <- purrr::map(.x = list.files(path = path_file, full.names = T),
-        .f = ~read.table(file = .x, header = F, sep = "\t",
-                         col.names = c("Barcode","Length", "Mapped",
-                                       "Unmapped")))
+    dataFrames <- purrr::map(.x = list.files(path = path_file,
+        full.names = TRUE), .f = ~read.table(file = .x, header = FALSE,
+        sep = "\t", col.names = c("Barcode", "Length", "Mapped",
+            "Unmapped")))
     # remove the useless one
     dataFrames <- purrr::map(.x = dataFrames, .f = ~.x[(names(.x) %in%
         c("Barcode", "Mapped"))])
@@ -22,7 +23,7 @@ Barcode_creation_Dataframe <- function(path_file) {
     Mapped_barcode_all_Samples <- dataFrames %>%
         purrr::reduce(left_join, by = "Barcode")
 
-    name <- basename(list.files(path = path_file, full.names = T))
+    name <- basename(list.files(path = path_file, full.names = TRUE))
     name <- unlist(strsplit(name, ".", fixed = TRUE))
     name <- name[seq(1, length(name), 3)]
     name <- strex::str_after_nth(name, "_", 3)

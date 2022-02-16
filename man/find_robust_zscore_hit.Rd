@@ -18,3 +18,10 @@ return a tibble containing the hit for the robust Z-score
 \description{
 Title Find robust Z-score Hit
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+table <- compute_metrics(obj, control = "Met", treatment = "DMSO",
+                         day = "Day3")
+find_robust_zscore_hit(table, number_barcode = 6)
+
+}

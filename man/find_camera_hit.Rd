@@ -37,3 +37,13 @@ The hit find with the camera method
 \description{
 Find the hit using the camera method
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+matrix <- model.matrix(~slot(obj, "groups"))
+colnames(matrix) <- c("Control", "T0/T48", "Treated")
+
+find_camera_hit(screenR_Object = obj,
+               matrix_model = matrix, contrast = "Treated")
+
+}

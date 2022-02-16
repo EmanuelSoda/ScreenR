@@ -2,11 +2,11 @@
 
 export(Barcode_creation_Dataframe)
 export(barcode_lost)
-export(compute_camera)
 export(compute_data_table)
 export(compute_explained_variance)
 export(compute_metrics)
 export(compute_slope)
+export(count_mapped_reads)
 export(create_edgeR_obj)
 export(create_screenR_object)
 export(distribution_mapped_reads)

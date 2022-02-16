@@ -9,7 +9,7 @@ plot_trend(
   genes,
   group_var,
   alpha = 0.5,
-  se = F,
+  se = FALSE,
   point_size = 1,
   line_size = 1,
   nrow = 1,
@@ -42,4 +42,13 @@ The the plot of the
 \description{
 This function plot the trend of a gene resulted as hit of the
              analysis
+}
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+
+plot_trend(obj, genes = "GLS", group_var = c("T0", "T48", "Met"))
+
+plot_trend(obj, genes = c("SEPT5", "GLS"), group_var = c("T0", "T48", "Met"),
+           nrow = 2)
+
 }

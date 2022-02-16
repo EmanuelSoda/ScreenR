@@ -7,7 +7,6 @@
 plot_barcode_hit(
   screenR_Object,
   matrix_model,
-  hit_common,
   contrast,
   number_barcode = 3,
   gene,
@@ -21,14 +20,12 @@ plot_barcode_hit(
 \item{matrix_model}{the matrix that will be used to perform the
 linear model analysis}
 
-\item{hit_common}{The vector of the common hit}
-
 \item{contrast}{An object created with makeContrasts
 function}
 
 \item{number_barcode}{Number of barcode to have under the median}
 
-\item{gene}{a single gene}
+\item{gene}{a single gene to plot}
 
 \item{quantile}{Quantile to display on the plot}
 
@@ -39,5 +36,13 @@ A vector containing the common hit
 }
 \description{
 Create a Barcode plot for the Hit
+}
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+matrix_model <- model.matrix(~slot(obj, "groups"))
+colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+
+plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = "ACACB")
 }
 \concept{plot}

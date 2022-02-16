@@ -28,4 +28,9 @@ return a tibble containing the number of mapped read for sample
 The function plot the distribution of the lost barcode in each
              sample
 }
+\examples{
+obj <- get0("obj", envir = asNamespace("ScreenR"))
+plot_distribution_of_barcode_lost(obj)
+plot_distribution_of_barcode_lost(obj, type = "density")
+}
 \concept{plot}
