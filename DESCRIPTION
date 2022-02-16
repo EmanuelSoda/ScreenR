@@ -14,7 +14,6 @@ Description: The aim of ScreenR is to help in the analysis of
              of visualization in order to shows the results obtained.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyDataCompression: xz
 RoxygenNote: 7.1.2
 Imports:
     methods (>= 4.0),
@@ -29,7 +28,6 @@ Imports:
     purrr (>= 0.3.4),
     ggplot2 (>= 3.3),
     stats,
-    tidyselect
 Suggests: 
     rmarkdown (>= 2.11),
     knitr (>= 1.37),
@@ -45,3 +43,4 @@ Depends:
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 LazyData: true
+LazyDataCompression: xz

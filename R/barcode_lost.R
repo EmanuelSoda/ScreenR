@@ -158,8 +158,7 @@ plot_distribution_of_barcode_lost <- function(screenR_Object,
         plot <- ggplot(data = table, aes(x = .data$LostBarcode,
             fill = .data$Sample)) + geom_density(alpha = alpha)
     } else {
-        warning(paste(paste("You have selected:\n", type, sep = ""),
-            "Please select the right type", sep = "\n"))
+        warning("You have selected:\nPlease select the right type")
     }
 
     if (!is.null(palette)) {
