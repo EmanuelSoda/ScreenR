@@ -385,8 +385,8 @@ test_that("plot_PC_explained_variance CUM", {
     library(tibble)
     object <- create_test_object()
 
-    plot <-
-        plot_PC_explained_variance(screenR_Object = object, cumulative = TRUE)
+    plot <- plot_PC_explained_variance(screenR_Object = object,
+        cumulative = TRUE)
     expect_equal(class(plot)[[1]], "gg")
 })
 

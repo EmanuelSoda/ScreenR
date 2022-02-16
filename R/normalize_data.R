@@ -12,7 +12,7 @@
 #' @return return the screenR object with the normalize data
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #' normalize_data(obj)
 normalize_data <- function(screenR_Object) {
     screenR_Object@normalized_count_table <- screenR_Object@count_table %>%

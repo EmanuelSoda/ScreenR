@@ -7,7 +7,7 @@
 #' @return The edgeR object edgeR
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #' create_edgeR_obj(obj)
 create_edgeR_obj <- function(screenR_Object) {
     # First create the Matrix of the Count table

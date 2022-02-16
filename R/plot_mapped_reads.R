@@ -13,7 +13,7 @@
 #' @return return a ggplot object
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
 #' plot_mapped_reads(obj)
 plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1,

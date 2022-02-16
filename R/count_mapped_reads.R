@@ -12,7 +12,7 @@
 #' @return return a tibble containing the number of mapped read for sample
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #' count_mapped_reads(obj)
 #'
 

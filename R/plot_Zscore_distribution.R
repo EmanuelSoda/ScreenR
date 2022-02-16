@@ -9,11 +9,11 @@
 #' @return return the density plot of the distribution of the Z-score
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
-#' table1 <- compute_metrics(obj, control = "Met", treatment = "DMSO",
-#'                          day = "Day3")
-#' table2 <- compute_metrics(obj, control = "Met", treatment = "DMSO",
-#'                          day = "Day6")
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' table1 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
+#'                          day = 'Day3')
+#' table2 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
+#'                          day = 'Day6')
 #'
 #'plot_Zscore_distribution(list(table1, table2), alpha = 0.5)
 

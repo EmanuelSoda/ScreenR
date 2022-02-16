@@ -15,12 +15,12 @@
 #' @return The the plot of the
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#'obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
-#' plot_trend(obj, genes = "GLS", group_var = c("T0", "T48", "Met"))
+#'plot_trend(obj, genes = 'GLS', group_var = c('T0', 'T48', 'Met'))
 #'
-#' plot_trend(obj, genes = c("SEPT5", "GLS"), group_var = c("T0", "T48", "Met"),
-#'            nrow = 2)
+#'plot_trend(obj, genes = c('SEPT5', 'GLS'), group_var = c('T0', 'T48', 'Met'),
+#'    nrow = 2)
 #'
 
 plot_trend <- function(screenR_Object, genes, group_var,

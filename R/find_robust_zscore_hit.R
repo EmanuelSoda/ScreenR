@@ -7,9 +7,9 @@
 #' @return return a tibble containing the hit for the robust Z-score
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
-#' table <- compute_metrics(obj, control = "Met", treatment = "DMSO",
-#'                          day = "Day3")
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' table <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
+#'                          day = 'Day3')
 #' find_robust_zscore_hit(table, number_barcode = 6)
 #'
 find_robust_zscore_hit <- function(table_treate_vs_control, number_barcode) {

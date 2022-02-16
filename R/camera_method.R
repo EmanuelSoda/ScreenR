@@ -11,13 +11,13 @@
 #' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
-#' matrix <- model.matrix(~slot(obj, "groups"))
-#' colnames(matrix) <- c("Control", "T0/T48", "Treated")
+#' matrix <- model.matrix(~slot(obj, 'groups'))
+#' colnames(matrix) <- c('Control', 'T0/T48', 'Treated')
 #'
 #'find_camera_hit(screenR_Object = obj,
-#'                matrix_model = matrix, contrast = "Treated")
+#'                matrix_model = matrix, contrast = 'Treated')
 #'
 #' @export
 #'
@@ -92,7 +92,7 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
         gene_symbols, number_barcode)
     names(gene_symbol_list) <- un_genesymbols
     # sapply(gene_symbol_list, is.null)
-    gene_symbol_list[purrr::map_lgl(gene_symbol_list,  is.null)] <- NULL
+    gene_symbol_list[purrr::map_lgl(gene_symbol_list, is.null)] <- NULL
     return(gene_symbol_list)
 }
 

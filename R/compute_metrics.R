@@ -19,9 +19,9 @@
 #' @return return a tibble  with all the measure computed
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
-#' compute_metrics(obj, control = "Met", treatment = "DMSO", day = "Day3")
+#' compute_metrics(obj, control = 'Met', treatment = 'DMSO', day = 'Day3')
 
 compute_metrics <- function(screenR_Object, control,
     treatment, day) {

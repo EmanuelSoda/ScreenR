@@ -20,22 +20,20 @@ plot_barcode_trend <- function(list_data_measure, genes,
         mutate(Day = factor(x = .data$Day, levels = unique(.data$Day)))
     if (is.null(color)) {
         gg_l <- map(.x = split(data, f = as.character(data$Gene)),
-            .f = function(x) {
-                ggplot(x, aes(x = .data$Day, y = .data$Log2FC,
-                  group = .data$Barcode, col = .data$Barcode)) +
-                  geom_line(size = size_line) + geom_point() +
-                  theme_light() + facet_wrap(facets = "Gene",
-                  scales = "free")
-            })
+            .f = ~ggplot(.x, aes(x = .data$Day, y = .data$Log2FC,
+                    group = .data$Barcode, col = .data$Barcode)) +
+                    geom_line(size = size_line) + geom_point() +
+                    theme_light() + facet_wrap(facets = "Gene",
+                    scales = "free")
+            )
     } else {
         gg_l <- map(.x = split(data, f = as.character(data$Gene)),
-            .f = function(x) {
-                ggplot(x, aes(x = .data$Day, y = .data$Log2FC,
-                  group = .data$Barcode, col = .data$Barcode)) +
-                  geom_line(size = size_line) + geom_point() +
-                  scale_color_manual(values = color) +
-                  facet_wrap(facets = "Gene", scales = "free")
-            })
+            .f = ~ggplot(.x, aes(x = .data$Day, y = .data$Log2FC,
+                    group = .data$Barcode, col = .data$Barcode)) +
+                    geom_line(size = size_line) + geom_point() +
+                    scale_color_manual(values = color) +
+                    facet_wrap(facets = "Gene", scales = "free")
+            )
     }
 
 

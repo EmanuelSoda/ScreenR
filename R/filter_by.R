@@ -19,11 +19,11 @@
 #'         for each gene
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
-#' filter_by_slope(screenR_Object = obj, genes = c("SEPT5", "GLS"),
-#'                 group_var_treatment = c("T0", "T48", "Met"),
-#'                 group_var_control = c("T0", "T48", "Day3", "Day6"),
+#' filter_by_slope(screenR_Object = obj, genes = c('SEPT5', 'GLS'),
+#'                 group_var_treatment = c('T0', 'T48', 'Met'),
+#'                 group_var_control = c('T0', 'T48', 'Day3', 'Day6'),
 #'                 slope_control = 0.5, slope_treatment = 1)
 
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
@@ -31,11 +31,11 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 
     # Compute the slope of the hits in the treatment Samples
     slope_treatment <- compute_slope(screenR_Object, genes,
-                                     group_var =  group_var_treatment)
+        group_var = group_var_treatment)
 
     # Compute the slope of the hits in the control Samples
     slope_DMSO <- compute_slope(screenR_Object, genes,
-                                group_var = group_var_control)
+        group_var = group_var_control)
 
     data <- screenR_Object@data_table
 
@@ -46,10 +46,12 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
     if (!is.null(slope_control)) {
-        data <- dplyr::filter(data, .data$slope_control <= slope_control)
+        data <- dplyr::filter(data, .data$slope_control <=
+            slope_control)
     }
 
-    data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
+    data <- dplyr::filter(data, .data$slope_treatment <=
+        slope_treatment)
 
     return(data)
 }
@@ -67,10 +69,10 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
-#' compute_slope(obj, genes = c("SEPT5", "GLS"),
-#'               group_var = c("T0", "T48", "Met"))
+#' compute_slope(obj, genes = c('SEPT5', 'GLS'),
+#'               group_var = c('T0', 'T48', 'Met'))
 #'
 
 compute_slope <- function(screenR_Object, genes, group_var) {
@@ -110,12 +112,12 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'         for each gene
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~slot(obj, "groups"))
-#' colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' matrix_model <- model.matrix(~slot(obj, 'groups'))
+#' colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' data <- filter_by_variance(screenR_Object = obj, genes = c("SEPT5"),
+#' data <- filter_by_variance(screenR_Object = obj, genes = c('SEPT5'),
 #'                            matrix_model = matrix_model, contrast = contrast)
 
 filter_by_variance <- function(screenR_Object, genes, matrix_model,

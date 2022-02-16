@@ -11,9 +11,9 @@
 #' @return A vector containing the common hit
 #' @export
 #' @examples
-#' hit_zscore <- tibble(Gene = c("A", "B", "C", "D", "E"))
-#' hit_camera <- tibble(Gene = c("A", "B", "C", "F", "H", "G"))
-#' hit_roast <- tibble(Gene = c("A", "L", "N"))
+#' hit_zscore <- tibble(Gene = c('A', 'B', 'C', 'D', 'E'))
+#' hit_camera <- tibble(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
+#' hit_roast <- tibble(Gene = c('A', 'L', 'N'))
 #'
 #' # common among all the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast)
@@ -71,9 +71,9 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' @param color The three vector color for the veen
 #' @export
 #' @examples
-#' hit_zscore <- tibble(Gene = c("A", "B", "C", "D", "E"))
-#' hit_camera <- tibble(Gene = c("A", "B", "C", "F", "H", "G"))
-#' hit_roast <- tibble(Gene = c("A", "L", "N"))
+#' hit_zscore <- tibble(Gene = c('A', 'B', 'C', 'D', 'E'))
+#' hit_camera <- tibble(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
+#' hit_roast <- tibble(Gene = c('A', 'L', 'N'))
 #' plot_common_hit(hit_zscore, hit_camera, hit_roast)
 plot_common_hit <- function(hit_zscore, hit_camera,
     hit_roast, alpha = 0.5, stroke_size = 0.5, set_name_size = 4,

@@ -14,7 +14,7 @@
 Barcode_creation_Dataframe <- function(path_file) {
     dataFrames <- purrr::map(.x = list.files(path = path_file,
         full.names = TRUE), .f = ~read.table(file = .x, header = FALSE,
-        sep = "\t", col.names = c("Barcode", "Length", "Mapped",
+          sep = "\t", col.names = c("Barcode", "Length", "Mapped",
             "Unmapped")))
     # remove the useless one
     dataFrames <- purrr::map(.x = dataFrames, .f = ~.x[(names(.x) %in%

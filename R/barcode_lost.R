@@ -12,10 +12,9 @@
 #' @importFrom  magrittr %>%
 #' @importFrom rlang .data
 #' @return return a tibble containing the number of barcode lost for sample
-#'
-#'
+
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
 #' # In order to count the number of barcode lost just the ScreenR object is
 #' # needed
@@ -46,7 +45,7 @@ barcode_lost <- function(screenR_Object) {
 #' @return return a tibble containing the number of mapped read for sample
 #'
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
 #' plot_barcode_lost(obj)
 #' @export
@@ -80,32 +79,30 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
 #' plot_barcode_lost_for_gene(obj)
-#' plot_barcode_lost_for_gene(obj, samples = c("Day3_DMSO_A", "Day3_DMSO_B"))
-#' plot_barcode_lost_for_gene(obj, samples = c("Day3_DMSO_A", "Day3_DMSO_B"),
+#' plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'))
+#' plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'),
 #'                            facet = FALSE)
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
-                                       samples = NULL) {
+    samples = NULL) {
     numericColumn <- screenR_Object@count_table %>%
         dplyr::select_if(is.numeric) %>%
         colnames()
 
     table <- tidyr::pivot_longer(data = screenR_Object@count_table,
-                                 cols = all_of(numericColumn),
-                                 names_to = "Sample",
-                                 values_to = "Mapped")
+        cols = all_of(numericColumn), names_to = "Sample", values_to = "Mapped")
     table <- dplyr::left_join(table, screenR_Object@annotation_table,
-                              by = "Barcode")
+        by = "Barcode")
     table <- dplyr::group_by(table, .data$Sample, .data$Gene)
 
-    table <- dplyr::mutate(table, barcode_lost = .data$Mapped == 0)
+    table <- dplyr::mutate(table, barcode_lost = .data$Mapped ==
+        0)
 
     table <- dplyr::summarise(table, Sample = unique(.data$Sample),
-                              barcode_lost = sum(.data$barcode_lost),
-                              .groups = "drop" )
+        barcode_lost = sum(.data$barcode_lost), .groups = "drop")
     table <- dplyr::filter(table, .data$barcode_lost != 0)
     table <- tidyr::drop_na(table)
 
@@ -115,12 +112,11 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     }
 
     plot <- ggplot(table, aes(.data$barcode_lost, .data$Gene,
-                                fill = .data$Sample)) +
-        geom_bar(stat = "identity", position = position_dodge(),
-                 show.legend = FALSE)
+        fill = .data$Sample)) + geom_bar(stat = "identity",
+        position = position_dodge(), show.legend = FALSE)
 
     if (facet) {
-     plot <- plot + facet_wrap(vars(.data$Sample), scales = "free")
+        plot <- plot + facet_wrap(vars(.data$Sample), scales = "free")
     }
 
     return(plot)
@@ -140,9 +136,9 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 #' @concept plot
 #' @return return a tibble containing the number of mapped read for sample
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #' plot_distribution_of_barcode_lost(obj)
-#' plot_distribution_of_barcode_lost(obj, type = "density")
+#' plot_distribution_of_barcode_lost(obj, type = 'density')
 #' @export
 
 plot_distribution_of_barcode_lost <- function(screenR_Object,

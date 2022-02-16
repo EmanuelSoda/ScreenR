@@ -14,15 +14,15 @@
 #' @return A vector containing the common hit
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~slot(obj, "groups"))
-#' colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' matrix_model <- model.matrix(~slot(obj, 'groups'))
+#' colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = "ACACB")
+#' plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = 'ACACB')
 plot_barcode_hit <- function(screenR_Object, matrix_model,
-    contrast, number_barcode = 3, gene, quantile = c(-0.5, 0.5),
-    labels = c("Negative logFC", "Positive logFC")) {
+    contrast, number_barcode = 3, gene, quantile = c(-0.5,
+        0.5), labels = c("Negative logFC", "Positive logFC")) {
 
     DGEList <- create_edgeR_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, coef = seq(1,

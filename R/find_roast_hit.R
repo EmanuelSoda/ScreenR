@@ -13,11 +13,11 @@
 #' @return The hit found by roast
 #' @export
 #' @examples
-#' obj <- get0("obj", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~slot(obj, "groups"))
-#' colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' matrix_model <- model.matrix(~slot(obj, 'groups'))
+#' colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
 #'
-#' find_roast_hit(obj, matrix_model = matrix_model, contrast = "Treated")
+#' find_roast_hit(obj, matrix_model = matrix_model, contrast = 'Treated')
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     nrot = 9999, number_barcode = 3, direction = "Down", p_val = 0.05) {
     DGEList <- create_edgeR_obj(screenR_Object)
