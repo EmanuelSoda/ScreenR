@@ -44,11 +44,11 @@ This function plot the trend of a gene resulted as hit of the
              analysis
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
-plot_trend(obj, genes = "GLS", group_var = c("T0", "T48", "Met"))
+plot_trend(obj, genes = 'GLS', group_var = c('T0', 'T48', 'Met'))
 
-plot_trend(obj, genes = c("SEPT5", "GLS"), group_var = c("T0", "T48", "Met"),
-           nrow = 2)
+plot_trend(obj, genes = c('SEPT5', 'GLS'), group_var = c('T0', 'T48', 'Met'),
+   nrow = 2)
 
 }

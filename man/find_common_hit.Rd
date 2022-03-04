@@ -26,9 +26,9 @@ A vector containing the common hit
 This method find the hit in common between the three methods
 }
 \examples{
-hit_zscore <- tibble(Gene = c("A", "B", "C", "D", "E"))
-hit_camera <- tibble(Gene = c("A", "B", "C", "F", "H", "G"))
-hit_roast <- tibble(Gene = c("A", "L", "N"))
+hit_zscore <- tibble(Gene = c('A', 'B', 'C', 'D', 'E'))
+hit_camera <- tibble(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
+hit_roast <- tibble(Gene = c('A', 'L', 'N'))
 
 # common among all the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast)

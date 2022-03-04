@@ -1,16 +1,18 @@
 #' @title Find Roast Hit
 #' @description Find the hit using the Roast method
-#' @param screenR_Object The Object of the package
-#' @param matrix_model the matrix that will be used to perform the
-#'                     linear model analysis
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
+#' @param matrix_model The matrix that will be used to perform the
+#'                     linear model analysis. Created using
+#'                     \code{\link[stats]{model.matrix}}
 #' @param contrast A vector or a single value indicating the index or the name
-#'                 of the column the model_matrix wo which perform the analysis
+#'                 of the column the model_matrix to which perform the analysis
 #' @param nrot Number of rotation to perform the test
 #' @param number_barcode Number of barcode to consider
 #' @param direction Direction of variation
 #' @param number_barcode The hit find with the Roast method
-#' @param p_val P val cut off
-#' @return The hit found by roast
+#' @param p_val P value cut off
+#' @return The hits found by ROAST method
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

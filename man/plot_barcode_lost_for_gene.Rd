@@ -15,17 +15,17 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples = NULL)
 \item{samples}{The samples to visualize}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped reads for sample
 }
 \description{
-This function plots the number of barcode lost in each sample
+This function plots the number of barcodes lost in each sample
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 plot_barcode_lost_for_gene(obj)
-plot_barcode_lost_for_gene(obj, samples = c("Day3_DMSO_A", "Day3_DMSO_B"))
-plot_barcode_lost_for_gene(obj, samples = c("Day3_DMSO_A", "Day3_DMSO_B"),
+plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'))
+plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'),
                            facet = FALSE)
 }
 \concept{plot}

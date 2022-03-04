@@ -1,15 +1,17 @@
 #' @title Plot Barcode Hit
-#' @description This function plot the boxplot in each sample for the genes
-#'              passed as input
-#' @param screenR_Object The Object of the package
+#' @description This function plots a boxplot in each sample for the genes
+#'              passed as input.
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
 #' @param group_var The variable that as to be used to filter the data, for
 #'                  example the different treatment
 #' @param fill_var The variable used to fill the boxplot
-#' @param alpha The opacity of the regression line
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
 #' @param genes The vector of genes to use
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
-#' @param type  The type of plot to use boxplot or violinplot
+#' @param type The type of plot to use "boxplot" or "violinplot"
 #' @concept  plot
 #' @importFrom dplyr sym
 #' @return A boxplot

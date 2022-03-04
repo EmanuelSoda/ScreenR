@@ -2,17 +2,19 @@
 % Please edit documentation in R/Barcode_creation_Dataframe.R
 \name{Barcode_creation_Dataframe}
 \alias{Barcode_creation_Dataframe}
-\title{Create the table containing the Mapped Sample f}
+\title{Create the table containing the Mapped Sample file}
 \usage{
 Barcode_creation_Dataframe(path_file)
 }
 \arguments{
-\item{path_file}{Path of the file}
+\item{path_file}{Path of the list of files}
 }
 \value{
-return the table containing barcode that have mapped to the samples
+Return the table containing  the list of barcodes mapped in each of
+        the samples (a cound table).
 }
 \description{
-This function take as input the path of a file creating using
-             the samtools idxstats
+This function takes as input the path of a list of files
+             created using the Samtools idxstats tool and retrun a
+              count table.
 }

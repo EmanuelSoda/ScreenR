@@ -1,20 +1,20 @@
 #' @title Filter using the slope filter
-#' @description This function is used to improve the quality of the hits.
+#' @description This function is used to improve the quality of the hits found.
 #'              It computes a regression line in the different samples ad uses
 #'              the slope of this line to see the trend
 #' @importFrom stats lm
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       create_screenR_object
+#'                       \code{\link{create_screenR_object}}
 #'
 #' @param genes The genes for which the slope as to be computed. Those genes are
 #'              the result of the three statistical methods selection
 #'
-#' @param slope_treatment The treatment slope
-#' @param slope_control The control slope
+#' @param slope_treatment The treatment slope threshold
+#' @param slope_control The control slope threshold
 #' @param group_var_treatment The variable to use as X for the linear model
-#'                            for the Treatment
+#'                            of the treatment
 #' @param group_var_control The variable to use as X for the linear model
-#'                            for the the control
+#'                          of the the control
 #' @return A data frame with the slope for the treatment and the control
 #'         for each gene
 #' @export
@@ -56,13 +56,13 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     return(data)
 }
 
-#' @title Compute Slope for Gene
-#' @description This function is used to compute the slope of the genes passed
+#' @title Compute Slope of a Gene
+#' @description This function is used to compute the slope of the gene passed
 #'              as input
 #' @importFrom rlang .data
 #'
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       create_screenR_object
+#'                       \code{\link{create_screenR_object}}
 #' @param genes The genes for which the slope as to be computed. Those genes are
 #'              the result of the three statistical methods selection
 #' @param group_var The variable to use as X for the linear model
@@ -96,18 +96,19 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 
 #' @title Filter using the variance filter
 #' @description This function is used to improve the quality of the hits.
-#'              It compute the variance of the hits and filter the one with a
-#'              value greater than the treashold set
+#'              It compute the variance among the hits and filter the one with a
+#'              value greater than the threshold set
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       create_screenR_object
+#'                       \code{\link{create_screenR_object}}
 #'
-#' @param genes The genes for which the slope as to be computed. Those genes are
-#'              the result of the three statistical methods selection
+#' @param genes The genes for which the variance as to be computed.
+#'              Those genes are the result of the three statistical
+#'              methods selection
 #'
 #' @param variance The maximum value of variance accepted
 #' @param contrast The variable to use as X for the linear model
-#'                            for the Treatment
-#' @param matrix_model a matrix created using model.matrix
+#'                 for the Treatment
+#' @param matrix_model a matrix created using \code{\link[stats]{model.matrix}}
 #' @return A data frame with the variance for the treatment and the control
 #'         for each gene
 #' @export

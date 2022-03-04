@@ -17,20 +17,21 @@ plot_distribution_of_barcode_lost(
 
 \item{palette}{A vector of colors}
 
-\item{alpha}{A value for the opacity of the plot}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
-\item{type}{Type of plot}
+\item{type}{Type of plot. Allowed values are "boxplot" and "boxplot"}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped read for sample
 }
 \description{
-The function plot the distribution of the lost barcode in each
-             sample
+The function plots the distribution of the lost barcodes in
+             each sample
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 plot_distribution_of_barcode_lost(obj)
-plot_distribution_of_barcode_lost(obj, type = "density")
+plot_distribution_of_barcode_lost(obj, type = 'density')
 }
 \concept{plot}

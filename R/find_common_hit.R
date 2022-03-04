@@ -56,11 +56,13 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 }
 
 #' @title Plot common hit
-#' @description This method plot the hit in common between the three methods
-#' @param hit_zscore The list of hits of the Z-score method
-#' @param hit_camera The list of hits of the CAMERA method
-#' @param hit_roast The list of hits of the ROAST method
-#' @param alpha The opacity of the color
+#' @description This method plot the hits in common among the three methods is
+#'              a wrapper for the \code{\link[ggvenn]{ggvenn}} function.
+#' @param hit_zscore The list of hits of the \code{\link{find_zscore_hit}}
+#' @param hit_camera The list of hits of the \code{\link{find_camera_hit}}
+#' @param hit_roast The list of hits of the \code{\link{find_roast_hit}}
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
 #' @param stroke_size Stroke size for drawing circles
 #' @param set_name_size Text size for set names
 #' @param text_size Text size for intersect contents

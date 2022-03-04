@@ -1,14 +1,14 @@
 #' @title Plot the trend over time of the Barcode
 #' @description Plot the log2FC over time of the barcode in the different
-#' time point
+#'              time point
 #' @importFrom rlang .data
 #' @param list_data_measure A list containing the measure table of the
 #'                          different time point
-#' @param n_col The number of col to use in the facette wrap
-#' @param size_line the dimension of the line
-#' @param genes vector of genes name
-#' @param color vector of colors
-#' @return The the plot of the
+#' @param n_col The number of column to use in the facet wrap
+#' @param size_line Rhe dimension of the line
+#' @param genes Vector of genes name
+#' @param colorVector of colors
+#' @return The rend plot for the genes in input
 #' @export
 #'
 

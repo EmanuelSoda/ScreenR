@@ -1,12 +1,12 @@
 #' @title Mapped Reads
-#' @description This function perform plot the number of reads mapped for each
-#'              sample.
+#' @description This function returns the number of mapped reads inside the
+#'              screenR object
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @importFrom rlang .data
 #'
-#' @return return a tibble containing the number of mapped read for sample
+#' @return Return a tibble containing the number of mapped read for sample
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

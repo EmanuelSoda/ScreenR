@@ -17,18 +17,21 @@ plot_barcode_lost(
 
 \item{palette}{A vector of colors}
 
-\item{alpha}{A value for the opacity of the plot}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
-\item{legende_position}{Where to positioning the legend of the plot}
+\item{legende_position}{Where to positioning the legend of the plot.
+Allowed values are in the "top", "bottom", "right",
+"left", "none".}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Returns a tibble containing the number of mapped read for sample
 }
 \description{
-This function plots the number of barcode lost in each sample
+This function plots the number of barcodes lost in each sample
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 plot_barcode_lost(obj)
 }

@@ -1,10 +1,10 @@
 #' Title Find robust Z-score Hit
 #'
-#' @param table_treate_vs_control table computet with the function
+#' @param table_treate_vs_control A table coomputed with the function
 #'                                \code{compute_data_table}
 #' @param number_barcode Number of barcode to have under the median
 #'
-#' @return return a tibble containing the hit for the robust Z-score
+#' @return Return a tibble containing the hit for the robust Z-score
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

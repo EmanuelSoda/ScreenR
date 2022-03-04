@@ -1,9 +1,10 @@
 #' Title Find Z-score Hit
 #' @param table_treate_vs_control table computed with the function
 #'                                \code{compute_data_table}
-#' @param number_barcode Number of barcode to have under the median or the mean
-#' @param metric A string containing the metric too use
-#' @return return a tibble containing the hit for the Z-score
+#' @param number_barcode Number of barcodes to have under the median or the mean
+#' @param metric A string containing the metric to use. The value  allowed are
+#'               "median" or "mean".
+#' @return Return a tibble containing the hit for the Z-score
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

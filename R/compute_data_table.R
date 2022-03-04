@@ -1,9 +1,11 @@
-#' @title Create the ScreenR Object
-#' @description Initial function to create the Screen Object.
+#' @title Compute data Table
+#' @description This function computes the data table that will be used
+#'              for the analysis.
 #'
-#' @param screenR_Object The ScreenR object
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
 #'
-#' @return screenR_Object
+#' @return screenR_Object with the data_table filed containing the table.
 #' @export
 #' @importFrom rlang .data
 #' @importFrom stringr str_split_fixed

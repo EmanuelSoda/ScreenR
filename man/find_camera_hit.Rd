@@ -15,10 +15,12 @@ find_camera_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 
 \item{matrix_model}{The matrix that will be used to perform the
-linear model analysis}
+linear model analysis created using
+\code{\link[stats]{model.matrix}}}
 
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
@@ -35,15 +37,16 @@ of the column the model_matrix wo which perform the analysis}
 The hit find with the camera method
 }
 \description{
-Find the hit using the camera method
+This function finds the hits using the camera method is
+             a wrapper for the \code{\link[limma]{camera}} function
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
-matrix <- model.matrix(~slot(obj, "groups"))
-colnames(matrix) <- c("Control", "T0/T48", "Treated")
+matrix <- model.matrix(~slot(obj, 'groups'))
+colnames(matrix) <- c('Control', 'T0/T48', 'Treated')
 
 find_camera_hit(screenR_Object = obj,
-               matrix_model = matrix, contrast = "Treated")
+               matrix_model = matrix, contrast = 'Treated')
 
 }

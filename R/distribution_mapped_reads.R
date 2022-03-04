@@ -1,17 +1,18 @@
 #' @title Plot the distribution of the mapped reads
-#' @description Create a boxplot to show the distribution of the mapped reads
-#'              in different sample
+#' @description This function creates a boxplot to show the distribution of
+#'              the mapped reads in different samples.
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}.
 #'
 #' @param palette The color vector for the plot.
-#' @param alpha The opacity of the plot.
-#' @param type The type of plot. THe default is boxplot the other option is
-#'             density.
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
+#' @param type The type of plot. The default is "boxplot" the other option is
+#'             "density."
 #' @concept plot
 #'
-#' @return return a tibble containing the number of mapped read for sample
+#' @return Return a tibble containing the number of mapped read for sample
 #' @export
 #'
 #' @examples

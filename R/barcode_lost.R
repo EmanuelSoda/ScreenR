@@ -1,17 +1,16 @@
 #' @title Count Barcode Lost
-#' @description This fuction count the number of Barcode lost during the
-#'              sequenceing. A barcode is lost if it has zero mapped read
+#' @description This fuction counts the number of Barcode lost during the
+#'              sequencing. A barcode is lost if it has zero mapped read.
 #'
-#'
-#'
-#'
+
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
 #' @import dplyr
 #' @importFrom  magrittr %>%
 #' @importFrom rlang .data
-#' @return return a tibble containing the number of barcode lost for sample
+#' @return Return a tibble containing the number of barcodes lost for each
+#'         sample
 
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))
@@ -33,16 +32,19 @@ barcode_lost <- function(screenR_Object) {
 }
 
 #' @title Plot number of barcode lost
-#' @description This function plots the number of barcode lost in each sample
+#' @description This function plots the number of barcodes lost in each sample
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of colors
-#' @param alpha A value for the opacity of the plot
-#' @param legende_position Where to positioning the legend of the plot
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
+#' @param legende_position Where to positioning the legend of the plot.
+#'                         Allowed values are in the "top", "bottom", "right",
+#'                         "left", "none".
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @concept plot
-#' @return return a tibble containing the number of mapped read for sample
+#' @return Returns a tibble containing the number of mapped read for sample
 #'
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))
@@ -69,7 +71,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 }
 
 #' @title Plot number of barcode lost for gene
-#' @description This function plots the number of barcode lost in each sample
+#' @description This function plots the number of barcodes lost in each sample
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param facet A boolean to use the facet
@@ -77,7 +79,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @concept plot
-#' @return return a tibble containing the number of mapped read for sample
+#' @return Return a tibble containing the number of mapped reads for sample
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #'
@@ -124,17 +126,18 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 
 
 #' @title Plot distribution of barcode lost
-#' @description The function plot the distribution of the lost barcode in each
-#'              sample
+#' @description The function plots the distribution of the lost barcodes in
+#'              each sample
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of colors
-#' @param alpha A value for the opacity of the plot
-#' @param type Type of plot
+#' @param alpha  A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
+#' @param type Type of plot. Allowed values are "boxplot" and "boxplot"
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @concept plot
-#' @return return a tibble containing the number of mapped read for sample
+#' @return Return a tibble containing the number of mapped read for sample
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))
 #' plot_distribution_of_barcode_lost(obj)

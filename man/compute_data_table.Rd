@@ -16,7 +16,7 @@ screenR_Object
 Initial function to create the Screen Object.
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 compute_data_table(obj)
 

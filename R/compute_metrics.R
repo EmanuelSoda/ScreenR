@@ -1,12 +1,14 @@
-#' @title Create the Z-score table
-#' @description This function compute the  Z-score tablestarting from
-#' the screenR object for a given treatment in a given day
+#' @title Compute Metrics
+#' @description This function computes the  metrics that will be then used
+#'              to compute the Z-score using the function
+#'              \code{\link{find_zscore_hit}} starting from the screenR object
+#'              for a given treatment in a given day
 #'
 
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
-#' @param control The control Samples
+#' @param control The control Samples.
 #'
 #' @param treatment The treatment Samples
 #'
@@ -16,7 +18,7 @@
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else
 #' @importFrom stats sd median
-#' @return return a tibble  with all the measure computed
+#' @return Return a tibble  with all the measure computed.
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

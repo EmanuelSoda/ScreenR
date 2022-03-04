@@ -11,14 +11,15 @@ barcode_lost(screenR_Object)
 \code{\link{create_screenR_object}}}
 }
 \value{
-return a tibble containing the number of barcode lost for sample
+Return a tibble containing the number of barcodes lost for each
+        sample
 }
 \description{
-This fuction count the number of Barcode lost during the
-             sequenceing. A barcode is lost if it has zero mapped read
+This fuction counts the number of Barcode lost during the
+             sequencing. A barcode is lost if it has zero mapped read.
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 # In order to count the number of barcode lost just the ScreenR object is
 # needed

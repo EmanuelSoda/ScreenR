@@ -32,7 +32,7 @@ Plot samples on a two or three-dimensional scatterplot so that
              changes between the samples.
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 plot_MDS(obj)
 }

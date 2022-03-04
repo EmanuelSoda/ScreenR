@@ -1,17 +1,18 @@
 #' @title Plot Barcode Hit
 #' @description Create a Barcode plot for the Hit
-#' @param screenR_Object The Object of the package
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
 #' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
 
-#' @param contrast An object created with makeContrasts
-#'                 function
+#' @param contrast An object created with \code{\link[limma]{makeContrasts}}
+#'                 function.
 #' @param number_barcode Number of barcode to have under the median
 #' @param quantile Quantile to display on the plot
 #' @param labels Title of the plot
-#' @param gene a single gene to plot
+#' @param gene A  gene name to plot
 #' @concept  plot
-#' @return A vector containing the common hit
+#' @return The barcode plot
 #' @export
 #' @examples
 #' obj <- get0('obj', envir = asNamespace('ScreenR'))

@@ -21,6 +21,6 @@ This function perform a normalization on the data considering
              sort of transcript per million.
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 normalize_data(obj)
 }

@@ -24,7 +24,7 @@ This function compute the  Z-score tablestarting from
 the screenR object for a given treatment in a given day
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
-compute_metrics(obj, control = "Met", treatment = "DMSO", day = "Day3")
+compute_metrics(obj, control = 'Met', treatment = 'DMSO', day = 'Day3')
 }

@@ -1,11 +1,14 @@
 #' @title Find Camera Hit
-#' @description Find the hit using the camera method
-#' @param screenR_Object The Object of the package
+#' @description This function finds the hits using the camera method is
+#'              a wrapper for the \code{\link[limma]{camera}} function
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
 #' @param matrix_model The matrix that will be used to perform the
-#'                     linear model analysis
+#'                     linear model analysis created using
+#'                     \code{\link[stats]{model.matrix}}
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix wo which perform the analysis
-#' @param  thresh The threshold
+#' @param thresh The threshold
 #' @param lfc The Log2FC
 #' @param number_barcode Number of barcode to use
 #' @param direction String containing the direction of the variation
@@ -47,12 +50,13 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 }
 
 #' @title Compute Camera
-#' @description Compute the actual hits using camera
-#' @param xglm object created with \code{link{edgeR::estimateDisp}}
-#' @param lrt object created with \code{link{edgeR::glmFit}}
+#' @description This function computes the actual hits using camera
+#' @param xglm object created with \code{\link[edgeR]{estimateDisp}}
+#' @param lrt object created with \code{\link[edgeR]{glmFit}}
 #' @param DGEList object of edgeR
-#' @param matrix_model the matrix that will be used to perform the
-#'                     linear model analysis
+#' @param matrix_model The matrix that will be used to perform the
+#'                     linear model analysis. Created using
+#'                     \code{\link[stats]{model.matrix}}
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column of model_matrix to which perform the analysis
 #' @param  thresh The threshold used to select the hits
@@ -111,4 +115,3 @@ select_number_barcode <- function(gene, genesymbols, number_barcode) {
 
     return(sel)
 }
-

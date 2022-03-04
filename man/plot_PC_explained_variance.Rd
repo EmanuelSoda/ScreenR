@@ -26,7 +26,7 @@ This function plot the explained variance by the
              Principal Component.
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
 plot_PC_explained_variance(obj)
 

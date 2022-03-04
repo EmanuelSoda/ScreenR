@@ -1,13 +1,15 @@
-#' @title Create the table containing the Mapped Sample f
-#' @description This function take as input the path of a file creating using
-#'              the samtools idxstats
+#' @title Create the table containing the Mapped Sample file
+#' @description This function takes as input the path of a list of files
+#'              created using the Samtools idxstats tool and retrun a
+#'               count table.
 #'
-#' @param path_file  Path of the file
+#' @param path_file  Path of the list of files
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom purrr map
-#' @return return the table containing barcode that have mapped to the samples
+#' @return Return the table containing  the list of barcodes mapped in each of
+#'         the samples (a cound table).
 #'
 #' @export
 
@@ -29,7 +31,6 @@ Barcode_creation_Dataframe <- function(path_file) {
     name <- strex::str_after_nth(name, "_", 3)
     name <- strex::str_before_last(name, "_")
     name <- strex::str_before_last(name, "_")
-    name
     colnames(Mapped_barcode_all_Samples) <- c("Barcode", name)
 
     Mapped_barcode_all_Samples <- Mapped_barcode_all_Samples %>%

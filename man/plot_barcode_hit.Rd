@@ -38,11 +38,11 @@ A vector containing the common hit
 Create a Barcode plot for the Hit
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~slot(obj, "groups"))
-colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+obj <- get0('obj', envir = asNamespace('ScreenR'))
+matrix_model <- model.matrix(~slot(obj, 'groups'))
+colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
 contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 
-plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = "ACACB")
+plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = 'ACACB')
 }
 \concept{plot}

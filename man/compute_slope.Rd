@@ -23,9 +23,9 @@ This function is used to compute the slope of the genes passed
              as input
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
+obj <- get0('obj', envir = asNamespace('ScreenR'))
 
-compute_slope(obj, genes = c("SEPT5", "GLS"),
-              group_var = c("T0", "T48", "Met"))
+compute_slope(obj, genes = c('SEPT5', 'GLS'),
+              group_var = c('T0', 'T48', 'Met'))
 
 }

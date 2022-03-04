@@ -36,11 +36,11 @@ This function is used to improve the quality of the hits.
              value greater than the treashold set
 }
 \examples{
-obj <- get0("obj", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~slot(obj, "groups"))
-colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+obj <- get0('obj', envir = asNamespace('ScreenR'))
+matrix_model <- model.matrix(~slot(obj, 'groups'))
+colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
 contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 
-data <- filter_by_variance(screenR_Object = obj, genes = c("SEPT5"),
+data <- filter_by_variance(screenR_Object = obj, genes = c('SEPT5'),
                            matrix_model = matrix_model, contrast = contrast)
 }
