@@ -1,11 +1,12 @@
 #' @title Plot the trend Hit Gene
-#' @description This function plot the trend of a gene resulted as hit of the
-#'              analysis
+#' @description This function plot the trend of a gene resulted as hit
 #' @importFrom rlang .data
-#' @param screenR_Object The ScreenR object
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenR_object}}
 #' @param group_var The variable that as to be used to filter the data, for
 #'                  example the different treatment
-#' @param alpha The opacity of the regression line
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
 #' @param se A boolean to indicate where or not to plot the standard error
 #' @param point_size The dimension of each dot
 #' @param line_size The dimension of the line

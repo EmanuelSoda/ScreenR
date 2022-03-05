@@ -1,11 +1,12 @@
 #' @title Plot Mapped Reads
-#' @description This function perform plot the number of reads mapped for each
+#' @description This function plots the number of reads mapped for each
 #'              sample.
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param palette A vector of color
-#' @param alpha The alpha parameter for the opacity of the plot
+#' @param alpha A value for the opacity of the plot.
+#'              Allowed values are in the range 0 to 1
 #' @param legende_position Where to positioning the legend of the plot
 #' @importFrom magrittr %>%
 #' @import ggplot2

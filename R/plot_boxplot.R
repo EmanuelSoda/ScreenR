@@ -1,5 +1,5 @@
-#' @title Plot Barcode Hit
-#' @description This function plots a boxplot in each sample for the genes
+#' @title Plot Barcodes Hit
+#' @description This function plots a boxplot for each sample for the genes
 #'              passed as input.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}

@@ -5,7 +5,7 @@
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
-#' @return screenR_Object with the data_table filed containing the table.
+#' @return ScreenR_Object with the data_table filed containing the table.
 #' @export
 #' @importFrom rlang .data
 #' @importFrom stringr str_split_fixed

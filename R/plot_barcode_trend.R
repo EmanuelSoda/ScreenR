@@ -1,5 +1,5 @@
-#' @title Plot the trend over time of the Barcode
-#' @description Plot the log2FC over time of the barcode in the different
+#' @title Plot the trend over time of the Barcodes
+#' @description Plot the log2FC over time of the barcodes in the different
 #'              time point
 #' @importFrom rlang .data
 #' @param list_data_measure A list containing the measure table of the

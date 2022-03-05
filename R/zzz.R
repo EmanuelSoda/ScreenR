@@ -8,6 +8,4 @@
     packageStartupMessage("")
     packageStartupMessage("Enjoy!")
     packageStartupMessage("")
-    packageStartupMessage("")
-    packageStartupMessage("")
 }

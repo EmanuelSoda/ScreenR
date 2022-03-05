@@ -1,5 +1,5 @@
-#' @title PLot the Sample in vector Space
-#' @description Plot samples on a two or three-dimensional scatterplot so that
+#' @title Multidimensional Scaling Plot
+#' @description Plot samples on a two-dimensional scatterplot so that
 #'              distances on the plot approximate the typical log2 fold
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
