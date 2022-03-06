@@ -1,12 +1,6 @@
 # ScreenR
 
 
-[![R-CMD-check](https://github.com/EmanuelSoda/ScreenR/workflows/R-CMD-check/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions)
-
-[![check-bioc.yml](https://github.com/EmanuelSoda/ScreenR/workflows/check-bioc.yml/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions)
-
-
-
 The aim of ScreenR is to help in the analysis of 
 High Throughput Biological Screening using pooled shRNAs. Those
 type of screening uses RNA-seq expression data to find candidate 
