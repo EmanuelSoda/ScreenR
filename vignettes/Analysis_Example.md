@@ -12,18 +12,39 @@ editor_options:
 # Importing Pacakge
 
 ```r
-library(ScreenR)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-theme_set(theme_light())
 knitr::opts_chunk$set(fig.width=10, fig.height=7) 
 ```
 
-# Read Data
+# Introduction 
+The R package **ScreenR** has been developed to perform the analysis of data 
+coming from RNA-seq data generated using Genetic Screening. It is based 
+on the same idea of edgeR but it also integrate the idea at the base of 
+Tidyverse. 
 
-We will use as example a Loss of Function Genetic Screening Performed on THP1
-using Metforming at Day3 and Day6. First of all the data are read.
+
+# Analysis 
+## Loading the package
+
+After installation, loading the package is simple:
+
+```r
+library(ScreenR)
+```
+
+## Read Data
+The input of ScreenR is a count table. A count table is usually the starting 
+point  of an RNA-seq differentially expressed genes analysis and consists of
+a matrix containing  reads count organized with: 
+
+* Genes on the rows
+* Samples on the columns
+
+For this vignette we will use as an example a Loss of Function Genetic Screening
+Performed on THP1 using Metformin at Day3 and Day6. 
+First of all the data has to be read.
 
 ```r
 data(CountTable_THP1_CONTROL_vs_MET)
@@ -45,24 +66,19 @@ total_Annotation <- Table_Annotation %>%
     dplyr::mutate(Barcode = as.factor(.$Barcode))
 ```
 
-# Object Creation 
-The ScreenR object is created using the function **create_screenR_object()**
+## Object Creation 
+The second needed step is to create a **ScreenR object** from the count table.
+The ScreenR object is created using the function **create_screenR_object()**.
+This object will be used to store the most important information to perform 
+the analysis. Most of the ScreenR function takes as main input the ScreenR 
+object to perform the needed operation and return a result.
 
 
 ```r
 groups <- colnames(data)[2:length(colnames(data))]
 groups <- gsub("(.*)_\\w+", "\\1", groups)
 groups <- factor(x = groups, levels = unique(groups))
-groups
-```
 
-```
-##  [1] T0        T48       Day3_Met  Day3_Met  Day3_Met  Day3_DMSO Day3_DMSO
-##  [8] Day3_DMSO Day6_Met  Day6_Met  Day6_Met  Day6_DMSO Day6_DMSO Day6_DMSO
-## Levels: T0 T48 Day3_Met Day3_DMSO Day6_Met Day6_DMSO
-```
-
-```r
 palette <- c(
     "#66c2a5", "#fc8d62", rep("#8da0cb", 3),
     rep("#e78ac3", 3),
@@ -77,7 +93,22 @@ object <- create_screenR_object(
 ```
 
 
-# Start Analysis
+## Computing the needed tables
+In order to start the analysis the data has first to be normalized and the 
+*data_table*.
+
+For what concern the normalizzation ScreenR uses a normalizzation that is called
+*Reads Per Million Sample (RPMS)* which has the following mathematical 
+expression:
+
+$$RPMS = \frac{Number \; of \; mapped \; reads \; to \; a \; barcode} 
+                   { \sum_{sample}{Number\; of \;mapped \; reads}} *10^{6}$$ 
+                   
+The number of reads mapped for each Barcode in a sample are normalized by the 
+number of reads in that sample and multiplied by one million.
+Then has to be computed the *data_table*. The *data_table* can be seen as a 
+tidy version of the original *count table* and will be used throughout the 
+analysis.
 
 ```r
 object <- normalize_data(object)
@@ -99,8 +130,12 @@ plot
 
 ![plot of chunk plot_mapped_reads](figure/plot_mapped_reads-1.png)
 
+## Quality Check 
+The first step to perform when dealing with RNA-seq data is to check the 
+quality of the samples. In ScreenR this can be done using several methods.
+For example the distribution can be seen using both boxplots or density plots.
 
-## Boxplot
+### Boxplot Mapped Reads
 
 ```r
 plot <- distribution_mapped_reads(
@@ -117,7 +152,7 @@ plot
 
 ![plot of chunk distribution_mapped_reads boxplot](figure/distribution_mapped_reads boxplot-1.png)
 
-## Boxplot
+### Density plot
 
 ```r
 plot <- distribution_mapped_reads(
@@ -131,32 +166,12 @@ plot
 
 ![plot of chunk distribution_mapped_reads density](figure/distribution_mapped_reads density-1.png)
 
-## Control Genes
 
-```r
-data_tmp <- slot(object = object, name = "data_table")
-data_tmp %>%
-    dplyr::filter(Gene %in% c("RPL30", "PSMA1", "LUC")) %>%
-  
-    ggplot(., aes(x=Sample, y=Frequency, fill=Treatment)) +
-    geom_boxplot(alpha = 0.9, outlier.shape = NA) +
-    geom_jitter(shape=16, size = 0.7, aes(colour = Treatment)) +
-    scale_fill_manual(values = unique(palette)) +
-    scale_color_manual(values =  unique(palette)) +
-    scale_alpha_manual(values=c(1, 0.1)) +
-    theme_light()  +
-    ylab("Normalized Mapped Reads") +
-    theme(axis.ticks = element_line(size = 0.3), 
-            legend.position = "none", legend.direction = "horizontal")  +
-    coord_flip()  +
-    scale_x_discrete(limits = rev(unique(data_tmp$Sample))) +
-    facet_wrap("Gene", scales = "free")
-```
+### Barcode Lost
 
-![plot of chunk Control Genes](figure/Control Genes-1.png)
-
-
-## Barcode Lost
+Moreover another very important quality check when a Genetic Screening is 
+performed is to check the barcode lost during the experiment. ScreenR implements
+a function able to  compute and plot the number of barcodes lost. 
 
 ```r
 plot <- plot_barcode_lost(screenR_Object = object, palette = palette) +
@@ -169,9 +184,11 @@ plot
 
 ![plot of chunk plot_barcode_lost](figure/plot_barcode_lost-1.png)
 
-## Plot MDS {.tabset}
+### Plot MDS {.tabset}
+In order to see compare the samples an initial MDS analysis can be conducted.
+In ScreenR this can be done using the *plot_MDS* function as follow.
 
-### For Sample
+#### For Sample
 
 ```r
 plot_MDS(screenR_Object = object) 
@@ -180,7 +197,7 @@ plot_MDS(screenR_Object = object)
 ![plot of chunk Plot MDS Sample](figure/Plot MDS Sample-1.png)
 
 
-### For Treatment
+#### For Treatment
 
 ```r
 GGgroups <- gsub(".*_", "", groups)
@@ -193,7 +210,7 @@ plot_MDS(
 
 ![plot of chunk Plot MDS Treatment](figure/Plot MDS Treatment-1.png)
 
-### For Day
+#### For Day
 
 ```r
 GGgroups <- sub("_.*", "", groups)
@@ -205,7 +222,21 @@ plot_MDS(
 
 ![plot of chunk Plot MDS Day](figure/Plot MDS Day-1.png)
 
-## Compute Metrics
+## Statistical Analysis
+Finally can be conducted the real analysis. 
+The statistical Analysis is based on three methods:
+
+* Z-score filtering
+* CAMERA filtering 
+* ROAST filtering 
+
+### Compute Metrics
+In order to compute the Z-score, first a list of metrics has to be computed. 
+In particular a *Log2FC* is computed for the treated vs control samples in the 
+different conditions. Here for example a treated vs control in different day 
+is computed. Then the different distribution of the Z-score can be plotted 
+using the *plot_Zscore_distribution* function. 
+
 
 ```r
 # 2DG
@@ -227,7 +258,10 @@ plot_Zscore_distribution(data_with_measure_Met, alpha = 0.8)
 ![plot of chunk compute_metrics](figure/compute_metrics-1.png)
 
 
-## Z-score hit
+### Z-score hit
+Now that the metrics has been computed the hits according to Z-score can be 
+found. This in ScreenR is done using the *find_zscore_hit* function.
+
 
 ```r
 zscore_hit_Met <- list(
@@ -278,7 +312,8 @@ zscore_hit_Met
 ```
 
 
-## CAMERA
+### CAMERA
+The same can be done with the CAMERA hit using the function  *find_camera_hit*.
 
 ```r
 groupss <- c(
@@ -338,7 +373,9 @@ camera_hit_Met
 ## # … with 259 more rows
 ```
 
-## ROAST
+### ROAST
+Last but not least this is done also for the ROAST hit using the function  
+*find_roast_hit*.
 
 ```r
 roast_hit_Met <- list(
@@ -390,7 +427,15 @@ roast_hit_Met
 ```
 
 
-## Find Common Hit 
+### Find Common Hit 
+ScreenR consider as final hit only the one present in common among the three 
+methods. In particular two strategy are possible:
+
+* Are considered candidate Hits the one present in at least two of the three 
+methods
+* Are considered candidate Hits the one present in all of the three methods
+
+
 
 ```r
 common_hit_Met_at_least_2 <- list(
@@ -415,6 +460,12 @@ common_hit_Met_at_least_3 <- list(
     )
 )
 ```
+
+
+
+### Plot common hit
+
+The hits can be easily visualized using the *plot_common_hit* function.
 
 
 ```r
@@ -477,88 +528,6 @@ sessionInfo()
 ## [57] colorspace_2.0-3  sessioninfo_1.2.2 strex_1.4.2       memoise_2.0.1    
 ## [61] knitr_1.37        patchwork_1.1.1   usethis_2.1.5
 ```
-
-
-
-
-
-
-
-
-<!-- ## Plot Barcode Hit -->
-<!-- ```{r Barcode Hit, fig.height=7, fig.width=10, message=FALSE, 
-warning=FALSE} -->
-<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, 
-levels=matrix_model) -->
-<!-- plot_barcode_hit(screenR_Object = object, -->
-<!--                  matrix_model = matrix_model, -->
-<!--                  contrast = contrast_Day21_2DG, -->
-<!--                  hit_common = common_hit_2DG_at_least_3$Day21, -->
-<!--                  gene = "KDM1A") -->
-
-<!-- plot_barcode_trend(list_data_measure = data_with_measure_2DG, -->
-<!--                    genes = c("KDM1A"), -->
-<!--                    n_col = 1,color = ggsci::pal_jco()(10))  -->
-
-<!-- data_with_measure_2DG$Day21  %>% arrange(Log2FC) %>%  
-filter(Gene == "KDM1A") -->
-
-<!-- library(edgeR) -->
-<!-- matrix <- -->
-<!--   as.matrix(data[, 2: dim(data)[2]]) -->
-
-
-<!-- rownames(matrix) <- data$Barcode -->
-
-<!-- DGEList <- DGEList(counts = matrix, -->
-<!--                    group = factor(groups), genes = total_Annotation) -->
-<!-- xglm <- estimateDisp(DGEList, matrix_model) -->
-<!-- fit <- glmFit(xglm, matrix_model) -->
-
-<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, 
-levels=matrix_model) -->
-<!-- lrt_Day21_2DG <- glmLRT(fit, contrast = contrast_Day21_2DG) -->
-
-<!-- genesymbols <- as.character(DGEList$genes[, 1]) -->
-<!-- genesymbollist2 <- list() -->
-<!-- unq <- unique(genesymbols) -->
-<!-- unq <- unq[!is.na(unq)] -->
-<!-- for(i in unq) { -->
-<!--   sel <- genesymbols == i & !is.na(genesymbols) -->
-<!--   if(sum(sel)>3) -->
-<!--     genesymbollist2[[i]] <- which(sel) -->
-<!-- } -->
-
-
-<!-- barcodeplot(statistics = lrt_Day21_2DG$table$logFC, -->
-<!--             index=genesymbollist2[["KDM1A"]], -->
-<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
-<!--  labels=c("Negative logFC", "Positive logFC"), -->
-<!--  quantile=c(-0.5,0.5)) -->
-
-
-
-<!-- prova <- object@annotation_table  %>%  -->
-<!--   select(Gene, Barcode,Library) -->
-
-
-<!-- prova <- prova %>%  -->
-<!--   mutate(Barcode = as.numeric(Barcode))  %>%  -->
-<!--   group_by(Gene) %>%  -->
-<!--   split(.$Gene, .$Barcode)  -->
-
-<!-- prova <- map(.x = prova,.f = function(x){x %>% pull(Barcode)}) -->
-
-<!-- barcodeplot(lrt_Day21_2DG$table$logFC,index=prova[["KDM1A"]], -->
-<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
-<!--  labels=c("Negative logFC", "Positive logFC"), -->
-<!--  quantile=c(-0.5,0.5)) -->
-
-<!-- ``` -->
-
-
-
-
 
 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_metrics.R
 \name{compute_metrics}
 \alias{compute_metrics}
-\title{Create the Z-score table}
+\title{Compute Metrics}
 \usage{
 compute_metrics(screenR_Object, control, treatment, day)
 }
@@ -10,18 +10,20 @@ compute_metrics(screenR_Object, control, treatment, day)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenR_object}}}
 
-\item{control}{The control Samples}
+\item{control}{The control Samples.}
 
 \item{treatment}{The treatment Samples}
 
 \item{day}{The day of the treatment}
 }
 \value{
-return a tibble  with all the measure computed
+Return a tibble  with all the measure computed.
 }
 \description{
-This function compute the  Z-score tablestarting from
-the screenR object for a given treatment in a given day
+This function computes the  metrics that will be then used
+             to compute the Z-score using the function
+             \code{\link{find_zscore_hit}} starting from the screenR object
+             for a given treatment in a given day
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

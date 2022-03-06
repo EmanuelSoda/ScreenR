@@ -28,6 +28,10 @@ Imports:
     purrr (>= 0.3.4),
     ggplot2 (>= 3.3),
     stats,
+    tidyr (>= 1.2),
+    magrittr (>= 1.0),
+    dplyr (>= 1.0),
+    edgeR (>= 3.32)
 Suggests: 
     rmarkdown (>= 2.11),
     knitr (>= 1.37),
@@ -35,11 +39,7 @@ Suggests:
     covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.0),
-    tidyr (>= 1.2),
-    magrittr (>= 1.0),
-    dplyr (>= 1.0),
-    edgeR (>= 3.32)
+    R (>= 4.1.0)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 LazyData: true

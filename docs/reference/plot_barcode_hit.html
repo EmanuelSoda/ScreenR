@@ -35,6 +35,9 @@
       <a href="../articles/Analysis_Example.html">Analysis_Example</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -57,7 +60,6 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plot_barcode_hit</span><span class="op">(</span>
   <span class="va">screenR_Object</span>,
   <span class="va">matrix_model</span>,
-  <span class="va">hit_common</span>,
   <span class="va">contrast</span>,
   number_barcode <span class="op">=</span> <span class="fl">3</span>,
   <span class="va">gene</span>,
@@ -69,19 +71,18 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>screenR_Object</dt>
-<dd><p>The Object of the package</p></dd>
+<dd><p>The ScreenR object obtained using the
+<code><a href="create_screenR_object.html">create_screenR_object</a></code></p></dd>
 <dt>matrix_model</dt>
 <dd><p>the matrix that will be used to perform the
 linear model analysis</p></dd>
-<dt>hit_common</dt>
-<dd><p>The vector of the common hit</p></dd>
 <dt>contrast</dt>
-<dd><p>An object created with makeContrasts
-function</p></dd>
+<dd><p>An object created with <code><a href="https://rdrr.io/pkg/limma/man/makeContrasts.html" class="external-link">makeContrasts</a></code>
+function.</p></dd>
 <dt>number_barcode</dt>
 <dd><p>Number of barcode to have under the median</p></dd>
 <dt>gene</dt>
-<dd><p>a single gene</p></dd>
+<dd><p>A  gene name to plot</p></dd>
 <dt>quantile</dt>
 <dd><p>Quantile to display on the plot</p></dd>
 <dt>labels</dt>
@@ -89,9 +90,22 @@ function</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A vector containing the common hit</p>
+    <p>The barcode plot</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">'obj'</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">'ScreenR'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fu">slot</span><span class="op">(</span><span class="va">obj</span>, <span class="st">'groups'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Control'</span>, <span class="st">'T0_T48'</span>, <span class="st">'Treated'</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">contrast</span> <span class="op">&lt;-</span> <span class="fu">limma</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/makeContrasts.html" class="external-link">makeContrasts</a></span><span class="op">(</span><span class="va">Treated</span> <span class="op">-</span> <span class="va">Control</span>, levels <span class="op">=</span> <span class="va">matrix_model</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">plot_barcode_hit</span><span class="op">(</span><span class="va">obj</span>, <span class="va">matrix_model</span>, contrast <span class="op">=</span> <span class="va">contrast</span>, gene <span class="op">=</span> <span class="st">'ACACB'</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Using classic mode.</span>
+<span class="r-plt img"><img src="plot_barcode_hit-1.png" alt="" width="700" height="433"></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -104,7 +118,7 @@ function</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

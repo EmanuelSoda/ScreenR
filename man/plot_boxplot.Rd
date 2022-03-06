@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_boxplot.R
 \name{plot_boxplot}
 \alias{plot_boxplot}
-\title{Plot Barcode Hit}
+\title{Plot Barcodes Hit}
 \usage{
 plot_boxplot(
   screenR_Object,
@@ -16,14 +16,16 @@ plot_boxplot(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 
 \item{genes}{The vector of genes to use}
 
 \item{group_var}{The variable that as to be used to filter the data, for
 example the different treatment}
 
-\item{alpha}{The opacity of the regression line}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
 \item{nrow}{The number of rows in case multiple genes are plotted}
 
@@ -31,14 +33,14 @@ example the different treatment}
 
 \item{fill_var}{The variable used to fill the boxplot}
 
-\item{type}{The type of plot to use boxplot or violinplot}
+\item{type}{The type of plot to use "boxplot" or "violinplot"}
 }
 \value{
 A boxplot
 }
 \description{
-This function plot the boxplot in each sample for the genes
-             passed as input
+This function plots a boxplot for each sample for the genes
+             passed as input.
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

@@ -54,6 +54,9 @@
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
 </div>
@@ -78,289 +81,451 @@
 
     
     
-<div class="section level1">
-<h1 id="importing-pacakge">Importing Pacakge<a class="anchor" aria-label="anchor" href="#importing-pacakge"></a>
-</h1>
+<div class="section level2">
+<h2 id="importing-pacakge">Importing Pacakge<a class="anchor" aria-label="anchor" href="#importing-pacakge"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ScreenR</span><span class="op">)</span>
-<span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_light</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span>
+<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>fig.width<span class="op">=</span><span class="fl">10</span>, fig.height<span class="op">=</span><span class="fl">7</span><span class="op">)</span> </code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="read-data">Read Data<a class="anchor" aria-label="anchor" href="#read-data"></a>
-</h1>
-<p>We will use as example a Loss of Function Genetic Screening Performed on THP1 using Metforming at Day3 and Day6. First of all the data are read.</p>
+<div class="section level2">
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h2>
+<p>The R package <strong>ScreenR</strong> has been developed to perform the analysis of data coming from RNA-seq data generated using Genetic Screening. It is based on the same idea of edgeR but it also integrate the idea at the base of Tidyverse.</p>
+</div>
+<div class="section level2">
+<h2 id="analysis">Analysis<a class="anchor" aria-label="anchor" href="#analysis"></a>
+</h2>
+<div class="section level3">
+<h3 id="loading-the-package">Loading the package<a class="anchor" aria-label="anchor" href="#loading-the-package"></a>
+</h3>
+<p>After installation, loading the package is simple:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">data</span> <span class="op">&lt;-</span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="va">CountTable_THP1_CONTROL_vs_MET</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> 
-  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barcode"</span>, <span class="st">"T0"</span>, <span class="st">"T48_postPURO"</span>, <span class="st">"Day3_Met_A"</span>, <span class="st">"Day3_Met_B"</span>,
-    <span class="st">"Day3_Met_C"</span>, <span class="st">"Day3_DMSO_A"</span> ,<span class="st">"Day3_DMSO_B"</span>,<span class="st">"Day3_DMSO_C"</span>,
-    <span class="st">"Day6_Met_A"</span>, <span class="st">"Day6_Met_B"</span>,<span class="st">"Day6_Met_C"</span>, <span class="st">"Day6_DMSO_A"</span>, 
-    <span class="st">"Day6_DMSO_B"</span>, <span class="st">"Day6_DMSO_C"</span><span class="op">)</span>
-<span class="va">data</span> <span class="op">&lt;-</span>
-  <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span> 
-
-
-<span class="va">total_Annotation</span> <span class="op">&lt;-</span>
-  <span class="va">Table_Annotation</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ScreenR</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="object-creation">Object Creation<a class="anchor" aria-label="anchor" href="#object-creation"></a>
-</h1>
-<p>The ScreenR object is created using the function <strong>create_screenR_object()</strong></p>
+<div class="section level3">
+<h3 id="read-data">Read Data<a class="anchor" aria-label="anchor" href="#read-data"></a>
+</h3>
+<p>The input of ScreenR is a count table. A count table is usually the starting point of an RNA-seq differentially expressed genes analysis and consists of a matrix containing reads count organized with:</p>
+<ul>
+<li>Genes on the rows</li>
+<li>Samples on the columns</li>
+</ul>
+<p>For this vignette we will use as an example a Loss of Function Genetic Screening Performed on THP1 using Metformin at Day3 and Day6. First of all the data has to be read.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
-<span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">'(.*)_\\w+'</span>, <span class="st">'\\1'</span>, <span class="va">groups</span><span class="op">)</span>
-<span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">groups</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">)</span>
-<span class="va">groups</span></code></pre></div>
-<pre><code><span class="co">##  [1] T0        T48       Day3_Met  Day3_Met  Day3_Met  Day3_DMSO Day3_DMSO</span>
-<span class="co">##  [8] Day3_DMSO Day6_Met  Day6_Met  Day6_Met  Day6_DMSO Day6_DMSO Day6_DMSO</span>
-<span class="co">## Levels: T0 T48 Day3_Met Day3_DMSO Day6_Met Day6_DMSO</span></code></pre>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">palette</span> <span class="op">&lt;-</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#66c2a5"</span>, <span class="st">"#fc8d62"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#8da0cb"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#e78ac3"</span>, <span class="fl">3</span><span class="op">)</span>,
-    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#a6d854"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#ffd92f"</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">CountTable_THP1_CONTROL_vs_MET</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Table_Annotation</span><span class="op">)</span>
 
-<span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenR_object.html">create_screenR_object</a></span><span class="op">(</span>table <span class="op">=</span> <span class="va">data</span>,
-                                annotation <span class="op">=</span> <span class="va">total_Annotation</span>,
-                                groups <span class="op">=</span> <span class="va">groups</span>,
-                                replicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="va">CountTable_THP1_CONTROL_vs_MET</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
+    <span class="st">"Barcode"</span>, <span class="st">"T0"</span>, <span class="st">"T48_postPURO"</span>, <span class="st">"Day3_Met_A"</span>, <span class="st">"Day3_Met_B"</span>, <span class="st">"Day3_Met_C"</span>,
+    <span class="st">"Day3_DMSO_A"</span>, <span class="st">"Day3_DMSO_B"</span>, <span class="st">"Day3_DMSO_C"</span>, <span class="st">"Day6_Met_A"</span>, <span class="st">"Day6_Met_B"</span>,
+    <span class="st">"Day6_Met_C"</span>, <span class="st">"Day6_DMSO_A"</span>, <span class="st">"Day6_DMSO_B"</span>, <span class="st">"Day6_DMSO_C"</span>
+<span class="op">)</span>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://tidyr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://tidyr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span>
+
+
+<span class="va">total_Annotation</span> <span class="op">&lt;-</span> <span class="va">Table_Annotation</span> <span class="op"><a href="https://tidyr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://tidyr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
+    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="start-analysis">Start Analysis<a class="anchor" aria-label="anchor" href="#start-analysis"></a>
-</h1>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="section level3">
+<h3 id="object-creation">Object Creation<a class="anchor" aria-label="anchor" href="#object-creation"></a>
+</h3>
+<p>The second needed step is to create a <strong>ScreenR object</strong> from the count table. The ScreenR object is created using the function <strong>create_screenR_object()</strong>. This object will be used to store the most important information to perform the analysis. Most of the ScreenR function takes as main input the ScreenR object to perform the needed operation and return a result.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
+<span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"(.*)_\\w+"</span>, <span class="st">"\\1"</span>, <span class="va">groups</span><span class="op">)</span>
+<span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">groups</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
+    <span class="st">"#66c2a5"</span>, <span class="st">"#fc8d62"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#8da0cb"</span>, <span class="fl">3</span><span class="op">)</span>,
+    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#e78ac3"</span>, <span class="fl">3</span><span class="op">)</span>,
+    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#a6d854"</span>, <span class="fl">3</span><span class="op">)</span>,
+    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#ffd92f"</span>, <span class="fl">3</span><span class="op">)</span>
+<span class="op">)</span>
+
+<span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenR_object.html">create_screenR_object</a></span><span class="op">(</span>
+    table <span class="op">=</span> <span class="va">data</span>, annotation <span class="op">=</span> <span class="va">total_Annotation</span>, groups <span class="op">=</span> <span class="va">groups</span>,
+    replicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="computing-the-needed-tables">Computing the needed tables<a class="anchor" aria-label="anchor" href="#computing-the-needed-tables"></a>
+</h3>
+<p>In order to start the analysis the data has first to be normalized and the <em>data_table</em>.</p>
+<p>For what concern the normalizzation ScreenR uses a normalizzation that is called <em>Reads Per Million Sample (RPMS)</em> which has the following mathematical expression:</p>
+<p><span class="math display">\[RPMS = \frac{Number \; of \; mapped \; reads \; to \; a \; barcode} 
+                   { \sum_{sample}{Number\; of \;mapped \; reads}} *10^{6}\]</span></p>
+<p>The number of reads mapped for each Barcode in a sample are normalized by the number of reads in that sample and multiplied by one million. Then has to be computed the <em>data_table</em>. The <em>data_table</em> can be seen as a tidy version of the original <em>count table</em> and will be used throughout the analysis.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
 <span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></code></pre></div>
-<div class="section level2">
-<h2 id="mapped-reads">Mapped Reads<a class="anchor" aria-label="anchor" href="#mapped-reads"></a>
-</h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+</div>
+<div class="section level3">
+<h3 id="mapped-reads">Mapped Reads<a class="anchor" aria-label="anchor" href="#mapped-reads"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads.html">plot_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
-        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">40</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Number of Mapped Reads in each sample"</span><span class="op">)</span>
+    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_number.html" class="external-link">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span>
+    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Number of Mapped Reads in each sample"</span><span class="op">)</span>
 
 <span class="va">plot</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/plot_mapped_reads-1.png" width="960"></p>
 </div>
-<div class="section level2">
-<h2 id="boxplot">Boxplot<a class="anchor" aria-label="anchor" href="#boxplot"></a>
-</h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span>,
-                                   alpha <span class="op">=</span> <span class="fl">0.8</span>,
-                                   type <span class="op">=</span> <span class="st">"boxplot"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
-        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">40</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>  
+<div class="section level3">
+<h3 id="quality-check">Quality Check<a class="anchor" aria-label="anchor" href="#quality-check"></a>
+</h3>
+<p>The first step to perform when dealing with RNA-seq data is to check the quality of the samples. In ScreenR this can be done using several methods. For example the distribution can be seen using both boxplots or density plots.</p>
+<div class="section level4">
+<h4 id="boxplot-mapped-reads">Boxplot Mapped Reads<a class="anchor" aria-label="anchor" href="#boxplot-mapped-reads"></a>
+</h4>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
+    <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>,
+    type <span class="op">=</span> <span class="st">"boxplot"</span>
+<span class="op">)</span> <span class="op">+</span>
+    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>
+        legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">40</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+    <span class="op">)</span>
 
-<span class="va">plot</span> </code></pre></div>
+<span class="va">plot</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/distribution_mapped_reads%20boxplot-1.png" width="960"></p>
 </div>
-<div class="section level2">
-<h2 id="boxplot-1">Boxplot<a class="anchor" aria-label="anchor" href="#boxplot-1"></a>
-</h2>
+<div class="section level4">
+<h4 id="density-plot">Density plot<a class="anchor" aria-label="anchor" href="#density-plot"></a>
+</h4>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
+    <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>,
+    type <span class="op">=</span> <span class="st">"density"</span>
+<span class="op">)</span> <span class="op">+</span>
+    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>
+
+<span class="va">plot</span></code></pre></div>
+<p><img src="Analysis_Example_files/figure-html/distribution_mapped_reads%20density-1.png" width="960"></p>
+</div>
+<div class="section level4">
+<h4 id="barcode-lost">Barcode Lost<a class="anchor" aria-label="anchor" href="#barcode-lost"></a>
+</h4>
+<p>Moreover another very important quality check when a Genetic Screening is performed is to check the barcode lost during the experiment. ScreenR implements a function able to compute and plot the number of barcodes lost.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span>,
-                                   alpha <span class="op">=</span> <span class="fl">0.5</span>,
-                                   type <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>  </code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="control-genes">Control Genes<a class="anchor" aria-label="anchor" href="#control-genes"></a>
-</h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">object</span><span class="op">@</span><span class="va">data_table</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RPL30"</span>, <span class="st">"PSMA1"</span>, <span class="st">"LUC"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-  
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">Sample</span>, y<span class="op">=</span><span class="va">Frequency</span>, fill<span class="op">=</span><span class="va">Treatment</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.9</span>, outlier.shape <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_jitter.html" class="external-link">geom_jitter</a></span><span class="op">(</span>shape<span class="op">=</span><span class="fl">16</span>, size <span class="op">=</span> <span class="fl">0.7</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="va">Treatment</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">palette</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">palette</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_alpha_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_light</a></span><span class="op">(</span><span class="op">)</span>  <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Normalized Mapped Reads"</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_line</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span>,
-       <span class="co"># axis.text.x = element_text(angle = 25),</span>
-        legend.position <span class="op">=</span> <span class="st">"none"</span>, legend.direction <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span>  <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span>  <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">object</span><span class="op">@</span><span class="va">data_table</span><span class="op">$</span><span class="va">Sample</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="st">"Gene"</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span></code></pre></div>
-<p><img src="Analysis_Example_files/figure-html/Control%20Genes-1.png" width="960"></p>
-</div>
-<div class="section level2">
-<h2 id="barcode-lost">Barcode Lost<a class="anchor" aria-label="anchor" href="#barcode-lost"></a>
-</h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span>  <span class="fu"><a href="../reference/plot_barcode_lost.html">plot_barcode_lost</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>,
-                           palette <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_light</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span>,
-        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">40</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_barcode_lost.html">plot_barcode_lost</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span>
+    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>
+        legend.position <span class="op">=</span> <span class="st">"none"</span>,
+        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">40</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+    <span class="op">)</span>
 <span class="va">plot</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/plot_barcode_lost-1.png" width="960"></p>
 </div>
-<div class="section level2 tabset">
-<h2 class="tabset" id="plot-mds">Plot MDS<a class="anchor" aria-label="anchor" href="#plot-mds"></a>
-</h2>
-<div class="section level3">
-<h3 id="for-sample">For Sample<a class="anchor" aria-label="anchor" href="#for-sample"></a>
-</h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span><span class="op">)</span></code></pre></div>
+<div class="section level4">
+<h4 class="tabset" id="plot-mds">Plot MDS<a class="anchor" aria-label="anchor" href="#plot-mds"></a>
+</h4>
+<p>In order to see compare the samples an initial MDS analysis can be conducted. In ScreenR this can be done using the <em>plot_MDS</em> function as follow.</p>
+<div class="section level5">
+<h5 id="for-sample">For Sample<a class="anchor" aria-label="anchor" href="#for-sample"></a>
+</h5>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span><span class="op">)</span> </code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Plot%20MDS%20Sample-1.png" width="960"></p>
 </div>
-<div class="section level3">
-<h3 id="for-treatment">For Treatment<a class="anchor" aria-label="anchor" href="#for-treatment"></a>
-</h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">GGgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*_"</span>,<span class="st">""</span>, <span class="va">groups</span><span class="op">)</span>
-<span class="va">pal</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1B9E77"</span>, <span class="st">"#D95F02"</span>, <span class="st">"#7570B3"</span>, <span class="st">"#E7298A"</span>, 
-         <span class="st">"#66A61E"</span>, <span class="st">"#E6AB02"</span>, <span class="st">"#A6761D"</span>,<span class="st">"#666666"</span><span class="op">)</span>
-<span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, 
-         palette <span class="op">=</span> <span class="va">pal</span>, 
-         groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">GGgroups</span>,
-                         levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">GGgroups</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<div class="section level5">
+<h5 id="for-treatment">For Treatment<a class="anchor" aria-label="anchor" href="#for-treatment"></a>
+</h5>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">GGgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*_"</span>, <span class="st">""</span>, <span class="va">groups</span><span class="op">)</span>
+
+<span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>
+    screenR_Object <span class="op">=</span> <span class="va">object</span>,
+    groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">GGgroups</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">GGgroups</span><span class="op">)</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Plot%20MDS%20Treatment-1.png" width="960"></p>
 </div>
-<div class="section level3">
-<h3 id="for-day">For Day<a class="anchor" aria-label="anchor" href="#for-day"></a>
-</h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="section level5">
+<h5 id="for-day">For Day<a class="anchor" aria-label="anchor" href="#for-day"></a>
+</h5>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GGgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="va">groups</span><span class="op">)</span>
-<span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, 
-         palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1B9E77"</span>, <span class="st">"#D95F02"</span>, <span class="st">"#7570B3"</span>, <span class="st">"#E7298A"</span><span class="op">)</span>, 
-         groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">GGgroups</span>,
-                         levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">GGgroups</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>
+    screenR_Object <span class="op">=</span> <span class="va">object</span>,
+    groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">GGgroups</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">GGgroups</span><span class="op">)</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Plot%20MDS%20Day-1.png" width="960"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="compute-metrics">Compute Metrics<a class="anchor" aria-label="anchor" href="#compute-metrics"></a>
-</h2>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+</div>
+<div class="section level3">
+<h3 id="statistical-analysis">Statistical Analysis<a class="anchor" aria-label="anchor" href="#statistical-analysis"></a>
+</h3>
+<p>Finally can be conducted the real analysis. The statistical Analysis is based on three methods:</p>
+<ul>
+<li>Z-score filtering</li>
+<li>CAMERA filtering</li>
+<li>ROAST filtering</li>
+</ul>
+<div class="section level4">
+<h4 id="compute-metrics">Compute Metrics<a class="anchor" aria-label="anchor" href="#compute-metrics"></a>
+</h4>
+<p>In order to compute the Z-score, first a list of metrics has to be computed. In particular a <em>Log2FC</em> is computed for the treated vs control samples in the different conditions. Here for example a treated vs control in different day is computed. Then the different distribution of the Z-score can be plotted using the <em>plot_Zscore_distribution</em> function.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># 2DG</span>
 <span class="va">data_with_measure_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, 
-                         treatment <span class="op">=</span> <span class="st">"Met"</span>, day <span class="op">=</span> <span class="st">"Day3"</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, 
-                         treatment <span class="op">=</span> <span class="st">"Met"</span>, day <span class="op">=</span> <span class="st">"Day6"</span><span class="op">)</span><span class="op">)</span>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
+        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, treatment <span class="op">=</span> <span class="st">"Met"</span>,
+        day <span class="op">=</span> <span class="st">"Day3"</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
+        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, treatment <span class="op">=</span> <span class="st">"Met"</span>,
+        day <span class="op">=</span> <span class="st">"Day6"</span>
+    <span class="op">)</span>
+<span class="op">)</span>
 
 
-<span class="fu"><a href="../reference/plot_Zscore_distribution.html">plot_Zscore_distribution</a></span><span class="op">(</span><span class="va">data_with_measure_Met</span>,
-                         alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span>  <span class="op">+</span>
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1B9E77"</span>, <span class="st">"#D95F02"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span> </code></pre></div>
+<span class="fu"><a href="../reference/plot_Zscore_distribution.html">plot_Zscore_distribution</a></span><span class="op">(</span><span class="va">data_with_measure_Met</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/compute_metrics-1.png" width="960"></p>
 </div>
-<div class="section level2">
-<h2 id="z-score-hit">Z-score hit<a class="anchor" aria-label="anchor" href="#z-score-hit"></a>
-</h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="section level4">
+<h4 id="z-score-hit">Z-score hit<a class="anchor" aria-label="anchor" href="#z-score-hit"></a>
+</h4>
+<p>Now that the metrics has been computed the hits according to Z-score can be found. This in ScreenR is done using the <em>find_zscore_hit</em> function.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">zscore_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day3</span>,
-                number_barcode <span class="op">=</span> <span class="fl">7</span>,
-                metric <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day6</span>,
-                number_barcode <span class="op">=</span> <span class="fl">7</span>,
-                metric <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
+        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day3</span>,
+        number_barcode <span class="op">=</span> <span class="fl">7</span>, metric <span class="op">=</span> <span class="st">"median"</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
+        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day6</span>,
+        number_barcode <span class="op">=</span> <span class="fl">7</span>, metric <span class="op">=</span> <span class="st">"median"</span>
+    <span class="op">)</span>
+<span class="op">)</span>
+<span class="va">zscore_hit_Met</span></code></pre></div>
+<pre><code><span class="co">## $Day3</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 30 × 2</span></span>
+<span class="co">##    Gene   numberOfBarcode</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> ASF1A                8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> BRD3                 8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> CBX1                 8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> CBX8                 9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> CHST13               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> EED                  8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> ENO3                 8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> FBP2                 8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> HDAC1                8</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> HERC3                9</span>
+<span class="co">## <span style="color: #949494;"># … with 20 more rows</span></span>
+<span class="co">## </span>
+<span class="co">## $Day6</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 30 × 2</span></span>
+<span class="co">##    Gene   numberOfBarcode</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> ACOX2                9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> BAZ1B                8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> BAZ2B                8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> BRD9                 8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> CHAF1A               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> CLOCK                9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> EP300                8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> GPT                  8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> H2AFV                9</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> HECTD3               9</span>
+<span class="co">## <span style="color: #949494;"># … with 20 more rows</span></span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="camera">CAMERA<a class="anchor" aria-label="anchor" href="#camera"></a>
-</h2>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">groupss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"T0/T48"</span>,<span class="fl">4</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">groups</span><span class="op">[</span><span class="fl">5</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+<div class="section level4">
+<h4 id="camera">CAMERA<a class="anchor" aria-label="anchor" href="#camera"></a>
+</h4>
+<p>The same can be done with the CAMERA hit using the function <em>find_camera_hit</em>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">groupss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
+    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"T0/T48"</span>, <span class="fl">4</span><span class="op">)</span>,
+    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">groups</span><span class="op">[</span><span class="fl">5</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
+<span class="op">)</span>
 
 
-<span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
+<span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>
 
 <span class="va">camera_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>,
-                              matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-                              contrast <span class="op">=</span> <span class="st">"Day3_Met"</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>,
-                              matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-                              contrast <span class="op">=</span> <span class="st">"Day6_Met"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
+        screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
+        contrast <span class="op">=</span> <span class="st">"Day3_Met"</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
+        screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
+        contrast <span class="op">=</span> <span class="st">"Day6_Met"</span>
+    <span class="op">)</span>
+<span class="op">)</span>
+
+<span class="va">camera_hit_Met</span></code></pre></div>
+<pre><code><span class="co">## $Day3</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 281 × 5</span></span>
+<span class="co">##    Gene    NGenes Direction PValue   FDR</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> INPP5E      10 Down      0.013<span style="text-decoration: underline;">1</span> 0.522</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> LDHAL6B     10 Down      0.018<span style="text-decoration: underline;">9</span> 0.674</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> CHD2        10 Down      0.032<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> TRIM43B     10 Down      0.041<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> TRIM9        9 Down      0.044<span style="text-decoration: underline;">7</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> TYMS         9 Down      0.052<span style="text-decoration: underline;">8</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> PDHA2       10 Down      0.058<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> PRDM4       10 Down      0.059<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> HUWE1       10 Down      0.064<span style="text-decoration: underline;">6</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> LUC         32 Down      0.069<span style="text-decoration: underline;">8</span> 0.906</span>
+<span class="co">## <span style="color: #949494;"># … with 271 more rows</span></span>
+<span class="co">## </span>
+<span class="co">## $Day6</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 269 × 5</span></span>
+<span class="co">##    Gene    NGenes Direction PValue   FDR</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> INPP5E      10 Down      0.013<span style="text-decoration: underline;">1</span> 0.779</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> LDHAL6B     10 Down      0.020<span style="text-decoration: underline;">1</span> 0.941</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> CHD2        10 Down      0.028<span style="text-decoration: underline;">5</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> PDHA2       10 Down      0.031<span style="text-decoration: underline;">6</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> TRIM9        9 Down      0.035<span style="text-decoration: underline;">5</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> TYMS         9 Down      0.037<span style="text-decoration: underline;">0</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> TRIM62       9 Down      0.043<span style="text-decoration: underline;">7</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> TRIM43B     10 Down      0.049<span style="text-decoration: underline;">1</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> ME3         10 Down      0.050<span style="text-decoration: underline;">0</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> HUWE1       10 Down      0.058<span style="text-decoration: underline;">4</span> 0.969</span>
+<span class="co">## <span style="color: #949494;"># … with 259 more rows</span></span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="roast">ROAST<a class="anchor" aria-label="anchor" href="#roast"></a>
-</h2>
+<div class="section level4">
+<h4 id="roast">ROAST<a class="anchor" aria-label="anchor" href="#roast"></a>
+</h4>
+<p>Last but not least this is done also for the ROAST hit using the function<br><em>find_roast_hit</em>.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">roast_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>,
-                              matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-                              contrast <span class="op">=</span> <span class="st">"Day3_Met"</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>,
-                              matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-                              contrast <span class="op">=</span> <span class="st">"Day6_Met"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="find-common-hit">Find Common Hit<a class="anchor" aria-label="anchor" href="#find-common-hit"></a>
-</h2>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">common_hit_Met_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
-                         <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, common_in <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
-                         <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, common_in <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
+        screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
+        contrast <span class="op">=</span> <span class="st">"Day3_Met"</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
+        screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
+        contrast <span class="op">=</span> <span class="st">"Day6_Met"</span>
+    <span class="op">)</span>
+<span class="op">)</span>
 
-<span class="va">common_hit_Met_at_least_3</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-  Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
-                         <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, common_in <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,
-  Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
-                         <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, common_in <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<!-- ## Plot Barcode Hit -->
-<!-- ```{r Barcode Hit, fig.height=7, fig.width=10, message=FALSE, warning=FALSE} -->
-<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model) -->
-<!-- plot_barcode_hit(screenR_Object = object, -->
-<!--                  matrix_model = matrix_model, -->
-<!--                  contrast = contrast_Day21_2DG, -->
-<!--                  hit_common = common_hit_2DG_at_least_3$Day21, -->
-<!--                  gene = "KDM1A") -->
-<!-- plot_barcode_trend(list_data_measure = data_with_measure_2DG, -->
-<!--                    genes = c("KDM1A"), -->
-<!--                    n_col = 1,color = ggsci::pal_jco()(10))  -->
-<!-- data_with_measure_2DG$Day21  %>% arrange(Log2FC) %>%  filter(Gene == "KDM1A") -->
-<!-- library(edgeR) -->
-<!-- matrix <- -->
-<!--   as.matrix(data[, 2: dim(data)[2]]) -->
-<!-- rownames(matrix) <- data$Barcode -->
-<!-- DGEList <- DGEList(counts = matrix, -->
-<!--                    group = factor(groups), genes = total_Annotation) -->
-<!-- xglm <- estimateDisp(DGEList, matrix_model) -->
-<!-- fit <- glmFit(xglm, matrix_model) -->
-<!-- contrast_Day21_2DG <- makeContrasts(Day21_2DG-Day21_DMSO, levels=matrix_model) -->
-<!-- lrt_Day21_2DG <- glmLRT(fit, contrast = contrast_Day21_2DG) -->
-<!-- genesymbols <- as.character(DGEList$genes[, 1]) -->
-<!-- genesymbollist2 <- list() -->
-<!-- unq <- unique(genesymbols) -->
-<!-- unq <- unq[!is.na(unq)] -->
-<!-- for(i in unq) { -->
-<!--   sel <- genesymbols == i & !is.na(genesymbols) -->
-<!--   if(sum(sel)>3) -->
-<!--     genesymbollist2[[i]] <- which(sel) -->
-<!-- } -->
-<!-- barcodeplot(statistics = lrt_Day21_2DG$table$logFC, -->
-<!--             index=genesymbollist2[["KDM1A"]], -->
-<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
-<!--  labels=c("Negative logFC", "Positive logFC"), -->
-<!--  quantile=c(-0.5,0.5)) -->
-<!-- prova <- object@annotation_table  %>%  -->
-<!--   select(Gene, Barcode,Library) -->
-<!-- prova <- prova %>%  -->
-<!--   mutate(Barcode = as.numeric(Barcode))  %>%  -->
-<!--   group_by(Gene) %>%  -->
-<!--   split(.$Gene, .$Barcode)  -->
-<!-- prova <- map(.x = prova,.f = function(x){x %>% pull(Barcode)}) -->
-<!-- barcodeplot(lrt_Day21_2DG$table$logFC,index=prova[["KDM1A"]], -->
-<!--  main= paste("Day21: Barcode plot for Gene", "KDM1A", sep = " ") , -->
-<!--  labels=c("Negative logFC", "Positive logFC"), -->
-<!--  quantile=c(-0.5,0.5)) -->
-<!-- ``` -->
+<span class="va">roast_hit_Met</span></code></pre></div>
+<pre><code><span class="co">## $Day3</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 534 × 9</span></span>
+<span class="co">##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> LUC        32        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> PSMA1      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> RPL30      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> SEPT5      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> SEPT9      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> ACAA1      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> ACAA2      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> ACACA      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> ACACB      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> ACAD11     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #949494;"># … with 524 more rows</span></span>
+<span class="co">## </span>
+<span class="co">## $Day6</span>
+<span class="co">## <span style="color: #949494;"># A tibble: 534 × 9</span></span>
+<span class="co">##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> LUC        32        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> PSMA1      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> RPL30      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> SEPT5      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> SEPT9      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> ACAA1      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> ACAA2      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> ACACA      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> ACACB      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> ACAD11     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #949494;"># … with 524 more rows</span></span></code></pre>
+</div>
+<div class="section level4">
+<h4 id="find-common-hit">Find Common Hit<a class="anchor" aria-label="anchor" href="#find-common-hit"></a>
+</h4>
+<p>ScreenR consider as final hit only the one present in common among the three methods. In particular two strategy are possible:</p>
+<ul>
+<li>Are considered candidate Hits the one present in at least two of the three methods</li>
+<li>Are considered candidate Hits the one present in all of the three methods</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">common_hit_Met_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
+        common_in <span class="op">=</span> <span class="fl">2</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
+        common_in <span class="op">=</span> <span class="fl">2</span>
+    <span class="op">)</span>
+<span class="op">)</span>
+
+<span class="va">common_hit_Met_at_least_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
+        common_in <span class="op">=</span> <span class="fl">3</span>
+    <span class="op">)</span>,
+    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
+        common_in <span class="op">=</span> <span class="fl">3</span>
+    <span class="op">)</span>
+<span class="op">)</span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="plot-common-hit">Plot common hit<a class="anchor" aria-label="anchor" href="#plot-common-hit"></a>
+</h4>
+<p>The hits can be easily visualized using the <em>plot_common_hit</em> function.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span>
+    hit_zscore <span class="op">=</span> <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, hit_camera <span class="op">=</span> <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
+    <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>
+<span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## Warning in sprintf("%d", n, 100 * n/sum(n)): one argument not used by format</span>
+<span class="co">## '%d'</span></code></pre>
+<p><img src="Analysis_Example_files/figure-html/Venn%20diagram%20in%20at%20least%202-1.png" width="960"></p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## R version 4.1.2 (2021-11-01)</span>
+<span class="co">## Platform: x86_64-apple-darwin17.0 (64-bit)</span>
+<span class="co">## Running under: macOS Big Sur 10.16</span>
+<span class="co">## </span>
+<span class="co">## Matrix products: default</span>
+<span class="co">## BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib</span>
+<span class="co">## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib</span>
+<span class="co">## </span>
+<span class="co">## locale:</span>
+<span class="co">## [1] it_IT.UTF-8/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8</span>
+<span class="co">## </span>
+<span class="co">## attached base packages:</span>
+<span class="co">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
+<span class="co">## </span>
+<span class="co">## other attached packages:</span>
+<span class="co">## [1] ScreenR_0.1.0  edgeR_3.36.0   limma_3.50.1   magrittr_2.0.2 tidyr_1.2.0   </span>
+<span class="co">## [6] dplyr_1.0.8    ggplot2_3.3.5 </span>
+<span class="co">## </span>
+<span class="co">## loaded via a namespace (and not attached):</span>
+<span class="co">##  [1] tidyselect_1.1.1  locfit_1.5-9.4    xfun_0.29         bslib_0.3.1      </span>
+<span class="co">##  [5] purrr_0.3.4       splines_4.1.2     lattice_0.20-45   colorspace_2.0-3 </span>
+<span class="co">##  [9] vctrs_0.3.8       generics_0.1.2    htmltools_0.5.2   yaml_2.3.5       </span>
+<span class="co">## [13] utf8_1.2.2        rlang_1.0.1       pkgdown_2.0.2     jquerylib_0.1.4  </span>
+<span class="co">## [17] pillar_1.7.0      glue_1.6.1        withr_2.4.3       DBI_1.1.2        </span>
+<span class="co">## [21] lifecycle_1.0.1   stringr_1.4.0     munsell_0.5.0     gtable_0.3.0     </span>
+<span class="co">## [25] ragg_1.2.2        memoise_2.0.1     evaluate_0.15     labeling_0.4.2   </span>
+<span class="co">## [29] knitr_1.37        fastmap_1.1.0     fansi_1.0.2       highr_0.9        </span>
+<span class="co">## [33] Rcpp_1.0.8        scales_1.1.1      cachem_1.0.6      desc_1.4.0       </span>
+<span class="co">## [37] jsonlite_1.7.3    farver_2.1.0      systemfonts_1.0.4 fs_1.5.2         </span>
+<span class="co">## [41] textshaping_0.3.6 digest_0.6.29     stringi_1.7.6     grid_4.1.2       </span>
+<span class="co">## [45] rprojroot_2.0.2   ggvenn_0.1.9      cli_3.2.0         tools_4.1.2      </span>
+<span class="co">## [49] sass_0.4.0        tibble_3.1.6      crayon_1.5.0      pkgconfig_2.0.3  </span>
+<span class="co">## [53] ellipsis_0.3.2    assertthat_0.2.1  rmarkdown_2.11    rstudioapi_0.13  </span>
+<span class="co">## [57] R6_2.5.1          compiler_4.1.2</span></code></pre>
+</div>
 </div>
 </div>
   </div>
@@ -382,7 +547,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>

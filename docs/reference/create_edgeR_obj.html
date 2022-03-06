@@ -36,6 +36,9 @@
       <a href="../articles/Analysis_Example.html">Analysis_Example</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -62,13 +65,61 @@
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>screenR_Object</dt>
-<dd><p>The Object of the package</p></dd>
+<dd><p>The ScreenR object obtained using the
+<code><a href="create_screenR_object.html">create_screenR_object</a></code></p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The edgeR object edgeR</p>
+    <p>The edgeR object</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">'obj'</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">'ScreenR'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">create_edgeR_obj</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> An object of class "DGEList"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $counts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          T0 T48_postPURO Day3_Met_A Day3_Met_B Day3_Met_C Day3_DMSO_A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 329.84259    437.05313  365.28131  438.98590  310.56195   357.71537</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  26.23748     34.59281   20.51319   59.51235   16.67032    49.34005</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 141.21386    156.43298  164.10552  123.52655  132.33355   119.76559</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 355.79896    423.58336  336.41632  423.50391  375.08227   387.65676</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  67.18669     65.71614   82.63885   36.89326   26.34323    58.40681</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Day3_DMSO_B Day3_DMSO_C Day6_Met_A Day6_Met_B Day6_Met_C Day6_DMSO_A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   424.65120   363.06161  323.48640  382.06214  456.79054   338.12714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    17.41192    16.93033   32.46057   15.37962   33.91447    63.18147</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   121.43982   126.87300   14.21549   39.96678   50.70943    43.66670</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   346.46392   361.38947  259.79652  325.90629  280.80853   359.96049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    65.43333    76.81355   35.70663   10.72526   32.53517    12.26918</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Day6_DMSO_B Day6_DMSO_C</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   358.16244   390.75227</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    29.41115    20.28906</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    41.17561    90.38830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   338.11929   274.92213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    43.89886    71.49478</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5315 more rows ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $samples</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                group lib.size norm.factors</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> T0            T0/T48    1e+06            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> T48_postPURO  T0/T48    1e+06            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Day3_Met_A   Treated    1e+06            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Day3_Met_B   Treated    1e+06            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Day3_Met_C   Treated    1e+06            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9 more rows ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $genes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Gene     Gene_ID Barcode           Sequence Library</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 SEPT5 NM_002688.5   10208 CAGTACCATGTGACGTGT hMetab1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 SEPT5 NM_002688.5   10502 CAGTACACCAGTGTCAAC hMetab1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 SEPT5 NM_002688.5   10796 GTGTACACACGTACTGGT hMetab1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 SEPT5 NM_002688.5   11089 CAGTACACTGCACAGTCA hMetab1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 SEPT5 NM_002688.5   11382 CAGTACTGGTCATGCAAC hMetab1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5315 more rows ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -81,7 +132,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

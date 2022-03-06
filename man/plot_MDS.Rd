@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_MDS.R
 \name{plot_MDS}
 \alias{plot_MDS}
-\title{PLot the Sample in vector Space}
+\title{Multidimensional Scaling Plot}
 \usage{
 plot_MDS(
   screenR_Object,
@@ -27,7 +27,7 @@ plot_MDS(
 The MDS Plot
 }
 \description{
-Plot samples on a two or three-dimensional scatterplot so that
+Plot samples on a two-dimensional scatterplot so that
              distances on the plot approximate the typical log2 fold
              changes between the samples.
 }

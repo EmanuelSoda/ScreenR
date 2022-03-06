@@ -35,6 +35,9 @@
       <a href="../articles/Analysis_Example.html">Analysis_Example</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -69,14 +72,29 @@ method</p></dd>
 <dd><p>The matrix obtained by the <code><a href="find_roast_hit.html">find_roast_hit</a></code>
 method</p></dd>
 <dt>common_in</dt>
-<dd><p>Number of method in which the hit should be part at the same
-time</p></dd>
+<dd><p>Number of method in which the hit should be part at
+the same time</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
     <p>A vector containing the common hit</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">hit_zscore</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>Gene <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'C'</span>, <span class="st">'D'</span>, <span class="st">'E'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">hit_camera</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>Gene <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'C'</span>, <span class="st">'F'</span>, <span class="st">'H'</span>, <span class="st">'G'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">hit_roast</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>Gene <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'L'</span>, <span class="st">'N'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># common among all the three methods</span></span>
+<span class="r-in"><span class="fu">find_common_hit</span><span class="op">(</span><span class="va">hit_zscore</span>, <span class="va">hit_camera</span>, <span class="va">hit_roast</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A"</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># common among at least twoo of the three methods</span></span>
+<span class="r-in"><span class="fu">find_common_hit</span><span class="op">(</span><span class="va">hit_zscore</span>, <span class="va">hit_camera</span>, <span class="va">hit_roast</span>, common_in <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A" "B" "C"</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -89,7 +107,7 @@ time</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

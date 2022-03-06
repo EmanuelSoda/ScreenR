@@ -7,13 +7,13 @@
 find_robust_zscore_hit(table_treate_vs_control, number_barcode)
 }
 \arguments{
-\item{table_treate_vs_control}{table computet with the function
+\item{table_treate_vs_control}{A table coomputed with the function
 \code{compute_data_table}}
 
 \item{number_barcode}{Number of barcode to have under the median}
 }
 \value{
-return a tibble containing the hit for the robust Z-score
+Return a tibble containing the hit for the robust Z-score
 }
 \description{
 Title Find robust Z-score Hit

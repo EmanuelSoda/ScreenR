@@ -15,13 +15,15 @@ find_roast_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 
-\item{matrix_model}{the matrix that will be used to perform the
-linear model analysis}
+\item{matrix_model}{The matrix that will be used to perform the
+linear model analysis. Created using
+\code{\link[stats]{model.matrix}}}
 
 \item{contrast}{A vector or a single value indicating the index or the name
-of the column the model_matrix wo which perform the analysis}
+of the column the model_matrix to which perform the analysis}
 
 \item{nrot}{Number of rotation to perform the test}
 
@@ -29,10 +31,10 @@ of the column the model_matrix wo which perform the analysis}
 
 \item{direction}{Direction of variation}
 
-\item{p_val}{P val cut off}
+\item{p_val}{P value cut off}
 }
 \value{
-The hit found by roast
+The hits found by ROAST method
 }
 \description{
 Find the hit using the Roast method

@@ -36,6 +36,9 @@
       <a href="../articles/Analysis_Example.html">Analysis_Example</a>
     </li>
   </ul></li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -66,10 +69,29 @@
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data.frame containing all the information of the variance expressed
-        by the components</p>
+    <p>A data.frame containing all the information of the variance
+        expressed by the components</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">'obj'</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">'ScreenR'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">compute_explained_variance</span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     Name         PC1         PC2         PC3        PC4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     Standard deviation 27020.11492 17798.98865 10637.33427 9752.58832</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Proportion of Variance     0.43304     0.18791     0.06712    0.05642</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  Cumulative Proportion     0.43304     0.62095     0.68807    0.74448</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          PC5        PC6        PC7        PC8        PC9       PC10       PC11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 8498.64745 7915.02711 7755.60776 7359.95708 7126.65824 6787.07374 6274.56580</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.04284    0.03716    0.03568    0.03213    0.03013    0.02732    0.02335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.78733    0.82448    0.86016    0.89229    0.92242    0.94974    0.97309</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         PC12       PC13        PC14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 5190.01211 4293.13649 2.58312e-11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.01598    0.01093 0.00000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.98907    1.00000 1.00000e+00</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -82,7 +104,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer></div>

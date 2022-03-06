@@ -16,14 +16,15 @@ compute_camera(
 )
 }
 \arguments{
-\item{xglm}{object created with \code{link{edgeR::estimateDisp}}}
+\item{xglm}{object created with \code{\link[edgeR]{estimateDisp}}}
 
-\item{lrt}{object created with \code{link{edgeR::glmFit}}}
+\item{lrt}{object created with \code{\link[edgeR]{glmFit}}}
 
 \item{DGEList}{object of edgeR}
 
-\item{matrix_model}{the matrix that will be used to perform the
-linear model analysis}
+\item{matrix_model}{The matrix that will be used to perform the
+linear model analysis. Created using
+\code{\link[stats]{model.matrix}}}
 
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column of model_matrix to which perform the analysis}
@@ -38,6 +39,6 @@ of the column of model_matrix to which perform the analysis}
 The list of hits found by the camera method
 }
 \description{
-Compute the actual hits using camera
+This function computes the actual hits using camera
 }
 \keyword{internal}
