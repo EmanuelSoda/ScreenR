@@ -43,7 +43,7 @@ a matrix containing  reads count organized with:
 For this vignette we will use as an example a Loss of Function Genetic Screening
 Performed on THP1 using Metformin at Day3 and Day6. 
 First of all the data has to be read.
-```{r read data,message=FALSE, warning=FALSE}
+```{r read_data, message=FALSE, warning=FALSE}
 data(CountTable_THP1_CONTROL_vs_MET)
 data(Table_Annotation)
 
@@ -70,7 +70,7 @@ This object will be used to store the most important information to perform
 the analysis. Most of the ScreenR function takes as main input the ScreenR 
 object to perform the needed operation and return a result.
 
-```{r Createe Object, message=FALSE, warning=FALSE}
+```{r Create_Object, message=FALSE, warning=FALSE}
 groups <- colnames(data)[2:length(colnames(data))]
 groups <- gsub("(.*)_\\w+", "\\1", groups)
 groups <- factor(x = groups, levels = unique(groups))
@@ -128,7 +128,7 @@ quality of the samples. In ScreenR this can be done using several methods.
 For example the distribution can be seen using both boxplots or density plots.
 
 ### Boxplot Mapped Reads
-```{r  distribution_mapped_reads boxplot, message=FALSE, warning=FALSE}
+```{r  distribution_mapped_reads_boxplot, message=FALSE, warning=FALSE}
 plot <- distribution_mapped_reads(
     object, palette, alpha = 0.8,
     type = "boxplot"
@@ -142,7 +142,7 @@ plot
 ```
 
 ### Density plot
-```{r  distribution_mapped_reads density, message=FALSE, warning=FALSE}
+```{r  distribution_mapped_reads_density, message=FALSE, warning=FALSE}
 plot <- distribution_mapped_reads(
     object, palette, alpha = 0.5,
     type = "density"
@@ -172,13 +172,13 @@ In order to see compare the samples an initial MDS analysis can be conducted.
 In ScreenR this can be done using the *plot_MDS* function as follow.
 
 #### For Sample
-```{r  Plot MDS Sample, message=FALSE, warning=FALSE}
+```{r  Plot_MDS_Sample, message=FALSE, warning=FALSE}
 plot_MDS(screenR_Object = object) 
 ```
 
 
 #### For Treatment
-```{r  Plot MDS Treatment, message=FALSE, warning=FALSE}
+```{r  Plot_MDS_Treatment, message=FALSE, warning=FALSE}
 GGgroups <- gsub(".*_", "", groups)
 
 plot_MDS(
@@ -188,7 +188,7 @@ plot_MDS(
 ```
 
 #### For Day
-```{r  Plot MDS Day, message=FALSE, warning=FALSE}
+```{r  Plot_MDS_Day, message=FALSE, warning=FALSE}
 GGgroups <- sub("_.*", "", groups)
 plot_MDS(
     screenR_Object = object,
@@ -233,7 +233,7 @@ plot_Zscore_distribution(data_with_measure_Met, alpha = 0.8)
 Now that the metrics has been computed the hits according to Z-score can be 
 found. This in ScreenR is done using the *find_zscore_hit* function.
 
-```{r  Z-score hit, message=FALSE, warning=FALSE}
+```{r  Z_score_hit, message=FALSE, warning=FALSE}
 zscore_hit_Met <- list(
     Day3 = find_zscore_hit(
         table_treate_vs_control = data_with_measure_Met$Day3,
@@ -302,7 +302,7 @@ methods
 * Are considered candidate Hits the one present in all of the three methods
 
 
-```{r Common Hit,  message=FALSE, warning=FALSE}
+```{r Common_Hit,  message=FALSE, warning=FALSE}
 common_hit_Met_at_least_2 <- list(
     Day3 = find_common_hit(
         zscore_hit_Met$Day3, camera_hit_Met$Day3, roast_hit_Met$Day3,
@@ -332,7 +332,7 @@ common_hit_Met_at_least_3 <- list(
 
 The hits can be easily visualized using the *plot_common_hit* function.
 
-```{r Venn diagram in at least 2}
+```{r Venn_diagram_in_at_least_2}
 plot_common_hit(
     hit_zscore = zscore_hit_Met$Day3, hit_camera = camera_hit_Met$Day3,
     roast_hit_Met$Day3
