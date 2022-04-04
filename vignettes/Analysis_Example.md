@@ -50,7 +50,7 @@ First of all the data has to be read.
 data(CountTable_THP1_CONTROL_vs_MET)
 data(Table_Annotation)
 
-data <- tidyr::tibble(CountTable_THP1_CONTROL_vs_MET)
+data <- CountTable_THP1_CONTROL_vs_MET
 colnames(data) <- c(
     "Barcode", "T0", "T48_postPURO", "Day3_Met_A", "Day3_Met_B", "Day3_Met_C",
     "Day3_DMSO_A", "Day3_DMSO_B", "Day3_DMSO_C", "Day6_Met_A", "Day6_Met_B",
@@ -61,9 +61,9 @@ data <- data %>%
     dplyr::filter(Barcode != "*")
 
 
-total_Annotation <- Table_Annotation %>%
-    tibble::tibble() %>%
-    dplyr::mutate(Barcode = as.factor(.$Barcode))
+total_Annotation <- 
+  Table_Annotation %>% 
+  dplyr::mutate(Barcode = as.factor(.$Barcode))
 ```
 
 ## Object Creation 
@@ -150,7 +150,7 @@ plot <- distribution_mapped_reads(
 plot
 ```
 
-![plot of chunk distribution_mapped_reads boxplot](figure/distribution_mapped_reads boxplot-1.png)
+![plot of chunk distribution_mapped_reads_boxplot](figure/distribution_mapped_reads_boxplot-1.png)
 
 ### Density plot
 
@@ -164,7 +164,11 @@ plot <- distribution_mapped_reads(
 plot
 ```
 
+<<<<<<< HEAD
 ![plot of chunk distribution_mapped_reads density](figure/distribution_mapped_reads density-1.png)
+=======
+![plot of chunk distribution_mapped_reads_density](figure/distribution_mapped_reads_density-1.png)
+>>>>>>> develop_2
 
 
 ### Barcode Lost
@@ -194,7 +198,7 @@ In ScreenR this can be done using the *plot_MDS* function as follow.
 plot_MDS(screenR_Object = object) 
 ```
 
-![plot of chunk Plot MDS Sample](figure/Plot MDS Sample-1.png)
+![plot of chunk Plot_MDS_Sample](figure/Plot_MDS_Sample-1.png)
 
 
 #### For Treatment
@@ -208,7 +212,7 @@ plot_MDS(
 )
 ```
 
-![plot of chunk Plot MDS Treatment](figure/Plot MDS Treatment-1.png)
+![plot of chunk Plot_MDS_Treatment](figure/Plot_MDS_Treatment-1.png)
 
 #### For Day
 
@@ -220,7 +224,7 @@ plot_MDS(
 )
 ```
 
-![plot of chunk Plot MDS Day](figure/Plot MDS Day-1.png)
+![plot of chunk Plot_MDS_Day](figure/Plot_MDS_Day-1.png)
 
 ## Statistical Analysis
 Finally can be conducted the real analysis. 
@@ -237,6 +241,24 @@ different conditions. Here for example a treated vs control in different day
 is computed. Then the different distribution of the Z-score can be plotted 
 using the *plot_Zscore_distribution* function. 
 
+<<<<<<< HEAD
+## Statistical Analysis
+Finally can be conducted the real analysis. 
+The statistical Analysis is based on three methods:
+
+* Z-score filtering
+* CAMERA filtering 
+* ROAST filtering 
+
+### Compute Metrics
+In order to compute the Z-score, first a list of metrics has to be computed. 
+In particular a *Log2FC* is computed for the treated vs control samples in the 
+different conditions. Here for example a treated vs control in different day 
+is computed. Then the different distribution of the Z-score can be plotted 
+using the *plot_Zscore_distribution* function. 
+
+=======
+>>>>>>> develop_2
 
 ```r
 # 2DG
@@ -476,11 +498,11 @@ plot_common_hit(
 ```
 
 ```
-## Warning in sprintf("%d", n, 100 * n/sum(n)): un argomento non usato per il
-## formato '%d'
+## Warning in sprintf("%d", n, 100 * n/sum(n)): one argument not used by format
+## '%d'
 ```
 
-![plot of chunk Venn diagram in at least 2](figure/Venn diagram in at least 2-1.png)
+![plot of chunk Venn_diagram_in_at_least_2](figure/Venn_diagram_in_at_least_2-1.png)
 
 
 
@@ -501,7 +523,7 @@ sessionInfo()
 ## LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-## [1] C/it_IT.UTF-8/it_IT.UTF-8/C/it_IT.UTF-8/it_IT.UTF-8
+## [1] C/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
@@ -511,22 +533,19 @@ sessionInfo()
 ## [6] magrittr_2.0.2 tidyr_1.2.0   
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.8        locfit_1.5-9.4    lattice_0.20-45   prettyunits_1.1.1
-##  [5] ps_1.6.0          assertthat_0.2.1  rprojroot_2.0.2   digest_0.6.29    
-##  [9] utf8_1.2.2        R6_2.5.1          evaluate_0.15     highr_0.9        
-## [13] pillar_1.7.0      rlang_1.0.1       rstudioapi_0.13   callr_3.7.0      
-## [17] splines_4.1.2     desc_1.4.0        labeling_0.4.2    devtools_2.4.3   
-## [21] stringr_1.4.0     munsell_0.5.0     compiler_4.1.2    xfun_0.29        
-## [25] pkgconfig_2.0.3   pkgbuild_1.3.1    tidyselect_1.1.1  tibble_3.1.6     
-## [29] roxygen2_7.1.2    ggvenn_0.1.9      fansi_1.0.2       crayon_1.5.0     
-## [33] withr_2.4.3       brio_1.1.3        grid_4.1.2        gtable_0.3.0     
-## [37] lifecycle_1.0.1   DBI_1.1.2         scales_1.1.1      cli_3.2.0        
-## [41] stringi_1.7.6     cachem_1.0.6      farver_2.1.0      fs_1.5.2         
-## [45] remotes_2.4.2     testthat_3.1.2    xml2_1.3.3        ellipsis_0.3.2   
-## [49] generics_0.1.2    vctrs_0.3.8       tools_4.1.2       glue_1.6.1       
-## [53] purrr_0.3.4       processx_3.5.2    pkgload_1.2.4     fastmap_1.1.0    
-## [57] colorspace_2.0-3  sessioninfo_1.2.2 strex_1.4.2       memoise_2.0.1    
-## [61] knitr_1.37        patchwork_1.1.1   usethis_2.1.5
+##  [1] Rcpp_1.0.8.3     highr_0.9        pillar_1.7.0     compiler_4.1.2  
+##  [5] tools_4.1.2      digest_0.6.29    testthat_3.1.2   pkgload_1.2.4   
+##  [9] evaluate_0.15    gtable_0.3.0     lifecycle_1.0.1  tibble_3.1.6    
+## [13] lattice_0.20-45  pkgconfig_2.0.3  rlang_1.0.2      strex_1.4.2     
+## [17] cli_3.2.0        DBI_1.1.2        rstudioapi_0.13  patchwork_1.1.1 
+## [21] xfun_0.30        withr_2.5.0      stringr_1.4.0    roxygen2_7.1.2  
+## [25] xml2_1.3.3       knitr_1.37       generics_0.1.2   desc_1.4.1      
+## [29] vctrs_0.3.8      grid_4.1.2       locfit_1.5-9.5   rprojroot_2.0.2 
+## [33] tidyselect_1.1.2 glue_1.6.2       R6_2.5.1         fansi_1.0.2     
+## [37] ggvenn_0.1.9     farver_2.1.0     purrr_0.3.4      splines_4.1.2   
+## [41] scales_1.1.1     ellipsis_0.3.2   assertthat_0.2.1 colorspace_2.0-3
+## [45] labeling_0.4.2   utf8_1.2.2       stringi_1.7.6    munsell_0.5.0   
+## [49] crayon_1.5.0     brio_1.1.3
 ```
 
 

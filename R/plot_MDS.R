@@ -3,6 +3,7 @@
 #'              distances on the plot approximate the typical log2 fold
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
+#'                       \code{\link{create_screenR_object}}
 #' @param groups The vector to fill the plot
 #' @param alpha The opacity of the labels
 #' @param size The dimension of the labels

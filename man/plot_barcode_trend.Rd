@@ -22,7 +22,11 @@ different time point}
 
 \item{size_line}{Rhe dimension of the line}
 
+<<<<<<< HEAD
 \item{color}{A color palette for the plot}
+=======
+\item{color}{Vector of colors}
+>>>>>>> develop_2
 }
 \value{
 The rend plot for the genes in input

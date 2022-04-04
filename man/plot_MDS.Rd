@@ -13,7 +13,8 @@ plot_MDS(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The Object of the package
+\code{\link{create_screenR_object}}}
 
 \item{groups}{The vector to fill the plot}
 
