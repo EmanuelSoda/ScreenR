@@ -1,10 +1,10 @@
-# ScreenR 0.1.1
+# ScreenR 0.99.1
 
 # ScreenR NEWS Report
 
-* Changes in version 0.1.0:
+* Changes in version 0.99.0:
   * Submitted to Bioconductor 
   
-* Changes in version 0.1.1:
+* Changes in version 0.99.1:
   * Fixed some bug 
 
