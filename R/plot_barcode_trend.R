@@ -7,11 +7,7 @@
 #' @param n_col The number of column to use in the facet wrap
 #' @param size_line Rhe dimension of the line
 #' @param genes Vector of genes name
-<<<<<<< HEAD
-#' @param color A color palette for the plot
-=======
 #' @param color Vector of colors
->>>>>>> develop_2
 #' @return The rend plot for the genes in input
 #' @export
 #'
