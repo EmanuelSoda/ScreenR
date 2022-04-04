@@ -11,14 +11,14 @@ create_test_object <- function() {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    CountTable_THP1_CONTROL_vs_MET <- CountTable_THP1_CONTROL_vs_MET %>%
+    data <- CountTable_THP1_CONTROL_vs_MET %>%
         dplyr::filter(Barcode != "*")
 
-    colnames(CountTable_THP1_CONTROL_vs_MET) <- c("Barcode", "T0",
+    colnames(data) <- c("Barcode", "T0",
         "T48_postPURO", "Day3_Met_A", "Day3_Met_B", "Day3_Met_C", "Day3_DMSO_A",
         "Day3_DMSO_B", "Day3_DMSO_C", "Day6_Met_A", "Day6_Met_B", "Day6_Met_C",
         "Day6_DMSO_A", "Day6_DMSO_B", "Day6_DMSO_C")
-    obj <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    obj <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     obj <- normalize_data(obj)
     obj <- compute_data_table(obj)

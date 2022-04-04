@@ -11,11 +11,11 @@ mapped_reads(screenR_Object)
 \code{\link{create_screenR_object}}}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped read for sample
 }
 \description{
-This function perform plot the number of reads mapped for each
-             sample.
+This function returns the number of mapped reads inside the
+             screenR object
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

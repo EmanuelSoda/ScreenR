@@ -17,7 +17,8 @@ plot_mapped_reads(
 
 \item{palette}{A vector of color}
 
-\item{alpha}{The alpha parameter for the opacity of the plot}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
 \item{legende_position}{Where to positioning the legend of the plot}
 }
@@ -25,7 +26,7 @@ plot_mapped_reads(
 return a ggplot object
 }
 \description{
-This function perform plot the number of reads mapped for each
+This function plots the number of reads mapped for each
              sample.
 }
 \examples{

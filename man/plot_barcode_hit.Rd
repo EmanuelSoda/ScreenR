@@ -15,24 +15,25 @@ plot_barcode_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 
 \item{matrix_model}{the matrix that will be used to perform the
 linear model analysis}
 
-\item{contrast}{An object created with makeContrasts
-function}
+\item{contrast}{An object created with \code{\link[limma]{makeContrasts}}
+function.}
 
 \item{number_barcode}{Number of barcode to have under the median}
 
-\item{gene}{a single gene to plot}
+\item{gene}{A  gene name to plot}
 
 \item{quantile}{Quantile to display on the plot}
 
 \item{labels}{Title of the plot}
 }
 \value{
-A vector containing the common hit
+The barcode plot
 }
 \description{
 Create a Barcode plot for the Hit

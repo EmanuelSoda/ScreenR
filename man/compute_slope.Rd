@@ -2,13 +2,13 @@
 % Please edit documentation in R/filter_by.R
 \name{compute_slope}
 \alias{compute_slope}
-\title{Compute Slope for Gene}
+\title{Compute Slope of a Gene}
 \usage{
 compute_slope(screenR_Object, genes, group_var)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-create_screenR_object}
+\code{\link{create_screenR_object}}}
 
 \item{genes}{The genes for which the slope as to be computed. Those genes are
 the result of the three statistical methods selection}
@@ -19,7 +19,7 @@ the result of the three statistical methods selection}
 A tibble containing in each row the gene and the corresponding Slope
 }
 \description{
-This function is used to compute the slope of the genes passed
+This function is used to compute the slope of the gene passed
              as input
 }
 \examples{

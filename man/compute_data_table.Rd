@@ -2,18 +2,20 @@
 % Please edit documentation in R/compute_data_table.R
 \name{compute_data_table}
 \alias{compute_data_table}
-\title{Create the ScreenR Object}
+\title{Compute data Table}
 \usage{
 compute_data_table(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 }
 \value{
-screenR_Object
+ScreenR_Object with the data_table filed containing the table.
 }
 \description{
-Initial function to create the Screen Object.
+This function computes the data table that will be used
+             for the analysis.
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

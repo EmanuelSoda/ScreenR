@@ -17,14 +17,16 @@ plot_trend(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 
 \item{genes}{The vector of genes to use}
 
 \item{group_var}{The variable that as to be used to filter the data, for
 example the different treatment}
 
-\item{alpha}{The opacity of the regression line}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
 \item{se}{A boolean to indicate where or not to plot the standard error}
 
@@ -40,8 +42,7 @@ example the different treatment}
 The the plot of the
 }
 \description{
-This function plot the trend of a gene resulted as hit of the
-             analysis
+This function plot the trend of a gene resulted as hit
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_barcode_trend.R
 \name{plot_barcode_trend}
 \alias{plot_barcode_trend}
-\title{Plot the trend over time of the Barcode}
+\title{Plot the trend over time of the Barcodes}
 \usage{
 plot_barcode_trend(
   list_data_measure,
@@ -16,18 +16,18 @@ plot_barcode_trend(
 \item{list_data_measure}{A list containing the measure table of the
 different time point}
 
-\item{genes}{vector of genes name}
+\item{genes}{Vector of genes name}
 
-\item{n_col}{The number of col to use in the facette wrap}
+\item{n_col}{The number of column to use in the facet wrap}
 
-\item{size_line}{the dimension of the line}
+\item{size_line}{Rhe dimension of the line}
 
-\item{color}{vector of colors}
+\item{color}{Vector of colors}
 }
 \value{
-The the plot of the
+The rend plot for the genes in input
 }
 \description{
-Plot the log2FC over time of the barcode in the different
-time point
+Plot the log2FC over time of the barcodes in the different
+             time point
 }

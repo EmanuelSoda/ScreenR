@@ -14,12 +14,13 @@ filter_by_variance(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-create_screenR_object}
+\code{\link{create_screenR_object}}}
 
-\item{genes}{The genes for which the slope as to be computed. Those genes are
-the result of the three statistical methods selection}
+\item{genes}{The genes for which the variance as to be computed.
+Those genes are the result of the three statistical
+methods selection}
 
-\item{matrix_model}{a matrix created using model.matrix}
+\item{matrix_model}{a matrix created using \code{\link[stats]{model.matrix}}}
 
 \item{variance}{The maximum value of variance accepted}
 
@@ -32,8 +33,8 @@ A data frame with the variance for the treatment and the control
 }
 \description{
 This function is used to improve the quality of the hits.
-             It compute the variance of the hits and filter the one with a
-             value greater than the treashold set
+             It compute the variance among the hits and filter the one with a
+             value greater than the threshold set
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

@@ -7,10 +7,11 @@
 create_edgeR_obj(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenR_object}}}
 }
 \value{
-The edgeR object edgeR
+The edgeR object
 }
 \description{
 Utility function that using the screenR-class
@@ -19,4 +20,5 @@ Utility function that using the screenR-class
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))
 create_edgeR_obj(obj)
+
 }

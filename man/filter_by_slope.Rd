@@ -15,27 +15,27 @@ filter_by_slope(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-create_screenR_object}
+\code{\link{create_screenR_object}}}
 
 \item{genes}{The genes for which the slope as to be computed. Those genes are
 the result of the three statistical methods selection}
 
 \item{group_var_treatment}{The variable to use as X for the linear model
-for the Treatment}
+of the treatment}
 
 \item{group_var_control}{The variable to use as X for the linear model
-for the the control}
+of the the control}
 
-\item{slope_control}{The control slope}
+\item{slope_control}{The control slope threshold}
 
-\item{slope_treatment}{The treatment slope}
+\item{slope_treatment}{The treatment slope threshold}
 }
 \value{
 A data frame with the slope for the treatment and the control
         for each gene
 }
 \description{
-This function is used to improve the quality of the hits.
+This function is used to improve the quality of the hits found.
              It computes a regression line in the different samples ad uses
              the slope of this line to see the trend
 }

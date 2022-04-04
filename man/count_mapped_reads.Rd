@@ -11,7 +11,7 @@ count_mapped_reads(screenR_Object)
 \code{\link{create_screenR_object}}}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped read for sample
 }
 \description{
 This function counts the number of reads for Barcode

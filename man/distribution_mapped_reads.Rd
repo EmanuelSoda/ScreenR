@@ -17,17 +17,18 @@ distribution_mapped_reads(
 
 \item{palette}{The color vector for the plot.}
 
-\item{alpha}{The opacity of the plot.}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
-\item{type}{The type of plot. THe default is boxplot the other option is
-density.}
+\item{type}{The type of plot. The default is "boxplot" the other option is
+"density."}
 }
 \value{
-return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped read for sample
 }
 \description{
-Create a boxplot to show the distribution of the mapped reads
-             in different sample
+This function creates a boxplot to show the distribution of
+             the mapped reads in different samples.
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

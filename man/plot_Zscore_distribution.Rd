@@ -10,14 +10,15 @@ plot_Zscore_distribution(time_point_measure, alpha = 1)
 \item{time_point_measure}{A list containing the table for each time
 point}
 
-\item{alpha}{the alpha value for the plot}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 }
 \value{
 return the density plot of the distribution of the Z-score
 }
 \description{
-This function plot the distribution of the Z-score of the
-             Log2FC of the treated vs control in the different timepoint
+This function plots the Log2FC Z-score distribution of the
+             treated vs control in the different time points.
 }
 \examples{
 obj <- get0('obj', envir = asNamespace('ScreenR'))

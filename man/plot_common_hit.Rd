@@ -19,13 +19,14 @@ plot_common_hit(
 )
 }
 \arguments{
-\item{hit_zscore}{The list of hits of the Z-score method}
+\item{hit_zscore}{The list of hits of the \code{\link{find_zscore_hit}}}
 
-\item{hit_camera}{The list of hits of the CAMERA method}
+\item{hit_camera}{The list of hits of the \code{\link{find_camera_hit}}}
 
-\item{hit_roast}{The list of hits of the ROAST method}
+\item{hit_roast}{The list of hits of the \code{\link{find_roast_hit}}}
 
-\item{alpha}{The opacity of the color}
+\item{alpha}{A value for the opacity of the plot.
+Allowed values are in the range 0 to 1}
 
 \item{stroke_size}{Stroke size for drawing circles}
 
@@ -45,7 +46,8 @@ plot_common_hit(
 A vector containing the common hit
 }
 \description{
-This method plot the hit in common between the three methods
+This method plot the hits in common among the three methods is
+             a wrapper for the \code{\link[ggvenn]{ggvenn}} function.
 }
 \examples{
 hit_zscore <- tibble(Gene = c('A', 'B', 'C', 'D', 'E'))

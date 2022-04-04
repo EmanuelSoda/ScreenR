@@ -11,12 +11,12 @@ normalize_data(screenR_Object)
 \code{\link{create_screenR_object}}}
 }
 \value{
-return the screenR object with the normalize data
+Return the screenR object with the normalize data
 }
 \description{
 This function perform a normalization on the data considering
-             the fact that Barcode has a defined length so they will not
-             influence the data. So, basically is computed the sum for
+             the fact that Barcodes have a defined length so this will not
+             influence the data. Basically is computed the sum for
              each row and then multiply by 1e6. At the end we will obtain a
              sort of transcript per million.
 }
