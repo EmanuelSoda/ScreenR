@@ -1,3 +1,4 @@
+*.html
 /Users/ieo5571/Documents/IEO/Stage/ScreenR/Rproj.user
 /Users/ieo5571/Documents/IEO/Stage/ScreenR/.Rhistory
 /Users/ieo5571/Documents/IEO/Stage/ScreenR/.RData
@@ -6,5 +7,5 @@ inst/doc
 .docs
 /doc/
 /Meta/
-/Users/ieo5571/Documents/IEO/Stage/ScreenR/.DS_Store
-/Users/ieo5571/Documents/IEO/Stage/ScreenR/ScreenR.Rproj
+.DS_Store
+/Users/ieo5571/Documents/IEO/Stage/ScreenR/ScreenR.Rprojx
