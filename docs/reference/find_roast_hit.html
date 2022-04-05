@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ScreenR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.2</span>
       </span>
     </div>
 
@@ -26,7 +26,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -102,20 +102,20 @@ of the column the model_matrix to which perform the analysis</p></dd>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">find_roast_hit</span><span class="op">(</span><span class="va">obj</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>, contrast <span class="op">=</span> <span class="st">'Treated'</span><span class="op">)</span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>3rows with all zero counts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 24 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 22 × 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Gene   NGenes PropDown PropUp Direction PValue   FDR PValue.Mixed FDR.Mixed</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> HERC3      10    0.7      0   Down      0.001  0.454       0.000<span style="text-decoration: underline;">9</span>     0.414</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> ACOX2      10    0.4      0   Down      0.003  0.454       0.016<span style="text-decoration: underline;">2</span>     0.734</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> TRIM15     10    0.2      0   Down      0.004  0.454       0.388      0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> PCMT1      10    0.4      0.1 Down      0.005<span style="text-decoration: underline;">6</span> 0.454       0.002<span style="text-decoration: underline;">6</span>     0.454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> TKTL1      10    0.1      0   Down      0.010<span style="text-decoration: underline;">2</span> 0.557       0.311      0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> EP300      10    0.4      0   Down      0.010<span style="text-decoration: underline;">8</span> 0.557       0.001<span style="text-decoration: underline;">6</span>     0.414</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> SDHB       10    0.2      0   Down      0.011<span style="text-decoration: underline;">7</span> 0.557       0.254      0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> CHST13     10    0.4      0   Down      0.012  0.557       0.004<span style="text-decoration: underline;">6</span>     0.486</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> TRIM71      9    0.111    0   Down      0.013<span style="text-decoration: underline;">6</span> 0.557       0.385      0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> SIN3B      10    0.3      0   Down      0.018<span style="text-decoration: underline;">7</span> 0.608       0.317      0.852</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 14 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> HERC3      10    0.7      0   Down      0.000<span style="text-decoration: underline;">8</span> 0.400       0.000<span style="text-decoration: underline;">7</span>     0.347</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> ACOX2      10    0.4      0   Down      0.002<span style="text-decoration: underline;">3</span> 0.536       0.015<span style="text-decoration: underline;">6</span>     0.738</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> TRIM15     10    0.2      0   Down      0.005<span style="text-decoration: underline;">3</span> 0.536       0.390      0.843</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> PCMT1      10    0.4      0.1 Down      0.007<span style="text-decoration: underline;">8</span> 0.536       0.002<span style="text-decoration: underline;">5</span>     0.436</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> TKTL1      10    0.1      0   Down      0.009<span style="text-decoration: underline;">2</span> 0.536       0.316      0.843</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> SDHB       10    0.2      0   Down      0.009<span style="text-decoration: underline;">9</span> 0.536       0.258      0.843</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> CHST13     10    0.4      0   Down      0.010<span style="text-decoration: underline;">8</span> 0.536       0.004<span style="text-decoration: underline;">8</span>     0.507</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> EP300      10    0.4      0   Down      0.012<span style="text-decoration: underline;">2</span> 0.536       0.002      0.436</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> TRIM71      9    0.111    0   Down      0.014<span style="text-decoration: underline;">7</span> 0.536       0.379      0.843</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> SIN3B      10    0.3      0   Down      0.017<span style="text-decoration: underline;">5</span> 0.582       0.310      0.843</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 12 more rows</span></span>
 </code></pre></div>
     </div>
   </div>
@@ -130,7 +130,8 @@ of the column the model_matrix to which perform the analysis</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
       </footer></div>

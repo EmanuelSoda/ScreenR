@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com")
 Description: The aim of ScreenR is to help in the analysis of 

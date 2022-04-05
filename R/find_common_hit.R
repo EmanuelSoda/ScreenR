@@ -77,6 +77,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
 #' hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
 #' plot_common_hit(hit_zscore, hit_camera, hit_roast)
+
 plot_common_hit <- function(hit_zscore, hit_camera,
     hit_roast, alpha = 0.5, stroke_size = 0.5, set_name_size = 4,
     text_color = "black", text_size = 4, show_percentage = FALSE,
