@@ -18,10 +18,10 @@
 #' # common among all the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast)
 #'
-#' # common among at least twoo of the three methods
+#' # common among at least two of the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
 
-find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 2) {
+find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     # First we gets all the Gene name of the different table
     hit_zscore_Gene <- as.vector(hit_zscore$Gene)
     hit_camera_Gene <- as.vector(hit_camera$Gene)

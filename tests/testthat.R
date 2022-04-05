@@ -276,7 +276,8 @@ test_that("find_common_hit 2", {
      find_common_hit <-
          find_common_hit(hit_zscore, hit_camera, hit_zscore,
                          common_in = 2)
-    expect_equal(class(find_common_hit), "character")
+    #expect_equal(class(find_common_hit), "character")
+    expect_equal(find_common_hit, c("A","B", "C"))
 })
 
 test_that("find_common_hit 3", {
@@ -285,7 +286,8 @@ test_that("find_common_hit 3", {
     hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
 
     find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore)
-    expect_equal(class(find_common_hit), "character")
+    #expect_equal(class(find_common_hit), "character")
+    expect_equal(find_common_hit, c("A"))
 })
 
 
