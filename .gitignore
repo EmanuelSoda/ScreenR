@@ -10,4 +10,4 @@ ScreenR.Rproj
 **/doc/
 **/Meta/
 **/*.html
-.Rproj.user
+*.Rproj.user
