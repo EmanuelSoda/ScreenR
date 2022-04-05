@@ -1,6 +1,6 @@
 library(testthat)
 library(ScreenR)
-
+data <- CountTable_THP1_CONTROL_vs_MET
 create_test_object <- function() {
     groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
@@ -11,7 +11,7 @@ create_test_object <- function() {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    data <- CountTable_THP1_CONTROL_vs_MET %>%
+    data <- data %>%
         dplyr::filter(Barcode != "*")
 
     colnames(data) <- c("Barcode", "T0",
@@ -33,7 +33,7 @@ test_that("Creation of the screenR object", {
     groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     expect_s4_class(object = object, class = "screenR_object")
 })
@@ -47,7 +47,7 @@ test_that("Normalize Data", {
         "Control", "Control", "Control"))
 
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
 
     object <- normalize_data(object)
@@ -60,7 +60,7 @@ test_that("Number mapped reads", {
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     mapped <- mapped_reads(object)
 
@@ -79,7 +79,7 @@ test_that("Plot number mapped reads", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     plot <- plot_mapped_reads(object, palette)
     expect_equal(class(plot)[2], "ggplot")
@@ -92,7 +92,7 @@ test_that("Plot number mapped reads", {
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     plot <- plot_mapped_reads(object, NULL)
     expect_equal(class(plot)[2], "ggplot")
@@ -109,7 +109,7 @@ test_that("Boxplot mapped reads", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     plot <- distribution_mapped_reads(object, palette, alpha = 0.8,
         type = "boxplot")
@@ -127,7 +127,7 @@ test_that("Density mapped reads", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     plot <- distribution_mapped_reads(object, palette, alpha = 0.8,
         type = "density")
@@ -146,7 +146,7 @@ test_that("Number of Barcode Lost", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     barcode_lost <- barcode_lost(object)
     expect_equal(is_tibble(barcode_lost), TRUE)
@@ -163,7 +163,7 @@ test_that("Plot number of Barcode Lost", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
 
     plot <- plot_barcode_lost(screenR_Object = object, palette = palette)
@@ -181,7 +181,7 @@ test_that("Create data_table", {
         "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
         "#66A61E", "#66A61E", "#66A61E")
 
-    object <- create_screenR_object(table = CountTable_THP1_CONTROL_vs_MET,
+    object <- create_screenR_object(table = data,
         annotation = Table_Annotation, groups = groups, replicates = c(""))
     object <- normalize_data(object)
 
@@ -284,8 +284,7 @@ test_that("find_common_hit 3", {
     hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
     hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
 
-    find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore,
-        common_in = 3)
+    find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore)
     expect_equal(class(find_common_hit), "character")
 })
 
