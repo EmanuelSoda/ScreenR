@@ -1,11 +1,13 @@
-**/*.html
+.DS_Store
+ScreenR.Rproj
+.Rhistory
+
 **/Rproj.user
-**/.Rhistory
 **/.RData
 **/.Ruserdata
 **/inst/doc
 **/.docs
 **/doc/
 **/Meta/
-**/.DS_Store
-**/ScreenR.Rproj
+**/*.html
+.Rproj.user
