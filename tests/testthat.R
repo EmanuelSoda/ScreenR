@@ -196,7 +196,10 @@ test_that("Compute Metrics ", {
     library(tibble)
     object <- create_test_object()
 
-
+    # In order to speed up the test we will compute the metrics only for a
+    # subset of the genes
+    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6")
+    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
     table <- compute_metrics(object, treatment = "Met", control = "DMSO",
         day = "Day3")
     expect_equal(class(table)[1], "tbl_df")
@@ -207,11 +210,15 @@ test_that("Hit Z-score per giorno", {
     library(tibble)
     object <- create_test_object()
 
+    # In order to speed up the test we will compute the metrics only for a
+    # subset of the genes
+    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6", "GLS")
+    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
+
     table <- compute_metrics(object, treatment = "Met", control = "DMSO",
         day = "Day3")
 
-
-    hit_table <- find_zscore_hit(table, 6)
+    hit_table <- find_zscore_hit(table, number_barcode = 2)
     expect_equal(class(hit_table)[1], "tbl_df")
 })
 
@@ -254,6 +261,7 @@ test_that("ROAST", {
 
     matrix <- model.matrix(~object@groups)
     colnames(matrix) <- c("Control", "T0/T48", "Treated")
+
     roast_hit <- suppressWarnings(find_roast_hit(screenR_Object = object,
         matrix_model = matrix, contrast = "Treated"))
     expect_equal(class(roast_hit)[[1]], "tbl_df")
@@ -261,44 +269,21 @@ test_that("ROAST", {
 
 
 test_that("find_common_hit 2", {
-    library(tibble)
-    object <- create_test_object()
+     hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
+     hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
+     hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
 
-    matrix <- model.matrix(~object@groups)
-    colnames(matrix) <- c("Control", "T0_T48", "Treated")
-    hit_roast <- suppressWarnings(find_roast_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-    hit_camera <- suppressWarnings(find_camera_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-
-
-    t
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = "Day3")
-
-
-    hit_zscore <- find_zscore_hit(table, number_barcode = 6)
-    find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore,
-        common_in = 2)
+     find_common_hit <-
+         find_common_hit(hit_zscore, hit_camera, hit_zscore,
+                         common_in = 2)
     expect_equal(class(find_common_hit), "character")
 })
 
 test_that("find_common_hit 3", {
-    library(tibble)
-    object <- create_test_object()
+    hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
+    hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
+    hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
 
-    matrix <- model.matrix(~object@groups)
-    colnames(matrix) <- c("Control", "T0_T48", "Treated")
-    hit_roast <- suppressWarnings(find_roast_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-    hit_camera <- suppressWarnings(find_camera_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = "Day3")
-
-
-    hit_zscore <- find_zscore_hit(table, number_barcode = 6)
     find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore,
         common_in = 3)
     expect_equal(class(find_common_hit), "character")
@@ -306,32 +291,16 @@ test_that("find_common_hit 3", {
 
 
 test_that("Plot common Hit", {
-    library(tibble)
-    object <- create_test_object()
-
-    matrix <- model.matrix(~object@groups)
-    colnames(matrix) <- c("Control", "T0_T48", "Treated")
-
-    hit_roast <- suppressWarnings(find_roast_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-    hit_camera <- suppressWarnings(find_camera_hit(screenR_Object = object,
-        matrix_model = matrix, contrast = "Treated"))
-
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = c("Day3"))
-
-
-    hit_zscore <- find_zscore_hit(table, number_barcode = 6)
-    find_common_hit <- find_common_hit(hit_zscore, hit_camera, hit_zscore,
-        common_in = 2)
-
+    hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E', 'F', 'J', 'L'))
+    hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G', 'L'))
+    hit_roast <- data.frame(Gene = c('A', 'L', 'N', 'F', 'J'))
     plot <- suppressWarnings(plot_common_hit(hit_zscore, hit_camera, hit_zscore,
         show_percentage = FALSE))
 
     expect_equal("gg", class(plot)[1])
 })
 
-test_that("Find_Score_hit mean ", {
+test_that("Find_Score_hit mean", {
     library(tibble)
     object <- create_test_object()
 

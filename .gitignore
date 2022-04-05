@@ -10,3 +10,4 @@ doc/
 Meta/
 *.html
 *.Rproj.user
+.Rproj.user
