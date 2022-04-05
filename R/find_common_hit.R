@@ -7,7 +7,7 @@
 #' @param hit_roast The matrix obtained by the \code{\link{find_roast_hit}}
 #'                  method
 #' @param common_in Number of method in which the hit should be part at
-#'                  the same time
+#'                  the same time. The default value is 3
 #' @return A vector containing the common hit
 #' @export
 #' @examples

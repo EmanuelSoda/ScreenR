@@ -17,7 +17,7 @@ method}
 method}
 
 \item{common_in}{Number of method in which the hit should be part at
-the same time}
+the same time. The default value is 3}
 }
 \value{
 A vector containing the common hit

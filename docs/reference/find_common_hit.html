@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ScreenR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.3</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@ method</p></dd>
 method</p></dd>
 <dt>common_in</dt>
 <dd><p>Number of method in which the hit should be part at
-the same time</p></dd>
+the same time. The default value is 3</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -90,7 +90,7 @@ the same time</p></dd>
 <span class="r-in"><span class="fu">find_common_hit</span><span class="op">(</span><span class="va">hit_zscore</span>, <span class="va">hit_camera</span>, <span class="va">hit_roast</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A"</span>
 <span class="r-in"></span>
-<span class="r-in"><span class="co"># common among at least twoo of the three methods</span></span>
+<span class="r-in"><span class="co"># common among at least two of the three methods</span></span>
 <span class="r-in"><span class="fu">find_common_hit</span><span class="op">(</span><span class="va">hit_zscore</span>, <span class="va">hit_camera</span>, <span class="va">hit_roast</span>, common_in <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A" "B" "C"</span>
 </code></pre></div>
