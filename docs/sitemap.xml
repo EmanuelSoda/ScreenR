@@ -37,6 +37,9 @@
     <loc>/reference/Table_Annotation.html</loc>
   </url>
   <url>
+    <loc>/reference/annotation_table.html</loc>
+  </url>
+  <url>
     <loc>/reference/barcode_lost.html</loc>
   </url>
   <url>
@@ -59,6 +62,9 @@
   </url>
   <url>
     <loc>/reference/count_mapped_reads.html</loc>
+  </url>
+  <url>
+    <loc>/reference/count_table.html</loc>
   </url>
   <url>
     <loc>/reference/create_edgeR_obj.html</loc>

@@ -1,4 +1,4 @@
-# ScreenR 0.99.3
+# ScreenR 0.99.4
 
 # ScreenR NEWS Report
 
@@ -14,3 +14,6 @@
 * Changes in version 0.99.3:
   * Fixed some other bug 
   * Changed find_common_hit
+
+* Changes in version 0.99.4:
+  * Changed dataframe for the example

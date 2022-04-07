@@ -9,7 +9,7 @@
 #' @importFrom rlang .data
 #' @importFrom purrr map
 #' @return Return the table containing  the list of barcodes mapped in each of
-#'         the samples (a cound table).
+#'         the samples (a count table).
 #'
 #' @export
 
