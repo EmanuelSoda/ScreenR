@@ -18,6 +18,6 @@ This function returns the number of mapped reads inside the
              screenR object
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-mapped_reads(obj)
+object <- get0('object', envir = asNamespace('ScreenR'))
+mapped_reads(object)
 }

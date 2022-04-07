@@ -31,8 +31,8 @@ Returns a tibble containing the number of mapped read for sample
 This function plots the number of barcodes lost in each sample
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
-plot_barcode_lost(obj)
+plot_barcode_lost(object)
 }
 \concept{plot}

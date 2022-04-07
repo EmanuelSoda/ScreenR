@@ -16,13 +16,16 @@
 #' @export
 #'
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' distribution_mapped_reads(obj)
+#' # Boxplot
+#' distribution_mapped_reads(object)
 #'
-#' distribution_mapped_reads(obj, type = 'density')
+#' # Density
+#' distribution_mapped_reads(object, type = 'density')
 #'
-#' distribution_mapped_reads(obj, type = 'density', alpha = 0.5)
+#  # Density changing also alpha
+#' distribution_mapped_reads(object, type = 'density', alpha = 0.2)
 
 distribution_mapped_reads <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {

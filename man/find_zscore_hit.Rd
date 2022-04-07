@@ -22,13 +22,15 @@ Return a tibble containing the hit for the Z-score
 Title Find Z-score Hit
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-table <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
-                         day = 'Day3')
+object <- get0('object', envir = asNamespace('ScreenR'))
+table <- compute_metrics(object, control = 'TRT', treatment = 'Time3',
+                         day = 'Time3')
 
 # For the the median
-find_zscore_hit(table, number_barcode = 6)
+result <- find_zscore_hit(table, number_barcode = 6)
+head(result)
 
 # For the mean
-find_zscore_hit(table, number_barcode = 6, metric = 'mean')
+result <- find_zscore_hit(table, number_barcode = 6, metric = 'mean')
+head(result)
 }

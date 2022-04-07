@@ -58,10 +58,7 @@ data <- data %>%
     dplyr::filter(Barcode != "*")
 
 
-total_Annotation <- 
-  annotation_table %>% 
-  dplyr::mutate(Barcode = as.factor(.$Barcode)) %>% 
-  mutate(Gene_ID = NA, Sequence = NA, Library = NA)
+total_Annotation <-  annotation_table 
 ```
 
 ## Object Creation 

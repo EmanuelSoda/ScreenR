@@ -26,7 +26,8 @@ This function computes the  metrics that will be then used
              for a given treatment in a given day
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-
-compute_metrics(obj, control = 'Met', treatment = 'DMSO', day = 'Day3')
+object <- get0('object', envir = asNamespace('ScreenR'))
+metrics <- compute_metrics(object, control = 'TRT',
+                          treatment = 'Time3', day = 'Time3')
+head(metrics)
 }

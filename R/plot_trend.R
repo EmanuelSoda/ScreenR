@@ -16,14 +16,15 @@
 #' @return The the plot of the
 #' @export
 #' @examples
-#'obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#'plot_trend(obj, genes = 'GLS', group_var = c('T0', 'T48', 'Met'))
+#' plot_trend(object, genes = 'Gene_42', group_var = c('T1', 'T2', 'TRT'))
 #'
-#'plot_trend(obj, genes = c('SEPT5', 'GLS'), group_var = c('T0', 'T48', 'Met'),
-#'    nrow = 2)
+#' plot_trend(object, genes = c('Gene_42', 'Gene_100'),
+#'            group_var = c('T1', 'T2', 'TRT'),
+#'            nrow = 2)
 #'
-
+#'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,
     nrow = 1, ncol = 1) {
@@ -36,7 +37,7 @@ plot_trend <- function(screenR_Object, genes, group_var,
     data <- dplyr::filter(data, .data$Treatment %in%
         group_var)
 
-    data <- dplyr::group_by(data, .data$Sample)
+    data <- dplyr::group_by(data, .data$Sample, .data$Gene)
 
     # Consider only the gene (which are the mean of the different shRNAs)
     data <- dplyr::summarise(data, Gene = unique(.data$Gene),

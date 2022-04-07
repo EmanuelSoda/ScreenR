@@ -1,8 +1,9 @@
 library(testthat)
 library(ScreenR)
-data <- CountTable_THP1_CONTROL_vs_MET
+data <- count_table
+annotation_table <- annotation_table
 create_test_object <- function() {
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -14,12 +15,13 @@ create_test_object <- function() {
     data <- data %>%
         dplyr::filter(Barcode != "*")
 
-    colnames(data) <- c("Barcode", "T0",
-        "T48_postPURO", "Day3_Met_A", "Day3_Met_B", "Day3_Met_C", "Day3_DMSO_A",
-        "Day3_DMSO_B", "Day3_DMSO_C", "Day6_Met_A", "Day6_Met_B", "Day6_Met_C",
-        "Day6_DMSO_A", "Day6_DMSO_B", "Day6_DMSO_C")
+    colnames(data) <- c(
+        "Barcode", "T1", "T2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+        "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
+        "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
+    )
     obj <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotation_table, groups = groups, replicates = c(""))
     obj <- normalize_data(obj)
     obj <- compute_data_table(obj)
 
@@ -29,8 +31,7 @@ create_test_object <- function() {
 
 
 test_that("Creation of the screenR object", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
     object <- create_screenR_object(table = data,
@@ -41,8 +42,7 @@ test_that("Creation of the screenR object", {
 
 
 test_that("Normalize Data", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -56,7 +56,7 @@ test_that("Normalize Data", {
 
 test_that("Number mapped reads", {
     library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -69,8 +69,7 @@ test_that("Number mapped reads", {
 
 
 test_that("Plot number mapped reads", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -87,8 +86,7 @@ test_that("Plot number mapped reads", {
 
 
 test_that("Plot number mapped reads", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -99,8 +97,7 @@ test_that("Plot number mapped reads", {
 })
 
 test_that("Boxplot mapped reads", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -117,8 +114,7 @@ test_that("Boxplot mapped reads", {
 })
 
 test_that("Density mapped reads", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -137,7 +133,7 @@ test_that("Density mapped reads", {
 
 test_that("Number of Barcode Lost", {
     library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -153,8 +149,7 @@ test_that("Number of Barcode Lost", {
 })
 
 test_that("Plot number of Barcode Lost", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -171,8 +166,7 @@ test_that("Plot number of Barcode Lost", {
 })
 
 test_that("Create data_table", {
-    library(tibble)
-    groups <- factor(c("T0/T48", "T0/T48", "Treated", "Treated", "Treated",
+    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
         "Control", "Control", "Control", "Treated", "Treated", "Treated",
         "Control", "Control", "Control"))
 
@@ -193,30 +187,28 @@ test_that("Create data_table", {
 
 
 test_that("Compute Metrics ", {
-    library(tibble)
     object <- create_test_object()
 
     # In order to speed up the test we will compute the metrics only for a
     # subset of the genes
-    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6")
+    genes <- c("Gene_1", "Gene_300", "Gene_10", "Gene_15", "Gene_3", "Gene_30")
     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
-    table <- compute_metrics(object, treatment = "Met", control = "DMSO",
-        day = "Day3")
+    table <- compute_metrics(object, treatment = "TRT", control = "Time3",
+        day = "Time3")
     expect_equal(class(table)[1], "tbl_df")
 })
 
 
 test_that("Hit Z-score per giorno", {
-    library(tibble)
     object <- create_test_object()
 
     # In order to speed up the test we will compute the metrics only for a
     # subset of the genes
-    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6", "GLS")
+    genes <- c("Gene_1", "Gene_300", "Gene_10", "Gene_15", "Gene_3", "Gene_30")
     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
 
-    table <- compute_metrics(object, treatment = "Met", control = "DMSO",
-        day = "Day3")
+    table <- compute_metrics(object, treatment = "TRT", control = "Time3",
+        day = "Time3")
 
     hit_table <- find_zscore_hit(table, number_barcode = 2)
     expect_equal(class(hit_table)[1], "tbl_df")
@@ -225,28 +217,23 @@ test_that("Hit Z-score per giorno", {
 
 
 test_that("Plot MDS NULL", {
-    library(tibble)
     object <- create_test_object()
     plot <- suppressWarnings(plot_MDS(screenR_Object = object))
     expect_equal(class(plot)[1], "gg")
 })
 
 test_that("Plot MDS", {
-    library(tibble)
     object <- create_test_object()
     plot <- suppressWarnings(plot_MDS(screenR_Object = object,
-        groups = c(rep("T0/T48", 2), rep("Day3", 6), rep("Day",
-            6))))
+        groups = c(rep("T1/T2", 2), rep("Time3", 6), rep("Time4", 6))))
     expect_equal(class(plot)[1], "gg")
 })
 
 test_that("Camera", {
-    library(tibble)
-
     object <- create_test_object()
 
     matrix <- model.matrix(~object@groups)
-    colnames(matrix) <- c("Control", "T0/T48", "Treated")
+    colnames(matrix) <- c("Control", "T1/T2", "Treated")
     camera_hit <- suppressWarnings(find_camera_hit(screenR_Object = object,
         matrix_model = matrix, contrast = "Treated"))
     expect_equal(class(camera_hit)[1], "tbl_df")
@@ -255,12 +242,11 @@ test_that("Camera", {
 test_that("ROAST", {
     testthat::skip_on_cran()
     testthat::skip_on_bioc()
-    library(tibble)
 
     object <- create_test_object()
 
     matrix <- model.matrix(~object@groups)
-    colnames(matrix) <- c("Control", "T0/T48", "Treated")
+    colnames(matrix) <- c("Control", "T1/T2", "Treated")
 
     roast_hit <- suppressWarnings(find_roast_hit(screenR_Object = object,
         matrix_model = matrix, contrast = "Treated"))
@@ -303,13 +289,13 @@ test_that("Plot common Hit", {
 })
 
 test_that("Find_Score_hit mean", {
-    library(tibble)
     object <- create_test_object()
 
-    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6")
+    genes <- c("Gene_1", "Gene_300", "Gene_10", "Gene_15", "Gene_3", "Gene_30")
     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = c("Day3"))
+
+    table <- compute_metrics(object, control = "Time3", treatment = "TRT",
+        day = c("Time3"))
 
     hit_zscore <- find_zscore_hit(table, number_barcode = 2, metric = "mean")
 
@@ -319,25 +305,24 @@ test_that("Find_Score_hit mean", {
 test_that("Find_Score_hit median ", {
     object <- create_test_object()
 
-    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6")
+    genes <- c("Gene_1", "Gene_300", "Gene_10", "Gene_15", "Gene_3", "Gene_30")
     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
 
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = c("Day3"))
+    table <- compute_metrics(object, control = "Time3", treatment = "TRT",
+        day = c("Time3"))
     hit_zscore <- find_zscore_hit(table, number_barcode = 4)
 
     expect_equal(class(hit_zscore)[[1]], "tbl_df")
 })
 
 test_that("find_robust_zscore_hit median ", {
-    library(tibble)
     object <- create_test_object()
 
-    genes <- c("SEPT5", "SEPT9", "ACAA1", "CARS", "GPT", "HERC6")
+    genes <- c("Gene_1", "Gene_300", "Gene_10", "Gene_15", "Gene_3", "Gene_30")
     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
 
-    table <- compute_metrics(object, control = "Met", treatment = "DMSO",
-        day = c("Day3"))
+    table <- compute_metrics(object, control = "Time3", treatment = "TRT",
+        day = c("Time3"))
     hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 2)
     expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
 })
@@ -373,8 +358,8 @@ test_that("plot trend hit", {
     library(tibble)
     object <- create_test_object()
 
-    plot <- plot_trend(screenR_Object = object, genes = c("SEPT5", "GLS"),
-        group_var = c("T0", "T48", "Met"), nrow = 1, ncol = 2)
+    plot <- plot_trend(screenR_Object = object, genes = c("Gene_1", "Gene_300"),
+        group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2)
     expect_equal(class(plot)[[1]], "gg")
 })
 
@@ -382,9 +367,11 @@ test_that("filter_by_slope", {
     library(tibble)
     object <- create_test_object()
 
-    data <- filter_by_slope(screenR_Object = object, genes = c("SEPT5", "GLS"),
-        group_var_treatment = c("T0", "T48", "Met"), group_var_control = c("T0",
-            "T48", "Day3", "Day6"), slope_treatment = 1)
+    data <- filter_by_slope(screenR_Object = object,
+                            genes = c("Gene_1", "Gene_300"),
+        group_var_treatment = c("T1", "T2", "TRT"),
+        group_var_control = c("T1", "T2", "Time3", "Time4"),
+        slope_treatment = 1)
     expect_equal(class(data)[1], "tbl_df")
 
 })
@@ -395,11 +382,11 @@ test_that("filter_by_variance", {
     object <- create_test_object()
 
     matrix_model <- model.matrix(~object@groups)
-    colnames(matrix_model) <- c("Control", "T0_T48", "Treated")
+    colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 
 
     contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
-    data <- filter_by_variance(genes = c("SEPT5"), screenR_Object = object,
+    data <- filter_by_variance(genes = c("Gene_320"), screenR_Object = object,
         matrix_model = matrix_model, contrast = contrast)
 
     expect_equal(class(data)[1], "tbl_df")
@@ -410,9 +397,11 @@ test_that("Plot Boxplot", {
     library(tibble)
     object <- create_test_object()
 
-    plot_boxplot(screenR_Object = object, genes = c("SEPT5", "GLS"),
-        group_var = c("T0", "T48", "Met"), nrow = 1, ncol = 2, fill_var = "Day",
+    p <- plot_boxplot(screenR_Object = object, genes = c("Gene_320", "Gene_32"),
+        group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2, fill_var = "Day",
         type = "violinplot")
+
+    expect_equal(class(p)[1], "gg")
 })
 
 

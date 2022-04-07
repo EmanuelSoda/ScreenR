@@ -17,10 +17,10 @@
 #' @return A boxplot
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' plot_boxplot(obj, genes = c('SEPT5', 'GLS'),
-#'              group_var = c('T0', 'T48', 'Met'), nrow = 1, ncol = 2,
+#' plot_boxplot(object, genes = c('Gene_34'),
+#'              group_var = c('T1', 'T2', 'TRT'), nrow = 1, ncol = 2,
 #'              fill_var = 'Day', type = 'violinplot')
 
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,

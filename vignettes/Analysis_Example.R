@@ -8,23 +8,21 @@ knitr::opts_chunk$set(fig.width=10, fig.height=7)
 library(ScreenR)
 
 ## ----read_data, message=FALSE, warning=FALSE----------------------------------
-data(CountTable_THP1_CONTROL_vs_MET)
-data(Table_Annotation)
+data(count_table)
+data(annotation_table)
 
-data <- CountTable_THP1_CONTROL_vs_MET
+data <- count_table
 colnames(data) <- c(
-    "Barcode", "T0", "T48_postPURO", "Day3_Met_A", "Day3_Met_B", "Day3_Met_C",
-    "Day3_DMSO_A", "Day3_DMSO_B", "Day3_DMSO_C", "Day6_Met_A", "Day6_Met_B",
-    "Day6_Met_C", "Day6_DMSO_A", "Day6_DMSO_B", "Day6_DMSO_C"
+    "Barcode", "T1", "T2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
+    "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
 )
 data <- data %>%
     dplyr::mutate(Barcode = as.factor(Barcode)) %>%
     dplyr::filter(Barcode != "*")
 
 
-total_Annotation <- 
-  Table_Annotation %>% 
-  dplyr::mutate(Barcode = as.factor(.$Barcode))
+total_Annotation <-  annotation_table 
 
 ## ----Create_Object, message=FALSE, warning=FALSE------------------------------
 groups <- colnames(data)[2:length(colnames(data))]
@@ -105,97 +103,91 @@ plot_MDS(
 
 ## ----compute_metrics, message=FALSE, warning=FALSE----------------------------
 # 2DG
-data_with_measure_Met <- list(
-    Day3 = compute_metrics(
-        object, control = "DMSO", treatment = "Met",
-        day = "Day3"
+data_with_measure_TRT <- list(
+    Time3 = compute_metrics(
+        object, control = "Time3", treatment = "TRT",
+        day = "Time3"
     ),
-    Day6 = compute_metrics(
-        object, control = "DMSO", treatment = "Met",
-        day = "Day6"
+    Time4 = compute_metrics(
+        object, control = "Time4", treatment = "TRT",
+        day = "Time4"
     )
 )
 
 
-plot_Zscore_distribution(data_with_measure_Met, alpha = 0.8)
+plot_Zscore_distribution(data_with_measure_TRT, alpha = 0.8)
 
 ## ----Z_score_hit, message=FALSE, warning=FALSE--------------------------------
-zscore_hit_Met <- list(
-    Day3 = find_zscore_hit(
-        table_treate_vs_control = data_with_measure_Met$Day3,
+zscore_hit_TRT <- list(
+    Time3 = find_zscore_hit(
+        table_treate_vs_control = data_with_measure_TRT$Time3,
         number_barcode = 7, metric = "median"
     ),
-    Day6 = find_zscore_hit(
-        table_treate_vs_control = data_with_measure_Met$Day6,
+    Time4 = find_zscore_hit(
+        table_treate_vs_control = data_with_measure_TRT$Time4,
         number_barcode = 7, metric = "median"
     )
 )
-zscore_hit_Met
+zscore_hit_TRT
 
 ## ----CAMERA, message=FALSE, warning=FALSE-------------------------------------
-groupss <- c(
-    rep("T0/T48", 4),
-    as.character(groups[5:length(groups)])
-)
-
-
 matrix_model <- model.matrix(~0 + groups)
 colnames(matrix_model) <- unique(groups)
 
-camera_hit_Met <- list(
-    Day3 = find_camera_hit(
+camera_hit_TRT <- list(
+    Time3 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day3_Met"
+        contrast = "Time3_TRT"
     ),
-    Day6 = find_camera_hit(
+    Time4 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day6_Met"
+        contrast = "Time4_TRT"
     )
 )
 
-camera_hit_Met
+camera_hit_TRT
 
 ## ----ROAST, message=FALSE, warning=FALSE--------------------------------------
-roast_hit_Met <- list(
-    Day3 = find_roast_hit(
+roast_hit_TRT <- list(
+    Time3 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day3_Met"
+        contrast = "Time3_TRT"
     ),
-    Day6 = find_roast_hit(
+    Time4 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day6_Met"
+        contrast = "Time4_TRT"
     )
 )
 
-roast_hit_Met
+roast_hit_TRT
 
 ## ----Common_Hit,  message=FALSE, warning=FALSE--------------------------------
-common_hit_Met_at_least_2 <- list(
-    Day3 = find_common_hit(
-        zscore_hit_Met$Day3, camera_hit_Met$Day3, roast_hit_Met$Day3,
+common_hit_TRT_at_least_2 <- list(
+    Time3 = find_common_hit(
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Day3,
         common_in = 2
     ),
-    Day6 = find_common_hit(
-        zscore_hit_Met$Day6, camera_hit_Met$Day6, roast_hit_Met$Day6,
+    Time4 = find_common_hit(
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Day6,
         common_in = 2
     )
 )
 
-common_hit_Met_at_least_3 <- list(
-    Day3 = find_common_hit(
-        zscore_hit_Met$Day3, camera_hit_Met$Day3, roast_hit_Met$Day3,
+common_hit_TRT_at_least_3 <- list(
+    Time3 = find_common_hit(
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Time3,
         common_in = 3
     ),
-    Day6 = find_common_hit(
-        zscore_hit_Met$Day6, camera_hit_Met$Day6, roast_hit_Met$Day6,
+    Time4 = find_common_hit(
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Time4,
         common_in = 3
     )
 )
 
 ## ----Venn_diagram_in_at_least_2-----------------------------------------------
 plot_common_hit(
-    hit_zscore = zscore_hit_Met$Day3, hit_camera = camera_hit_Met$Day3,
-    roast_hit_Met$Day3
+    hit_zscore = zscore_hit_TRT$Time3, hit_camera = camera_hit_TRT$Time3,
+    roast_hit_TRT$Time3
 )
 
 ## -----------------------------------------------------------------------------

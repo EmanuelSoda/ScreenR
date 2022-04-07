@@ -13,11 +13,11 @@
 #'         sample
 
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
 #' # In order to count the number of barcode lost just the ScreenR object is
 #' # needed
-#' barcode_lost(obj)
+#' head(barcode_lost(object))
 #'
 #' @export
 
@@ -47,9 +47,9 @@ barcode_lost <- function(screenR_Object) {
 #' @return Returns a tibble containing the number of mapped read for sample
 #'
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' plot_barcode_lost(obj)
+#' plot_barcode_lost(object)
 #' @export
 plot_barcode_lost <- function(screenR_Object, palette = NULL,
     alpha = 1, legende_position = "none") {
@@ -81,11 +81,12 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @concept plot
 #' @return Return a tibble containing the number of mapped reads for sample
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' plot_barcode_lost_for_gene(obj)
-#' plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'))
-#' plot_barcode_lost_for_gene(obj, samples = c('Day3_DMSO_A', 'Day3_DMSO_B'),
+#' plot_barcode_lost_for_gene(object,
+#'                            samples = c('Time3_A', 'Time3_B'))
+#' plot_barcode_lost_for_gene(object,
+#'                            samples = c('Time3_A', 'Time3_B'),
 #'                            facet = FALSE)
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
@@ -139,10 +140,10 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 #' @concept plot
 #' @return Return a tibble containing the number of mapped read for sample
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
-#' plot_distribution_of_barcode_lost(obj)
-#' plot_distribution_of_barcode_lost(obj, type = 'density')
-#' @export
+#' #object <- get0('object', envir = asNamespace('ScreenR'))
+#' #plot_distribution_of_barcode_lost(object)
+#' #plot_distribution_of_barcode_lost(object, type = 'density')
+#'
 
 plot_distribution_of_barcode_lost <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {

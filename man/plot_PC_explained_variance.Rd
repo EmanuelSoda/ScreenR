@@ -26,10 +26,10 @@ This function plot the explained variance by the
              Principal Component.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
-plot_PC_explained_variance(obj)
+plot_PC_explained_variance(object)
 
 # For the cumulative plote
-plot_PC_explained_variance(obj, cumulative = TRUE)
+plot_PC_explained_variance(object, cumulative = TRUE)
 }

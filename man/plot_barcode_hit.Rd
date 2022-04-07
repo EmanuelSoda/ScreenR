@@ -39,11 +39,11 @@ The barcode plot
 Create a Barcode plot for the Hit
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-matrix_model <- model.matrix(~slot(obj, 'groups'))
-colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
+object <- get0('object', envir = asNamespace('ScreenR'))
+matrix_model <- model.matrix(~slot(object, 'groups'))
+colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
 contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 
-plot_barcode_hit(obj, matrix_model, contrast = contrast, gene = 'ACACB')
+plot_barcode_hit(object, matrix_model, contrast = contrast, gene = 'Gene_300')
 }
 \concept{plot}

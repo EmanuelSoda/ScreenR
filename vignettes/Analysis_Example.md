@@ -43,27 +43,25 @@ a matrix containing  reads count organized with:
 * Samples on the columns
 
 For this vignette we will use as an example a Loss of Function Genetic Screening
-Performed on THP1 using Metformin at Day3 and Day6. 
+performed using . 
 First of all the data has to be read.
 
 ```r
-data(CountTable_THP1_CONTROL_vs_MET)
-data(Table_Annotation)
+data(count_table)
+data(annotation_table)
 
-data <- CountTable_THP1_CONTROL_vs_MET
+data <- count_table
 colnames(data) <- c(
-    "Barcode", "T0", "T48_postPURO", "Day3_Met_A", "Day3_Met_B", "Day3_Met_C",
-    "Day3_DMSO_A", "Day3_DMSO_B", "Day3_DMSO_C", "Day6_Met_A", "Day6_Met_B",
-    "Day6_Met_C", "Day6_DMSO_A", "Day6_DMSO_B", "Day6_DMSO_C"
+    "Barcode", "T1", "T2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
+    "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
 )
 data <- data %>%
     dplyr::mutate(Barcode = as.factor(Barcode)) %>%
     dplyr::filter(Barcode != "*")
 
 
-total_Annotation <- 
-  Table_Annotation %>% 
-  dplyr::mutate(Barcode = as.factor(.$Barcode))
+total_Annotation <-  annotation_table 
 ```
 
 ## Object Creation 
@@ -240,19 +238,19 @@ using the *plot_Zscore_distribution* function.
 
 ```r
 # 2DG
-data_with_measure_Met <- list(
-    Day3 = compute_metrics(
-        object, control = "DMSO", treatment = "Met",
-        day = "Day3"
+data_with_measure_TRT <- list(
+    Time3 = compute_metrics(
+        object, control = "Time3", treatment = "TRT",
+        day = "Time3"
     ),
-    Day6 = compute_metrics(
-        object, control = "DMSO", treatment = "Met",
-        day = "Day6"
+    Time4 = compute_metrics(
+        object, control = "Time4", treatment = "TRT",
+        day = "Time4"
     )
 )
 
 
-plot_Zscore_distribution(data_with_measure_Met, alpha = 0.8)
+plot_Zscore_distribution(data_with_measure_TRT, alpha = 0.8)
 ```
 
 ![plot of chunk compute_metrics](figure/compute_metrics-1.png)
@@ -264,50 +262,50 @@ found. This in ScreenR is done using the *find_zscore_hit* function.
 
 
 ```r
-zscore_hit_Met <- list(
-    Day3 = find_zscore_hit(
-        table_treate_vs_control = data_with_measure_Met$Day3,
+zscore_hit_TRT <- list(
+    Time3 = find_zscore_hit(
+        table_treate_vs_control = data_with_measure_TRT$Time3,
         number_barcode = 7, metric = "median"
     ),
-    Day6 = find_zscore_hit(
-        table_treate_vs_control = data_with_measure_Met$Day6,
+    Time4 = find_zscore_hit(
+        table_treate_vs_control = data_with_measure_TRT$Time4,
         number_barcode = 7, metric = "median"
     )
 )
-zscore_hit_Met
+zscore_hit_TRT
 ```
 
 ```
-## $Day3
+## $Time3
 ## # A tibble: 30 × 2
-##    Gene   numberOfBarcode
-##    <fct>            <int>
-##  1 ASF1A                8
-##  2 BRD3                 8
-##  3 CBX1                 8
-##  4 CBX8                 9
-##  5 CHST13               8
-##  6 EED                  8
-##  7 ENO3                 8
-##  8 FBP2                 8
-##  9 HDAC1                8
-## 10 HERC3                9
+##    Gene     numberOfBarcode
+##    <chr>              <int>
+##  1 Gene_116               8
+##  2 Gene_120               8
+##  3 Gene_128               8
+##  4 Gene_156               8
+##  5 Gene_173               9
+##  6 Gene_190               8
+##  7 Gene_193               8
+##  8 Gene_200               8
+##  9 Gene_218               8
+## 10 Gene_226               8
 ## # … with 20 more rows
 ## 
-## $Day6
+## $Time4
 ## # A tibble: 30 × 2
-##    Gene   numberOfBarcode
-##    <fct>            <int>
-##  1 ACOX2                9
-##  2 BAZ1B                8
-##  3 BAZ2B                8
-##  4 BRD9                 8
-##  5 CHAF1A               8
-##  6 CLOCK                9
-##  7 EP300                8
-##  8 GPT                  8
-##  9 H2AFV                9
-## 10 HECTD3               9
+##    Gene     numberOfBarcode
+##    <chr>              <int>
+##  1 Gene_121               8
+##  2 Gene_147               8
+##  3 Gene_148               9
+##  4 Gene_15                9
+##  5 Gene_168               9
+##  6 Gene_171               9
+##  7 Gene_173               8
+##  8 Gene_185               8
+##  9 Gene_204               8
+## 10 Gene_245              18
 ## # … with 20 more rows
 ```
 
@@ -316,60 +314,54 @@ zscore_hit_Met
 The same can be done with the CAMERA hit using the function  *find_camera_hit*.
 
 ```r
-groupss <- c(
-    rep("T0/T48", 4),
-    as.character(groups[5:length(groups)])
-)
-
-
 matrix_model <- model.matrix(~0 + groups)
 colnames(matrix_model) <- unique(groups)
 
-camera_hit_Met <- list(
-    Day3 = find_camera_hit(
+camera_hit_TRT <- list(
+    Time3 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day3_Met"
+        contrast = "Time3_TRT"
     ),
-    Day6 = find_camera_hit(
+    Time4 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day6_Met"
+        contrast = "Time4_TRT"
     )
 )
 
-camera_hit_Met
+camera_hit_TRT
 ```
 
 ```
-## $Day3
+## $Time3
 ## # A tibble: 281 × 5
-##    Gene    NGenes Direction PValue   FDR
-##    <chr>    <dbl> <fct>      <dbl> <dbl>
-##  1 INPP5E      10 Down      0.0131 0.522
-##  2 LDHAL6B     10 Down      0.0189 0.674
-##  3 CHD2        10 Down      0.0324 0.906
-##  4 TRIM43B     10 Down      0.0414 0.906
-##  5 TRIM9        9 Down      0.0447 0.906
-##  6 TYMS         9 Down      0.0528 0.906
-##  7 PDHA2       10 Down      0.0584 0.906
-##  8 PRDM4       10 Down      0.0594 0.906
-##  9 HUWE1       10 Down      0.0646 0.906
-## 10 LUC         32 Down      0.0698 0.906
+##    Gene     NGenes Direction PValue   FDR
+##    <chr>     <dbl> <fct>      <dbl> <dbl>
+##  1 Gene_199     10 Down      0.0131 0.522
+##  2 Gene_239     10 Down      0.0189 0.674
+##  3 Gene_78      10 Down      0.0324 0.906
+##  4 Gene_478     10 Down      0.0414 0.906
+##  5 Gene_508      9 Down      0.0447 0.906
+##  6 Gene_516      9 Down      0.0528 0.906
+##  7 Gene_298     10 Down      0.0584 0.906
+##  8 Gene_347     10 Down      0.0594 0.906
+##  9 Gene_183     10 Down      0.0646 0.906
+## 10 Gene_245     32 Down      0.0698 0.906
 ## # … with 271 more rows
 ## 
-## $Day6
+## $Time4
 ## # A tibble: 269 × 5
-##    Gene    NGenes Direction PValue   FDR
-##    <chr>    <dbl> <fct>      <dbl> <dbl>
-##  1 INPP5E      10 Down      0.0131 0.779
-##  2 LDHAL6B     10 Down      0.0201 0.941
-##  3 CHD2        10 Down      0.0285 0.969
-##  4 PDHA2       10 Down      0.0316 0.969
-##  5 TRIM9        9 Down      0.0355 0.969
-##  6 TYMS         9 Down      0.0370 0.969
-##  7 TRIM62       9 Down      0.0437 0.969
-##  8 TRIM43B     10 Down      0.0491 0.969
-##  9 ME3         10 Down      0.0500 0.969
-## 10 HUWE1       10 Down      0.0584 0.969
+##    Gene     NGenes Direction PValue   FDR
+##    <chr>     <dbl> <fct>      <dbl> <dbl>
+##  1 Gene_199     10 Down      0.0131 0.779
+##  2 Gene_239     10 Down      0.0201 0.941
+##  3 Gene_78      10 Down      0.0285 0.969
+##  4 Gene_298     10 Down      0.0316 0.969
+##  5 Gene_508      9 Down      0.0355 0.969
+##  6 Gene_516      9 Down      0.0370 0.969
+##  7 Gene_494      9 Down      0.0437 0.969
+##  8 Gene_478     10 Down      0.0491 0.969
+##  9 Gene_257     10 Down      0.0500 0.969
+## 10 Gene_183     10 Down      0.0584 0.969
 ## # … with 259 more rows
 ```
 
@@ -378,51 +370,51 @@ Last but not least this is done also for the ROAST hit using the function
 *find_roast_hit*.
 
 ```r
-roast_hit_Met <- list(
-    Day3 = find_roast_hit(
+roast_hit_TRT <- list(
+    Time3 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day3_Met"
+        contrast = "Time3_TRT"
     ),
-    Day6 = find_roast_hit(
+    Time4 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Day6_Met"
+        contrast = "Time4_TRT"
     )
 )
 
-roast_hit_Met
+roast_hit_TRT
 ```
 
 ```
-## $Day3
+## $Time3
 ## # A tibble: 534 × 9
-##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
-##    <chr>   <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
-##  1 LUC        32        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  2 PSMA1      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  3 RPL30      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  4 SEPT5      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  5 SEPT9      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  6 ACAA1      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  7 ACAA2      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  8 ACACA      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  9 ACACB      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-## 10 ACAD11     10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##    Gene     NGenes PropDown PropUp Direction PValue   FDR PValue.Mixed FDR.Mixed
+##    <chr>     <int>    <dbl>  <dbl> <fct>      <dbl> <dbl>        <dbl>     <dbl>
+##  1 Gene_245     32        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  2 Gene_364     12        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  3 Gene_372     12        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  4 Gene_380     10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  5 Gene_381     10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  6 Gene_1       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  7 Gene_2       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  8 Gene_3       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  9 Gene_4       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+## 10 Gene_5       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
 ## # … with 524 more rows
 ## 
-## $Day6
+## $Time4
 ## # A tibble: 534 × 9
-##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
-##    <chr>   <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
-##  1 LUC        32        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  2 PSMA1      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  3 RPL30      12        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  4 SEPT5      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  5 SEPT9      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  6 ACAA1      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  7 ACAA2      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  8 ACACA      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-##  9 ACACB      10        1      0 Down      0.0001 0.0001       0.0001    0.0001
-## 10 ACAD11     10        1      0 Down      0.0001 0.0001       0.0001    0.0001
+##    Gene     NGenes PropDown PropUp Direction PValue   FDR PValue.Mixed FDR.Mixed
+##    <chr>     <int>    <dbl>  <dbl> <fct>      <dbl> <dbl>        <dbl>     <dbl>
+##  1 Gene_245     32        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  2 Gene_364     12        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  3 Gene_372     12        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  4 Gene_380     10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  5 Gene_381     10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  6 Gene_1       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  7 Gene_2       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  8 Gene_3       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+##  9 Gene_4       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
+## 10 Gene_5       10        1      0 Down      0.0001  1e-4       0.0001    0.0001
 ## # … with 524 more rows
 ```
 
@@ -438,24 +430,24 @@ methods
 
 
 ```r
-common_hit_Met_at_least_2 <- list(
-    Day3 = find_common_hit(
-        zscore_hit_Met$Day3, camera_hit_Met$Day3, roast_hit_Met$Day3,
+common_hit_TRT_at_least_2 <- list(
+    Time3 = find_common_hit(
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Day3,
         common_in = 2
     ),
-    Day6 = find_common_hit(
-        zscore_hit_Met$Day6, camera_hit_Met$Day6, roast_hit_Met$Day6,
+    Time4 = find_common_hit(
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Day6,
         common_in = 2
     )
 )
 
-common_hit_Met_at_least_3 <- list(
-    Day3 = find_common_hit(
-        zscore_hit_Met$Day3, camera_hit_Met$Day3, roast_hit_Met$Day3,
+common_hit_TRT_at_least_3 <- list(
+    Time3 = find_common_hit(
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Time3,
         common_in = 3
     ),
-    Day6 = find_common_hit(
-        zscore_hit_Met$Day6, camera_hit_Met$Day6, roast_hit_Met$Day6,
+    Time4 = find_common_hit(
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Time4,
         common_in = 3
     )
 )
@@ -470,8 +462,8 @@ The hits can be easily visualized using the *plot_common_hit* function.
 
 ```r
 plot_common_hit(
-    hit_zscore = zscore_hit_Met$Day3, hit_camera = camera_hit_Met$Day3,
-    roast_hit_Met$Day3
+    hit_zscore = zscore_hit_TRT$Time3, hit_camera = camera_hit_TRT$Time3,
+    roast_hit_TRT$Time3
 )
 ```
 
@@ -507,23 +499,26 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] tidyr_1.2.0    dplyr_1.0.8    ggplot2_3.3.5  ScreenR_0.99.0
+## [1] tidyr_1.2.0    dplyr_1.0.8    ggplot2_3.3.5  ScreenR_0.99.4
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.2 locfit_1.5-9.5   xfun_0.30        purrr_0.3.4     
-##  [5] splines_4.1.2    lattice_0.20-45  colorspace_2.0-3 vctrs_0.3.8     
-##  [9] generics_0.1.2   testthat_3.1.2   utf8_1.2.2       rlang_1.0.2     
-## [13] pillar_1.7.0     glue_1.6.2       withr_2.5.0      DBI_1.1.2       
-## [17] lifecycle_1.0.1  stringr_1.4.0    munsell_0.5.0    gtable_0.3.0    
-## [21] evaluate_0.15    labeling_0.4.2   knitr_1.37       fansi_1.0.2     
-## [25] highr_0.9        Rcpp_1.0.8.3     edgeR_3.36.0     scales_1.1.1    
-## [29] limma_3.50.1     desc_1.4.1       pkgload_1.2.4    farver_2.1.0    
-## [33] brio_1.1.3       digest_0.6.29    stringi_1.7.6    grid_4.1.2      
-## [37] rprojroot_2.0.2  ggvenn_0.1.9     cli_3.2.0        tools_4.1.2     
-## [41] magrittr_2.0.2   patchwork_1.1.1  tibble_3.1.6     crayon_1.5.0    
-## [45] pkgconfig_2.0.3  ellipsis_0.3.2   xml2_1.3.3       strex_1.4.2     
-## [49] assertthat_0.2.1 roxygen2_7.1.2   rstudioapi_0.13  R6_2.5.1        
-## [53] compiler_4.1.2
+##  [1] Rcpp_1.0.8.3      locfit_1.5-9.5    lattice_0.20-45   prettyunits_1.1.1
+##  [5] ps_1.6.0          assertthat_0.2.1  rprojroot_2.0.3   digest_0.6.29    
+##  [9] utf8_1.2.2        R6_2.5.1          evaluate_0.15     highr_0.9        
+## [13] pillar_1.7.0      rlang_1.0.2       rstudioapi_0.13   callr_3.7.0      
+## [17] splines_4.1.2     desc_1.4.1        labeling_0.4.2    devtools_2.4.3   
+## [21] stringr_1.4.0     munsell_0.5.0     compiler_4.1.2    xfun_0.30        
+## [25] pkgconfig_2.0.3   pkgbuild_1.3.1    tidyselect_1.1.2  tibble_3.1.6     
+## [29] roxygen2_7.1.2    ggvenn_0.1.9      edgeR_3.36.0      fansi_1.0.3      
+## [33] crayon_1.5.1      withr_2.5.0       brio_1.1.3        grid_4.1.2       
+## [37] gtable_0.3.0      lifecycle_1.0.1   DBI_1.1.2         magrittr_2.0.3   
+## [41] scales_1.1.1      cli_3.2.0         stringi_1.7.6     cachem_1.0.6     
+## [45] farver_2.1.0      fs_1.5.2          remotes_2.4.2     testthat_3.1.3   
+## [49] limma_3.50.1      xml2_1.3.3        ellipsis_0.3.2    generics_0.1.2   
+## [53] vctrs_0.4.0       tools_4.1.2       glue_1.6.2        purrr_0.3.4      
+## [57] processx_3.5.3    pkgload_1.2.4     fastmap_1.1.0     colorspace_2.0-3 
+## [61] sessioninfo_1.2.2 strex_1.4.2       memoise_2.0.1     knitr_1.38       
+## [65] patchwork_1.1.1   usethis_2.1.5
 ```
 
 

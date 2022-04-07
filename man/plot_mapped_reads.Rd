@@ -30,7 +30,7 @@ This function plots the number of reads mapped for each
              sample.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
-plot_mapped_reads(obj)
+plot_mapped_reads(object)
 }

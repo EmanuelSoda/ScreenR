@@ -30,8 +30,9 @@ The function plots the distribution of the lost barcodes in
              each sample
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-plot_distribution_of_barcode_lost(obj)
-plot_distribution_of_barcode_lost(obj, type = 'density')
+#object <- get0('object', envir = asNamespace('ScreenR'))
+#plot_distribution_of_barcode_lost(object)
+#plot_distribution_of_barcode_lost(object, type = 'density')
+
 }
 \concept{plot}

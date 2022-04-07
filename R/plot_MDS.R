@@ -11,9 +11,9 @@
 #' @return The MDS Plot
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' plot_MDS(obj)
+#' plot_MDS(object)
 
 plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
@@ -52,12 +52,12 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @return The explained variance  plot
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' plot_PC_explained_variance(obj)
+#' plot_PC_explained_variance(object)
 #'
 #' # For the cumulative plote
-#' plot_PC_explained_variance(obj, cumulative = TRUE)
+#' plot_PC_explained_variance(object, cumulative = TRUE)
 
 plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {
@@ -111,9 +111,9 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
 #' @keywords internal
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' compute_explained_variance(obj)
+#' compute_explained_variance(object)
 compute_explained_variance <- function(screenR_Object) {
     data <- screenR_Object@count_table
     # Get only the numeric columns

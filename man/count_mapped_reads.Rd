@@ -18,7 +18,7 @@ This function counts the number of reads for Barcode
              in each sample
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-count_mapped_reads(obj)
+object <- get0('object', envir = asNamespace('ScreenR'))
+head(count_mapped_reads(object))
 
 }

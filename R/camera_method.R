@@ -14,14 +14,14 @@
 #' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' matrix <- model.matrix(~slot(obj, 'groups'))
-#' colnames(matrix) <- c('Control', 'T0/T48', 'Treated')
+#' matrix <- model.matrix(~slot(object, 'groups'))
+#' colnames(matrix) <- c('Control', 'T1/T2', 'Treated')
 #'
-#'find_camera_hit(screenR_Object = obj,
+#' result <- find_camera_hit(screenR_Object = object,
 #'                matrix_model = matrix, contrast = 'Treated')
-#'
+#' head(result)
 #' @export
 #'
 #'

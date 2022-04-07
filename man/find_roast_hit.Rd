@@ -40,9 +40,11 @@ The hits found by ROAST method
 Find the hit using the Roast method
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-matrix_model <- model.matrix(~slot(obj, 'groups'))
-colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
+object <- get0('object', envir = asNamespace('ScreenR'))
+matrix_model <- model.matrix(~slot(object, 'groups'))
+colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
 
-find_roast_hit(obj, matrix_model = matrix_model, contrast = 'Treated')
+result <- find_roast_hit(object, matrix_model = matrix_model,
+                         contrast = 'Treated', nrot = 100)
+head(result)
 }

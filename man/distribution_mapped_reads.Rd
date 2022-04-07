@@ -31,12 +31,14 @@ This function creates a boxplot to show the distribution of
              the mapped reads in different samples.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
-distribution_mapped_reads(obj)
+# Boxplot
+distribution_mapped_reads(object)
 
-distribution_mapped_reads(obj, type = 'density')
+# Density
+distribution_mapped_reads(object, type = 'density')
 
-distribution_mapped_reads(obj, type = 'density', alpha = 0.5)
+distribution_mapped_reads(object, type = 'density', alpha = 0.2)
 }
 \concept{plot}

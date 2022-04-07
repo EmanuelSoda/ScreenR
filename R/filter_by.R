@@ -19,11 +19,11 @@
 #'         for each gene
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' filter_by_slope(screenR_Object = obj, genes = c('SEPT5', 'GLS'),
-#'                 group_var_treatment = c('T0', 'T48', 'Met'),
-#'                 group_var_control = c('T0', 'T48', 'Day3', 'Day6'),
+#' filter_by_slope(screenR_Object = object, genes = c('Gene_1', 'Gene_2'),
+#'                 group_var_treatment = c('T1', 'T2', 'TRT'),
+#'                 group_var_control = c('T1', 'T2', 'Time3', 'Time4'),
 #'                 slope_control = 0.5, slope_treatment = 1)
 
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
@@ -69,10 +69,10 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
+#' object <- get0('object', envir = asNamespace('ScreenR'))
 #'
-#' compute_slope(obj, genes = c('SEPT5', 'GLS'),
-#'               group_var = c('T0', 'T48', 'Met'))
+#' compute_slope(object, genes = c('Gene_42', 'Gene_24'),
+#'               group_var = c('T1', 'T2', 'TRT'))
 #'
 
 compute_slope <- function(screenR_Object, genes, group_var) {
@@ -113,13 +113,14 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'         for each gene
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
-#' matrix_model <- model.matrix(~slot(obj, 'groups'))
-#' colnames(matrix_model) <- c('Control', 'T0_T48', 'Treated')
+#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' matrix_model <- model.matrix(~slot(object, 'groups'))
+#' colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' data <- filter_by_variance(screenR_Object = obj, genes = c('SEPT5'),
+#' data <- filter_by_variance(screenR_Object = object, genes = c('Gene_42'),
 #'                            matrix_model = matrix_model, contrast = contrast)
+#' head(data)
 
 filter_by_variance <- function(screenR_Object, genes, matrix_model,
     variance = 0.5, contrast) {

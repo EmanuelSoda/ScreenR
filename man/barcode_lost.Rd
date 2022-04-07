@@ -19,10 +19,10 @@ This fuction counts the number of Barcode lost during the
              sequencing. A barcode is lost if it has zero mapped read.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
 # In order to count the number of barcode lost just the ScreenR object is
 # needed
-barcode_lost(obj)
+head(barcode_lost(object))
 
 }

@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ScreenR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.99.4</span>
       </span>
     </div>
 
@@ -119,26 +119,24 @@ consists of a matrix containing reads count organized with:</p>
 <li>Samples on the columns</li>
 </ul>
 <p>For this vignette we will use as an example a Loss of Function
-Genetic Screening Performed on THP1 using Metformin at Day3 and Day6.
-First of all the data has to be read.</p>
+Genetic Screening performed using . First of all the data has to be
+read.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">CountTable_THP1_CONTROL_vs_MET</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">Table_Annotation</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span>
 
-<span class="va">data</span> <span class="op">&lt;-</span> <span class="va">CountTable_THP1_CONTROL_vs_MET</span>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="va">count_table</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
-    <span class="st">"Barcode"</span>, <span class="st">"T0"</span>, <span class="st">"T48_postPURO"</span>, <span class="st">"Day3_Met_A"</span>, <span class="st">"Day3_Met_B"</span>, <span class="st">"Day3_Met_C"</span>,
-    <span class="st">"Day3_DMSO_A"</span>, <span class="st">"Day3_DMSO_B"</span>, <span class="st">"Day3_DMSO_C"</span>, <span class="st">"Day6_Met_A"</span>, <span class="st">"Day6_Met_B"</span>,
-    <span class="st">"Day6_Met_C"</span>, <span class="st">"Day6_DMSO_A"</span>, <span class="st">"Day6_DMSO_B"</span>, <span class="st">"Day6_DMSO_C"</span>
+    <span class="st">"Barcode"</span>, <span class="st">"T1"</span>, <span class="st">"T2"</span>, <span class="st">"Time3_TRT_A"</span>, <span class="st">"Time3_TRT_B"</span>, <span class="st">"Time3_TRT_C"</span>,
+    <span class="st">"Time3_A"</span>, <span class="st">"Time3_B"</span>, <span class="st">"Time3_C"</span>, <span class="st">"Time4_TRT_A"</span>, <span class="st">"Time4_TRT_B"</span>,
+    <span class="st">"Time4_TRT_C"</span>, <span class="st">"Time4_A"</span>, <span class="st">"Time4_B"</span>, <span class="st">"Time4_c"</span>
 <span class="op">)</span>
 <span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span>
 
 
-<span class="va">total_Annotation</span> <span class="op">&lt;-</span> 
-  <span class="va">Table_Annotation</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Barcode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">.</span><span class="op">$</span><span class="va">Barcode</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="va">total_Annotation</span> <span class="op">&lt;-</span>  <span class="va">annotation_table</span> </code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="object-creation">Object Creation<a class="anchor" aria-label="anchor" href="#object-creation"></a>
@@ -311,19 +309,19 @@ of the Z-score can be plotted using the
 <em>plot_Zscore_distribution</em> function.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># 2DG</span>
-<span class="va">data_with_measure_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
-        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, treatment <span class="op">=</span> <span class="st">"Met"</span>,
-        day <span class="op">=</span> <span class="st">"Day3"</span>
+<span class="va">data_with_measure_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
+        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"Time3"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
+        day <span class="op">=</span> <span class="st">"Time3"</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
-        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"DMSO"</span>, treatment <span class="op">=</span> <span class="st">"Met"</span>,
-        day <span class="op">=</span> <span class="st">"Day6"</span>
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
+        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"Time4"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
+        day <span class="op">=</span> <span class="st">"Time4"</span>
     <span class="op">)</span>
 <span class="op">)</span>
 
 
-<span class="fu"><a href="../reference/plot_Zscore_distribution.html">plot_Zscore_distribution</a></span><span class="op">(</span><span class="va">data_with_measure_Met</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/plot_Zscore_distribution.html">plot_Zscore_distribution</a></span><span class="op">(</span><span class="va">data_with_measure_TRT</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/compute_metrics-1.png" width="960"></p>
 </div>
 <div class="section level4">
@@ -333,47 +331,47 @@ of the Z-score can be plotted using the
 can be found. This in ScreenR is done using the <em>find_zscore_hit</em>
 function.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">zscore_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
-        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day3</span>,
+<code class="sourceCode R"><span class="va">zscore_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
+        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_TRT</span><span class="op">$</span><span class="va">Time3</span>,
         number_barcode <span class="op">=</span> <span class="fl">7</span>, metric <span class="op">=</span> <span class="st">"median"</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
-        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_Met</span><span class="op">$</span><span class="va">Day6</span>,
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
+        table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_TRT</span><span class="op">$</span><span class="va">Time4</span>,
         number_barcode <span class="op">=</span> <span class="fl">7</span>, metric <span class="op">=</span> <span class="st">"median"</span>
     <span class="op">)</span>
 <span class="op">)</span>
-<span class="va">zscore_hit_Met</span></code></pre></div>
-<pre><code><span class="co">## $Day3</span>
+<span class="va">zscore_hit_TRT</span></code></pre></div>
+<pre><code><span class="co">## $Time3</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 30 × 2</span></span>
-<span class="co">##    Gene   numberOfBarcode</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> ASF1A                8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> BRD3                 8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> CBX1                 8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> CBX8                 9</span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> CHST13               8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> EED                  8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> ENO3                 8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> FBP2                 8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> HDAC1                8</span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> HERC3                9</span>
+<span class="co">##    Gene     numberOfBarcode</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_116               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_120               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_128               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_156               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_173               9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_190               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_193               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_200               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_218               8</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_226               8</span>
 <span class="co">## <span style="color: #949494;"># … with 20 more rows</span></span>
 <span class="co">## </span>
-<span class="co">## $Day6</span>
+<span class="co">## $Time4</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 30 × 2</span></span>
-<span class="co">##    Gene   numberOfBarcode</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> ACOX2                9</span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> BAZ1B                8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> BAZ2B                8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> BRD9                 8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> CHAF1A               8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> CLOCK                9</span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> EP300                8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> GPT                  8</span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> H2AFV                9</span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> HECTD3               9</span>
+<span class="co">##    Gene     numberOfBarcode</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_121               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_147               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_148               9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_15                9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_168               9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_171               9</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_173               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_185               8</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_204               8</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_245              18</span>
 <span class="co">## <span style="color: #949494;"># … with 20 more rows</span></span></code></pre>
 </div>
 <div class="section level4">
@@ -382,57 +380,51 @@ function.</p>
 <p>The same can be done with the CAMERA hit using the function
 <em>find_camera_hit</em>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">groupss</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"T0/T48"</span>, <span class="fl">4</span><span class="op">)</span>,
-    <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">groups</span><span class="op">[</span><span class="fl">5</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
-<span class="op">)</span>
-
-
-<span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>
 
-<span class="va">camera_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
+<span class="va">camera_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
         screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-        contrast <span class="op">=</span> <span class="st">"Day3_Met"</span>
+        contrast <span class="op">=</span> <span class="st">"Time3_TRT"</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span>
         screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-        contrast <span class="op">=</span> <span class="st">"Day6_Met"</span>
+        contrast <span class="op">=</span> <span class="st">"Time4_TRT"</span>
     <span class="op">)</span>
 <span class="op">)</span>
 
-<span class="va">camera_hit_Met</span></code></pre></div>
-<pre><code><span class="co">## $Day3</span>
+<span class="va">camera_hit_TRT</span></code></pre></div>
+<pre><code><span class="co">## $Time3</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 281 × 5</span></span>
-<span class="co">##    Gene    NGenes Direction PValue   FDR</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> INPP5E      10 Down      0.013<span style="text-decoration: underline;">1</span> 0.522</span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> LDHAL6B     10 Down      0.018<span style="text-decoration: underline;">9</span> 0.674</span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> CHD2        10 Down      0.032<span style="text-decoration: underline;">4</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> TRIM43B     10 Down      0.041<span style="text-decoration: underline;">4</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> TRIM9        9 Down      0.044<span style="text-decoration: underline;">7</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> TYMS         9 Down      0.052<span style="text-decoration: underline;">8</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> PDHA2       10 Down      0.058<span style="text-decoration: underline;">4</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> PRDM4       10 Down      0.059<span style="text-decoration: underline;">4</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> HUWE1       10 Down      0.064<span style="text-decoration: underline;">6</span> 0.906</span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> LUC         32 Down      0.069<span style="text-decoration: underline;">8</span> 0.906</span>
+<span class="co">##    Gene     NGenes Direction PValue   FDR</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_199     10 Down      0.013<span style="text-decoration: underline;">1</span> 0.522</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_239     10 Down      0.018<span style="text-decoration: underline;">9</span> 0.674</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_78      10 Down      0.032<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_478     10 Down      0.041<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_508      9 Down      0.044<span style="text-decoration: underline;">7</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_516      9 Down      0.052<span style="text-decoration: underline;">8</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_298     10 Down      0.058<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_347     10 Down      0.059<span style="text-decoration: underline;">4</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_183     10 Down      0.064<span style="text-decoration: underline;">6</span> 0.906</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_245     32 Down      0.069<span style="text-decoration: underline;">8</span> 0.906</span>
 <span class="co">## <span style="color: #949494;"># … with 271 more rows</span></span>
 <span class="co">## </span>
-<span class="co">## $Day6</span>
+<span class="co">## $Time4</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 269 × 5</span></span>
-<span class="co">##    Gene    NGenes Direction PValue   FDR</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> INPP5E      10 Down      0.013<span style="text-decoration: underline;">1</span> 0.779</span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> LDHAL6B     10 Down      0.020<span style="text-decoration: underline;">1</span> 0.941</span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> CHD2        10 Down      0.028<span style="text-decoration: underline;">5</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> PDHA2       10 Down      0.031<span style="text-decoration: underline;">6</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> TRIM9        9 Down      0.035<span style="text-decoration: underline;">5</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> TYMS         9 Down      0.037<span style="text-decoration: underline;">0</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> TRIM62       9 Down      0.043<span style="text-decoration: underline;">7</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> TRIM43B     10 Down      0.049<span style="text-decoration: underline;">1</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> ME3         10 Down      0.050<span style="text-decoration: underline;">0</span> 0.969</span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> HUWE1       10 Down      0.058<span style="text-decoration: underline;">4</span> 0.969</span>
+<span class="co">##    Gene     NGenes Direction PValue   FDR</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_199     10 Down      0.013<span style="text-decoration: underline;">1</span> 0.779</span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_239     10 Down      0.020<span style="text-decoration: underline;">1</span> 0.941</span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_78      10 Down      0.028<span style="text-decoration: underline;">5</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_298     10 Down      0.031<span style="text-decoration: underline;">6</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_508      9 Down      0.035<span style="text-decoration: underline;">5</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_516      9 Down      0.037<span style="text-decoration: underline;">0</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_494      9 Down      0.043<span style="text-decoration: underline;">7</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_478     10 Down      0.049<span style="text-decoration: underline;">1</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_257     10 Down      0.050<span style="text-decoration: underline;">0</span> 0.969</span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_183     10 Down      0.058<span style="text-decoration: underline;">4</span> 0.969</span>
 <span class="co">## <span style="color: #949494;"># … with 259 more rows</span></span></code></pre>
 </div>
 <div class="section level4">
@@ -441,48 +433,48 @@ function.</p>
 <p>Last but not least this is done also for the ROAST hit using the
 function<br><em>find_roast_hit</em>.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">roast_hit_Met</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
+<code class="sourceCode R"><span class="va">roast_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
         screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-        contrast <span class="op">=</span> <span class="st">"Day3_Met"</span>
+        contrast <span class="op">=</span> <span class="st">"Time3_TRT"</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
         screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
-        contrast <span class="op">=</span> <span class="st">"Day6_Met"</span>
+        contrast <span class="op">=</span> <span class="st">"Time4_TRT"</span>
     <span class="op">)</span>
 <span class="op">)</span>
 
-<span class="va">roast_hit_Met</span></code></pre></div>
-<pre><code><span class="co">## $Day3</span>
+<span class="va">roast_hit_TRT</span></code></pre></div>
+<pre><code><span class="co">## $Time3</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 534 × 9</span></span>
-<span class="co">##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> LUC        32        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> PSMA1      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> RPL30      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> SEPT5      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> SEPT9      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> ACAA1      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> ACAA2      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> ACACA      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> ACACB      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> ACAD11     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">##    Gene     NGenes PropDown PropUp Direction PValue   FDR PValue.Mixed FDR.Mixed</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_245     32        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_364     12        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_372     12        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_380     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_381     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_1       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_2       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_3       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_4       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_5       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
 <span class="co">## <span style="color: #949494;"># … with 524 more rows</span></span>
 <span class="co">## </span>
-<span class="co">## $Day6</span>
+<span class="co">## $Time4</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 534 × 9</span></span>
-<span class="co">##    Gene   NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed</span>
-<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 1</span> LUC        32        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 2</span> PSMA1      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 3</span> RPL30      12        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 4</span> SEPT5      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 5</span> SEPT9      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 6</span> ACAA1      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 7</span> ACAA2      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 8</span> ACACA      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;"> 9</span> ACACB      10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
-<span class="co">## <span style="color: #BCBCBC;">10</span> ACAD11     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">1</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">##    Gene     NGenes PropDown PropUp Direction PValue   FDR PValue.Mixed FDR.Mixed</span>
+<span class="co">##    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 1</span> Gene_245     32        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 2</span> Gene_364     12        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 3</span> Gene_372     12        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 4</span> Gene_380     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 5</span> Gene_381     10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 6</span> Gene_1       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 7</span> Gene_2       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 8</span> Gene_3       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;"> 9</span> Gene_4       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
+<span class="co">## <span style="color: #BCBCBC;">10</span> Gene_5       10        1      0 Down      0.000<span style="text-decoration: underline;">1</span>  1<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span>       0.000<span style="text-decoration: underline;">1</span>    0.000<span style="text-decoration: underline;">1</span></span>
 <span class="co">## <span style="color: #949494;"># … with 524 more rows</span></span></code></pre>
 </div>
 <div class="section level4">
@@ -497,24 +489,24 @@ three methods</li>
 methods</li>
 </ul>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">common_hit_Met_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
-        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
+<code class="sourceCode R"><span class="va">common_hit_TRT_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Day3</span>,
         common_in <span class="op">=</span> <span class="fl">2</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
-        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Day6</span>,
         common_in <span class="op">=</span> <span class="fl">2</span>
     <span class="op">)</span>
 <span class="op">)</span>
 
-<span class="va">common_hit_Met_at_least_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    Day3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
-        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
+<span class="va">common_hit_TRT_at_least_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
+    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>,
         common_in <span class="op">=</span> <span class="fl">3</span>
     <span class="op">)</span>,
-    Day6 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
-        <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day6</span>, <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day6</span>,
+    Time4 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
+        <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>,
         common_in <span class="op">=</span> <span class="fl">3</span>
     <span class="op">)</span>
 <span class="op">)</span></code></pre></div>
@@ -526,8 +518,8 @@ methods</li>
 function.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span>
-    hit_zscore <span class="op">=</span> <span class="va">zscore_hit_Met</span><span class="op">$</span><span class="va">Day3</span>, hit_camera <span class="op">=</span> <span class="va">camera_hit_Met</span><span class="op">$</span><span class="va">Day3</span>,
-    <span class="va">roast_hit_Met</span><span class="op">$</span><span class="va">Day3</span>
+    hit_zscore <span class="op">=</span> <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, hit_camera <span class="op">=</span> <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>,
+    <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>
 <span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Warning in sprintf("%d", n, 100 * n/sum(n)): one argument not used by format</span>
 <span class="co">## '%d'</span></code></pre>
@@ -549,7 +541,7 @@ function.</p>
 <span class="co">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
 <span class="co">## </span>
 <span class="co">## other attached packages:</span>
-<span class="co">## [1] ScreenR_0.99.3 tidyr_1.2.0    dplyr_1.0.8    ggplot2_3.3.5 </span>
+<span class="co">## [1] ScreenR_0.99.4 tidyr_1.2.0    dplyr_1.0.8    ggplot2_3.3.5 </span>
 <span class="co">## </span>
 <span class="co">## loaded via a namespace (and not attached):</span>
 <span class="co">##  [1] tidyselect_1.1.2  locfit_1.5-9.5    xfun_0.30         bslib_0.3.1      </span>

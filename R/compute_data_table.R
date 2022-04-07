@@ -10,11 +10,9 @@
 #' @importFrom rlang .data
 #' @importFrom stringr str_split_fixed
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
-#'
-#' compute_data_table(obj)
-
-#'
+#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- compute_data_table(object)
+#' head(slot(object, "data_table"))
 compute_data_table <- function(screenR_Object) {
     # First the table is created with the join of the annotation and the count
     # table

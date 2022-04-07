@@ -10,14 +10,15 @@
 #' @return return the density plot of the distribution of the Z-score
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
-#' table1 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
-#'                          day = 'Day3')
-#' table2 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
-#'                          day = 'Day6')
+#' object <- get0('object', envir = asNamespace('ScreenR'))
+#'
+#' table1 <- compute_metrics(object, control = 'TRT', treatment = 'Time3',
+#'                          day = 'Time3')
+#'
+#' table2 <- compute_metrics(object, control = 'TRT', treatment = 'Time4',
+#'                          day = 'Time4')
 #'
 #'plot_Zscore_distribution(list(table1, table2), alpha = 0.5)
-
 
 plot_Zscore_distribution <- function(time_point_measure, alpha = 1) {
     dplyr::bind_rows(time_point_measure) %>%

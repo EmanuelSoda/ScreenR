@@ -11,7 +11,7 @@ Barcode_creation_Dataframe(path_file)
 }
 \value{
 Return the table containing  the list of barcodes mapped in each of
-        the samples (a cound table).
+        the samples (a count table).
 }
 \description{
 This function takes as input the path of a list of files

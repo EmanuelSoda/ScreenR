@@ -21,11 +21,13 @@ This function plots the Log2FC Z-score distribution of the
              treated vs control in the different time points.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-table1 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
-                         day = 'Day3')
-table2 <- compute_metrics(obj, control = 'Met', treatment = 'DMSO',
-                         day = 'Day6')
+object <- get0('object', envir = asNamespace('ScreenR'))
+
+table1 <- compute_metrics(object, control = 'TRT', treatment = 'Time3',
+                         day = 'Time3')
+
+table2 <- compute_metrics(object, control = 'TRT', treatment = 'Time4',
+                         day = 'Time4')
 
 plot_Zscore_distribution(list(table1, table2), alpha = 0.5)
 }

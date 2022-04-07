@@ -12,8 +12,10 @@
 #' @return Return the screenR object with the normalize data
 #' @export
 #' @examples
-#' obj <- get0('obj', envir = asNamespace('ScreenR'))
-#' normalize_data(obj)
+#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- normalize_data(object)
+#'
+#' slot(object, 'normalized_count_table')
 normalize_data <- function(screenR_Object) {
     screenR_Object@normalized_count_table <- screenR_Object@count_table %>%
         # divede each cell for the sum of the column and than multiply 1e6

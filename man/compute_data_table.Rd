@@ -18,8 +18,7 @@ This function computes the data table that will be used
              for the analysis.
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
-
-compute_data_table(obj)
-
+object <- get0('object', envir = asNamespace('ScreenR'))
+object <- compute_data_table(object)
+head(slot(object, "data_table"))
 }

@@ -41,12 +41,12 @@ This function finds the hits using the camera method is
              a wrapper for the \code{\link[limma]{camera}} function
 }
 \examples{
-obj <- get0('obj', envir = asNamespace('ScreenR'))
+object <- get0('object', envir = asNamespace('ScreenR'))
 
-matrix <- model.matrix(~slot(obj, 'groups'))
-colnames(matrix) <- c('Control', 'T0/T48', 'Treated')
+matrix <- model.matrix(~slot(object, 'groups'))
+colnames(matrix) <- c('Control', 'T1/T2', 'Treated')
 
-find_camera_hit(screenR_Object = obj,
+result <- find_camera_hit(screenR_Object = object,
                matrix_model = matrix, contrast = 'Treated')
-
+head(result)
 }
