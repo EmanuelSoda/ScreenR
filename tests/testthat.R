@@ -1,17 +1,18 @@
 library(testthat)
 library(ScreenR)
 data <- count_table
-annotation_table <- annotation_table
+annotaion <- annotation_table
+
+groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
+                   "Control", "Control", "Control", "Treated", "Treated", "Treated",
+                   "Control", "Control", "Control"))
+
+
+palette <- c("#1B9E75", "#1B9E75", "#D95F02", "#D95F02", "#D95F02",
+             "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
+             "#66A61E", "#66A61E", "#66A61E")
+
 create_test_object <- function() {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E75", "#1B9E75", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     data <- data %>%
         dplyr::filter(Barcode != "*")
 
@@ -21,7 +22,7 @@ create_test_object <- function() {
         "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
     )
     obj <- create_screenR_object(table = data,
-        annotation = annotation_table, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     obj <- normalize_data(obj)
     obj <- compute_data_table(obj)
 
@@ -31,24 +32,16 @@ create_test_object <- function() {
 
 
 test_that("Creation of the screenR object", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     expect_s4_class(object = object, class = "screenR_object")
 })
 
 
 
 test_that("Normalize Data", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
 
     object <- normalize_data(object)
     expect_equal(dim(object@count_table), dim(object@normalized_count_table))
@@ -56,12 +49,8 @@ test_that("Normalize Data", {
 
 test_that("Number mapped reads", {
     library(tibble)
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     mapped <- mapped_reads(object)
 
     expect_equal(is_tibble(mapped), TRUE)
@@ -69,62 +58,31 @@ test_that("Number mapped reads", {
 
 
 test_that("Plot number mapped reads", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     plot <- plot_mapped_reads(object, palette)
     expect_equal(class(plot)[2], "ggplot")
 })
 
 
 test_that("Plot number mapped reads", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     plot <- plot_mapped_reads(object, NULL)
     expect_equal(class(plot)[2], "ggplot")
 })
 
 test_that("Boxplot mapped reads", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     plot <- distribution_mapped_reads(object, palette, alpha = 0.8,
         type = "boxplot")
     expect_equal(class(plot)[2], "ggplot")
 })
 
 test_that("Density mapped reads", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     plot <- distribution_mapped_reads(object, palette, alpha = 0.8,
         type = "density")
     expect_equal(class(plot)[2], "ggplot")
@@ -133,50 +91,24 @@ test_that("Density mapped reads", {
 
 test_that("Number of Barcode Lost", {
     library(tibble)
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
 
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     barcode_lost <- barcode_lost(object)
     expect_equal(is_tibble(barcode_lost), TRUE)
 })
 
 test_that("Plot number of Barcode Lost", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
 
     plot <- plot_barcode_lost(screenR_Object = object, palette = palette)
     expect_equal(class(plot)[2], "ggplot")
 })
 
 test_that("Create data_table", {
-    groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control", "Treated", "Treated", "Treated",
-        "Control", "Control", "Control"))
-
-
-    palette <- c("#1B9E77", "#1B9E77", "#D95F02", "#D95F02", "#D95F02",
-        "#7570B3", "#7570B3", "#7570B3", "#E7298A", "#E7298A", "#E7298A",
-        "#66A61E", "#66A61E", "#66A61E")
-
     object <- create_screenR_object(table = data,
-        annotation = Table_Annotation, groups = groups, replicates = c(""))
+        annotation = annotaion, groups = groups, replicates = c(""))
     object <- normalize_data(object)
 
 
