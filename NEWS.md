@@ -1,4 +1,4 @@
-# ScreenR 0.99.4
+# ScreenR 0.99.41
 
 # ScreenR NEWS Report
 
@@ -17,3 +17,6 @@
 
 * Changes in version 0.99.4:
   * Changed dataframe for the example
+  
+* Changes in version 0.99.41:
+  * Unpdate to Bioconductor
