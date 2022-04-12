@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 [![codecov](https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0)](https://codecov.io/gh/EmanuelSoda/ScreenR)
