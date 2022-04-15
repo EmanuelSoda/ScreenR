@@ -59,6 +59,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' @param text_size Text size for intersect contents
 #' @param text_color Text color for intersect contents
 #' @param show_percentage Show percentage for each set
+#' @param show_elements Show set elements instead of count/percentage.
 #' @param title The title to display above the plot
 #' @return A vector containing the common hit
 #' @param color The three vector color for the veen
@@ -71,16 +72,19 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 
 plot_common_hit <- function(hit_zscore, hit_camera,
     hit_roast, alpha = 0.5, stroke_size = 0.5, set_name_size = 4,
-    text_color = "black", text_size = 4, show_percentage = FALSE,
-    title = "", color = c("#1B9E77", "#D95F02", "#7570B3")) {
+    text_color = "black", text_size = 4, show_percentage = TRUE,
+    title = "", color = c("#1B9E77", "#D95F02", "#7570B3"),
+    show_elements = TRUE) {
     hit_list <- list(`Z-score Hits` = unique(hit_zscore$Gene),
         `Camera Hits` = unique(hit_camera$Gene),
         `ROAST Hits` = unique(hit_roast$Gene))
 
     ggvenn::ggvenn(data = hit_list, fill_alpha = alpha,
+        columns = c("Z-score Hits", "Camera Hits", "ROAST Hits"),
         fill_color = color, stroke_size = stroke_size,
         text_size = text_size, text_color = text_color,
-        set_name_size = 4, show_percentage = show_percentage) +
+        show_elements = show_elements, set_name_size = set_name_size,
+        show_percentage = show_percentage) +
         ggtitle(title)
 }
 

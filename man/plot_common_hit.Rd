@@ -13,9 +13,10 @@ plot_common_hit(
   set_name_size = 4,
   text_color = "black",
   text_size = 4,
-  show_percentage = FALSE,
+  show_percentage = TRUE,
   title = "",
-  color = c("#1B9E77", "#D95F02", "#7570B3")
+  color = c("#1B9E77", "#D95F02", "#7570B3"),
+  show_elements = TRUE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ Allowed values are in the range 0 to 1}
 \item{title}{The title to display above the plot}
 
 \item{color}{The three vector color for the veen}
+
+\item{show_elements}{Show set elements instead of count/percentage.}
 }
 \value{
 A vector containing the common hit

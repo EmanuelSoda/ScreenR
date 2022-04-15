@@ -24,7 +24,7 @@ Imports:
     strex (>= 1.4.2),
     tibble (>= 3.1.6),
     scales (>= 1.1.1),
-    ggvenn,
+    ggvenn (>= 0.1.9),
     purrr (>= 0.3.4),
     ggplot2 (>= 3.3),
     stats,
@@ -36,11 +36,14 @@ Suggests:
     rmarkdown (>= 2.11),
     knitr (>= 1.37),
     testthat (>= 3.0.0),
+    BiocStyle (>= 2.22.0),
     covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.1.0)
+    R (>= 4.2.0)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 LazyData: true
 LazyDataCompression: xz
+BugReports: https://github.com/EmanuelSoda/ScreenR/issues
+URL: https://emanuelsoda.github.io/ScreenR/

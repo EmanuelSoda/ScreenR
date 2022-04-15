@@ -35,7 +35,7 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 
     plot <- ggplot2::ggplot(PLTdata, aes(x = .data$x, y = .data$y,
         fill = .data$group)) + ggplot2::geom_label(aes(label = .data$Sample),
-        color = color, size = size, alpha = alpha, check_overlap = TRUE) +
+        color = color, size = size, alpha = alpha) +
         ggplot2::labs(x = "First Dimension", y = "Second Dimension")
 
     return(plot)

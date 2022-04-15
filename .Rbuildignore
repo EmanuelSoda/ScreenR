@@ -10,3 +10,5 @@
 ^Meta$
 ^ScreenR.Rproj
 ^data-raw$
+^_pkgdown\.yml$
+^pkgdown$
