@@ -43,7 +43,5 @@ Depends:
     R (>= 4.2.0)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
-LazyData: true
-LazyDataCompression: xz
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues
 URL: https://emanuelsoda.github.io/ScreenR/

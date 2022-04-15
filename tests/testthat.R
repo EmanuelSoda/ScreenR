@@ -1,5 +1,7 @@
 library(testthat)
 library(ScreenR)
+data("count_table", package = "ScreenR")
+data("annotation_table", package = "ScreenR")
 data <- count_table
 annotaion <- annotation_table
 
