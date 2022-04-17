@@ -12,3 +12,4 @@
 ^data-raw$
 ^_pkgdown\.yml$
 ^pkgdown$
+^README\.Rmd$
