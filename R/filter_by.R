@@ -19,23 +19,27 @@
 #'         for each gene
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' filter_by_slope(screenR_Object = object, genes = c('Gene_1', 'Gene_2'),
-#'                 group_var_treatment = c('T1', 'T2', 'TRT'),
-#'                 group_var_control = c('T1', 'T2', 'Time3', 'Time4'),
-#'                 slope_control = 0.5, slope_treatment = 1)
-
+#' filter_by_slope(
+#'     screenR_Object = object, genes = c("Gene_1", "Gene_2"),
+#'     group_var_treatment = c("T1", "T2", "TRT"),
+#'     group_var_control = c("T1", "T2", "Time3", "Time4"),
+#'     slope_control = 0.5, slope_treatment = 1
+#' )
+#'
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     group_var_control, slope_control = NULL, slope_treatment) {
 
     # Compute the slope of the hits in the treatment Samples
     slope_treatment <- compute_slope(screenR_Object, genes,
-        group_var = group_var_treatment)
+        group_var = group_var_treatment
+    )
 
     # Compute the slope of the hits in the control Samples
     slope_DMSO <- compute_slope(screenR_Object, genes,
-        group_var = group_var_control)
+        group_var = group_var_control
+    )
 
     data <- screenR_Object@data_table
 
@@ -69,12 +73,13 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' compute_slope(object, genes = c('Gene_42', 'Gene_24'),
-#'               group_var = c('T1', 'T2', 'TRT'))
+#' compute_slope(object,
+#'     genes = c("Gene_42", "Gene_24"),
+#'     group_var = c("T1", "T2", "TRT")
+#' )
 #'
-
 compute_slope <- function(screenR_Object, genes, group_var) {
     data <- screenR_Object@data_table
     data <- dplyr::filter(data, .data$Gene %in% genes)
@@ -87,7 +92,8 @@ compute_slope <- function(screenR_Object, genes, group_var) {
     data <- dplyr::ungroup(data)
 
     data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
-        Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"])
+        Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"]
+    )
     slope_tibble <- select(data, .data$Gene, .data$Slope)
 
     return(slope_tibble)
@@ -113,15 +119,17 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'         for each gene
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
-#' matrix_model <- model.matrix(~slot(object, 'groups'))
-#' colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' matrix_model <- model.matrix(~ slot(object, "groups"))
+#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' data <- filter_by_variance(screenR_Object = object, genes = c('Gene_42'),
-#'                            matrix_model = matrix_model, contrast = contrast)
+#' data <- filter_by_variance(
+#'     screenR_Object = object, genes = c("Gene_42"),
+#'     matrix_model = matrix_model, contrast = contrast
+#' )
 #' head(data)
-
+#'
 filter_by_variance <- function(screenR_Object, genes, matrix_model,
     variance = 0.5, contrast) {
 
@@ -140,8 +148,10 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
     lrt <- dplyr::filter(lrt, .data$Gene %in% genes)
     lrt <- dplyr::group_by(lrt, .data$Gene)
     lrt <- dplyr::mutate(lrt, variance = stats::var(.data$logFC))
-    lrt <- dplyr::summarise(lrt, Gene = unique(.data$Gene),
-        variance = mean(.data$variance), .groups = "drop")
+    lrt <- dplyr::summarise(lrt,
+        Gene = unique(.data$Gene),
+        variance = mean(.data$variance), .groups = "drop"
+    )
 
     # Bind the temporary data_table to the table with the fold change
     data <- dplyr::left_join(data, lrt, by = "Gene")
@@ -151,4 +161,3 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 
     return(data)
 }
-

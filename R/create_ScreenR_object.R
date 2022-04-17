@@ -16,9 +16,11 @@ create_screenR_object <- function(table = NULL, annotation = NULL,
     arcode <- as.factor(table$Barcode)
     annotation$Barcode <- as.factor(annotation$Barcode)
 
-    object <- new("screenR_object", count_table = table,
+    object <- new("screenR_object",
+        count_table = table,
         annotation_table = annotation, groups = groups, replicates = replicates,
-        normalized_count_table = data.frame(), data_table = data.frame())
+        normalized_count_table = data.frame(), data_table = data.frame()
+    )
 
     return(object)
 }

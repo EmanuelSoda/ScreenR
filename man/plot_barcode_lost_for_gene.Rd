@@ -21,12 +21,14 @@ Return a tibble containing the number of mapped reads for sample
 This function plots the number of barcodes lost in each sample
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_barcode_lost_for_gene(object,
-                           samples = c('Time3_A', 'Time3_B'))
+    samples = c("Time3_A", "Time3_B")
+)
 plot_barcode_lost_for_gene(object,
-                           samples = c('Time3_A', 'Time3_B'),
-                           facet = FALSE)
+    samples = c("Time3_A", "Time3_B"),
+    facet = FALSE
+)
 }
 \concept{plot}

@@ -16,14 +16,15 @@
 #' @return The the plot of the
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' plot_trend(object, genes = 'Gene_42', group_var = c('T1', 'T2', 'TRT'))
+#' plot_trend(object, genes = "Gene_42", group_var = c("T1", "T2", "TRT"))
 #'
-#' plot_trend(object, genes = c('Gene_42', 'Gene_100'),
-#'            group_var = c('T1', 'T2', 'TRT'),
-#'            nrow = 2)
-#'
+#' plot_trend(object,
+#'     genes = c("Gene_42", "Gene_100"),
+#'     group_var = c("T1", "T2", "TRT"),
+#'     nrow = 2
+#' )
 #'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,
@@ -40,27 +41,28 @@ plot_trend <- function(screenR_Object, genes, group_var,
     data <- dplyr::group_by(data, .data$Sample, .data$Gene)
 
     # Consider only the gene (which are the mean of the different shRNAs)
-    data <- dplyr::summarise(data, Gene = unique(.data$Gene),
+    data <- dplyr::summarise(data,
+        Gene = unique(.data$Gene),
         Sample = unique(.data$Sample), Frequency = mean(.data$Frequency),
-        .groups = "drop")
+        .groups = "drop"
+    )
 
-    plot <- ggplot2::ggplot(data, aes(.data$Sample,
-        .data$Frequency)) + ggplot2::geom_point(size = point_size) +
+    plot <- ggplot2::ggplot(data, aes(
+        .data$Sample,
+        .data$Frequency
+    )) +
+        ggplot2::geom_point(size = point_size) +
         ggplot2::geom_smooth(aes(group = .data$Gene),
             method = "lm", formula = y ~ x, alpha = alpha,
-            se = se, size = line_size)
+            se = se, size = line_size
+        )
 
     if (length(genes) > 1) {
-        plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow,
-            ncol = ncol)
+        plot <- plot + ggplot2::facet_wrap("Gene",
+            nrow = nrow,
+            ncol = ncol
+        )
     }
 
     return(plot)
 }
-
-
-
-
-
-
-

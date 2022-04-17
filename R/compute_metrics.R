@@ -21,14 +21,15 @@
 #' @return Return a tibble  with all the measure computed.
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
-#' metrics <- compute_metrics(object, control = 'TRT',
-#'                           treatment = 'Time3', day = 'Time3')
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' metrics <- compute_metrics(object,
+#'     control = "TRT",
+#'     treatment = "Time3", day = "Time3"
+#' )
 #' head(metrics)
-
+#'
 compute_metrics <- function(screenR_Object, control,
     treatment, day) {
-
     control <- screenR_Object@data_table %>%
         filter(.data$Treatment %in% control) %>%
         pull(.data$Sample) %>%
@@ -45,24 +46,29 @@ compute_metrics <- function(screenR_Object, control,
         filter(.data$Sample %in% c(control, treated)) %>%
         mutate(Group = factor(if_else(condition = .data$Sample %in%
             treated, true = "Treated", false = "Control"),
-            levels = c("Treated", "Control")))
+        levels = c("Treated", "Control")
+        ))
 
     data_trt <- data_trt %>%
         dplyr::filter(.data$Day %in% day) %>%
         dplyr::group_by(.data$Group, .data$Barcode) %>%
         dplyr::mutate(Mean = mean(.data$Frequency)) %>%
-        dplyr::summarise(Barcode = unique(.data$Barcode),
+        dplyr::summarise(
+            Barcode = unique(.data$Barcode),
             Mean = unique(.data$Mean), Gene = unique(.data$Gene),
-            .groups = "drop") %>%
-        tidyr::pivot_wider(names_from = .data$Group,
-            values_from = .data$Mean) %>%
+            .groups = "drop"
+        ) %>%
+        tidyr::pivot_wider(
+            names_from = .data$Group,
+            values_from = .data$Mean
+        ) %>%
         dplyr::filter(.data$Control > 0) %>%
-        dplyr::mutate(Log2FC = log2(.data$Treated/.data$Control +
+        dplyr::mutate(Log2FC = log2(.data$Treated / .data$Control +
             1e-07)) %>%
         dplyr::mutate(Zscore = (.data$Log2FC -
-            mean(.data$Log2FC))/sd(.data$Log2FC)) %>%
+            mean(.data$Log2FC)) / sd(.data$Log2FC)) %>%
         dplyr::mutate(ZscoreRobust = 1.4826 * (.data$Log2FC -
-            mean(.data$Log2FC))/median(abs(.data$Log2FC -
+            mean(.data$Log2FC)) / median(abs(.data$Log2FC -
             median(.data$Log2FC)))) %>%
         dplyr::mutate(Day = day, Treatment = treatment)
 

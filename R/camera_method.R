@@ -14,13 +14,15 @@
 #' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' matrix <- model.matrix(~slot(object, 'groups'))
-#' colnames(matrix) <- c('Control', 'T1/T2', 'Treated')
+#' matrix <- model.matrix(~ slot(object, "groups"))
+#' colnames(matrix) <- c("Control", "T1/T2", "Treated")
 #'
-#' result <- find_camera_hit(screenR_Object = object,
-#'                matrix_model = matrix, contrast = 'Treated')
+#' result <- find_camera_hit(
+#'     screenR_Object = object,
+#'     matrix_model = matrix, contrast = "Treated"
+#' )
 #' head(result)
 #' @export
 #'
@@ -35,10 +37,12 @@ find_camera_hit <- function(screenR_Object, matrix_model,
     fit <- edgeR::glmFit(xglm, matrix_model)
     lrt <- edgeR::glmLRT(fit, coef = seq(1, length(colnames(matrix_model))))
 
-    camera_hit <- compute_camera(xglm = xglm, lrt = lrt, DGEList = DGEList,
+    camera_hit <- compute_camera(
+        xglm = xglm, lrt = lrt, DGEList = DGEList,
         matrix_model = matrix_model, contrast = contrast,
         number_barcode = number_barcode, thresh = thresh,
-        lfc = lfc)
+        lfc = lfc
+    )
     camera_hit <- camera_hit %>%
         tibble::rownames_to_column("Gene") %>%
         dplyr::tibble() %>%
@@ -69,16 +73,20 @@ compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
     number_barcode = 3, thresh = 1e-04, lfc = 1) {
     # Take all the Tags in descending order
     top <- edgeR::topTags(lrt, n = Inf)
-    topids <- top$table[top$table$FDR < thresh & top$table$logFC <= lfc,
-        1]
+    topids <- top$table[
+        top$table$FDR < thresh & top$table$logFC <= lfc,
+        1
+    ]
 
     # Select only the first column
     genesymbols <- DGEList$genes[, 1]
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
     # Perform the camera test
-    camera.res <- limma::camera(xglm, index = genesymbollist, matrix_model,
-        contrast = contrast)
+    camera.res <- limma::camera(xglm,
+        index = genesymbollist, matrix_model,
+        contrast = contrast
+    )
     return(camera.res)
 }
 
@@ -92,8 +100,10 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
     un_genesymbols <- unique(gene_symbols)
     un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
 
-    gene_symbol_list <- lapply(X = un_genesymbols, FUN = select_number_barcode,
-        gene_symbols, number_barcode)
+    gene_symbol_list <- lapply(
+        X = un_genesymbols, FUN = select_number_barcode,
+        gene_symbols, number_barcode
+    )
     names(gene_symbol_list) <- un_genesymbols
     # sapply(gene_symbol_list, is.null)
     gene_symbol_list[purrr::map_lgl(gene_symbol_list, is.null)] <- NULL

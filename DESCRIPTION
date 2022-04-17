@@ -2,8 +2,10 @@ Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
 Version: 0.99.41
+Date: 2022-04-01 
 Authors@R: person("Emanuel Michele", "Soda", role = c("aut", "cre"),
-                  email = "emanuelsoda@gmail.com")
+                  email = "emanuelsoda@gmail.com", 
+                  comment = c(ORICD = "0000-0002-2301-6465"))
 Description: The aim of ScreenR is to help in the analysis of 
              High Throughput Biological Screening using pooled shRNAs. Those
              type of screening uses RNA-seq expression data to find candidate 
@@ -40,7 +42,7 @@ Suggests:
     covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.2.0)
+    R (>= 4.2)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues

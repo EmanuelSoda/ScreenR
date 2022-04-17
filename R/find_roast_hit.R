@@ -15,12 +15,14 @@
 #' @return The hits found by ROAST method
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
-#' matrix_model <- model.matrix(~slot(object, 'groups'))
-#' colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' matrix_model <- model.matrix(~ slot(object, "groups"))
+#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 #'
-#' result <- find_roast_hit(object, matrix_model = matrix_model,
-#'                          contrast = 'Treated', nrot = 100)
+#' result <- find_roast_hit(object,
+#'     matrix_model = matrix_model,
+#'     contrast = "Treated", nrot = 100
+#' )
 #' head(result)
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     nrot = 9999, number_barcode = 3, direction = "Down", p_val = 0.05) {
@@ -29,8 +31,10 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     genesymbols <- DGEList$genes[, 1]
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
-    roast_hit <- limma::mroast(xglm, index = genesymbollist,
-        design = matrix_model, contrast = contrast, nrot = nrot)
+    roast_hit <- limma::mroast(xglm,
+        index = genesymbollist,
+        design = matrix_model, contrast = contrast, nrot = nrot
+    )
 
     roast_hit <- roast_hit %>%
         tibble::rownames_to_column("Gene") %>%

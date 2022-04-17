@@ -45,13 +45,14 @@ The the plot of the
 This function plot the trend of a gene resulted as hit
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 
-plot_trend(object, genes = 'Gene_42', group_var = c('T1', 'T2', 'TRT'))
+plot_trend(object, genes = "Gene_42", group_var = c("T1", "T2", "TRT"))
 
-plot_trend(object, genes = c('Gene_42', 'Gene_100'),
-           group_var = c('T1', 'T2', 'TRT'),
-           nrow = 2)
-
+plot_trend(object,
+    genes = c("Gene_42", "Gene_100"),
+    group_var = c("T1", "T2", "TRT"),
+    nrow = 2
+)
 
 }

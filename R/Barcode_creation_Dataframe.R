@@ -14,12 +14,18 @@
 #' @export
 
 Barcode_creation_Dataframe <- function(path_file) {
-    dataFrames <- purrr::map(.x = list.files(path = path_file,
-        full.names = TRUE), .f = ~read.table(file = .x, header = FALSE,
-          sep = "\t", col.names = c("Barcode", "Length", "Mapped",
-            "Unmapped")))
+    dataFrames <- purrr::map(.x = list.files(
+        path = path_file,
+        full.names = TRUE
+    ), .f = ~ read.table(
+        file = .x, header = FALSE,
+        sep = "\t", col.names = c(
+            "Barcode", "Length", "Mapped",
+            "Unmapped"
+        )
+    ))
     # remove the useless one
-    dataFrames <- purrr::map(.x = dataFrames, .f = ~.x[(names(.x) %in%
+    dataFrames <- purrr::map(.x = dataFrames, .f = ~ .x[(names(.x) %in%
         c("Barcode", "Mapped"))])
 
     Mapped_barcode_all_Samples <- dataFrames %>%

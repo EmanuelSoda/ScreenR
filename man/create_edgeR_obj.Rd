@@ -18,7 +18,7 @@ Utility function that using the screenR-class
              object create the corresponding edgeR object
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 create_edgeR_obj(object)
 
 }

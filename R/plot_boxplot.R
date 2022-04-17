@@ -17,12 +17,14 @@
 #' @return A boxplot
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' plot_boxplot(object, genes = c('Gene_34'),
-#'              group_var = c('T1', 'T2', 'TRT'), nrow = 1, ncol = 2,
-#'              fill_var = 'Day', type = 'violinplot')
-
+#' plot_boxplot(object,
+#'     genes = c("Gene_34"),
+#'     group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2,
+#'     fill_var = "Day", type = "violinplot"
+#' )
+#'
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     nrow = 1, ncol = 1, fill_var = "Sample", type = "boxplot") {
     data <- screenR_Object@data_table
@@ -34,7 +36,8 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
     plot <- ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency,
-        fill = !!sym(fill_var)))
+        fill = !!sym(fill_var)
+    ))
     if (type == "boxplot") {
         plot <- plot + geom_boxplot()
     } else if (type == "violinplot") {

@@ -18,7 +18,7 @@ This function compute the explained variance by each of the
              Principal Components
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 
 compute_explained_variance(object)
 }

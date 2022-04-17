@@ -21,8 +21,8 @@ This function perform a normalization on the data considering
              sort of transcript per million.
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 object <- normalize_data(object)
 
-slot(object, 'normalized_count_table')
+slot(object, "normalized_count_table")
 }

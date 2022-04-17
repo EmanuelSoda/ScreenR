@@ -8,7 +8,7 @@
 #' @return The edgeR object
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #' create_edgeR_obj(object)
 #'
 create_edgeR_obj <- function(screenR_Object) {

@@ -11,10 +11,10 @@
 #' @return The MDS Plot
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_MDS(object)
-
+#'
 plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
     # We have to convert the screenR obj into an edgeR obj
@@ -24,8 +24,10 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     plotMDS <- limma::plotMDS(DGEList, plot = FALSE, ndim = 2)
 
     # Create the Updated plot MDS
-    PLTdata <- data.frame(Sample = rownames(plotMDS$distance.matrix.squared),
-        x = plotMDS$x, y = plotMDS$y)
+    PLTdata <- data.frame(
+        Sample = rownames(plotMDS$distance.matrix.squared),
+        x = plotMDS$x, y = plotMDS$y
+    )
 
     if (is.null(groups)) {
         PLTdata$group <- DGEList$samples$group
@@ -33,9 +35,13 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
         PLTdata$group <- groups
     }
 
-    plot <- ggplot2::ggplot(PLTdata, aes(x = .data$x, y = .data$y,
-        fill = .data$group)) + ggplot2::geom_label(aes(label = .data$Sample),
-        color = color, size = size, alpha = alpha) +
+    plot <- ggplot2::ggplot(PLTdata, aes(
+        x = .data$x, y = .data$y,
+        fill = .data$group
+    )) +
+        ggplot2::geom_label(aes(label = .data$Sample),
+            color = color, size = size, alpha = alpha
+        ) +
         ggplot2::labs(x = "First Dimension", y = "Second Dimension")
 
     return(plot)
@@ -52,16 +58,15 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @return The explained variance  plot
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_PC_explained_variance(object)
 #'
 #' # For the cumulative plote
 #' plot_PC_explained_variance(object, cumulative = TRUE)
-
+#'
 plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {
-
     PC <- compute_explained_variance(screenR_Object)
     # Remove the Standard deviation row
     PC <- filter(PC, .data$Name != "Standard deviation")
@@ -70,10 +75,14 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
     numeric_col <- colnames(PC[, unlist(lapply(PC, is.numeric))])
 
     # Transform the data in a longer format
-    PC <- tidyr::pivot_longer(data = PC, cols = all_of(numeric_col),
-        names_to = "name")
-    PC <- dplyr::mutate(PC, name = factor(x = .data$name,
-        levels = unique(.data$name)))
+    PC <- tidyr::pivot_longer(
+        data = PC, cols = all_of(numeric_col),
+        names_to = "name"
+    )
+    PC <- dplyr::mutate(PC, name = factor(
+        x = .data$name,
+        levels = unique(.data$name)
+    ))
     plot <- NULL
 
 
@@ -83,19 +92,26 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
 
         plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
             geom_bar(stat = "identity", fill = color, col = "black") +
-            geom_point() + geom_line(aes(group = .data$Name)) +
-            scale_y_continuous(labels = percent) + labs(x = NULL,
-            y = "Cumulative Expressed Variance (%)")
-
+            geom_point() +
+            geom_line(aes(group = .data$Name)) +
+            scale_y_continuous(labels = percent) +
+            labs(
+                x = NULL,
+                y = "Cumulative Expressed Variance (%)"
+            )
     } else {
         # Select only the Proportion of Variance
         PC <- dplyr::filter(PC, .data$Name == "Proportion of Variance")
 
         plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
             geom_bar(stat = "identity", fill = color, col = "black") +
-            geom_point() + geom_line(aes(group = .data$Name)) +
-            scale_y_continuous(labels = percent) + labs(x = NULL,
-            y = "Expressed Variance (%)")
+            geom_point() +
+            geom_line(aes(group = .data$Name)) +
+            scale_y_continuous(labels = percent) +
+            labs(
+                x = NULL,
+                y = "Expressed Variance (%)"
+            )
     }
 
     return(plot)
@@ -111,7 +127,7 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
 #' @keywords internal
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' compute_explained_variance(object)
 compute_explained_variance <- function(screenR_Object) {
@@ -136,9 +152,10 @@ compute_explained_variance <- function(screenR_Object) {
 
     PC <- tibble::rownames_to_column(PC, var = "Name")
 
-    PC <- dplyr::mutate(PC, Name = factor(x = .data$Name,
-        levels = unique(.data$Name)))
+    PC <- dplyr::mutate(PC, Name = factor(
+        x = .data$Name,
+        levels = unique(.data$Name)
+    ))
 
     return(PC)
-
 }

@@ -16,27 +16,33 @@
 #' @export
 #'
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' # Boxplot
 #' distribution_mapped_reads(object)
 #'
 #' # Density
-#' distribution_mapped_reads(object, type = 'density')
+#' distribution_mapped_reads(object, type = "density")
 #'
 #  # Density changing also alpha
-#' distribution_mapped_reads(object, type = 'density', alpha = 0.2)
-
+#' distribution_mapped_reads(object, type = "density", alpha = 0.2)
+#'
 distribution_mapped_reads <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {
     table <- count_mapped_reads(screenR_Object)
 
-    if (type == "boxplot")
-        plot <- ggplot(data = table, aes(x = .data$Sample,
-            y = .data$Mapped, fill = .data$Sample)) +
-            geom_boxplot(alpha = alpha) else if (type == "density") {
-        plot <- ggplot(data = table, aes(x = .data$Mapped,
-            fill = .data$Sample)) + geom_density(alpha = alpha)
+    if (type == "boxplot") {
+        plot <- ggplot(data = table, aes(
+            x = .data$Sample,
+            y = .data$Mapped, fill = .data$Sample
+        )) +
+            geom_boxplot(alpha = alpha)
+    } else if (type == "density") {
+        plot <- ggplot(data = table, aes(
+            x = .data$Mapped,
+            fill = .data$Sample
+        )) +
+            geom_density(alpha = alpha)
     }
 
     if (!is.null(palette)) {

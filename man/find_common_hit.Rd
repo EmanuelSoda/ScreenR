@@ -26,13 +26,14 @@ A vector containing the common hit
 This method find the hit in common between the three methods
 }
 \examples{
-hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
-hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
-hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
+hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
+hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
+hit_roast <- data.frame(Gene = c("A", "L", "N"))
 
 # common among all the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast)
 
 # common among at least two of the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
+
 }

@@ -43,10 +43,13 @@ This function plots a boxplot for each sample for the genes
              passed as input.
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 
-plot_boxplot(object, genes = c('Gene_34'),
-             group_var = c('T1', 'T2', 'TRT'), nrow = 1, ncol = 2,
-             fill_var = 'Day', type = 'violinplot')
+plot_boxplot(object,
+    genes = c("Gene_34"),
+    group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2,
+    fill_var = "Day", type = "violinplot"
+)
+
 }
 \concept{plot}

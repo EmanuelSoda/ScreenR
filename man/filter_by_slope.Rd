@@ -40,10 +40,13 @@ This function is used to improve the quality of the hits found.
              the slope of this line to see the trend
 }
 \examples{
-object <- get0('object', envir = asNamespace('ScreenR'))
+object <- get0("object", envir = asNamespace("ScreenR"))
 
-filter_by_slope(screenR_Object = object, genes = c('Gene_1', 'Gene_2'),
-                group_var_treatment = c('T1', 'T2', 'TRT'),
-                group_var_control = c('T1', 'T2', 'Time3', 'Time4'),
-                slope_control = 0.5, slope_treatment = 1)
+filter_by_slope(
+    screenR_Object = object, genes = c("Gene_1", "Gene_2"),
+    group_var_treatment = c("T1", "T2", "TRT"),
+    group_var_control = c("T1", "T2", "Time3", "Time4"),
+    slope_control = 0.5, slope_treatment = 1
+)
+
 }

@@ -11,16 +11,16 @@
 #' @return A vector containing the common hit
 #' @export
 #' @examples
-#' hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
-#' hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
-#' hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
+#' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
+#' hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
+#' hit_roast <- data.frame(Gene = c("A", "L", "N"))
 #'
 #' # common among all the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast)
 #'
 #' # common among at least two of the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
-
+#'
 find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     # First we gets all the Gene name of the different table
     hit_zscore_Gene <- as.vector(hit_zscore$Gene)
@@ -32,14 +32,16 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     hit_common <-
         tibble::tibble(Gene = name) %>%
         dplyr::mutate(hit_zscore = ifelse(test = .data$Gene %in%
-                                              hit_zscore_Gene, yes = 1, no = 0)) %>%
+            hit_zscore_Gene, yes = 1, no = 0)) %>%
         dplyr::mutate(hit_camera = ifelse(test = .data$Gene %in%
-                                              hit_camera_Gene, yes = 1, no = 0)) %>%
+            hit_camera_Gene, yes = 1, no = 0)) %>%
         dplyr::mutate(hit_roast = ifelse(test = .data$Gene %in%
-                                             hit_roast_Gene, yes = 1, no = 0)) %>%
+            hit_roast_Gene, yes = 1, no = 0)) %>%
         dplyr::rowwise() %>%
-        dplyr::mutate(common = sum(.data$hit_zscore, .data$hit_camera,
-                                   .data$hit_roast)) %>%
+        dplyr::mutate(common = sum(
+            .data$hit_zscore, .data$hit_camera,
+            .data$hit_roast
+        )) %>%
         dplyr::filter(.data$common >= common_in) %>%
         dplyr::pull(.data$Gene)
 
@@ -65,29 +67,29 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' @param color The three vector color for the veen
 #' @export
 #' @examples
-#' hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
-#' hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
-#' hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
+#' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
+#' hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
+#' hit_roast <- data.frame(Gene = c("A", "L", "N"))
 #' plot_common_hit(hit_zscore, hit_camera, hit_roast)
-
+#'
 plot_common_hit <- function(hit_zscore, hit_camera,
     hit_roast, alpha = 0.5, stroke_size = 0.5, set_name_size = 4,
     text_color = "black", text_size = 4, show_percentage = TRUE,
     title = "", color = c("#1B9E77", "#D95F02", "#7570B3"),
     show_elements = TRUE) {
-    hit_list <- list(`Z-score Hits` = unique(hit_zscore$Gene),
+    hit_list <- list(
+        `Z-score Hits` = unique(hit_zscore$Gene),
         `Camera Hits` = unique(hit_camera$Gene),
-        `ROAST Hits` = unique(hit_roast$Gene))
+        `ROAST Hits` = unique(hit_roast$Gene)
+    )
 
-    ggvenn::ggvenn(data = hit_list, fill_alpha = alpha,
+    ggvenn::ggvenn(
+        data = hit_list, fill_alpha = alpha,
         columns = c("Z-score Hits", "Camera Hits", "ROAST Hits"),
         fill_color = color, stroke_size = stroke_size,
         text_size = text_size, text_color = text_color,
         show_elements = show_elements, set_name_size = set_name_size,
-        show_percentage = show_percentage) +
+        show_percentage = show_percentage
+    ) +
         ggtitle(title)
 }
-
-
-
-

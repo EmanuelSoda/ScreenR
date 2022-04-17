@@ -15,19 +15,22 @@
 #' @return The barcode plot
 #' @export
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
-#' matrix_model <- model.matrix(~slot(object, 'groups'))
-#' colnames(matrix_model) <- c('Control', 'T1_T2', 'Treated')
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' matrix_model <- model.matrix(~ slot(object, "groups"))
+#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' plot_barcode_hit(object, matrix_model, contrast = contrast, gene = 'Gene_300')
+#' plot_barcode_hit(object, matrix_model, contrast = contrast, gene = "Gene_300")
 plot_barcode_hit <- function(screenR_Object, matrix_model,
-    contrast, number_barcode = 3, gene, quantile = c(-0.5,
-        0.5), labels = c("Negative logFC", "Positive logFC")) {
-
+    contrast, number_barcode = 3, gene, quantile = c(
+        -0.5,
+        0.5
+    ), labels = c("Negative logFC", "Positive logFC")) {
     DGEList <- create_edgeR_obj(screenR_Object)
-    xglm <- edgeR::estimateDisp(DGEList, coef = seq(1,
-        length(colnames(matrix_model)), 1))
+    xglm <- edgeR::estimateDisp(DGEList, coef = seq(
+        1,
+        length(colnames(matrix_model)), 1
+    ))
     fit <- edgeR::glmFit(xglm, matrix_model)
 
     lrt <- edgeR::glmLRT(fit, contrast = contrast)
@@ -39,14 +42,17 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
     unq <- unq[!is.na(unq)]
     for (i in unq) {
         sel <- genesymbols == i & !is.na(genesymbols)
-        if (sum(sel) > 3)
+        if (sum(sel) > 3) {
             genesymbollist[[i]] <- which(sel)
+        }
     }
 
 
-    plot <- limma::barcodeplot(lrt$table$logFC, index = genesymbollist[[gene]],
+    plot <- limma::barcodeplot(lrt$table$logFC,
+        index = genesymbollist[[gene]],
         main = paste("Barcode plot for Gene", gene), labels = labels,
-        quantile = quantile)
+        quantile = quantile
+    )
 
     return(plot)
 }

@@ -53,8 +53,9 @@ This method plot the hits in common among the three methods is
              a wrapper for the \code{\link[ggvenn]{ggvenn}} function.
 }
 \examples{
-hit_zscore <- data.frame(Gene = c('A', 'B', 'C', 'D', 'E'))
-hit_camera <- data.frame(Gene = c('A', 'B', 'C', 'F', 'H', 'G'))
-hit_roast <- data.frame(Gene = c('A', 'L', 'N'))
+hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
+hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
+hit_roast <- data.frame(Gene = c("A", "L", "N"))
 plot_common_hit(hit_zscore, hit_camera, hit_roast)
+
 }

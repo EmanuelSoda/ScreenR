@@ -10,15 +10,20 @@
 issues](https://img.shields.io/github/issues/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/issues)
 [![GitHub
 pulls](https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/pulls)
-[![check-bioc](https://github.com/EmanuelSoda/ScreenR/workflows/check-bioc/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions)
 <!-- badges: end -->
 
-The goal of `ScreenR` is to …
+ScreenR is an easy and effective package to perform hits identification
+in loss of function High Throughput Biological Screening performed with
+shRNAs library. ScreenR combines the power of softwares like edgeR with
+the semplicity of the Tydiverse metapackage. ScreenR executes a pipeline
+able to find candidate hits from barcode counts data and integrates a
+wide range of visualization for each step of the analysis
 
 ## Installation instructions
 
 Get the latest stable `R` release from
-[CRAN](http://cran.r-project.org/). Then install `ScreenR` from
+[CRAN](http://cran.r-project.org/) note that you need to have `R 4.3` or
+greater to use `ScreenR`. Then install `ScreenR` from
 [Bioconductor](http://bioconductor.org/) using the following code:
 
 ``` r
@@ -38,39 +43,27 @@ BiocManager::install("EmanuelSoda/ScreenR")
 
 ## ScreenR overall workflow
 
-<img src="man/figures/Pipeline.png" align="top" height="200"/> \##
-Citation
+<img src="man/figures/Pipeline.png" align="top">
 
-Below is the citation output from using `citation('ScreenR')` in R.
-Please run this yourself to check for any updates on how to cite
-**ScreenR**.
-
-``` r
-print(citation('ScreenR'), bibtex = TRUE)
-#> Warning in citation("ScreenR"): no date field in DESCRIPTION file of package
-#> 'ScreenR'
-#> Warning in citation("ScreenR"): could not determine year for 'ScreenR' from
-#> package DESCRIPTION file
-#> 
-#> To cite package 'ScreenR' in publications use:
-#> 
-#>   Soda E (????). _ScreenR: Package to Perform High Throughput
-#>   Biological Screening_. R package version 0.99.41,
-#>   <https://emanuelsoda.github.io/ScreenR/>.
-#> 
-#> A BibTeX entry for LaTeX users is
-#> 
-#>   @Manual{,
-#>     title = {ScreenR: Package to Perform High Throughput Biological Screening},
-#>     author = {Emanuel Michele Soda},
-#>     note = {R package version 0.99.41},
-#>     url = {https://emanuelsoda.github.io/ScreenR/},
-#>   }
-```
+<!-- ## Citation -->
+<!-- Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. -->
+<!-- ```{r 'citation', eval = requireNamespace('ScreenR')} -->
+<!-- print(citation('ScreenR'), bibtex = TRUE) -->
+<!-- ``` -->
 
 Please note that the `ScreenR` was only made possible thanks to many
 other R and bioinformatics software authors, which are cited either in
 the vignettes and/or the paper(s) describing this package.
+
+## Citation
+
+Below is the citation output from using `citation('ScreenR')` in `R`.
+Please run this yourself to check for any updates on how to cite
+**ScreenR**.
+
+``` r
+#print(citation('ScreenR'), bibtex = TRUE)
+```
 
 ## Code of Conduct
 

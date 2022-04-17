@@ -13,7 +13,7 @@
 #'         sample
 
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' # In order to count the number of barcode lost just the ScreenR object is
 #' # needed
@@ -47,7 +47,7 @@ barcode_lost <- function(screenR_Object) {
 #' @return Returns a tibble containing the number of mapped read for sample
 #'
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_barcode_lost(object)
 #' @export
@@ -55,17 +55,26 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
     alpha = 1, legende_position = "none") {
     table <- barcode_lost(screenR_Object)
 
-    plot <- ggplot(table, aes(x = .data$Sample, y = .data$LostBarcode,
-        fill = .data$Sample)) + geom_bar(stat = "identity",
-        color = "black") + theme(legend.position = legende_position) +
-        geom_bar(alpha = alpha, stat = "identity",
-            color = "black") + geom_text(aes(label = .data$LostBarcode),
-        position = position_stack(vjust = 0.8), color = "black",
-        size = 5)
+    plot <- ggplot(table, aes(
+        x = .data$Sample, y = .data$LostBarcode,
+        fill = .data$Sample
+    )) +
+        geom_bar(
+            stat = "identity",
+            color = "black"
+        ) +
+        theme(legend.position = legende_position) +
+        geom_bar(
+            alpha = alpha, stat = "identity",
+            color = "black"
+        ) +
+        geom_text(aes(label = .data$LostBarcode),
+            position = position_stack(vjust = 0.8), color = "black",
+            size = 5
+        )
 
     if (!is.null(palette)) {
         plot <- plot + scale_fill_manual(values = palette)
-
     }
     return(plot)
 }
@@ -81,13 +90,15 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @concept plot
 #' @return Return a tibble containing the number of mapped reads for sample
 #' @examples
-#' object <- get0('object', envir = asNamespace('ScreenR'))
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_barcode_lost_for_gene(object,
-#'                            samples = c('Time3_A', 'Time3_B'))
+#'     samples = c("Time3_A", "Time3_B")
+#' )
 #' plot_barcode_lost_for_gene(object,
-#'                            samples = c('Time3_A', 'Time3_B'),
-#'                            facet = FALSE)
+#'     samples = c("Time3_A", "Time3_B"),
+#'     facet = FALSE
+#' )
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     samples = NULL) {
@@ -95,28 +106,36 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
         dplyr::select_if(is.numeric) %>%
         colnames()
 
-    table <- tidyr::pivot_longer(data = screenR_Object@count_table,
-        cols = all_of(numericColumn), names_to = "Sample", values_to = "Mapped")
+    table <- tidyr::pivot_longer(
+        data = screenR_Object@count_table,
+        cols = all_of(numericColumn), names_to = "Sample", values_to = "Mapped"
+    )
     table <- dplyr::left_join(table, screenR_Object@annotation_table,
-        by = "Barcode")
+        by = "Barcode"
+    )
     table <- dplyr::group_by(table, .data$Sample, .data$Gene)
 
     table <- dplyr::mutate(table, barcode_lost = .data$Mapped ==
         0)
 
-    table <- dplyr::summarise(table, Sample = unique(.data$Sample),
-        barcode_lost = sum(.data$barcode_lost), .groups = "drop")
+    table <- dplyr::summarise(table,
+        Sample = unique(.data$Sample),
+        barcode_lost = sum(.data$barcode_lost), .groups = "drop"
+    )
     table <- dplyr::filter(table, .data$barcode_lost != 0)
     table <- tidyr::drop_na(table)
 
     if (!is.null(samples)) {
         table <- dplyr::filter(table, .data$Sample %in% samples)
-
     }
 
     plot <- ggplot(table, aes(.data$barcode_lost, .data$Gene,
-        fill = .data$Sample)) + geom_bar(stat = "identity",
-        position = position_dodge(), show.legend = FALSE)
+        fill = .data$Sample
+    )) +
+        geom_bar(
+            stat = "identity",
+            position = position_dodge(), show.legend = FALSE
+        )
 
     if (facet) {
         plot <- plot + facet_wrap(vars(.data$Sample), scales = "free")
@@ -140,23 +159,26 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 #' @concept plot
 #' @return Return a tibble containing the number of mapped read for sample
 #' @examples
-#' #object <- get0('object', envir = asNamespace('ScreenR'))
-#' #plot_distribution_of_barcode_lost(object)
-#' #plot_distribution_of_barcode_lost(object, type = 'density')
+#' # object <- get0('object', envir = asNamespace('ScreenR'))
+#' # plot_distribution_of_barcode_lost(object)
+#' # plot_distribution_of_barcode_lost(object, type = 'density')
 #'
-
 plot_distribution_of_barcode_lost <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {
     table <- barcode_lost(screenR_Object)
 
     if (toupper(type) == toupper("boxplot")) {
-        plot <- ggplot(data = table, aes(x = .data$Sample,
-            y = .data$LostBarcode, fill = .data$Sample)) +
+        plot <- ggplot(data = table, aes(
+            x = .data$Sample,
+            y = .data$LostBarcode, fill = .data$Sample
+        )) +
             geom_boxplot(alpha = alpha)
-
     } else if (toupper(type) == toupper("density")) {
-        plot <- ggplot(data = table, aes(x = .data$LostBarcode,
-            fill = .data$Sample)) + geom_density(alpha = alpha)
+        plot <- ggplot(data = table, aes(
+            x = .data$LostBarcode,
+            fill = .data$Sample
+        )) +
+            geom_density(alpha = alpha)
     } else {
         warning("You have selected:\nPlease select the right type")
     }
