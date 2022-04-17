@@ -1,6 +1,4 @@
-url: https://emanuelsoda.github.io/ScreenR/
+url: ~
 template:
   bootstrap: 5
-deploy:
-  install_metadata: yes
 
