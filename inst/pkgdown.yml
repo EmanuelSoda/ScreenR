@@ -3,8 +3,5 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   Analysis_Example: Analysis_Example.html
-last_built: 2022-04-17T18:05Z
-urls:
-  reference: https://emanuelsoda.github.io/ScreenR/reference
-  article: https://emanuelsoda.github.io/ScreenR/articles
+last_built: 2022-04-17T18:18Z
 

@@ -1,156 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/404.html</loc>
+    <loc>/404.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/LICENSE-text.html</loc>
+    <loc>/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/LICENSE.html</loc>
+    <loc>/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/SUPPORT.html</loc>
+    <loc>/SUPPORT.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/articles/Analysis_Example.html</loc>
+    <loc>/articles/Analysis_Example.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/articles/Example_Analysis.html</loc>
+    <loc>/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/articles/index.html</loc>
+    <loc>/authors.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/authors.html</loc>
+    <loc>/index.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/index.html</loc>
+    <loc>/news/index.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/news/index.html</loc>
+    <loc>/reference/Barcode_creation_Dataframe.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/Barcode_creation_Dataframe.html</loc>
+    <loc>/reference/annotation_table.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/CountTable_THP1_CONTROL_vs_MET.html</loc>
+    <loc>/reference/barcode_lost.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/Table_Annotation.html</loc>
+    <loc>/reference/compute_camera.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/annotation_table.html</loc>
+    <loc>/reference/compute_data_table.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.html</loc>
+    <loc>/reference/compute_explained_variance.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_camera.html</loc>
+    <loc>/reference/compute_metrics.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.html</loc>
+    <loc>/reference/compute_slope.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.html</loc>
+    <loc>/reference/count_mapped_reads.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.html</loc>
+    <loc>/reference/count_table.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_slope.html</loc>
+    <loc>/reference/create_edgeR_obj.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/compute_z_score.html</loc>
+    <loc>/reference/create_screenR_object.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.html</loc>
+    <loc>/reference/distribution_mapped_reads.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/count_table.html</loc>
+    <loc>/reference/filter_by_slope.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/create_edgeR_obj.html</loc>
+    <loc>/reference/filter_by_variance.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/create_screenR_object.html</loc>
+    <loc>/reference/find_camera_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/distribution_mapped_reads.html</loc>
+    <loc>/reference/find_common_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.html</loc>
+    <loc>/reference/find_roast_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.html</loc>
+    <loc>/reference/find_robust_zscore_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.html</loc>
+    <loc>/reference/find_zscore_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.html</loc>
+    <loc>/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.html</loc>
+    <loc>/reference/mapped_reads.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/find_robust_zscore_hit.html</loc>
+    <loc>/reference/normalize_data.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.html</loc>
+    <loc>/reference/plot_MDS.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/index.html</loc>
+    <loc>/reference/plot_PC_explained_variance.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.html</loc>
+    <loc>/reference/plot_Zscore_distribution.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/normalize_data.html</loc>
+    <loc>/reference/plot_barcode_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_MDS.html</loc>
+    <loc>/reference/plot_barcode_lost.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_PC_explained_variance.html</loc>
+    <loc>/reference/plot_barcode_lost_for_gene.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_Zscore_distribution.html</loc>
+    <loc>/reference/plot_barcode_trend.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.html</loc>
+    <loc>/reference/plot_boxplot.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.html</loc>
+    <loc>/reference/plot_common_hit.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.html</loc>
+    <loc>/reference/plot_distribution_of_barcode_lost.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.html</loc>
+    <loc>/reference/plot_mapped_reads.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.html</loc>
+    <loc>/reference/plot_trend.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.html</loc>
+    <loc>/reference/select_number_barcode.html</loc>
   </url>
   <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_distribution_of_barcode_lost.html</loc>
-  </url>
-  <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.html</loc>
-  </url>
-  <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/plot_trend.html</loc>
-  </url>
-  <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/select_number_barcode.html</loc>
-  </url>
-  <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/unique_gene_symbols.html</loc>
-  </url>
-  <url>
-    <loc>https://emanuelsoda.github.io/ScreenR/reference/z_score.html</loc>
+    <loc>/reference/unique_gene_symbols.html</loc>
   </url>
 </urlset>
