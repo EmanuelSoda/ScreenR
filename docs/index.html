@@ -89,36 +89,86 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="screenr-">ScreenR
-<a class="anchor" aria-label="anchor" href="#screenr-"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="screenr">ScreenR<a class="anchor" aria-label="anchor" href="#screenr"></a>
 </h1>
 </div>
+<!-- badges: start -->
 
-<p>The aim of ScreenR is to help in the analysis of High Throughput
-Biological Screening using pooled shRNAs. Those type of screening uses
-RNA-seq expression data to find candidate hits. ScreenR tries to combine
-together the power of software like edgeR with the semplicity of package
-like the metapackage Tydiverse. Using ScreenR a pipeline able to find
-candidate hits can be applied on RNA-seq data moreover it integrates a
-wide range of visualization in order to shows the results obtained.</p>
+<p>ScreenR is an easy and effective package to perform hits
+identification in loss of function High Throughput Biological Screening
+performed with shRNAs library. ScreenR combines the power of softwares
+like edgeR with the semplicity of the Tydiverse metapackage. ScreenR
+executes a pipeline able to find candidate hits from barcode counts data
+and integrates a wide range of visualization for each step of the
+analysis</p>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="installation-instructions">Installation instructions<a class="anchor" aria-label="anchor" href="#installation-instructions"></a>
 </h2>
+<p>Get the latest stable <code>R</code> release from <a href="http://cran.r-project.org/" class="external-link">CRAN</a> note that you need to have
+<code>R 4.3</code> or greater to use <code>ScreenR</code>. Then install
+<code>ScreenR</code> from <a href="http://bioconductor.org/" class="external-link">Bioconductor</a> using the following
+code:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Development version from GitHub:</span>
-<span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"EmanuelSoda/ScreenR"</span><span class="op">)</span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
-</h2>
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span>
+<span class="op">}</span>
+
+<span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span></code></pre></div>
+<p>And the development version from <a href="https://github.com/EmanuelSoda/ScreenR" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/" class="external-link">ScreenR</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"EmanuelSoda/ScreenR"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="screenr-overall-workflow">ScreenR overall workflow<a class="anchor" aria-label="anchor" href="#screenr-overall-workflow"></a>
 </h2>
-<p><img src="reference/figures/Pipeline.png" align="top" height="200"></p>
+<p><img src="reference/figures/Pipeline.png" align="top"></p>
+<!-- ## Citation -->
+<!-- Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. -->
+<!-- ```{r 'citation', eval = requireNamespace('ScreenR')} -->
+<!-- print(citation('ScreenR'), bibtex = TRUE) -->
+<!-- ``` -->
+<p>Please note that the <code>ScreenR</code> was only made possible
+thanks to many other R and bioinformatics software authors, which are
+cited either in the vignettes and/or the paper(s) describing this
+package.</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>Below is the citation output from using
+<code>citation('ScreenR')</code> in <code>R</code>. Please run this
+yourself to check for any updates on how to cite
+<strong>ScreenR</strong>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#print(citation('ScreenR'), bibtex = TRUE)</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
+</h2>
+<p>Please note that the <code>ScreenR</code> project is released with a
+<a href="http://bioconductor.org/about/code-of-conduct/" class="external-link">Contributor
+Code of Conduct</a>. By contributing to this project, you agree to abide
+by its terms.</p>
+</div>
+<div class="section level2">
+<h2 id="development-tools">Development tools<a class="anchor" aria-label="anchor" href="#development-tools"></a>
+</h2>
+<ul>
+<li>Continuous code testing is possible thanks to <a href="https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/" class="external-link">GitHub
+actions</a> through <em><a href="https://CRAN.R-project.org/package=usethis" class="external-link">usethis</a></em>,
+<em><a href="https://CRAN.R-project.org/package=remotes" class="external-link">remotes</a></em>, and
+<em><a href="https://CRAN.R-project.org/package=rcmdcheck" class="external-link">rcmdcheck</a></em>
+customized to use <a href="https://www.bioconductor.org/help/docker/" class="external-link">Bioconductor’s docker
+containers</a> and <em><a href="https://bioconductor.org/packages/3.15/BiocCheck" class="external-link">BiocCheck</a></em>.</li>
+<li>Code coverage assessment is possible thanks to <a href="https://codecov.io/gh" class="external-link">codecov</a> and <em><a href="https://CRAN.R-project.org/package=covr" class="external-link">covr</a></em>.</li>
+<li>The <a href="http://EmanuelSoda.github.io/ScreenR" class="external-link">documentation
+website</a> is automatically updated thanks to <em><a href="https://CRAN.R-project.org/package=pkgdown" class="external-link">pkgdown</a></em>.</li>
+<li>The code is styled automatically thanks to <em><a href="https://CRAN.R-project.org/package=styler" class="external-link">styler</a></em>.</li>
+<li>The documentation is formatted thanks to <em><a href="https://CRAN.R-project.org/package=devtools" class="external-link">devtools</a></em> and
+<em><a href="https://CRAN.R-project.org/package=roxygen2" class="external-link">roxygen2</a></em>.</li>
+</ul>
+<p>For more details, check the <code>dev</code> directory.</p>
+<p>This package was developed using <em><a href="https://bioconductor.org/packages/3.15/biocthis" class="external-link">biocthis</a></em>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -149,6 +199,7 @@ wide range of visualization in order to shows the results obtained.</p>
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Emanuel Michele Soda <br><small class="roles"> Author, maintainer </small>  </li>
+<li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
 
@@ -156,7 +207,8 @@ wide range of visualization in order to shows the results obtained.</p>
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://codecov.io/gh/EmanuelSoda/ScreenR" class="external-link"><img src="https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0" alt="codecov"></a></li>
-<li><a href="https://github.com/EmanuelSoda/ScreenR/actions" class="external-link"><img src="https://github.com/EmanuelSoda/ScreenR/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/EmanuelSoda/ScreenR/issues" class="external-link"><img src="https://img.shields.io/github/issues/EmanuelSoda/ScreenR" alt="GitHub issues"></a></li>
+<li><a href="https://github.com/EmanuelSoda/ScreenR/pulls" class="external-link"><img src="https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR" alt="GitHub pulls"></a></li>
 </ul>
 </div>
 

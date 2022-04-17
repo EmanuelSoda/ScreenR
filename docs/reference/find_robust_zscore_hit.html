@@ -75,9 +75,11 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">'object'</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">'ScreenR'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>, control <span class="op">=</span> <span class="st">'TRT'</span>, treatment <span class="op">=</span> <span class="st">'Time3'</span>,</span>
-<span class="r-in">                         day <span class="op">=</span> <span class="st">'Time3'</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">"object"</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">table</span> <span class="op">&lt;-</span> <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span class="r-in">    control <span class="op">=</span> <span class="st">"TRT"</span>, treatment <span class="op">=</span> <span class="st">"Time3"</span>,</span>
+<span class="r-in">    day <span class="op">=</span> <span class="st">"Time3"</span></span>
+<span class="r-in"><span class="op">)</span></span>
 <span class="r-in"><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">find_robust_zscore_hit</span><span class="op">(</span><span class="va">table</span>, number_barcode <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 2</span></span>
