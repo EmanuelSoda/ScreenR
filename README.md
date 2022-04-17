@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="139" /></a>
+# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="150" /></a>
 
 <!-- badges: start -->
 
@@ -10,6 +10,15 @@
 issues](https://img.shields.io/github/issues/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/issues)
 [![GitHub
 pulls](https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/pulls)
+[![GitHub
+forks](https://img.shields.io/github/forks/EmanuelSoda/ScreenR?style=social)](https://github.com/EmanuelSoda/ScreenR/network/members)
+[![GitHub
+downloads](https://img.shields.io/github/downloads/EmanuelSoda/ScreenR/total)]()
+[![last
+commit](https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR)]()
+[![Version](https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master)]()
+[![Lenguage](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]()
+
 <!-- badges: end -->
 
 ScreenR is an easy and effective package to perform hits identification
