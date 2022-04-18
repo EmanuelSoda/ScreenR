@@ -3,5 +3,8 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   Analysis_Example: Analysis_Example.html
-last_built: 2022-04-17T19:21Z
+last_built: 2022-04-18T08:11Z
+urls:
+  reference: ~pkg/reference
+  article: ~pkg/articles
 
