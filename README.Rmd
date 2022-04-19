@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="150" /></a>
+# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="120" /></a>
 
 <!-- badges: start -->
 [![codecov](https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0)](https://codecov.io/gh/EmanuelSoda/ScreenR) [![GitHub issues](https://img.shields.io/github/issues/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/issues) [![GitHub pulls](https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/pulls) [![GitHub forks](https://img.shields.io/github/forks/EmanuelSoda/ScreenR?style=social)](https://github.com/EmanuelSoda/ScreenR/network/members) [![GitHub downloads](https://img.shields.io/github/downloads/EmanuelSoda/ScreenR/total)]() [![last commit ](https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR)]() [![Version ](https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master)]() [![Lenguage ](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]() 
