@@ -4,19 +4,14 @@
 #'              \code{\link{find_zscore_hit}} starting from the screenR object
 #'              for a given treatment in a given day
 #'
-
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
-#'
 #' @param control The control Samples.
-#'
 #' @param treatment The treatment Samples
-#'
 #' @param day The day of the treatment
-
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
-#' @importFrom dplyr mutate filter summarise if_else
+#' @importFrom dplyr mutate filter summarise if_else pull
 #' @importFrom stats sd median
 #' @return Return a tibble  with all the measure computed.
 #' @export
@@ -32,22 +27,21 @@ compute_metrics <- function(screenR_Object, control,
     treatment, day) {
     control <- screenR_Object@data_table %>%
         filter(.data$Treatment %in% control) %>%
-        pull(.data$Sample) %>%
+        dplyr::pull(.data$Sample) %>%
         unique() %>%
         as.character()
 
     treated <- screenR_Object@data_table %>%
         filter(.data$Treatment %in% treatment) %>%
-        pull(.data$Sample) %>%
+        dplyr::pull(.data$Sample) %>%
         unique() %>%
         as.character()
 
     data_trt <- screenR_Object@data_table %>%
-        filter(.data$Sample %in% c(control, treated)) %>%
-        mutate(Group = factor(if_else(condition = .data$Sample %in%
+        dplyr::filter(.data$Sample %in% c(control, treated)) %>%
+        dplyr::mutate(Group = factor(if_else(condition = .data$Sample %in%
             treated, true = "Treated", false = "Control"),
-        levels = c("Treated", "Control")
-        ))
+        levels = c("Treated", "Control")))
 
     data_trt <- data_trt %>%
         dplyr::filter(.data$Day %in% day) %>%

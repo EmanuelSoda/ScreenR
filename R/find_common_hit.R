@@ -9,6 +9,7 @@
 #' @param common_in Number of method in which the hit should be part at
 #'                  the same time. The default value is 3
 #' @return A vector containing the common hit
+#' @importFrom tibble tibble
 #' @export
 #' @examples
 #' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -20,7 +21,6 @@
 #'
 #' # common among at least two of the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
-#'
 find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     # First we gets all the Gene name of the different table
     hit_zscore_Gene <- as.vector(hit_zscore$Gene)
@@ -65,6 +65,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' @param title The title to display above the plot
 #' @return A vector containing the common hit
 #' @param color The three vector color for the veen
+#' @importFrom ggplot2 ggtitle
 #' @export
 #' @examples
 #' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -91,5 +92,5 @@ plot_common_hit <- function(hit_zscore, hit_camera,
         show_elements = show_elements, set_name_size = set_name_size,
         show_percentage = show_percentage
     ) +
-        ggtitle(title)
+        ggplot2::ggtitle(title)
 }

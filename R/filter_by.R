@@ -3,6 +3,7 @@
 #'              It computes a regression line in the different samples ad uses
 #'              the slope of this line to see the trend
 #' @importFrom stats lm
+#' @importFrom dplyr rename
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
@@ -32,12 +33,12 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     group_var_control, slope_control = NULL, slope_treatment) {
 
     # Compute the slope of the hits in the treatment Samples
-    slope_treatment <- compute_slope(screenR_Object, genes,
+    slope_treatment <- ScreenR::compute_slope(screenR_Object, genes,
         group_var = group_var_treatment
     )
 
     # Compute the slope of the hits in the control Samples
-    slope_DMSO <- compute_slope(screenR_Object, genes,
+    slope_DMSO <- ScreenR::compute_slope(screenR_Object, genes,
         group_var = group_var_control
     )
 
@@ -50,12 +51,10 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
     if (!is.null(slope_control)) {
-        data <- dplyr::filter(data, .data$slope_control <=
-            slope_control)
+        data <- dplyr::filter(data, .data$slope_control <= slope_control)
     }
 
-    data <- dplyr::filter(data, .data$slope_treatment <=
-        slope_treatment)
+    data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
 
     return(data)
 }
@@ -64,7 +63,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @description This function is used to compute the slope of the gene passed
 #'              as input
 #' @importFrom rlang .data
-#'
+#' @importFrom dplyr ungroup
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @param genes The genes for which the slope as to be computed. Those genes are
@@ -102,8 +101,8 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 
 #' @title Filter using the variance filter
 #' @description This function is used to improve the quality of the hits.
-#'              It compute the variance among the hits and filter the one with a
-#'              value greater than the threshold set
+#'              It compute the variance among the hits and filter the one with
+#'              a value greater than the threshold set
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'
@@ -132,8 +131,6 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'
 filter_by_variance <- function(screenR_Object, genes, matrix_model,
     variance = 0.5, contrast) {
-
-
     # Save the data_table in a temporary variable
     data <- screenR_Object@data_table
 
@@ -158,6 +155,5 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 
     data <- dplyr::filter(data, .data$variance <= variance)
     data <- dplyr::rename(data, Variance = .data$variance)
-
     return(data)
 }

@@ -13,6 +13,10 @@
 #' @param gene A  gene name to plot
 #' @concept  plot
 #' @return The barcode plot
+#' @importFrom edgeR estimateDisp
+#' @importFrom edgeR glmFit
+#' @importFrom edgeR glmLRT
+#' @importFrom limma barcodeplot
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
@@ -20,7 +24,9 @@
 #' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' plot_barcode_hit(object, matrix_model, contrast = contrast, gene = "Gene_300")
+#' plot_barcode_hit(object, matrix_model, contrast = contrast,
+#'                  gene = "Gene_300")
+#'
 plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene, quantile = c(
         -0.5,

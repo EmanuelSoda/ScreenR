@@ -74,7 +74,7 @@ R CMD INSTALL ScreenR_<version>.tar.gz
 ... or the newest version can directly be installed from GitHub using the
 CRAN package devtools:
 
-```{r github install, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+```{r github install, eval=FALSE, message=FALSE, warning=TRUE}
 # install.packages("devtools")
 devtools::install_github("EmanuelSoda/ScreenR")
 ```

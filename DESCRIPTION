@@ -3,17 +3,19 @@ Type: Package
 Title: Package to Perform High Throughput Biological Screening
 Version: 0.99.41
 Date: 2022-04-01 
-Authors@R: person("Emanuel Michele", "Soda", role = c("aut", "cre"),
+Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
-                  comment = c(ORICD = "0000-0002-2301-6465"))
-Description: The aim of ScreenR is to help in the analysis of 
-             High Throughput Biological Screening using pooled shRNAs. Those
-             type of screening uses RNA-seq expression data to find candidate 
-             hits. ScreenR tries to combine together the power of software like
-             edgeR with the semplicity of package like the metapackage 
-             Tydiverse. Using ScreenR a pipeline able to find candidate hits can 
-             be applied oon RNA-seq data moreover it integrates a wide range 
-             of visualization in order to shows the results obtained.
+                  comment = c(ORICD = "0000-0002-2301-6465")),
+             person("Elena", "Ceccacci", role = c("aut"),
+                   email = "elena.ceccacci@ieo.it", 
+                   comment = c(ORICD = "0000-0002-2285-8994")))
+Description: ScreenR is an easy and effective package to perform hits 
+             identification in loss of function High Throughput Biological 
+             Screening performed with shRNAs library. ScreenR combines the 
+             power of softwares like edgeR with the semplicity of the Tydiverse 
+             metapackage. ScreenR executes a pipeline able to find candidate 
+             hits from barcode counts data and integrates a wide range of 
+             visualization for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.1.2
@@ -33,7 +35,8 @@ Imports:
     tidyr (>= 1.2),
     magrittr (>= 1.0),
     dplyr (>= 1.0),
-    edgeR (>= 3.32)
+    edgeR (>= 3.32),
+    tidyselect (>= 1.1.2)
 Suggests: 
     rmarkdown (>= 2.11),
     knitr (>= 1.37),

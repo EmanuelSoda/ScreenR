@@ -12,6 +12,9 @@
 #' @param direction Direction of variation
 #' @param number_barcode The hit find with the Roast method
 #' @param p_val P value cut off
+#' @importFrom edgeR estimateDisp
+#' @importFrom limma mroast
+#' @importFrom tibble tibble
 #' @return The hits found by ROAST method
 #' @export
 #' @examples

@@ -35,5 +35,4 @@ find_common_hit(hit_zscore, hit_camera, hit_roast)
 
 # common among at least two of the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
-
 }

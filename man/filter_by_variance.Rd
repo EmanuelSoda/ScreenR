@@ -33,8 +33,8 @@ A data frame with the variance for the treatment and the control
 }
 \description{
 This function is used to improve the quality of the hits.
-             It compute the variance among the hits and filter the one with a
-             value greater than the threshold set
+             It compute the variance among the hits and filter the one with
+             a value greater than the threshold set
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

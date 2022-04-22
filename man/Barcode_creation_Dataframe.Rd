@@ -15,6 +15,6 @@ Return the table containing  the list of barcodes mapped in each of
 }
 \description{
 This function takes as input the path of a list of files
-             created using the Samtools idxstats tool and retrun a
+             created using the Samtools idxstats tool and return a
               count table.
 }

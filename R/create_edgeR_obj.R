@@ -3,8 +3,7 @@
 #'              object create the corresponding edgeR object
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
-#' @import edgeR
-
+#' @importFrom  edgeR DGEList
 #' @return The edgeR object
 #' @export
 #' @examples

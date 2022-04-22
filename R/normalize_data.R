@@ -9,6 +9,8 @@
 #'                       \code{\link{create_screenR_object}}
 #'
 #' @importFrom magrittr %>%
+#' @importFrom dplyr as_tibble
+#' @importFrom purrr map_if
 #' @return Return the screenR object with the normalize data
 #' @export
 #' @examples
@@ -18,7 +20,7 @@
 #' slot(object, "normalized_count_table")
 normalize_data <- function(screenR_Object) {
     screenR_Object@normalized_count_table <- screenR_Object@count_table %>%
-        # divede each cell for the sum of the column and than multiply 1e6
+        # it divedes each cell for the sum of the column and than multiply 1e6
         purrr::map_if(is.numeric, ~ . / sum(.) * 1e+06) %>%
         dplyr::as_tibble()
 

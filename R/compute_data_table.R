@@ -9,6 +9,8 @@
 #' @export
 #' @importFrom rlang .data
 #' @importFrom stringr str_split_fixed
+#' @importFrom  tidyr pivot_longer
+#' @importFrom  dplyr left_join
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' object <- compute_data_table(object)
@@ -28,13 +30,13 @@ compute_data_table <- function(screenR_Object) {
             .data$Barcode, .data$Gene, .data$Sample, .data$Frequency,
             .data$Sequence, .data$Library, .data$Gene_ID
         ) %>%
-        mutate(Day = str_split_fixed(.data$Sample,
-            pattern = "_",
-            n = 3
-        )[, 1], Treatment = gsub(".*_", "", gsub(
-            "(.*)_\\w+",
-            "\\1", .data$Sample
-        )))
+        mutate(
+            Day = str_split_fixed(.data$Sample, pattern = "_", n = 3)[, 1],
+            Treatment = gsub(
+                ".*_", "",
+                gsub("(.*)_\\w+", "\\1", .data$Sample)
+            )
+        )
 
     table <- dplyr::mutate(table, Sample = factor(
         x = .data$Sample,

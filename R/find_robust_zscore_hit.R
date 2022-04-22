@@ -3,7 +3,7 @@
 #' @param table_treate_vs_control A table coomputed with the function
 #'                                \code{compute_data_table}
 #' @param number_barcode Number of barcode to have under the median
-#'
+#' @importFrom dplyr n
 #' @return Return a tibble containing the hit for the robust Z-score
 #' @export
 #' @examples

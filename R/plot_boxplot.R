@@ -14,6 +14,7 @@
 #' @param type The type of plot to use "boxplot" or "violinplot"
 #' @concept  plot
 #' @importFrom dplyr sym
+#' @importFrom ggplot2 geom_violin
 #' @return A boxplot
 #' @export
 #' @examples

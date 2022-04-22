@@ -8,6 +8,9 @@
 #' @param alpha The opacity of the labels
 #' @param size The dimension of the labels
 #' @param color The color of the labels
+#' @importFrom ggplot2 geom_label labs
+#' @importFrom ggplot2 scale_y_continuous
+#' @importFrom limma plotMDS
 #' @return The MDS Plot
 #' @export
 #' @examples
@@ -54,7 +57,7 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @param cumulative A boolean value which indicates whether or not to plot
 #'                   the cumulative variance
 #' @param color The color to fill the barplot
-#' @import scales
+#' @importFrom  scales percent
 #' @return The explained variance  plot
 #' @export
 #' @examples
@@ -94,7 +97,7 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
             geom_bar(stat = "identity", fill = color, col = "black") +
             geom_point() +
             geom_line(aes(group = .data$Name)) +
-            scale_y_continuous(labels = percent) +
+            scale_y_continuous(labels = scales::percent) +
             labs(
                 x = NULL,
                 y = "Cumulative Expressed Variance (%)"
@@ -108,10 +111,7 @@ plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
             geom_point() +
             geom_line(aes(group = .data$Name)) +
             scale_y_continuous(labels = percent) +
-            labs(
-                x = NULL,
-                y = "Expressed Variance (%)"
-            )
+            labs(x = NULL, y = "Expressed Variance (%)")
     }
 
     return(plot)

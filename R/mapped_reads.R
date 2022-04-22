@@ -5,7 +5,7 @@
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #' @importFrom rlang .data
-#'
+#' @importFrom dplyr select
 #' @return Return a tibble containing the number of mapped read for sample
 #' @export
 #' @examples

@@ -10,6 +10,12 @@
 #'                 of the column the model_matrix wo which perform the analysis
 #' @param thresh The threshold
 #' @param lfc The Log2FC
+#' @importFrom edgeR estimateDisp
+#' @importFrom edgeR glmFit
+#' @importFrom edgeR glmLRT
+#' @importFrom tibble rownames_to_column
+#' @importFrom limma camera
+#' @importFrom purrr map_lgl
 #' @param number_barcode Number of barcode to use
 #' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
@@ -32,12 +38,12 @@ find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
     direction = "Down") {
     # We have to convert the screenR obj into an edgeR obj
-    DGEList <- create_edgeR_obj(screenR_Object)
+    DGEList <- ScreenR::create_edgeR_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     fit <- edgeR::glmFit(xglm, matrix_model)
     lrt <- edgeR::glmLRT(fit, coef = seq(1, length(colnames(matrix_model))))
 
-    camera_hit <- compute_camera(
+    camera_hit <- ScreenR::compute_camera(
         xglm = xglm, lrt = lrt, DGEList = DGEList,
         matrix_model = matrix_model, contrast = contrast,
         number_barcode = number_barcode, thresh = thresh,
@@ -66,6 +72,8 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @param  thresh The threshold used to select the hits
 #' @param  number_barcode Number of barcode to be considered a hit
 #' @param lfc The Log2FC threshold
+#' @importFrom edgeR topTags
+#' @export
 #' @return The list of hits found by the camera method
 #' @keywords internal
 
@@ -73,10 +81,7 @@ compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
     number_barcode = 3, thresh = 1e-04, lfc = 1) {
     # Take all the Tags in descending order
     top <- edgeR::topTags(lrt, n = Inf)
-    topids <- top$table[
-        top$table$FDR < thresh & top$table$logFC <= lfc,
-        1
-    ]
+    topids <- top$table[top$table$FDR < thresh & top$table$logFC <= lfc, 1]
 
     # Select only the first column
     genesymbols <- DGEList$genes[, 1]

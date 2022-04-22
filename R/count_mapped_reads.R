@@ -2,6 +2,7 @@
 #' @description This function counts the number of reads for Barcode
 #'              in each sample
 #' @importFrom rlang .data
+#' @importFrom tidyr gather
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
 #'

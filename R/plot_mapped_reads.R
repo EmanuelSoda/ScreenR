@@ -9,7 +9,7 @@
 #'              Allowed values are in the range 0 to 1
 #' @param legende_position Where to positioning the legend of the plot
 #' @importFrom magrittr %>%
-#' @import ggplot2
+#' @importFrom  ggplot2 geom_bar
 #' @importFrom rlang .data
 #' @return return a ggplot object
 #' @export

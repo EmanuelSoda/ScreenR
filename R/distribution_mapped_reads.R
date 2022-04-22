@@ -29,7 +29,7 @@
 #'
 distribution_mapped_reads <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {
-    table <- count_mapped_reads(screenR_Object)
+    table <- ScreenR::count_mapped_reads(screenR_Object)
 
     if (type == "boxplot") {
         plot <- ggplot(data = table, aes(

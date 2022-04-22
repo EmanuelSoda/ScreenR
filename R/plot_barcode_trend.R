@@ -2,6 +2,9 @@
 #' @description Plot the log2FC over time of the barcodes in the different
 #'              time point
 #' @importFrom rlang .data
+#' @importFrom dplyr bind_rows
+#' @importFrom patchwork wrap_plots
+#' @importFrom ggplot2 geom_line geom_point facet_wrap scale_color_manual
 #' @param list_data_measure A list containing the measure table of the
 #'                          different time point
 #' @param n_col The number of column to use in the facet wrap
@@ -14,19 +17,18 @@
 
 plot_barcode_trend <- function(list_data_measure, genes,
     n_col = 2, size_line = 1, color = NULL) {
-    data <- bind_rows(list_data_measure) %>%
+    data <- dplyr::bind_rows(list_data_measure) %>%
         filter(.data$Gene %in% genes) %>%
         mutate(Day = factor(x = .data$Day, levels = unique(.data$Day)))
     if (is.null(color)) {
-        gg_l <- map(
+        gg_l <- purrr::map(
             .x = split(data, f = as.character(data$Gene)),
             .f = ~ ggplot(.x, aes(
                 x = .data$Day, y = .data$Log2FC,
                 group = .data$Barcode, col = .data$Barcode
             )) +
                 geom_line(size = size_line) +
-                geom_point() +
-                theme_light() +
+                geom_point()  +
                 facet_wrap(
                     facets = "Gene",
                     scales = "free"

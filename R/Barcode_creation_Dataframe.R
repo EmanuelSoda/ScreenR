@@ -1,13 +1,13 @@
 #' @title Create the table containing the Mapped Sample file
 #' @description This function takes as input the path of a list of files
-#'              created using the Samtools idxstats tool and retrun a
+#'              created using the Samtools idxstats tool and return a
 #'               count table.
 #'
 #' @param path_file  Path of the list of files
 #'
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
-#' @importFrom purrr map
+#' @importFrom purrr map reduce
 #' @return Return the table containing  the list of barcodes mapped in each of
 #'         the samples (a count table).
 #'
@@ -42,7 +42,7 @@ Barcode_creation_Dataframe <- function(path_file) {
     Mapped_barcode_all_Samples <- Mapped_barcode_all_Samples %>%
         tidyr::drop_na() %>%
         dplyr::filter(.data$Barcode != "*") %>%
-        tibble()
+        tibble::tibble()
 
     return(Mapped_barcode_all_Samples)
 }

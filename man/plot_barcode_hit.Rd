@@ -44,6 +44,8 @@ matrix_model <- model.matrix(~ slot(object, "groups"))
 colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 
-plot_barcode_hit(object, matrix_model, contrast = contrast, gene = "Gene_300")
+plot_barcode_hit(object, matrix_model, contrast = contrast,
+                 gene = "Gene_300")
+
 }
 \concept{plot}
