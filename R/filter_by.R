@@ -18,6 +18,7 @@
 #'                          of the the control
 #' @return A data frame with the slope for the treatment and the control
 #'         for each gene
+#' @concept filter
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
@@ -71,6 +72,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @param group_var The variable to use as X for the linear model
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
+#' @concept compute
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
@@ -117,6 +119,7 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #' @return A data frame with the variance for the treatment and the control
 #'         for each gene
 #' @export
+#' @concept filter
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' matrix_model <- model.matrix(~ slot(object, "groups"))

@@ -7,7 +7,7 @@
 plot_barcode_trend(
   list_data_measure,
   genes,
-  n_col = 2,
+  n_col = 1,
   size_line = 1,
   color = NULL
 )
@@ -30,4 +30,18 @@ The rend plot for the genes in input
 \description{
 Plot the log2FC over time of the barcodes in the different
              time point
+}
+\examples{
+object <- get0("object", envir = asNamespace("ScreenR"))
+
+metrics <- dplyr::bind_rows(
+   compute_metrics(object, control = "TRT", treatment = "Time3",
+                   day = "Time3"),
+   compute_metrics(object, control = "TRT", treatment = "Time4",
+                   day = "Time4"))
+# Multiple Genes
+plot_barcode_trend(metrics, genes = c("Gene_1", "Gene_50"),
+                  n_col = 2)
+# Single Gene
+plot_barcode_trend(metrics, genes = "Gene_300")
 }

@@ -13,10 +13,21 @@
 #' @param color Vector of colors
 #' @return The rend plot for the genes in input
 #' @export
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-
+#' metrics <- dplyr::bind_rows(
+#'    compute_metrics(object, control = "TRT", treatment = "Time3",
+#'                    day = "Time3"),
+#'    compute_metrics(object, control = "TRT", treatment = "Time4",
+#'                    day = "Time4"))
+#' # Multiple Genes
+#' plot_barcode_trend(metrics, genes = c("Gene_1", "Gene_50"),
+#'                   n_col = 2)
+#' # Single Gene
+#' plot_barcode_trend(metrics, genes = "Gene_300")
 plot_barcode_trend <- function(list_data_measure, genes,
-    n_col = 2, size_line = 1, color = NULL) {
+    n_col = 1, size_line = 1, color = NULL) {
     data <- dplyr::bind_rows(list_data_measure) %>%
         filter(.data$Gene %in% genes) %>%
         mutate(Day = factor(x = .data$Day, levels = unique(.data$Day)))
@@ -28,7 +39,7 @@ plot_barcode_trend <- function(list_data_measure, genes,
                 group = .data$Barcode, col = .data$Barcode
             )) +
                 geom_line(size = size_line) +
-                geom_point()  +
+                geom_point() +
                 facet_wrap(
                     facets = "Gene",
                     scales = "free"
@@ -47,7 +58,9 @@ plot_barcode_trend <- function(list_data_measure, genes,
                 facet_wrap(facets = "Gene", scales = "free")
         )
     }
+    if (n_col > 1) {
+        gg_l <- patchwork::wrap_plots(gg_l, ncol = n_col)
+    }
 
-
-    patchwork::wrap_plots(gg_l, ncol = n_col)
+    return(gg_l)
 }

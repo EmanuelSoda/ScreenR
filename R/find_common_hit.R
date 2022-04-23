@@ -11,6 +11,7 @@
 #' @return A vector containing the common hit
 #' @importFrom tibble tibble
 #' @export
+#' @concept find
 #' @examples
 #' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
 #' hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))

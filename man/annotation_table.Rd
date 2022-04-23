@@ -24,4 +24,5 @@ data(annotation_table)
 \description{
 Table for the annotation of Barcode
 }
+\concept{data}
 \keyword{datasets}

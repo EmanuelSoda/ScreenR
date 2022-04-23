@@ -11,6 +11,7 @@
 #' @importFrom stringr str_split_fixed
 #' @importFrom  tidyr pivot_longer
 #' @importFrom  dplyr left_join
+#' @concept compute
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' object <- compute_data_table(object)

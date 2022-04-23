@@ -22,3 +22,4 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 object <- compute_data_table(object)
 head(slot(object, "data_table"))
 }
+\concept{compute}

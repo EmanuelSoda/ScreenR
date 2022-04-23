@@ -6,6 +6,7 @@
 #' @importFrom dplyr n
 #' @return Return a tibble containing the hit for the robust Z-score
 #' @export
+#' @concept find
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,

@@ -31,3 +31,4 @@ compute_slope(object,
 )
 
 }
+\concept{compute}

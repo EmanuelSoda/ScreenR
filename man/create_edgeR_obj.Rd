@@ -22,3 +22,4 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 create_edgeR_obj(object)
 
 }
+\concept{objects}

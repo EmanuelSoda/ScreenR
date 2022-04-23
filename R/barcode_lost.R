@@ -13,6 +13,7 @@
 #' @importFrom rlang .data
 #' @importFrom dplyr vars
 #' @importFrom tidyr drop_na
+#' @concept compute
 #' @return Return a tibble containing the number of barcodes lost for each
 #'         sample
 #' @examples
@@ -98,8 +99,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' )
 #' plot_barcode_lost_for_gene(object,
 #'     samples = c("Time3_A", "Time3_B"),
-#'     facet = FALSE
-#' )
+#'     facet = FALSE)
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     samples = NULL) {
@@ -145,51 +145,51 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 }
 
 
-#' @title Plot distribution of barcode lost
-#' @description The function plots the distribution of the lost barcodes in
-#'              each sample
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
-#' @param palette A vector of colors
-#' @param alpha  A value for the opacity of the plot.
-#'              Allowed values are in the range 0 to 1
-#' @param type Type of plot. Allowed values are "boxplot" and "boxplot"
-#' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @importFrom ggplot2 position_dodge scale_fill_manual geom_boxplot
-#' @importFrom ggplot2 geom_density
-#' @concept plot
-#' @return Return a tibble containing the number of mapped read for sample
-#' @examples
-#' # object <- get0('object', envir = asNamespace('ScreenR'))
-#' # plot_distribution_of_barcode_lost(object)
-#' # plot_distribution_of_barcode_lost(object, type = 'density')
+#' #' @title Plot distribution of barcode lost
+#' #' @description The function plots the distribution of the lost barcodes in
+#' #'              each sample
+#' #' @param screenR_Object The ScreenR object obtained using the
+#' #'                       \code{\link{create_screenR_object}}
+#' #' @param palette A vector of colors
+#' #' @param alpha  A value for the opacity of the plot.
+#' #'              Allowed values are in the range 0 to 1
+#' #' @param type Type of plot. Allowed values are "boxplot" and "boxplot"
+#' #' @importFrom magrittr %>%
+#' #' @importFrom rlang .data
+#' #' @importFrom ggplot2 position_dodge scale_fill_manual geom_boxplot
+#' #' @importFrom ggplot2 geom_density
+#' #' @concept plot
+#' #' @return Return a tibble containing the number of mapped read for sample
+#' #' @examples
+#' #' # object <- get0('object', envir = asNamespace('ScreenR'))
+#' #' # plot_distribution_of_barcode_lost(object)
+#' #' # plot_distribution_of_barcode_lost(object, type = 'density')
+#' #'
+#' plot_distribution_of_barcode_lost <- function(screenR_Object,
+#'     palette = NULL, alpha = 1, type = "boxplot") {
+#'     table <- ScreenR::barcode_lost(screenR_Object)
 #'
-plot_distribution_of_barcode_lost <- function(screenR_Object,
-    palette = NULL, alpha = 1, type = "boxplot") {
-    table <- ScreenR::barcode_lost(screenR_Object)
-
-    if (toupper(type) == toupper("boxplot")) {
-        plot <- ggplot(data = table, aes(
-            x = .data$Sample,
-            y = .data$LostBarcode, fill = .data$Sample
-        )) +
-            ggplot2::geom_boxplot(alpha = alpha)
-    } else if (toupper(type) == toupper("density")) {
-        plot <- ggplot(data = table, aes(
-            x = .data$LostBarcode,
-            fill = .data$Sample
-        )) +
-            ggplot2::geom_density(alpha = alpha)
-    } else {
-        warning("You have selected:\nPlease select the right type")
-    }
-
-    if (!is.null(palette)) {
-        plot <- plot + ggplot2::scale_fill_manual(values = palette)
-    } else {
-        warning("The palette is null")
-    }
-
-    return(plot)
-}
+#'     if (toupper(type) == toupper("boxplot")) {
+#'         plot <- ggplot(data = table, aes(
+#'             x = .data$Sample,
+#'             y = .data$LostBarcode, fill = .data$Sample
+#'         )) +
+#'             ggplot2::geom_boxplot(alpha = alpha)
+#'     } else if (toupper(type) == toupper("density")) {
+#'         plot <- ggplot(data = table, aes(
+#'             x = .data$LostBarcode,
+#'             fill = .data$Sample
+#'         )) +
+#'             ggplot2::geom_density(alpha = alpha)
+#'     } else {
+#'         warning("You have selected:\nPlease select the right type")
+#'     }
+#'
+#'     if (!is.null(palette)) {
+#'         plot <- plot + ggplot2::scale_fill_manual(values = palette)
+#'     } else {
+#'         warning("The palette is null")
+#'     }
+#'
+#'     return(plot)
+#' }

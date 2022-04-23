@@ -49,3 +49,4 @@ data <- filter_by_variance(
 head(data)
 
 }
+\concept{filter}

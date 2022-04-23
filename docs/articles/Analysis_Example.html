@@ -152,6 +152,9 @@ example, be done from the command line …</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>R CMD INSTALL ScreenR_<span class="sc">&lt;</span>version<span class="sc">&gt;</span>.tar.gz</span></code></pre></div>
 <p>… or the newest version can directly be installed from GitHub using
 the CRAN package devtools:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># install.packages("devtools")</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"EmanuelSoda/ScreenR"</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -161,7 +164,7 @@ the CRAN package devtools:</p>
 <h3 id="loading-the-package">Loading the package<a class="anchor" aria-label="anchor" href="#loading-the-package"></a>
 </h3>
 <p>After installation, loading the package is simple as :</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/" class="external-link">ScreenR</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
@@ -177,7 +180,7 @@ consists of a matrix containing reads count organized with:</p>
 <p>For this vignette we will use as an example a Loss of Function
 Genetic Screening performed using . First of all the data has to be
 read.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span>
 
@@ -203,7 +206,7 @@ from the count table. The ScreenR object is created using the function
 store the most important information to perform the analysis. Most of
 the ScreenR function takes as main input the ScreenR object to perform
 the needed operation and return a result.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
 <span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"(.*)_\\w+"</span>, <span class="st">"\\1"</span>, <span class="va">groups</span><span class="op">)</span>
 <span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">groups</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span><span class="op">)</span>
@@ -217,7 +220,7 @@ the needed operation and return a result.</p>
 
 <span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenR_object.html">create_screenR_object</a></span><span class="op">(</span>
     table <span class="op">=</span> <span class="va">data</span>, annotation <span class="op">=</span> <span class="va">total_Annotation</span>, groups <span class="op">=</span> <span class="va">groups</span>,
-    replicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span>
+    replicates <span class="op">=</span> <span class="st">""</span>
 <span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
@@ -237,14 +240,14 @@ normalized by the number of reads in that sample and multiplied by one
 million. Then has to be computed the <em>data_table</em>. The
 <em>data_table</em> can be seen as a tidy version of the original
 <em>count table</em> and will be used throughout the analysis.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>
 <span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mapped-reads">Mapped Reads<a class="anchor" aria-label="anchor" href="#mapped-reads"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads.html">plot_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span><span class="op">)</span> <span class="op">+</span> 
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -264,7 +267,7 @@ density plots.</p>
 <div class="section level4">
 <h4 id="boxplot-mapped-reads">Boxplot Mapped Reads<a class="anchor" aria-label="anchor" href="#boxplot-mapped-reads"></a>
 </h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
     <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>,
     type <span class="op">=</span> <span class="st">"boxplot"</span>
@@ -280,7 +283,7 @@ density plots.</p>
 <div class="section level4">
 <h4 id="density-plot">Density plot<a class="anchor" aria-label="anchor" href="#density-plot"></a>
 </h4>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
     <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>,
     type <span class="op">=</span> <span class="st">"density"</span>
@@ -297,7 +300,7 @@ density plots.</p>
 Screening is performed is to check the barcode lost during the
 experiment. ScreenR implements a function able to compute and plot the
 number of barcodes lost.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_barcode_lost.html">plot_barcode_lost</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>
         legend.position <span class="op">=</span> <span class="st">"none"</span>,
@@ -315,14 +318,14 @@ function as follow.</p>
 <div class="section level5">
 <h5 id="for-sample">For Sample<a class="anchor" aria-label="anchor" href="#for-sample"></a>
 </h5>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span><span class="op">)</span> </code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Plot_MDS_Sample-1.png" width="960"></p>
 </div>
 <div class="section level5">
 <h5 id="for-treatment">For Treatment<a class="anchor" aria-label="anchor" href="#for-treatment"></a>
 </h5>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GGgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*_"</span>, <span class="st">""</span>, <span class="va">groups</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>
@@ -334,7 +337,7 @@ function as follow.</p>
 <div class="section level5">
 <h5 id="for-day">For Day<a class="anchor" aria-label="anchor" href="#for-day"></a>
 </h5>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">GGgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="va">groups</span><span class="op">)</span>
 <span class="fu"><a href="../reference/plot_MDS.html">plot_MDS</a></span><span class="op">(</span>
     screenR_Object <span class="op">=</span> <span class="va">object</span>,
@@ -363,7 +366,7 @@ control samples in the different conditions. Here for example a treated
 vs control in different day is computed. Then the different distribution
 of the Z-score can be plotted using the
 <em>plot_Zscore_distribution</em> function.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># 2DG</span>
 <span class="va">data_with_measure_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     Time3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
@@ -386,7 +389,7 @@ of the Z-score can be plotted using the
 <p>Now that the metrics has been computed the hits according to Z-score
 can be found. This in ScreenR is done using the <em>find_zscore_hit</em>
 function.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">zscore_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span>
         table_treate_vs_control <span class="op">=</span> <span class="va">data_with_measure_TRT</span><span class="op">$</span><span class="va">Time3</span>,
@@ -435,7 +438,7 @@ function.</p>
 </h4>
 <p>The same can be done with the CAMERA hit using the function
 <em>find_camera_hit</em>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>
 
@@ -455,7 +458,7 @@ function.</p>
 <pre><code><span class="co">## Warning in .zscoreDGE(y = y, design = design, contrast = contrast): 3rows with</span>
 <span class="co">## all zero counts</span></code></pre>
 <pre><code><span class="co">## Warning: Zero sample variances detected, have been offset away from zero</span></code></pre>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">camera_hit_TRT</span></code></pre></div>
 <pre><code><span class="co">## $Time3</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 281 × 5</span></span>
@@ -494,7 +497,7 @@ function.</p>
 </h4>
 <p>Last but not least this is done also for the ROAST hit using the
 function<br><em>find_roast_hit</em>.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">roast_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span>
         screenR_Object <span class="op">=</span> <span class="va">object</span>, matrix_model <span class="op">=</span> <span class="va">matrix_model</span>,
@@ -510,7 +513,7 @@ function<br><em>find_roast_hit</em>.</p>
 
 <span class="co">## Warning in .zscoreDGE(y = y, design = design, contrast = contrast): 3rows with</span>
 <span class="co">## all zero counts</span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">roast_hit_TRT</span></code></pre></div>
 <pre><code><span class="co">## $Time3</span>
 <span class="co">## <span style="color: #949494;"># A tibble: 534 × 9</span></span>
@@ -555,7 +558,7 @@ three methods</li>
 <li>Are considered candidate Hits the one present in all of the three
 methods</li>
 </ul>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">common_hit_TRT_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span>
         <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Day3</span>,
@@ -583,13 +586,13 @@ methods</li>
 </h4>
 <p>The hits can be easily visualized using the <em>plot_common_hit</em>
 function.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span>
     hit_zscore <span class="op">=</span> <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>, hit_camera <span class="op">=</span> <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>,
     <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Time3</span>
 <span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Venn_diagram_in_at_least_2-1.png" width="960"></p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## R version 4.2.0 RC (2022-04-14 r82180)</span>
 <span class="co">## Platform: x86_64-apple-darwin17.0 (64-bit)</span>
@@ -616,21 +619,22 @@ function.</p>
 <span class="co">## [10] generics_0.1.2      htmltools_0.5.2     yaml_2.3.5         </span>
 <span class="co">## [13] utf8_1.2.2          rlang_1.0.2         pkgdown_2.0.2      </span>
 <span class="co">## [16] jquerylib_0.1.4     pillar_1.7.0        glue_1.6.2         </span>
-<span class="co">## [19] withr_2.5.0         lifecycle_1.0.1     stringr_1.4.0      </span>
-<span class="co">## [22] munsell_0.5.0       gtable_0.3.0        ragg_1.2.2         </span>
-<span class="co">## [25] memoise_2.0.1       evaluate_0.15       labeling_0.4.2     </span>
-<span class="co">## [28] knitr_1.38          fastmap_1.1.0       fansi_1.0.3        </span>
-<span class="co">## [31] highr_0.9           Rcpp_1.0.8.3        edgeR_3.37.1       </span>
-<span class="co">## [34] scales_1.2.0        BiocManager_1.30.16 cachem_1.0.6       </span>
-<span class="co">## [37] limma_3.51.8        desc_1.4.1          jsonlite_1.8.0     </span>
-<span class="co">## [40] farver_2.1.0        systemfonts_1.0.4   fs_1.5.2           </span>
-<span class="co">## [43] textshaping_0.3.6   digest_0.6.29       stringi_1.7.6      </span>
-<span class="co">## [46] bookdown_0.26       grid_4.2.0          rprojroot_2.0.3    </span>
-<span class="co">## [49] ggvenn_0.1.9        cli_3.2.0           tools_4.2.0        </span>
-<span class="co">## [52] magrittr_2.0.3      sass_0.4.1          tibble_3.1.6       </span>
-<span class="co">## [55] crayon_1.5.1        pkgconfig_2.0.3     ellipsis_0.3.2     </span>
-<span class="co">## [58] rmarkdown_2.13      rstudioapi_0.13     R6_2.5.1           </span>
-<span class="co">## [61] compiler_4.2.0</span></code></pre>
+<span class="co">## [19] withr_2.5.0         DBI_1.1.2           lifecycle_1.0.1    </span>
+<span class="co">## [22] stringr_1.4.0       munsell_0.5.0       gtable_0.3.0       </span>
+<span class="co">## [25] ragg_1.2.2          memoise_2.0.1       evaluate_0.15      </span>
+<span class="co">## [28] labeling_0.4.2      knitr_1.38          fastmap_1.1.0      </span>
+<span class="co">## [31] fansi_1.0.3         highr_0.9           Rcpp_1.0.8.3       </span>
+<span class="co">## [34] edgeR_3.37.1        scales_1.2.0        BiocManager_1.30.16</span>
+<span class="co">## [37] cachem_1.0.6        limma_3.51.8        desc_1.4.1         </span>
+<span class="co">## [40] jsonlite_1.8.0      farver_2.1.0        systemfonts_1.0.4  </span>
+<span class="co">## [43] fs_1.5.2            textshaping_0.3.6   digest_0.6.29      </span>
+<span class="co">## [46] stringi_1.7.6       bookdown_0.26       grid_4.2.0         </span>
+<span class="co">## [49] rprojroot_2.0.3     ggvenn_0.1.9        cli_3.2.0          </span>
+<span class="co">## [52] tools_4.2.0         magrittr_2.0.3      sass_0.4.1         </span>
+<span class="co">## [55] patchwork_1.1.1     tibble_3.1.6        crayon_1.5.1       </span>
+<span class="co">## [58] pkgconfig_2.0.3     ellipsis_0.3.2      assertthat_0.2.1   </span>
+<span class="co">## [61] rmarkdown_2.13      rstudioapi_0.13     R6_2.5.1           </span>
+<span class="co">## [64] compiler_4.2.0</span></code></pre>
 </div>
 </div>
 </div>
@@ -648,7 +652,7 @@ function.</p>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Emanuel Michele Soda.</p>
+<p>Developed by Emanuel Michele Soda, Elena Ceccacci.</p>
 </div>
 
 <div class="pkgdown">

@@ -50,3 +50,4 @@ result <- find_roast_hit(object,
 )
 head(result)
 }
+\concept{find}

@@ -27,3 +27,4 @@ table <- compute_metrics(object,
 result <- find_robust_zscore_hit(table, number_barcode = 6)
 head(result)
 }
+\concept{find}

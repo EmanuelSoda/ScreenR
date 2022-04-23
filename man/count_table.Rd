@@ -56,4 +56,5 @@ data(count_table)
 \description{
 Table of the count table
 }
+\concept{data}
 \keyword{datasets}

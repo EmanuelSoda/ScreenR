@@ -29,3 +29,4 @@ An object containing all the needed information for the analysis.
 \description{
 Initial function to create the Screen Object.
 }
+\concept{objects}

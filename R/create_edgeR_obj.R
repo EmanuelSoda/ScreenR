@@ -5,6 +5,7 @@
 #'                       \code{\link{create_screenR_object}}
 #' @importFrom  edgeR DGEList
 #' @return The edgeR object
+#' @concept objects
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

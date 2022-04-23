@@ -14,4 +14,7 @@ Meta/
 .Rproj.user/
 /vignettes/figure/
 docs
+/vignettes/*.html
+/vignettes/*.md
+/vignettes/*.R
 

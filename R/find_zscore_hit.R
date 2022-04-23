@@ -7,6 +7,7 @@
 #'               "median" or "mean".
 #' @return Return a tibble containing the hit for the Z-score
 #' @export
+#' @concept find
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
@@ -21,7 +22,6 @@
 #' # For the mean
 #' result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 #' head(result)
-#'
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
     metric = "median") {
     if (metric == "median") {

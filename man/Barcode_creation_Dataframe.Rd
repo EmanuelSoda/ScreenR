@@ -18,3 +18,4 @@ This function takes as input the path of a list of files
              created using the Samtools idxstats tool and return a
               count table.
 }
+\concept{compute}

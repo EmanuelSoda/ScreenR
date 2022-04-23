@@ -4,7 +4,7 @@
 #'               count table.
 #'
 #' @param path_file  Path of the list of files
-#'
+#' @concept  compute
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom purrr map reduce

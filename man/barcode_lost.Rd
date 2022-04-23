@@ -26,3 +26,4 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 head(barcode_lost(object))
 
 }
+\concept{compute}

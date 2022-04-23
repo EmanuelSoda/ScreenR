@@ -9,18 +9,18 @@
 #' @param replicates A vector containing the replicates label
 #' @importFrom rlang .data
 #' @importFrom methods new
+#' @concept objects
 #' @return An object containing all the needed information for the analysis.
 #' @export
 create_screenR_object <- function(table = NULL, annotation = NULL,
     groups = NULL, replicates = c("")) {
     #arcode <- as.factor(table$Barcode)
     annotation$Barcode <- as.factor(annotation$Barcode)
-
-    object <- methods::new("screenR_object",
-        count_table = table,
-        annotation_table = annotation, groups = groups,
-        replicates = replicates, normalized_count_table = data.frame(),
-        data_table = data.frame()
+    object <- methods::new("screenr_object",
+        count_table = tibble(table),
+        annotation_table = tibble(annotation), groups = groups,
+        replicates = replicates, normalized_count_table = tibble(),
+        data_table = tibble()
     )
     return(object)
 }

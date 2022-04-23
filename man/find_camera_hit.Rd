@@ -52,3 +52,4 @@ result <- find_camera_hit(
 )
 head(result)
 }
+\concept{find}

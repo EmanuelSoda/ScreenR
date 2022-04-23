@@ -1,0 +1,31 @@
+reference:
+- title: Object
+  desc:  Function for the ScreenR Object
+  contents:
+  - has_concept("objects")
+
+- title: Computation
+  desc:  Function used to perform computations
+  contents:
+  - has_concept("compute")
+
+- title: Find Hit
+  desc:  Function used to find hits
+  contents:
+  - has_concept("find")
+
+- title: Further Optimization
+  desc:  Function to further optimize the hit found
+  contents:
+  - has_concept("filter")
+
+- title: Plot
+  desc:  Function used to plot data
+  contents:
+  - starts_with("plot_")
+  - has_concept("plot")
+
+- title: Data
+  contents:
+  - has_concept("data")
+

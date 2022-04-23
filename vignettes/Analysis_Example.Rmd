@@ -138,7 +138,7 @@ palette <- c(
 
 object <- create_screenR_object(
     table = data, annotation = total_Annotation, groups = groups,
-    replicates = c("")
+    replicates = ""
 )
 ```
 

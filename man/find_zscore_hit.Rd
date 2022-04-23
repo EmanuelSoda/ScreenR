@@ -36,5 +36,5 @@ head(result)
 # For the mean
 result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 head(result)
-
 }
+\concept{find}

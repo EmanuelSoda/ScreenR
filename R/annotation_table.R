@@ -2,6 +2,7 @@
 #' @docType data
 #' @usage data(annotation_table)
 #' @keywords datasets
+#' @concept data
 #'
 #' @format A data frame with 5320 rows and 2 columns:
 #' \describe{

@@ -83,13 +83,15 @@
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">"object"</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">count_mapped_reads</span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Barcode Sample Mapped</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   10208     T1   3520</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   10502     T1    280</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   10796     T1   1507</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   11089     T1   3797</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   11382     T1    717</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   11675     T1   7330</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 10208   T1       <span style="text-decoration: underline;">3</span>520</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 10502   T1        280</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 10796   T1       <span style="text-decoration: underline;">1</span>507</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 11089   T1       <span style="text-decoration: underline;">3</span>797</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 11382   T1        717</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 11675   T1       <span style="text-decoration: underline;">7</span>330</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
@@ -101,7 +103,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Emanuel Michele Soda.</p>
+  <p></p><p>Developed by Emanuel Michele Soda, Elena Ceccacci.</p>
 </div>
 
 <div class="pkgdown">

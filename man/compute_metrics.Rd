@@ -34,3 +34,4 @@ metrics <- compute_metrics(object,
 head(metrics)
 
 }
+\concept{compute}

@@ -7,6 +7,7 @@
 #' @importFrom rlang .data
 #' @importFrom dplyr select
 #' @return Return a tibble containing the number of mapped read for sample
+#' @concept plot
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

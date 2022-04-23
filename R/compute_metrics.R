@@ -14,6 +14,7 @@
 #' @importFrom dplyr mutate filter summarise if_else pull
 #' @importFrom stats sd median
 #' @return Return a tibble  with all the measure computed.
+#' @concept compute
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

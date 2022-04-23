@@ -2,6 +2,7 @@
 #' @docType data
 #' @usage data(count_table)
 #' @keywords datasets
+#' @concept  data
 #'
 #' @format A data frame with 5323 rows and 15 variables:
 #' \describe{

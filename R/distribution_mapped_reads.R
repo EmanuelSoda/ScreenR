@@ -10,11 +10,10 @@
 #'              Allowed values are in the range 0 to 1
 #' @param type The type of plot. The default is "boxplot" the other option is
 #'             "density."
+#' @importFrom ggplot2 geom_boxplot geom_density
 #' @concept plot
-#'
 #' @return Return a tibble containing the number of mapped read for sample
 #' @export
-#'
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
@@ -36,13 +35,13 @@ distribution_mapped_reads <- function(screenR_Object,
             x = .data$Sample,
             y = .data$Mapped, fill = .data$Sample
         )) +
-            geom_boxplot(alpha = alpha)
+            ggplot2::geom_boxplot(alpha = alpha)
     } else if (type == "density") {
         plot <- ggplot(data = table, aes(
             x = .data$Mapped,
             fill = .data$Sample
         )) +
-            geom_density(alpha = alpha)
+            ggplot2::geom_density(alpha = alpha)
     }
 
     if (!is.null(palette)) {

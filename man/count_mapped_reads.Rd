@@ -22,3 +22,4 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 head(count_mapped_reads(object))
 
 }
+\concept{compute}

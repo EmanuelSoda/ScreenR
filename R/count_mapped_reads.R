@@ -8,6 +8,7 @@
 #'
 #' @return Return a tibble containing the number of mapped read for sample
 #' @export
+#' @concept compute
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' head(count_mapped_reads(object))

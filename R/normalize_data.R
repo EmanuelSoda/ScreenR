@@ -7,12 +7,12 @@
 
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenR_object}}
-#'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr as_tibble
 #' @importFrom purrr map_if
 #' @return Return the screenR object with the normalize data
 #' @export
+#' @concept  compute
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' object <- normalize_data(object)

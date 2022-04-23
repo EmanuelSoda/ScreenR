@@ -19,6 +19,8 @@
 #' @param number_barcode Number of barcode to use
 #' @param direction String containing the direction of the variation
 #' @return The hit find with the camera method
+#' @export
+#' @concept find
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
@@ -30,10 +32,6 @@
 #'     matrix_model = matrix, contrast = "Treated"
 #' )
 #' head(result)
-#' @export
-#'
-#'
-
 find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
     direction = "Down") {

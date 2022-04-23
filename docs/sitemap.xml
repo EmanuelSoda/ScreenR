@@ -85,6 +85,24 @@
     <loc>/reference/find_zscore_hit.html</loc>
   </url>
   <url>
+    <loc>/reference/get_annotation_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_count_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_data_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_groups.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_normalized_count_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/get_replicates.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
@@ -130,7 +148,28 @@
     <loc>/reference/plot_trend.html</loc>
   </url>
   <url>
+    <loc>/reference/screenr_object-class.html</loc>
+  </url>
+  <url>
     <loc>/reference/select_number_barcode.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_annotation_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_count_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_data_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_groups.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_normalized_count_table.html</loc>
+  </url>
+  <url>
+    <loc>/reference/set_replicates.html</loc>
   </url>
   <url>
     <loc>/reference/unique_gene_symbols.html</loc>

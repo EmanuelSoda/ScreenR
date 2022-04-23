@@ -26,3 +26,4 @@ object <- normalize_data(object)
 
 slot(object, "normalized_count_table")
 }
+\concept{compute}

@@ -16,8 +16,10 @@
 #' @importFrom limma mroast
 #' @importFrom tibble tibble
 #' @return The hits found by ROAST method
+#' @concept find
 #' @export
 #' @examples
+#' set.seed(42)
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' matrix_model <- model.matrix(~ slot(object, "groups"))
 #' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")

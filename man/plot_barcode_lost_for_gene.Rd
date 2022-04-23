@@ -28,7 +28,6 @@ plot_barcode_lost_for_gene(object,
 )
 plot_barcode_lost_for_gene(object,
     samples = c("Time3_A", "Time3_B"),
-    facet = FALSE
-)
+    facet = FALSE)
 }
 \concept{plot}
