@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -148,7 +148,7 @@ test_that("plot_barcode_trend color", {
 
 
 
-test_that("plot_Zscore_distribution", {
+test_that("plot_zscore_distribution", {
   object <- create_test_object()
   genes <- c("Gene_1", "Gene_5")
   object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
@@ -157,7 +157,7 @@ test_that("plot_Zscore_distribution", {
                                  treatment = "Time3", day = "Time3"),
                  compute_metrics(object,control = "TRT",
                                  treatment = "Time4", day = "Time4"))
-  p <- plot_Zscore_distribution(tables, alpha = 0.5)
+  p <- plot_zscore_distribution(tables, alpha = 0.5)
 
   expect_equal(class(p)[1], "gg")
 })
@@ -178,7 +178,7 @@ test_that("plot_barcode_hit", {
 
 
 test_that("Plot number mapped reads", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -188,7 +188,7 @@ test_that("Plot number mapped reads", {
 
 
 test_that("Plot number mapped reads", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -197,7 +197,7 @@ test_that("Plot number mapped reads", {
 })
 
 test_that("Boxplot mapped reads", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -209,7 +209,7 @@ test_that("Boxplot mapped reads", {
 })
 
 test_that("Density mapped reads", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -222,7 +222,7 @@ test_that("Density mapped reads", {
 
 
 test_that("Plot number of Barcode Lost", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )

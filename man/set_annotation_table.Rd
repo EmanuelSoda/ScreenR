@@ -8,7 +8,7 @@ set_annotation_table(object, annotation_table)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{annotation_table}{a table containing the annotation for each shRNA}
 }

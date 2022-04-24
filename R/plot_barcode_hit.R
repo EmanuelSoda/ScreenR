@@ -1,7 +1,7 @@
 #' @title Plot Barcode Hit
 #' @description Create a Barcode plot for the Hit
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param matrix_model the matrix that will be used to perform the
 #'                     linear model analysis
 
@@ -30,7 +30,7 @@
 plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
     quantile = c(-0.5, 0.5), labels = c("Negative logFC", "Positive logFC")) {
-    DGEList <- create_edgeR_obj(screenR_Object)
+    DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, coef = seq(
         1,
         length(colnames(matrix_model)), 1
@@ -50,7 +50,6 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
             genesymbollist[[i]] <- which(sel)
         }
     }
-
 
     plot <- limma::barcodeplot(lrt$table$logFC,
         index = genesymbollist[[gene]],

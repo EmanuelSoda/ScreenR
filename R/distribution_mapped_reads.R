@@ -3,7 +3,7 @@
 #'              the mapped reads in different samples.
 #'
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}.
+#'                       \code{\link{create_screenr_object}}.
 #'
 #' @param palette The color vector for the plot.
 #' @param alpha A value for the opacity of the plot.

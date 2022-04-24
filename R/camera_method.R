@@ -2,7 +2,7 @@
 #' @description This function finds the hits using the camera method is
 #'              a wrapper for the \code{\link[limma]{camera}} function
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param matrix_model The matrix that will be used to perform the
 #'                     linear model analysis created using
 #'                     \code{\link[stats]{model.matrix}}
@@ -36,12 +36,12 @@ find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
     direction = "Down") {
     # We have to convert the screenR obj into an edgeR obj
-    DGEList <- ScreenR::create_edgeR_obj(screenR_Object)
+    DGEList <- ScreenR::create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     fit <- edgeR::glmFit(xglm, matrix_model)
     lrt <- edgeR::glmLRT(fit, coef = seq(1, length(colnames(matrix_model))))
 
-    camera_hit <- ScreenR::compute_camera(
+    camera_hit <- compute_camera(
         xglm = xglm, lrt = lrt, DGEList = DGEList,
         matrix_model = matrix_model, contrast = contrast,
         number_barcode = number_barcode, thresh = thresh,
@@ -71,10 +71,8 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @param  number_barcode Number of barcode to be considered a hit
 #' @param lfc The Log2FC threshold
 #' @importFrom edgeR topTags
-#' @export
 #' @return The list of hits found by the camera method
 #' @keywords internal
-
 compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
     number_barcode = 3, thresh = 1e-04, lfc = 1) {
     # Take all the Tags in descending order

@@ -5,7 +5,7 @@
 #' @importFrom stats lm
 #' @importFrom dplyr rename
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #'
 #' @param genes The genes for which the slope as to be computed. Those genes are
 #'              the result of the three statistical methods selection
@@ -31,7 +31,7 @@
 #' )
 #'
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
-    group_var_control, slope_control = NULL, slope_treatment) {
+    group_var_control, slope_control, slope_treatment) {
 
     # Compute the slope of the hits in the treatment Samples
     slope_treatment <- ScreenR::compute_slope(screenR_Object, genes,
@@ -51,9 +51,8 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::left_join(data, slope_DMSO, by = "Gene")
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
-    if (!is.null(slope_control)) {
-        data <- dplyr::filter(data, .data$slope_control <= slope_control)
-    }
+
+    data <- dplyr::filter(data, .data$slope_control <= slope_control)
 
     data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
 
@@ -66,7 +65,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @importFrom rlang .data
 #' @importFrom dplyr ungroup
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param genes The genes for which the slope as to be computed. Those genes are
 #'              the result of the three statistical methods selection
 #' @param group_var The variable to use as X for the linear model
@@ -106,7 +105,7 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'              It compute the variance among the hits and filter the one with
 #'              a value greater than the threshold set
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #'
 #' @param genes The genes for which the variance as to be computed.
 #'              Those genes are the result of the three statistical
@@ -138,7 +137,7 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
     data <- screenR_Object@data_table
 
     # Create the edgeR object and computing the LogFC
-    DGEList <- create_edgeR_obj(screenR_Object)
+    DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     fit <- edgeR::glmFit(xglm, matrix_model)
     lrt <- edgeR::glmLRT(fit, contrast = contrast)

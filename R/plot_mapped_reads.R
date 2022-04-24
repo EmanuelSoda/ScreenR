@@ -3,7 +3,7 @@
 #'              sample.
 #'
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param palette A vector of color
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1

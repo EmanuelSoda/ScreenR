@@ -17,7 +17,7 @@ plot_boxplot(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{genes}{The vector of genes to use}
 

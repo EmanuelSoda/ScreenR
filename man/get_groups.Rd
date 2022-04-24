@@ -8,7 +8,7 @@ get_groups(object)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 }
 \value{
 The groups of the ScreenR object

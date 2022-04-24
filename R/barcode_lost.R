@@ -4,7 +4,7 @@
 #'
 
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #'
 #' @importFrom  dplyr group_by
 #' @importFrom  dplyr filter
@@ -38,7 +38,7 @@ barcode_lost <- function(screenR_Object) {
 #' @title Plot number of barcode lost
 #' @description This function plots the number of barcodes lost in each sample
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param palette A vector of colors
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1
@@ -82,7 +82,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @title Plot number of barcode lost for gene
 #' @description This function plots the number of barcodes lost in each sample
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param facet A boolean to use the facet
 #' @param samples The samples to visualize
 #' @importFrom magrittr %>%
@@ -149,7 +149,7 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
 #' #' @description The function plots the distribution of the lost barcodes in
 #' #'              each sample
 #' #' @param screenR_Object The ScreenR object obtained using the
-#' #'                       \code{\link{create_screenR_object}}
+#' #'                       \code{\link{create_screenr_object}}
 #' #' @param palette A vector of colors
 #' #' @param alpha  A value for the opacity of the plot.
 #' #'              Allowed values are in the range 0 to 1

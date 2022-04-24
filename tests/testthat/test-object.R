@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -47,7 +47,7 @@ create_test_object <- function() {
   return(obj)
 }
 test_that("Creation of the screenR object", {
-  object <- create_screenR_object(
+  object <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -85,11 +85,11 @@ test_that("get_groups NULL" , {
 
 test_that("get_replicates", {
   object <- get0("object", envir = asNamespace("ScreenR"))
-  expect_silent(get_groups(object))
+  expect_silent(get_replicates(object))
 })
 
 test_that("get_replicates NULL" , {
-  expect_error(get_groups(NULL))
+  expect_error(get_replicates(NULL))
 })
 
 
@@ -115,9 +115,7 @@ test_that("get_data_table NULL" , {
   expect_error(get_data_table(NULL))
 })
 
-
-
-
+# Set annotation table
 test_that("set_annotation_table" , {
   object <- get0("object", envir = asNamespace("ScreenR"))
   annotation <- get_annotation_table(object)
@@ -128,4 +126,75 @@ test_that("set_annotation_table NULL" , {
   object <- get0("object", envir = asNamespace("ScreenR"))
   annotation <- get_annotation_table(object)
   expect_error(set_annotation_table(object = NULL, annotation))
+})
+
+# Set Count Table
+test_that("set_count_table" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  count <- get_count_table(object)
+  expect_silent(set_count_table(object, count))
+})
+
+test_that("set_count_table NULL" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  count <- get_count_table(object)
+  expect_error(set_count_table(object = NULL, count))
+})
+
+
+# Set groups
+test_that("set_groups" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  groups <- get_groups(object)
+  expect_silent(set_groups(object, groups))
+})
+
+test_that("set_groups NULL" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  groups <- get_groups(object)
+  expect_error(set_groups(object = NULL, groups))
+})
+
+
+
+# Set replicates
+test_that("set_replicates" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  replicates <- get_replicates(object)
+  expect_silent(set_replicates(object, replicates))
+})
+
+test_that("set_replicates NULL" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  replicates <- get_replicates(object)
+  expect_error(set_replicates(object = NULL, replicates))
+})
+
+
+# Set normalized_count_table
+test_that("set_normalized_count_table" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  counts_norm <- get_normalized_count_table(object)
+  expect_silent(set_normalized_count_table(object, counts_norm))
+})
+
+test_that("set_normalized_count_table NULL" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  counts_norm <- get_normalized_count_table(object)
+  expect_error(set_normalized_count_table(object = NULL, counts_norm))
+})
+
+
+
+# Set data_table
+test_that("set_normalized_count_table" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  data_table <- get_data_table(object)
+  expect_silent(set_data_table(object, data_table))
+})
+
+test_that("set_normalized_count_table NULL" , {
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  data_table <- get_data_table(object)
+  expect_error(set_data_table(object = NULL, data_table))
 })

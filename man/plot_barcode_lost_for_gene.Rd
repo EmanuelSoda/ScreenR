@@ -8,7 +8,7 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples = NULL)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{facet}{A boolean to use the facet}
 

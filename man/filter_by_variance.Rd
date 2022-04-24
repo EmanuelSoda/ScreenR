@@ -14,7 +14,7 @@ filter_by_variance(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{genes}{The genes for which the variance as to be computed.
 Those genes are the result of the three statistical

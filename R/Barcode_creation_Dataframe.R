@@ -13,7 +13,7 @@
 #'
 #' @export
 
-Barcode_creation_Dataframe <- function(path_file) {
+barcode_creation_dataframe <- function(path_file) {
     dataFrames <- purrr::map(.x = list.files(
         path = path_file,
         full.names = TRUE

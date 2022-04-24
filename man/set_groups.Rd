@@ -8,7 +8,7 @@ set_groups(object, groups)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{groups}{The treatment and control groups}
 }

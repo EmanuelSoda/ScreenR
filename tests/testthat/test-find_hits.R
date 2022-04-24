@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -68,5 +68,16 @@ test_that("find_common_hit 3", {
                                 hit_roast, common_in = 3)
   #expect_equal(class(find_common_hit), "character")
   expect_equal(common_hit, c("A"))
+})
+
+
+test_that("find_roast_hit", {
+  set.seed(42)
+  object <- get0("object", envir = asNamespace("ScreenR"))
+  matrix_model <- model.matrix(~ slot(object, "groups"))
+  colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
+  expect_warning(find_roast_hit(object,
+                           matrix_model = matrix_model,
+                           contrast = "Treated", nrot = 20))
 })
 

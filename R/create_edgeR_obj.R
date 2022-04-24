@@ -2,16 +2,16 @@
 #' @description Utility function that using the screenR-class
 #'              object create the corresponding edgeR object
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @importFrom  edgeR DGEList
 #' @return The edgeR object
 #' @concept objects
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' create_edgeR_obj(object)
+#' create_edger_obj(object)
 #'
-create_edgeR_obj <- function(screenR_Object) {
+create_edger_obj <- function(screenR_Object) {
     # First create the Matrix of the Count table
     counts <- screenR_Object@normalized_count_table
     counts <- as.matrix(dplyr::select_if(counts, is.numeric))

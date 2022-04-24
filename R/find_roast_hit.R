@@ -1,7 +1,7 @@
 #' @title Find Roast Hit
 #' @description Find the hit using the Roast method
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param matrix_model The matrix that will be used to perform the
 #'                     linear model analysis. Created using
 #'                     \code{\link[stats]{model.matrix}}
@@ -31,7 +31,7 @@
 #' head(result)
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     nrot = 9999, number_barcode = 3, direction = "Down", p_val = 0.05) {
-    DGEList <- create_edgeR_obj(screenR_Object)
+    DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     genesymbols <- DGEList$genes[, 1]
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)

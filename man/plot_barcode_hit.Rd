@@ -16,7 +16,7 @@ plot_barcode_hit(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{matrix_model}{the matrix that will be used to perform the
 linear model analysis}

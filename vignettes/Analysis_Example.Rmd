@@ -136,7 +136,7 @@ palette <- c(
     rep("#ffd92f", 3)
 )
 
-object <- create_screenR_object(
+object <- create_screenr_object(
     table = data, annotation = total_Annotation, groups = groups,
     replicates = ""
 )
@@ -227,7 +227,7 @@ In ScreenR this can be done using the *plot_MDS* function as follow.
 
 #### For Sample
 ```{r  Plot_MDS_Sample, message=FALSE, warning=TRUE}
-plot_MDS(screenR_Object = object) 
+plot_mds(screenR_Object = object) 
 ```
 
 
@@ -235,7 +235,7 @@ plot_MDS(screenR_Object = object)
 ```{r  Plot_MDS_Treatment, message=FALSE, warning=TRUE}
 GGgroups <- gsub(".*_", "", groups)
 
-plot_MDS(
+plot_mds(
     screenR_Object = object,
     groups = factor(x = GGgroups, levels = unique(GGgroups))
 )
@@ -244,7 +244,7 @@ plot_MDS(
 #### For Day
 ```{r  Plot_MDS_Day, message=FALSE, warning=TRUE}
 GGgroups <- sub("_.*", "", groups)
-plot_MDS(
+plot_mds(
     screenR_Object = object,
     groups = factor(x = GGgroups, levels = unique(GGgroups))
 )
@@ -263,7 +263,7 @@ In order to compute the Z-score, first a list of metrics has to be computed.
 In particular a *Log2FC* is computed for the treated vs control samples in the 
 different conditions. Here for example a treated vs control in different day 
 is computed. Then the different distribution of the Z-score can be plotted 
-using the *plot_Zscore_distribution* function. 
+using the *plot_zscore_distribution* function. 
 
 ```{r  compute_metrics, message=FALSE, warning=TRUE}
 # 2DG
@@ -279,7 +279,7 @@ data_with_measure_TRT <- list(
 )
 
 
-plot_Zscore_distribution(data_with_measure_TRT, alpha = 0.8)
+plot_zscore_distribution(data_with_measure_TRT, alpha = 0.8)
 ```
 
 

@@ -23,7 +23,7 @@ screenr_object <- setClass("screenr_object", methods::representation(
 #' @title Get ScreenR count table
 #' @description Get function for the count table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The count table of the ScreenR object
 #' @concept objects
 #' @importFrom methods slot
@@ -43,7 +43,7 @@ get_count_table <- function(object){
 #' @title Get ScreenR annotation table
 #' @description Get function for the annotation table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The annotation table of the ScreenR object
 #' @export
 #' @concept objects
@@ -62,7 +62,7 @@ get_annotation_table <- function(object){
 #' @title Get ScreenR groups
 #' @description Get function for the groups of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The groups of the ScreenR object
 #' @export
 
@@ -82,7 +82,7 @@ get_groups <- function(object){
 #' @title Get ScreenR replicates
 #' @description Get function for the replicates of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The replicates of the ScreenR object
 #' @export
 #' @concept objects
@@ -102,7 +102,7 @@ get_replicates <- function(object){
 #' @description Get function for the normalized_count_table of
 #'              the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The normalized_count_table of the ScreenR object
 #' @export
 #' @concept objects
@@ -121,7 +121,7 @@ get_normalized_count_table <- function(object){
 #' @title Get ScreenR data_table
 #' @description Get function for the data_table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The data_table of the ScreenR object
 #' @export
 #' @concept objects
@@ -145,7 +145,7 @@ get_data_table <- function(object){
 #' @title Set ScreenR count table
 #' @description Set function for the count table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param count_table A count table containing in each row an shRNA and in each
 #'                    column a sample
 #' @return The ScreenR object with the count table
@@ -160,10 +160,6 @@ set_count_table <- function(object, count_table){
   if (is.null(object)) {
     stop('The object is not defined!')
   }
-  if (is.null(count_table)) {
-    warning("You are inputing a NULL count_table")
-  }
-
   slot(object = object, name = 'count_table') <- count_table
   return(object)
 }
@@ -172,7 +168,7 @@ set_count_table <- function(object, count_table){
 #' @title Set ScreenR annotation table
 #' @description Set function for the annotation table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param annotation_table a table containing the annotation for each shRNA
 #' @return The ScreenR object with the annotation table
 #' @export
@@ -186,9 +182,6 @@ set_annotation_table <- function(object, annotation_table){
   if (is.null(object)) {
     stop('The object is not defined!')
   }
-  if (is.null(annotation_table)) {
-    warning("You are inputing a NULL annotation_table")
-  }
   slot(object = object, name = 'annotation_table') <- annotation_table
   return(object)
 }
@@ -197,7 +190,7 @@ set_annotation_table <- function(object, annotation_table){
 #' @title Set ScreenR groups
 #' @description Set function for the groups of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param groups The treatment and control groups
 #' @return The ScreenR object containing the group field
 #' @export
@@ -211,9 +204,6 @@ set_groups <- function(object, groups){
   if (is.null(object)) {
     stop('The object is not defined!')
     }
-  if (is.null(groups)) {
-    warning("You are inputing a NULL groups")
-    }
   slot(object = object, name = 'groups') <- groups
   return(object)
 }
@@ -223,7 +213,7 @@ set_groups <- function(object, groups){
 #' @title Set ScreenR replicates
 #' @description Set function for the replicates of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The ScreenR object with the specific replicates
 #' @param  replicates The vecotr containing the replicates name
 #' @export
@@ -236,9 +226,6 @@ set_replicates <- function(object, replicates){
   if (is.null(object)) {
     stop('The object is not defined!')
   }
-  if (is.null(replicates)) {
-    warning("You are inputing a NULL replicates")
-  }
   slot(object = object, name = 'replicates') <- replicates
   return(object)
 }
@@ -248,7 +235,7 @@ set_replicates <- function(object, replicates){
 #' @description Set function for the normalized_count_table of
 #'              the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @return The ScreenR object with the setted normalized_count_table
 #' @param normalized_count_table A table of the normalized count table
 #' @export
@@ -262,16 +249,6 @@ set_normalized_count_table <- function(object, normalized_count_table){
   if (is.null(object)) {
     stop('The object is not defined!')
   }
-
-  if (is.null(object@normalized_count_table)) {
-    message <- paste("The normalized_count_table is not yet defined!\n",
-                     "Please perform  normalize_data() to normalization")
-    stop(message)
-  }
-  if (is.null(normalized_count_table)) {
-    warning("You are inputing a NULL normalized_count_table")
-  }
-
   slot(object = object, name = 'normalized_count_table') <-
     normalized_count_table
 
@@ -282,7 +259,7 @@ set_normalized_count_table <- function(object, normalized_count_table){
 #' @title Set ScreenR data_table
 #' @description Set function for the data_table of the ScreenR object
 #' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param data_table A count table in a tidy format
 #' @return The ScreenR object with the setted data_table
 #' @export
@@ -294,9 +271,6 @@ set_normalized_count_table <- function(object, normalized_count_table){
 set_data_table <- function(object, data_table){
   if (is.null(object)) {
     stop('The object is not defined!')
-  }
-  if (is.null(data_table)) {
-    warning("You are inputing a NULL data_table")
   }
   slot(object = object, name = 'data_table') <- data_table
   return(object)

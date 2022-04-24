@@ -8,7 +8,7 @@ get_data_table(object)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 }
 \value{
 The data_table of the ScreenR object

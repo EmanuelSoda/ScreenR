@@ -6,7 +6,7 @@
 #'              sort of transcript per million.
 
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @importFrom magrittr %>%
 #' @importFrom dplyr as_tibble
 #' @importFrom purrr map_if

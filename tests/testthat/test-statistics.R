@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )

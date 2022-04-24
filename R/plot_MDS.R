@@ -3,7 +3,7 @@
 #'              distances on the plot approximate the typical log2 fold
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param groups The vector to fill the plot
 #' @param alpha The opacity of the labels
 #' @param size The dimension of the labels
@@ -16,12 +16,12 @@
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' plot_MDS(object)
+#' plot_mds(object)
 #'
-plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
+plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
     # We have to convert the screenR obj into an edgeR obj
-    DGEList <- create_edgeR_obj(screenR_Object)
+    DGEList <- create_edger_obj(screenR_Object)
 
     # The Standard plotMDS
     plotMDS <- limma::plotMDS(DGEList, plot = FALSE, ndim = 2)
@@ -50,7 +50,7 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     return(plot)
 }
 
-#' @title PLot the explained variance by the PC
+#' @title Plot the explained variance by the PC
 #' @description This function plot the explained variance by the
 #'              Principal Component.
 #' @param screenR_Object The ScreenR object
@@ -63,12 +63,11 @@ plot_MDS <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' plot_PC_explained_variance(object)
+#' plot_pc_explained_variance(object)
 #'
 #' # For the cumulative plote
-#' plot_PC_explained_variance(object, cumulative = TRUE)
-#'
-plot_PC_explained_variance <- function(screenR_Object, cumulative = FALSE,
+#' plot_pc_explained_variance(object, cumulative = TRUE)
+plot_pc_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {
     PC <- compute_explained_variance(screenR_Object)
     # Remove the Standard deviation row

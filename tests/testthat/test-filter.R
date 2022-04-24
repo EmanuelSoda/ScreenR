@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -56,6 +56,21 @@ test_that("filter_by_slope", {
     group_var_treatment = c("T1", "T2", "TRT"),
     group_var_control = c("T1", "T2", "Time3", "Time4"),
     slope_treatment = 1
+  )
+  expect_equal(class(data)[1], "tbl_df")
+})
+
+
+test_that("filter_by_slope", {
+  library(tibble)
+  object <- create_test_object()
+
+  data <- filter_by_slope(
+    screenR_Object = object,
+    genes = c("Gene_1", "Gene_300"),
+    group_var_treatment = c("T1", "T2", "TRT"),
+    group_var_control = c("T1", "T2", "Time3", "Time4"),
+    slope_treatment = 1,
   )
   expect_equal(class(data)[1], "tbl_df")
 })

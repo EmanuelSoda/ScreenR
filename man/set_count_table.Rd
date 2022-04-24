@@ -8,7 +8,7 @@ set_count_table(object, count_table)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{count_table}{A count table containing in each row an shRNA and in each
 column a sample}

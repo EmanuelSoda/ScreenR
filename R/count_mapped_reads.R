@@ -4,7 +4,7 @@
 #' @importFrom rlang .data
 #' @importFrom tidyr gather
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #'
 #' @return Return a tibble containing the number of mapped read for sample
 #' @export

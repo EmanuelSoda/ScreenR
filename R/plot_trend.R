@@ -2,7 +2,7 @@
 #' @description This function plot the trend of a gene resulted as hit
 #' @importFrom rlang .data
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param group_var The variable that as to be used to filter the data, for
 #'                  example the different treatment
 #' @param alpha A value for the opacity of the plot.
@@ -24,8 +24,7 @@
 #' plot_trend(object,
 #'     genes = c("Gene_42", "Gene_100"),
 #'     group_var = c("T1", "T2", "TRT"),
-#'     nrow = 2
-#' )
+#'     nrow = 2)
 #'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,

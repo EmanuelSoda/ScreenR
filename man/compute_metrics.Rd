@@ -8,7 +8,7 @@ compute_metrics(screenR_Object, control, treatment, day)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{control}{The control Samples.}
 

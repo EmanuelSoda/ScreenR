@@ -13,7 +13,7 @@ plot_mapped_reads(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{palette}{A vector of color}
 

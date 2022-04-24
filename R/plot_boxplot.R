@@ -2,7 +2,7 @@
 #' @description This function plots a boxplot for each sample for the genes
 #'              passed as input.
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param group_var The variable that as to be used to filter the data, for
 #'                  example the different treatment
 #' @param fill_var The variable used to fill the boxplot

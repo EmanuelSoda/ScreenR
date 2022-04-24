@@ -25,7 +25,7 @@ create_test_object <- function() {
     "Time3_A", "Time3_B", "Time3_C", "Time4_TRT_A", "Time4_TRT_B",
     "Time4_TRT_C", "Time4_A", "Time4_B", "Time4_c"
   )
-  obj <- create_screenR_object(
+  obj <- create_screenr_object(
     table = data,
     annotation = annotaion, groups = groups, replicates = c("")
   )
@@ -46,15 +46,15 @@ create_test_object <- function() {
 
   return(obj)
 }
-test_that("Plot MDS NULL", {
+test_that("plot_mds NULL", {
   object <- create_test_object()
-  plot <- suppressWarnings(plot_MDS(screenR_Object = object))
+  plot <- suppressWarnings(plot_mds(screenR_Object = object))
   expect_equal(class(plot)[1], "gg")
 })
 
-test_that("Plot MDS", {
+test_that("plot_mds", {
   object <- create_test_object()
-  plot <- suppressWarnings(plot_MDS(
+  plot <- suppressWarnings(plot_mds(
     screenR_Object = object,
     groups = c(rep("T1/T2", 2), rep("Time3", 6), rep("Time4", 6))
   ))
@@ -62,19 +62,19 @@ test_that("Plot MDS", {
 })
 
 
-test_that("plot_PC_explained_variance", {
+test_that("plot_pc_explained_variance", {
   library(tibble)
   object <- create_test_object()
 
-  plot <- plot_PC_explained_variance(object, cumulative = FALSE)
+  plot <- plot_pc_explained_variance(object, cumulative = FALSE)
   expect_equal(class(plot)[[1]], "gg")
 })
 
-test_that("plot_PC_explained_variance CUM", {
+test_that("plot_pc_explained_variance CUM", {
   library(tibble)
   object <- create_test_object()
 
-  plot <- plot_PC_explained_variance(
+  plot <- plot_pc_explained_variance(
     screenR_Object = object,
     cumulative = TRUE
   )

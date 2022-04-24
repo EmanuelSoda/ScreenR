@@ -5,7 +5,7 @@
 #'              for a given treatment in a given day
 #'
 #' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenR_object}}
+#'                       \code{\link{create_screenr_object}}
 #' @param control The control Samples.
 #' @param treatment The treatment Samples
 #' @param day The day of the treatment

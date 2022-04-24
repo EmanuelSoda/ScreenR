@@ -8,7 +8,7 @@ set_normalized_count_table(object, normalized_count_table)
 }
 \arguments{
 \item{object}{The ScreenR object obtained using the
-\code{\link{create_screenR_object}}}
+\code{\link{create_screenr_object}}}
 
 \item{normalized_count_table}{A table of the normalized count table}
 }
