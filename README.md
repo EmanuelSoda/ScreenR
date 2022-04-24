@@ -71,7 +71,7 @@ Please run this yourself to check for any updates on how to cite
 **ScreenR**.
 
 ``` r
-#print(citation('ScreenR'), bibtex = TRUE)
+# print(citation('ScreenR'), bibtex = TRUE)
 ```
 
 ## Code of Conduct

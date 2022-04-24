@@ -24,8 +24,10 @@
 #' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
 #' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
 #'
-#' plot_barcode_hit(object, matrix_model, contrast = contrast,
-#'                  gene = "Gene_300")
+#' plot_barcode_hit(object, matrix_model,
+#'     contrast = contrast,
+#'     gene = "Gene_300"
+#' )
 #'
 plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
@@ -54,10 +56,8 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
     plot <- limma::barcodeplot(lrt$table$logFC,
         index = genesymbollist[[gene]],
         main = paste("Barcode plot for Gene", gene), labels = labels,
-        quantile = quantile)
+        quantile = quantile
+    )
 
     return(plot)
 }
-
-
-

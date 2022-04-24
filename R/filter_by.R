@@ -7,8 +7,8 @@
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #'
-#' @param genes The genes for which the slope as to be computed. Those genes are
-#'              the result of the three statistical methods selection
+#' @param genes The genes for which the slope as to be computed. Those genes
+#'              are the result of the three statistical methods selection
 #'
 #' @param slope_treatment The treatment slope threshold
 #' @param slope_control The control slope threshold
@@ -66,8 +66,8 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @importFrom dplyr ungroup
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param genes The genes for which the slope as to be computed. Those genes are
-#'              the result of the three statistical methods selection
+#' @param genes The genes for which the slope as to be computed. Those genes
+#'              are the result of the three statistical methods selection
 #' @param group_var The variable to use as X for the linear model
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export

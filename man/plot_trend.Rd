@@ -52,6 +52,7 @@ plot_trend(object, genes = "Gene_42", group_var = c("T1", "T2", "TRT"))
 plot_trend(object,
     genes = c("Gene_42", "Gene_100"),
     group_var = c("T1", "T2", "TRT"),
-    nrow = 2)
+    nrow = 2
+)
 
 }

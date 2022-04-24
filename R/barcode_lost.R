@@ -99,7 +99,8 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' )
 #' plot_barcode_lost_for_gene(object,
 #'     samples = c("Time3_A", "Time3_B"),
-#'     facet = FALSE)
+#'     facet = FALSE
+#' )
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     samples = NULL) {

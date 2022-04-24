@@ -2,19 +2,21 @@
 #' The screenr_object class is the main object of the package, it is passed
 #' to a series of function to perform the analysis.
 #'
-#' @slot count_table It is used to store the count table to perform the analysis
+#' @slot count_table It is used to store the count table to perform the
+#'                   analysis
 #' @slot annotation_table It is used to store the annotation of the shRNA
 #' @slot groups It is used to store the vector of treated and untreated
 #' @slot replicates It is used to store information about the replicates
-#' @slot normalized_count_table It is used to store a normalized verision of the
-#'                              count table
+#' @slot normalized_count_table It is used to store a normalized verision of
+#'                              the count table
 #' @slot data_table It is used to store a tidy format of the count table
 #' @concept objects
 
 screenr_object <- setClass("screenr_object", methods::representation(
     count_table = "data.frame",
     annotation_table = "data.frame", groups = "factor", replicates = "vector",
-    normalized_count_table = "data.frame", data_table = "data.frame"))
+    normalized_count_table = "data.frame", data_table = "data.frame"
+))
 
 
 
@@ -32,11 +34,11 @@ screenr_object <- setClass("screenr_object", methods::representation(
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' count_table <- get_count_table(object)
 #' head(count_table)
-get_count_table <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'count_table'))
+get_count_table <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "count_table"))
 }
 
 
@@ -51,11 +53,11 @@ get_count_table <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' annotation_table <- get_annotation_table(object)
 #' head(annotation_table)
-get_annotation_table <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'annotation_table'))
+get_annotation_table <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "annotation_table"))
 }
 
 
@@ -71,11 +73,11 @@ get_annotation_table <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' groups <- get_groups(object)
 #' groups
-get_groups <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'groups'))
+get_groups <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "groups"))
 }
 
 
@@ -90,11 +92,11 @@ get_groups <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' replicates <- get_replicates(object)
 #' replicates
-get_replicates <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'replicates'))
+get_replicates <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "replicates"))
 }
 
 
@@ -110,11 +112,11 @@ get_replicates <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' normalized_count_table <- get_normalized_count_table(object)
 #' normalized_count_table
-get_normalized_count_table <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'normalized_count_table'))
+get_normalized_count_table <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "normalized_count_table"))
 }
 
 
@@ -129,11 +131,11 @@ get_normalized_count_table <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' data_table <- get_data_table(object)
 #' data_table
-get_data_table <- function(object){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  return(slot(object = object, name = 'data_table'))
+get_data_table <- function(object) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    return(slot(object = object, name = "data_table"))
 }
 
 
@@ -156,12 +158,12 @@ get_data_table <- function(object){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' counts <- get_count_table(object)
 #' set_count_table(object, counts)
-set_count_table <- function(object, count_table){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  slot(object = object, name = 'count_table') <- count_table
-  return(object)
+set_count_table <- function(object, count_table) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    slot(object = object, name = "count_table") <- count_table
+    return(object)
 }
 
 
@@ -178,12 +180,12 @@ set_count_table <- function(object, count_table){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' annotation <- get_annotation_table(object)
 #' set_annotation_table(object, annotation)
-set_annotation_table <- function(object, annotation_table){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  slot(object = object, name = 'annotation_table') <- annotation_table
-  return(object)
+set_annotation_table <- function(object, annotation_table) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    slot(object = object, name = "annotation_table") <- annotation_table
+    return(object)
 }
 
 
@@ -200,12 +202,12 @@ set_annotation_table <- function(object, annotation_table){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' groups <- get_groups(object)
 #' set_groups(object, groups)
-set_groups <- function(object, groups){
-  if (is.null(object)) {
-    stop('The object is not defined!')
+set_groups <- function(object, groups) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
     }
-  slot(object = object, name = 'groups') <- groups
-  return(object)
+    slot(object = object, name = "groups") <- groups
+    return(object)
 }
 
 
@@ -222,12 +224,12 @@ set_groups <- function(object, groups){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' replicates <- get_replicates(object)
 #' set_replicates(object, replicates)
-set_replicates <- function(object, replicates){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  slot(object = object, name = 'replicates') <- replicates
-  return(object)
+set_replicates <- function(object, replicates) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    slot(object = object, name = "replicates") <- replicates
+    return(object)
 }
 
 
@@ -245,14 +247,14 @@ set_replicates <- function(object, replicates){
 #' normalized_count_table <- get_normalized_count_table(object)
 #' normalized_count_table
 #' set_normalized_count_table(object, normalized_count_table)
-set_normalized_count_table <- function(object, normalized_count_table){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  slot(object = object, name = 'normalized_count_table') <-
-    normalized_count_table
+set_normalized_count_table <- function(object, normalized_count_table) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    slot(object = object, name = "normalized_count_table") <-
+        normalized_count_table
 
-  return(object)
+    return(object)
 }
 
 
@@ -268,19 +270,10 @@ set_normalized_count_table <- function(object, normalized_count_table){
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' data_table <- get_data_table(object)
 #' set_data_table(object, data_table)
-set_data_table <- function(object, data_table){
-  if (is.null(object)) {
-    stop('The object is not defined!')
-  }
-  slot(object = object, name = 'data_table') <- data_table
-  return(object)
+set_data_table <- function(object, data_table) {
+    if (is.null(object)) {
+        stop("The object is not defined!")
+    }
+    slot(object = object, name = "data_table") <- data_table
+    return(object)
 }
-
-
-
-
-
-
-
-
-

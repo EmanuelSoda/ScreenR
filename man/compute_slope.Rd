@@ -10,8 +10,8 @@ compute_slope(screenR_Object, genes, group_var)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{genes}{The genes for which the slope as to be computed. Those genes are
-the result of the three statistical methods selection}
+\item{genes}{The genes for which the slope as to be computed. Those genes
+are the result of the three statistical methods selection}
 
 \item{group_var}{The variable to use as X for the linear model}
 }

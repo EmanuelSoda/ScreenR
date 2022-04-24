@@ -42,7 +42,8 @@ compute_metrics <- function(screenR_Object, control,
         dplyr::filter(.data$Sample %in% c(control, treated)) %>%
         dplyr::mutate(Group = factor(if_else(condition = .data$Sample %in%
             treated, true = "Treated", false = "Control"),
-        levels = c("Treated", "Control")))
+        levels = c("Treated", "Control")
+        ))
 
     data_trt <- data_trt %>%
         dplyr::filter(.data$Day %in% day) %>%

@@ -24,11 +24,36 @@
 #' plot_trend(object,
 #'     genes = c("Gene_42", "Gene_100"),
 #'     group_var = c("T1", "T2", "TRT"),
-#'     nrow = 2)
+#'     nrow = 2
+#' )
 #'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,
     nrow = 1, ncol = 1) {
+    data <- compute_trend(screenR_Object, genes, group_var)
+
+    plot <- ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency)) +
+        ggplot2::geom_point(size = point_size) +
+        ggplot2::geom_smooth(aes(group = .data$Gene),
+            method = "lm", formula = y ~ x, alpha = alpha,
+            se = se, size = line_size
+        )
+
+    if (length(genes) > 1) {
+        plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol)
+    }
+
+    return(plot)
+}
+
+#' @title Compute Trend
+#' @description This function computes the trend of a gene
+#' @param screenR_Object object created with \code{\link[edgeR]{estimateDisp}}
+#' @param genes a list of genes
+#' @param group_var the variable that as to be used as grouping variable
+#' @return A table with the trend of the genes passed as input
+#' @keywords internal
+compute_trend <- function(screenR_Object, genes, group_var) {
     data <- screenR_Object@data_table
 
     # Select only the hit gene
@@ -42,20 +67,10 @@ plot_trend <- function(screenR_Object, genes, group_var,
     # Consider only the gene (which are the mean of the different shRNAs)
     data <- dplyr::summarise(data,
         Gene = unique(.data$Gene),
-        Sample = unique(.data$Sample), Frequency = mean(.data$Frequency),
-        .groups = "drop")
+        Sample = unique(.data$Sample),
+        Frequency = mean(.data$Frequency),
+        .groups = "drop"
+    )
 
-    plot <- ggplot2::ggplot(data, aes(
-        .data$Sample,
-        .data$Frequency)) +
-        ggplot2::geom_point(size = point_size) +
-        ggplot2::geom_smooth(aes(group = .data$Gene),
-            method = "lm", formula = y ~ x, alpha = alpha,
-            se = se, size = line_size )
-
-    if (length(genes) > 1) {
-        plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol)
-    }
-
-    return(plot)
+    return(data)
 }

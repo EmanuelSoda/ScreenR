@@ -15,7 +15,8 @@ to a series of function to perform the analysis.
 \section{Slots}{
 
 \describe{
-\item{\code{count_table}}{It is used to store the count table to perform the analysis}
+\item{\code{count_table}}{It is used to store the count table to perform the
+analysis}
 
 \item{\code{annotation_table}}{It is used to store the annotation of the shRNA}
 
@@ -23,8 +24,8 @@ to a series of function to perform the analysis.
 
 \item{\code{replicates}}{It is used to store information about the replicates}
 
-\item{\code{normalized_count_table}}{It is used to store a normalized verision of the
-count table}
+\item{\code{normalized_count_table}}{It is used to store a normalized verision of
+the count table}
 
 \item{\code{data_table}}{It is used to store a tidy format of the count table}
 }}

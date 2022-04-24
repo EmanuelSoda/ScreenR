@@ -20,7 +20,7 @@
 #' slot(object, "normalized_count_table")
 normalize_data <- function(screenR_Object) {
     screenR_Object@normalized_count_table <- screenR_Object@count_table %>%
-        # it divedes each cell for the sum of the column and than multiply 1e6
+        # it divides each cell for the sum of the column and than multiply 1e6
         purrr::map_if(is.numeric, ~ . / sum(.) * 1e+06) %>%
         dplyr::as_tibble()
 

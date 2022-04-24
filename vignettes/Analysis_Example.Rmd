@@ -20,7 +20,7 @@ editor_options:
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-knitr::opts_chunk$set(fig.width=10, fig.height=7) 
+knitr::opts_chunk$set(fig.width = 10, fig.height = 7)
 ```
 
 # Introduction 
@@ -114,7 +114,7 @@ data <- data %>%
     dplyr::filter(Barcode != "*")
 
 
-total_Annotation <-  annotation_table 
+total_Annotation <- annotation_table
 ```
 
 ## Object Creation 
@@ -147,8 +147,8 @@ object <- create_screenr_object(
 In order to start the analysis the data has first to be normalized and the 
 *data_table*.
 
-For what concern the normalizzation ScreenR uses a normalizzation that is called
-*Reads Per Million Sample (RPMS)* which has the following mathematical 
+For what concern the normalizzation ScreenR uses a normalizzation that is 
+called *Reads Per Million Sample (RPMS)* which has the following mathematical 
 expression:
 
 $$RPMS = \frac{Number \; of \; mapped \; reads \; to \; a \; barcode} 
@@ -167,7 +167,7 @@ object <- compute_data_table(object)
 
 ## Mapped Reads
 ```{r plot_mapped_reads, message=FALSE, warning=TRUE}
-plot <- plot_mapped_reads(object, palette) + 
+plot <- plot_mapped_reads(object, palette) +
     ggplot2::coord_flip() +
     ggplot2::scale_y_continuous(labels = scales::number_format()) +
     ggplot2::theme(legend.position = "none") +
@@ -184,7 +184,8 @@ For example the distribution can be seen using both boxplots or density plots.
 ### Boxplot Mapped Reads
 ```{r  distribution_mapped_reads_boxplot, message=FALSE, warning=TRUE}
 plot <- distribution_mapped_reads(
-    object, palette, alpha = 0.8,
+    object, palette,
+    alpha = 0.8,
     type = "boxplot"
 ) +
     theme(
@@ -198,7 +199,8 @@ plot
 ### Density plot
 ```{r  distribution_mapped_reads_density, message=FALSE, warning=TRUE}
 plot <- distribution_mapped_reads(
-    object, palette, alpha = 0.5,
+    object, palette,
+    alpha = 0.5,
     type = "density"
 ) +
     ggplot2::theme(legend.position = "none")
@@ -227,7 +229,7 @@ In ScreenR this can be done using the *plot_MDS* function as follow.
 
 #### For Sample
 ```{r  Plot_MDS_Sample, message=FALSE, warning=TRUE}
-plot_mds(screenR_Object = object) 
+plot_mds(screenR_Object = object)
 ```
 
 
@@ -269,11 +271,13 @@ using the *plot_zscore_distribution* function.
 # 2DG
 data_with_measure_TRT <- list(
     Time3 = compute_metrics(
-        object, control = "Time3", treatment = "TRT",
+        object,
+        control = "Time3", treatment = "TRT",
         day = "Time3"
     ),
     Time4 = compute_metrics(
-        object, control = "Time4", treatment = "TRT",
+        object,
+        control = "Time4", treatment = "TRT",
         day = "Time4"
     )
 )
@@ -303,9 +307,9 @@ zscore_hit_TRT
 
 
 ### CAMERA
-The same can be done with the CAMERA hit using the function  *find_camera_hit*.
+The same can be done with the CAMERA hit using the function *find_camera_hit*.
 ```{r  CAMERA, message=FALSE, warning=TRUE}
-matrix_model <- model.matrix(~0 + groups)
+matrix_model <- model.matrix(~ 0 + groups)
 colnames(matrix_model) <- unique(groups)
 
 camera_hit_TRT <- list(
@@ -374,8 +378,6 @@ common_hit_TRT_at_least_3 <- list(
 )
 ```
 
-
-
 ### Plot common hit
 
 The hits can be easily visualized using the *plot_common_hit* function.
@@ -387,14 +389,6 @@ plot_common_hit(
 )
 ```
 
-
-
-
-
 ```{r}
 sessionInfo()
 ```
-
-
-
-

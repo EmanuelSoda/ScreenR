@@ -17,13 +17,20 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' metrics <- dplyr::bind_rows(
-#'    compute_metrics(object, control = "TRT", treatment = "Time3",
-#'                    day = "Time3"),
-#'    compute_metrics(object, control = "TRT", treatment = "Time4",
-#'                    day = "Time4"))
+#'     compute_metrics(object,
+#'         control = "TRT", treatment = "Time3",
+#'         day = "Time3"
+#'     ),
+#'     compute_metrics(object,
+#'         control = "TRT", treatment = "Time4",
+#'         day = "Time4"
+#'     )
+#' )
 #' # Multiple Genes
-#' plot_barcode_trend(metrics, genes = c("Gene_1", "Gene_50"),
-#'                   n_col = 2)
+#' plot_barcode_trend(metrics,
+#'     genes = c("Gene_1", "Gene_50"),
+#'     n_col = 2
+#' )
 #' # Single Gene
 #' plot_barcode_trend(metrics, genes = "Gene_300")
 plot_barcode_trend <- function(list_data_measure, genes,
