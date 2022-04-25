@@ -4,13 +4,13 @@
 \name{screenr_object-class}
 \alias{screenr_object-class}
 \alias{screenr_object}
-\title{The screenr_object Class
+\title{S4 ScreenR object Class
 The screenr_object class is the main object of the package, it is passed
-to a series of function to perform the analysis.}
+to a series of function to perform the analysis. I}
 \description{
-The screenr_object Class
+S4 ScreenR object Class
 The screenr_object class is the main object of the package, it is passed
-to a series of function to perform the analysis.
+to a series of function to perform the analysis. I
 }
 \section{Slots}{
 
@@ -30,4 +30,17 @@ the count table}
 \item{\code{data_table}}{It is used to store a tidy format of the count table}
 }}
 
+\examples{
+data("count_table", package = "ScreenR")
+data("annotation_table", package = "ScreenR")
+
+groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
+                   "Control", "Control", "Control", "Treated", "Treated",
+                   "Treated", "Control", "Control", "Control"))
+
+obj <- create_screenr_object(table = count_table,
+                             annotation = annotation_table,
+                             groups = groups,
+                             replicates = c(""))
+}
 \concept{objects}

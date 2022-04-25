@@ -98,13 +98,20 @@ different time point</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">"object"</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
-<span class="r-in">   <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>, control <span class="op">=</span> <span class="st">"TRT"</span>, treatment <span class="op">=</span> <span class="st">"Time3"</span>,</span>
-<span class="r-in">                   day <span class="op">=</span> <span class="st">"Time3"</span><span class="op">)</span>,</span>
-<span class="r-in">   <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>, control <span class="op">=</span> <span class="st">"TRT"</span>, treatment <span class="op">=</span> <span class="st">"Time4"</span>,</span>
-<span class="r-in">                   day <span class="op">=</span> <span class="st">"Time4"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">    <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span class="r-in">        control <span class="op">=</span> <span class="st">"TRT"</span>, treatment <span class="op">=</span> <span class="st">"Time3"</span>,</span>
+<span class="r-in">        day <span class="op">=</span> <span class="st">"Time3"</span></span>
+<span class="r-in">    <span class="op">)</span>,</span>
+<span class="r-in">    <span class="fu"><a href="compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span class="r-in">        control <span class="op">=</span> <span class="st">"TRT"</span>, treatment <span class="op">=</span> <span class="st">"Time4"</span>,</span>
+<span class="r-in">        day <span class="op">=</span> <span class="st">"Time4"</span></span>
+<span class="r-in">    <span class="op">)</span></span>
+<span class="r-in"><span class="op">)</span></span>
 <span class="r-in"><span class="co"># Multiple Genes</span></span>
-<span class="r-in"><span class="fu">plot_barcode_trend</span><span class="op">(</span><span class="va">metrics</span>, genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gene_1"</span>, <span class="st">"Gene_50"</span><span class="op">)</span>,</span>
-<span class="r-in">                  n_col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">plot_barcode_trend</span><span class="op">(</span><span class="va">metrics</span>,</span>
+<span class="r-in">    genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gene_1"</span>, <span class="st">"Gene_50"</span><span class="op">)</span>,</span>
+<span class="r-in">    n_col <span class="op">=</span> <span class="fl">2</span></span>
+<span class="r-in"><span class="op">)</span></span>
 <span class="r-plt img"><img src="plot_barcode_trend-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span class="co"># Single Gene</span></span>
 <span class="r-in"><span class="fu">plot_barcode_trend</span><span class="op">(</span><span class="va">metrics</span>, genes <span class="op">=</span> <span class="st">"Gene_300"</span><span class="op">)</span></span>
@@ -125,8 +132,7 @@ different time point</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>

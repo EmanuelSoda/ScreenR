@@ -56,7 +56,8 @@ test_that("Creation of the screenR object", {
 
 test_that("get_count_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_count_table(object))
+    counts <- get_count_table(object)
+    expect_equal(class(counts)[1], "tbl_df")
 })
 
 test_that("get_count_table NULL", {
@@ -65,7 +66,8 @@ test_that("get_count_table NULL", {
 
 test_that("get_annotation_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_annotation_table(object))
+    annotation <- get_annotation_table(object)
+    expect_equal(class(annotation)[1], "tbl_df")
 })
 
 test_that("get_annotation_table NULL", {
@@ -75,7 +77,8 @@ test_that("get_annotation_table NULL", {
 
 test_that("get_groups", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_groups(object))
+    grp <- get_groups(object)
+    expect_equal(class(grp)[1], "factor")
 })
 
 test_that("get_groups NULL", {
@@ -85,7 +88,8 @@ test_that("get_groups NULL", {
 
 test_that("get_replicates", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_replicates(object))
+    reps <- get_replicates(object)
+    expect_equal(class(reps)[1], "character")
 })
 
 test_that("get_replicates NULL", {
@@ -96,7 +100,8 @@ test_that("get_replicates NULL", {
 
 test_that("get_normalized_count_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_normalized_count_table(object))
+    counts_norm <- get_normalized_count_table(object)
+    expect_equal(class(counts_norm)[1], "tbl_df")
 })
 
 test_that("get_normalized_count_table NULL", {
@@ -108,7 +113,8 @@ test_that("get_normalized_count_table NULL", {
 
 test_that("get_data_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    expect_silent(get_data_table(object))
+    data_t <- get_data_table(object)
+    expect_equal(class(data_t)[1], "tbl_df")
 })
 
 test_that("get_data_table NULL", {
@@ -119,7 +125,7 @@ test_that("get_data_table NULL", {
 test_that("set_annotation_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     annotation <- get_annotation_table(object)
-    expect_silent(set_annotation_table(object, annotation))
+    expect_equal(class(annotation)[1], "tbl_df")
 })
 
 test_that("set_annotation_table NULL", {
@@ -198,3 +204,4 @@ test_that("set_normalized_count_table NULL", {
     data_table <- get_data_table(object)
     expect_error(set_data_table(object = NULL, data_table))
 })
+

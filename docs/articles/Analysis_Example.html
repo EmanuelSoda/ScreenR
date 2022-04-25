@@ -108,7 +108,7 @@ Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:emanuelmich
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span>
-<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>fig.width<span class="op">=</span><span class="fl">10</span>, fig.height<span class="op">=</span><span class="fl">7</span><span class="op">)</span> </code></pre></div>
+<span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html" class="external-link">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>fig.width <span class="op">=</span> <span class="fl">10</span>, fig.height <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -195,7 +195,7 @@ read.</p>
     <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span>
 
 
-<span class="va">total_Annotation</span> <span class="op">&lt;-</span>  <span class="va">annotation_table</span> </code></pre></div>
+<span class="va">total_Annotation</span> <span class="op">&lt;-</span> <span class="va">annotation_table</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="object-creation">Object Creation<a class="anchor" aria-label="anchor" href="#object-creation"></a>
@@ -248,7 +248,7 @@ million. Then has to be computed the <em>data_table</em>. The
 <h3 id="mapped-reads">Mapped Reads<a class="anchor" aria-label="anchor" href="#mapped-reads"></a>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads.html">plot_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span><span class="op">)</span> <span class="op">+</span> 
+<code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads.html">plot_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">number_format</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span>
@@ -269,7 +269,8 @@ density plots.</p>
 </h4>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
-    <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.8</span>,
+    <span class="va">object</span>, <span class="va">palette</span>,
+    alpha <span class="op">=</span> <span class="fl">0.8</span>,
     type <span class="op">=</span> <span class="st">"boxplot"</span>
 <span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>
@@ -285,7 +286,8 @@ density plots.</p>
 </h4>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution_mapped_reads.html">distribution_mapped_reads</a></span><span class="op">(</span>
-    <span class="va">object</span>, <span class="va">palette</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>,
+    <span class="va">object</span>, <span class="va">palette</span>,
+    alpha <span class="op">=</span> <span class="fl">0.5</span>,
     type <span class="op">=</span> <span class="st">"density"</span>
 <span class="op">)</span> <span class="op">+</span>
     <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>
@@ -319,7 +321,7 @@ function as follow.</p>
 <h5 id="for-sample">For Sample<a class="anchor" aria-label="anchor" href="#for-sample"></a>
 </h5>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span><span class="op">)</span> </code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span><span class="op">)</span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Plot_MDS_Sample-1.png" width="960"></p>
 </div>
 <div class="section level5">
@@ -370,11 +372,13 @@ of the Z-score can be plotted using the
 <code class="sourceCode R"><span class="co"># 2DG</span>
 <span class="va">data_with_measure_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
     Time3 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
-        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"Time3"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
+        <span class="va">object</span>,
+        control <span class="op">=</span> <span class="st">"Time3"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
         day <span class="op">=</span> <span class="st">"Time3"</span>
     <span class="op">)</span>,
     Time4 <span class="op">=</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>
-        <span class="va">object</span>, control <span class="op">=</span> <span class="st">"Time4"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
+        <span class="va">object</span>,
+        control <span class="op">=</span> <span class="st">"Time4"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,
         day <span class="op">=</span> <span class="st">"Time4"</span>
     <span class="op">)</span>
 <span class="op">)</span>
@@ -439,7 +443,7 @@ function.</p>
 <p>The same can be done with the CAMERA hit using the function
 <em>find_camera_hit</em>.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span><span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">groups</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span>
 
 <span class="va">camera_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
@@ -617,14 +621,14 @@ function.</p>
 <span class="co">##  [4] bslib_0.3.1         purrr_0.3.4         splines_4.2.0      </span>
 <span class="co">##  [7] lattice_0.20-45     colorspace_2.0-3    vctrs_0.4.1        </span>
 <span class="co">## [10] generics_0.1.2      htmltools_0.5.2     yaml_2.3.5         </span>
-<span class="co">## [13] utf8_1.2.2          rlang_1.0.2         pkgdown_2.0.2      </span>
+<span class="co">## [13] utf8_1.2.2          rlang_1.0.2         pkgdown_2.0.3      </span>
 <span class="co">## [16] jquerylib_0.1.4     pillar_1.7.0        glue_1.6.2         </span>
 <span class="co">## [19] withr_2.5.0         DBI_1.1.2           lifecycle_1.0.1    </span>
 <span class="co">## [22] stringr_1.4.0       munsell_0.5.0       gtable_0.3.0       </span>
 <span class="co">## [25] ragg_1.2.2          memoise_2.0.1       evaluate_0.15      </span>
 <span class="co">## [28] labeling_0.4.2      knitr_1.38          fastmap_1.1.0      </span>
 <span class="co">## [31] fansi_1.0.3         highr_0.9           Rcpp_1.0.8.3       </span>
-<span class="co">## [34] edgeR_3.37.1        scales_1.2.0        BiocManager_1.30.16</span>
+<span class="co">## [34] edgeR_3.37.3        scales_1.2.0        BiocManager_1.30.17</span>
 <span class="co">## [37] cachem_1.0.6        limma_3.51.8        desc_1.4.1         </span>
 <span class="co">## [40] jsonlite_1.8.0      farver_2.1.0        systemfonts_1.0.4  </span>
 <span class="co">## [43] fs_1.5.2            textshaping_0.3.6   digest_0.6.29      </span>
@@ -657,8 +661,7 @@ function.</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>

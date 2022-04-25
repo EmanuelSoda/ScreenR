@@ -91,27 +91,17 @@
       </header><div class="row">
   <div class="contents col-md-9">
 <div class="section level1">
-<div class="page-header"><h1 id="screenr-">ScreenR
-<a href="https://emanuelsoda.github.io/ScreenR/" class="external-link"><img src="reference/figures/logo.png" align="right" height="120"></a>
+<div class="page-header"><h1 id="screenr-">ScreenR <a href="https://emanuelsoda.github.io/ScreenR/" class="external-link"><img src="reference/figures/logo.png" align="right" height="120"></a>
 <a class="anchor" aria-label="anchor" href="#screenr-"></a>
 </h1></div>
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p>ScreenR is an easy and effective package to perform hits
-identification in loss of function High Throughput Biological Screening
-performed with shRNAs library. ScreenR combines the power of softwares
-like edgeR with the semplicity of the Tydiverse metapackage. ScreenR
-executes a pipeline able to find candidate hits from barcode counts data
-and integrates a wide range of visualization for each step of the
-analysis</p>
+<p>ScreenR is an easy and effective package to perform hits identification in loss of function High Throughput Biological Screening performed with shRNAs library. ScreenR combines the power of softwares like edgeR with the semplicity of the Tydiverse metapackage. ScreenR executes a pipeline able to find candidate hits from barcode counts data and integrates a wide range of visualization for each step of the analysis</p>
 <div class="section level2">
 <h2 id="installation-instructions">Installation instructions<a class="anchor" aria-label="anchor" href="#installation-instructions"></a>
 </h2>
-<p>Get the latest stable <code>R</code> release from <a href="http://cran.r-project.org/" class="external-link">CRAN</a> note that you need to have
-<code>R 4.3</code> or greater to use <code>ScreenR</code>. Then install
-<code>ScreenR</code> from <a href="http://bioconductor.org/" class="external-link">Bioconductor</a> using the following
-code:</p>
+<p>Get the latest stable <code>R</code> release from <a href="http://cran.r-project.org/" class="external-link">CRAN</a> note that you need to have <code>R 4.3</code> or greater to use <code>ScreenR</code>. Then install <code>ScreenR</code> from <a href="http://bioconductor.org/" class="external-link">Bioconductor</a> using the following code:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span>
@@ -131,45 +121,29 @@ code:</p>
 <!-- ```{r 'citation', eval = requireNamespace('ScreenR')} -->
 <!-- print(citation('ScreenR'), bibtex = TRUE) -->
 <!-- ``` -->
-<p>Please note that the <code>ScreenR</code> was only made possible
-thanks to many other R and bioinformatics software authors, which are
-cited either in the vignettes and/or the paper(s) describing this
-package.</p>
+<p>Please note that the <code>ScreenR</code> was only made possible thanks to many other R and bioinformatics software authors, which are cited either in the vignettes and/or the paper(s) describing this package.</p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Below is the citation output from using
-<code>citation('ScreenR')</code> in <code>R</code>. Please run this
-yourself to check for any updates on how to cite
-<strong>ScreenR</strong>.</p>
+<p>Below is the citation output from using <code>citation('ScreenR')</code> in <code>R</code>. Please run this yourself to check for any updates on how to cite <strong>ScreenR</strong>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#print(citation('ScreenR'), bibtex = TRUE)</span></code></pre></div>
+<code class="sourceCode R"><span class="co"># print(citation('ScreenR'), bibtex = TRUE)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that the <code>ScreenR</code> project is released with a
-<a href="http://bioconductor.org/about/code-of-conduct/" class="external-link">Contributor
-Code of Conduct</a>. By contributing to this project, you agree to abide
-by its terms.</p>
+<p>Please note that the <code>ScreenR</code> project is released with a <a href="http://bioconductor.org/about/code-of-conduct/" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 <div class="section level2">
 <h2 id="development-tools">Development tools<a class="anchor" aria-label="anchor" href="#development-tools"></a>
 </h2>
 <ul>
-<li>Continuous code testing is possible thanks to <a href="https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/" class="external-link">GitHub
-actions</a> through <em><a href="https://CRAN.R-project.org/package=usethis" class="external-link">usethis</a></em>,
-<em><a href="https://CRAN.R-project.org/package=remotes" class="external-link">remotes</a></em>, and
-<em><a href="https://CRAN.R-project.org/package=rcmdcheck" class="external-link">rcmdcheck</a></em>
-customized to use <a href="https://www.bioconductor.org/help/docker/" class="external-link">Bioconductor’s docker
-containers</a> and <em><a href="https://bioconductor.org/packages/3.15/BiocCheck" class="external-link">BiocCheck</a></em>.</li>
+<li>Continuous code testing is possible thanks to <a href="https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/" class="external-link">GitHub actions</a> through <em><a href="https://CRAN.R-project.org/package=usethis" class="external-link">usethis</a></em>, <em><a href="https://CRAN.R-project.org/package=remotes" class="external-link">remotes</a></em>, and <em><a href="https://CRAN.R-project.org/package=rcmdcheck" class="external-link">rcmdcheck</a></em> customized to use <a href="https://www.bioconductor.org/help/docker/" class="external-link">Bioconductor’s docker containers</a> and <em><a href="https://bioconductor.org/packages/3.15/BiocCheck" class="external-link">BiocCheck</a></em>.</li>
 <li>Code coverage assessment is possible thanks to <a href="https://codecov.io/gh" class="external-link">codecov</a> and <em><a href="https://CRAN.R-project.org/package=covr" class="external-link">covr</a></em>.</li>
-<li>The <a href="http://EmanuelSoda.github.io/ScreenR" class="external-link">documentation
-website</a> is automatically updated thanks to <em><a href="https://CRAN.R-project.org/package=pkgdown" class="external-link">pkgdown</a></em>.</li>
+<li>The <a href="http://EmanuelSoda.github.io/ScreenR" class="external-link">documentation website</a> is automatically updated thanks to <em><a href="https://CRAN.R-project.org/package=pkgdown" class="external-link">pkgdown</a></em>.</li>
 <li>The code is styled automatically thanks to <em><a href="https://CRAN.R-project.org/package=styler" class="external-link">styler</a></em>.</li>
-<li>The documentation is formatted thanks to <em><a href="https://CRAN.R-project.org/package=devtools" class="external-link">devtools</a></em> and
-<em><a href="https://CRAN.R-project.org/package=roxygen2" class="external-link">roxygen2</a></em>.</li>
+<li>The documentation is formatted thanks to <em><a href="https://CRAN.R-project.org/package=devtools" class="external-link">devtools</a></em> and <em><a href="https://CRAN.R-project.org/package=roxygen2" class="external-link">roxygen2</a></em>.</li>
 </ul>
 <p>For more details, check the <code>dev</code> directory.</p>
 <p>This package was developed using <em><a href="https://bioconductor.org/packages/3.15/biocthis" class="external-link">biocthis</a></em>.</p>
@@ -236,8 +210,7 @@ website</a> is automatically updated thanks to <em><a href="https://CRAN.R-proje
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
