@@ -18,15 +18,15 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' # Boxplot
-#' distribution_mapped_reads(object)
+#' plot_mapped_reads_distribution(object)
 #'
 #' # Density
-#' distribution_mapped_reads(object, type = "density")
+#' plot_mapped_reads_distribution(object, type = "density")
 #'
 #  # Density changing also alpha
-#' distribution_mapped_reads(object, type = "density", alpha = 0.2)
+#' plot_mapped_reads_distribution(object, type = "density", alpha = 0.2)
 #'
-distribution_mapped_reads <- function(screenR_Object,
+plot_mapped_reads_distribution <- function(screenR_Object,
     palette = NULL, alpha = 1, type = "boxplot") {
     table <- ScreenR::count_mapped_reads(screenR_Object)
 

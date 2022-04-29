@@ -22,4 +22,4 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 mapped_reads(object)
 
 }
-\concept{plot}
+\concept{compute}

@@ -62,19 +62,19 @@ test_that("plot_mds", {
 })
 
 
-test_that("plot_pc_explained_variance", {
+test_that("plot_explained_variance", {
     library(tibble)
     object <- create_test_object()
 
-    plot <- plot_pc_explained_variance(object, cumulative = FALSE)
+    plot <- plot_explained_variance(object, cumulative = FALSE)
     expect_equal(class(plot)[[1]], "gg")
 })
 
-test_that("plot_pc_explained_variance CUM", {
+test_that("plot_explained_variance CUM", {
     library(tibble)
     object <- create_test_object()
 
-    plot <- plot_pc_explained_variance(
+    plot <- plot_explained_variance(
         screenR_Object = object,
         cumulative = TRUE
     )

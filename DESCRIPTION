@@ -25,7 +25,6 @@ Imports:
     stringr (>= 1.4),
     limma (>= 3.46),
     patchwork (>= 1.1),
-    strex (>= 1.4.2),
     tibble (>= 3.1.6),
     scales (>= 1.1.1),
     ggvenn (>= 0.1.9),
@@ -51,9 +50,7 @@ biocViews: Software, AssayDomain, GeneExpression
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues
 URL: https://emanuelsoda.github.io/ScreenR/
 Collate: 
-    'S4-methods.R'
     'annotation_table.R'
-    'barcode_creation_dataframe.R'
     'barcode_lost.R'
     'camera_method.R'
     'compute_data_table.R'
@@ -68,6 +65,7 @@ Collate:
     'find_roast_hit.R'
     'find_robust_zscore_hit.R'
     'find_zscore_hit.R'
+    'generics.R'
     'mapped_reads.R'
     'normalize_data.R'
     'plot_barcode_hit.R'

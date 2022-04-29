@@ -13,6 +13,7 @@
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
 #' @param genes The vector of genes to use
+#' @param scales The scales to be used in the facette
 #' @return The the plot of the
 #' @importFrom ggplot2 geom_smooth
 #' @export
@@ -29,7 +30,7 @@
 #'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,
-    nrow = 1, ncol = 1) {
+    nrow = 1, ncol = 1, scales = "free") {
     data <- compute_trend(screenR_Object, genes, group_var)
 
     plot <- ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency)) +
@@ -40,7 +41,9 @@ plot_trend <- function(screenR_Object, genes, group_var,
         )
 
     if (length(genes) > 1) {
-        plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol)
+        plot <- plot +
+            ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol,
+                                scales = scales)
     }
 
     return(plot)

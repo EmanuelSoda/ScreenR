@@ -13,7 +13,8 @@ plot_trend(
   point_size = 1,
   line_size = 1,
   nrow = 1,
-  ncol = 1
+  ncol = 1,
+  scales = "free"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ Allowed values are in the range 0 to 1}
 \item{nrow}{The number of rows in case multiple genes are plotted}
 
 \item{ncol}{The number of columns in case multiple genes are plotted}
+
+\item{scales}{The scales to be used in the facette}
 }
 \value{
 The the plot of the

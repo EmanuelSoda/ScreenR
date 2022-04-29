@@ -12,7 +12,8 @@ plot_boxplot(
   nrow = 1,
   ncol = 1,
   fill_var = "Sample",
-  type = "boxplot"
+  type = "boxplot",
+  scales = "free"
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ Allowed values are in the range 0 to 1}
 \item{fill_var}{The variable used to fill the boxplot}
 
 \item{type}{The type of plot to use "boxplot" or "violinplot"}
+
+\item{scales}{The scales used for the facet. Possible values can be "free",
+"fixed" and "free_y"}
 }
 \value{
 A boxplot

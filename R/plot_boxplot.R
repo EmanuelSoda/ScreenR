@@ -12,6 +12,8 @@
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
 #' @param type The type of plot to use "boxplot" or "violinplot"
+#' @param scales The scales used for the facet. Possible values can be "free",
+#'               "fixed" and "free_y"
 #' @concept  plot
 #' @importFrom dplyr sym
 #' @importFrom ggplot2 geom_violin
@@ -27,7 +29,8 @@
 #' )
 #'
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
-    nrow = 1, ncol = 1, fill_var = "Sample", type = "boxplot") {
+    nrow = 1, ncol = 1, fill_var = "Sample",
+    type = "boxplot", scales = "free") {
     data <- screenR_Object@data_table
 
     # Select only the hit gene
@@ -48,7 +51,8 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     }
 
     if (length(genes) > 1) {
-        plot <- plot + facet_wrap("Gene", nrow = nrow, ncol = ncol)
+        plot <- plot + facet_wrap("Gene", nrow = nrow,
+                                  ncol = ncol, scales = scales)
     }
 
     return(plot)

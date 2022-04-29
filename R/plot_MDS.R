@@ -63,11 +63,11 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' plot_pc_explained_variance(object)
+#' plot_explained_variance(object)
 #'
 #' # For the cumulative plote
-#' plot_pc_explained_variance(object, cumulative = TRUE)
-plot_pc_explained_variance <- function(screenR_Object, cumulative = FALSE,
+#' plot_explained_variance(object, cumulative = TRUE)
+plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {
     PC <- compute_explained_variance(screenR_Object)
     # Remove the Standard deviation row

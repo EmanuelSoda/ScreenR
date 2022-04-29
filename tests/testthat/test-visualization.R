@@ -220,7 +220,7 @@ test_that("Boxplot mapped reads", {
         table = data,
         annotation = annotaion, groups = groups, replicates = c("")
     )
-    plot <- distribution_mapped_reads(object, palette,
+    plot <- plot_mapped_reads_distribution(object, palette,
         alpha = 0.8,
         type = "boxplot"
     )
@@ -233,7 +233,7 @@ test_that("Density mapped reads", {
         table = data,
         annotation = annotaion, groups = groups, replicates = c("")
     )
-    plot <- distribution_mapped_reads(object, palette,
+    plot <- plot_mapped_reads_distribution(object, palette,
         alpha = 0.8,
         type = "density"
     )
@@ -262,3 +262,5 @@ test_that("Plot common Hit", {
 
     expect_equal("gg", class(plot)[1])
 })
+
+

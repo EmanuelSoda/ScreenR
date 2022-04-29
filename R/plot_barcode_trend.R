@@ -4,6 +4,9 @@
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
 #' @importFrom patchwork wrap_plots
+#' @importFrom magrittr %>%
+#' @importFrom rlang .data
+#' @importFrom purrr map reduce
 #' @importFrom ggplot2 geom_line geom_point facet_wrap scale_color_manual
 #' @param list_data_measure A list containing the measure table of the
 #'                          different time point

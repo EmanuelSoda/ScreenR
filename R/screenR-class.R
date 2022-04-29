@@ -1,4 +1,4 @@
-#' @include  S4-methods.R
+#' @include  generics.R
 
 #' @title S4 ScreenR object Class
 #' The screenr_object class is the main object of the package, it is passed
@@ -14,6 +14,7 @@
 #' @slot data_table It is used to store a tidy format of the count table
 #' @exportClass screenr_object
 #' @concept objects
+#' @rdname get_count_table
 #' @examples
 #' data("count_table", package = "ScreenR")
 #' data("annotation_table", package = "ScreenR")
@@ -39,19 +40,9 @@ screenr_object <- setClass("screenr_object", methods::representation(
 # S4 methods
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#' @title Get ScreenR count table
-#' @description Get function for the count table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The count table of the ScreenR object
-#' @concept objects
-#' @importFrom methods slot
+#' @rdname get_count_table
 #' @aliases get_count_table,screenr_object
 #' @export
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' count_table <- get_count_table(object)
-#' head(count_table)
 setMethod(
     f = "get_count_table",
     signature = "screenr_object",
@@ -71,18 +62,9 @@ setMethod(
 
 
 # get_annotation_table
-#' @title Get ScreenR annotation table
-#' @description Get function for the annotation table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The annotation table of the ScreenR object
-#' @export
-#' @concept objects
+#' @rdname get_annotation_table
 #' @aliases get_annotation_table,screenr_object
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' annotation_table <- get_annotation_table(object)
-#' head(annotation_table)
+#' @export
 setMethod(
     f = "get_annotation_table",
     signature = "screenr_object",
@@ -102,18 +84,10 @@ setMethod(
     }
 )
 
-#' @title Get ScreenR groups
-#' @description Get function for the groups of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The groups of the ScreenR object
+
 #' @export
 #' @aliases get_groups,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' groups <- get_groups(object)
-#' groups
+#' @rdname get_groups
 setMethod(
     f = "get_groups",
     signature = "screenr_object",
@@ -127,18 +101,9 @@ setMethod(
 
 
 # get_replicates
-#' @title Get ScreenR replicates
-#' @description Get function for the replicates of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The replicates of the ScreenR object
 #' @export
-#' @concept objects
 #' @aliases get_replicates,screenr_object
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' replicates <- get_replicates(object)
-#' replicates
+#' @rdname get_replicates
 setMethod(
     f = "get_replicates",
     signature = "screenr_object",
@@ -151,19 +116,9 @@ setMethod(
 )
 
 # get_normalized_count_table
-#' @title Get ScreenR normalized_count_table
-#' @description Get function for the normalized_count_table of
-#'              the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The normalized_count_table of the ScreenR object
 #' @export
 #' @aliases get_normalized_count_table,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' normalized_count_table <- get_normalized_count_table(object)
-#' normalized_count_table
+#' @rdname get_normalized_count_table
 setMethod(
     f = "get_normalized_count_table",
     signature = "screenr_object",
@@ -184,18 +139,9 @@ setMethod(
 
 
 # get_data_table
-#' @title Get ScreenR data_table
-#' @description Get function for the data_table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The data_table of the ScreenR object
 #' @export
 #' @aliases get_data_table,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' data_table <- get_data_table(object)
-#' data_table
+#' @rdname get_data_table
 setMethod(
     f = "get_data_table",
     signature = "screenr_object",
@@ -216,22 +162,9 @@ setMethod(
 
 
 ########### Set
-# set_count_table
-#' @title Set ScreenR count table
-#' @description Set function for the count table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param count_table A count table containing in each row an shRNA and in each
-#'                    column a sample
-#' @return The ScreenR object with the count table
-#' @concept objects
-#' @importFrom methods slot
-#' @aliases set_count_table,screenr_object
 #' @export
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' counts <- get_count_table(object)
-#' set_count_table(object, counts)
+#' @aliases set_count_table,screenr_object
+#' @rdname set_count_table
 setMethod(
     f = "set_count_table",
     signature = "screenr_object",
@@ -245,20 +178,9 @@ setMethod(
 )
 
 # set_annotation_table
-#' @title Set ScreenR annotation table
-#' @description Set function for the annotation table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param annotation_table a table containing the annotation for each shRNA
-#' @return The ScreenR object with the annotation table
 #' @export
 #' @aliases set_annotation_table,screenr_object
-#' @concept objects
-#' @importFrom methods slot<-
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' annotation <- get_annotation_table(object)
-#' set_annotation_table(object, annotation)
+#' @rdname set_annotation_table
 setMethod(
     f = "set_annotation_table",
     signature = "screenr_object",
@@ -272,19 +194,9 @@ setMethod(
 )
 
 # set_groups
-#' @title Set ScreenR groups
-#' @description Set function for the groups of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param groups The treatment and control groups
-#' @return The ScreenR object containing the group field
 #' @export
 #' @aliases set_groups,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' groups <- get_groups(object)
-#' set_groups(object, groups)
+#' @rdname set_groups
 setMethod(
     f = "set_groups",
     signature = "screenr_object",
@@ -299,19 +211,9 @@ setMethod(
 
 
 # set_replicates
-#' @title Set ScreenR replicates
-#' @description Set function for the replicates of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The ScreenR object with the specific replicates
-#' @param  replicates The vecotr containing the replicates name
 #' @export
-#' @concept objects
 #' @aliases set_replicates,screenr_object
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' replicates <- get_replicates(object)
-#' set_replicates(object, replicates)
+#' @rdname set_replicates
 setMethod(
     f = "set_replicates",
     signature = "screenr_object",
@@ -325,21 +227,9 @@ setMethod(
 )
 
 # set_normalized_count_table
-#' @title Set ScreenR normalized_count_table
-#' @description Set function for the normalized_count_table of
-#'              the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return The ScreenR object with the setted normalized_count_table
-#' @param normalized_count_table A table of the normalized count table
 #' @export
 #' @aliases set_normalized_count_table,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' normalized_count_table <- get_normalized_count_table(object)
-#' normalized_count_table
-#' set_normalized_count_table(object, normalized_count_table)
+#' @rdname set_normalized_count_table
 setMethod(
     f = "set_normalized_count_table",
     signature = "screenr_object",
@@ -355,19 +245,9 @@ setMethod(
 
 
 # set_data_table
-#' @title Set ScreenR data_table
-#' @description Set function for the data_table of the ScreenR object
-#' @param object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param data_table A count table in a tidy format
-#' @return The ScreenR object with the setted data_table
 #' @export
 #' @aliases set_data_table,screenr_object
-#' @concept objects
-#' @examples
-#' object <- get0("object", envir = asNamespace("ScreenR"))
-#' data_table <- get_data_table(object)
-#' set_data_table(object, data_table)
+#' @rdname set_data_table
 setMethod(
     f = "set_data_table",
     signature = "screenr_object",

@@ -20,12 +20,13 @@ reference:
   - has_concept("filter")
 
 - title: Plot
-  desc:  Function used to plot data
+  desc:  Functions used to visualize the data
   contents:
   - starts_with("plot_")
   - has_concept("plot")
 
 - title: Data
+  desc:  Example of data used in the ScreenR pipeline
   contents:
   - has_concept("data")
 
