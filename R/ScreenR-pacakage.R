@@ -28,5 +28,4 @@
 #' @docType package
 #' @aliases ScreenR ScreenR-package
 #' @keywords internal
-#'
 NULL
