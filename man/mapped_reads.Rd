@@ -15,7 +15,7 @@ Return a tibble containing the number of mapped read for sample
 }
 \description{
 This function returns the number of mapped reads inside the
-             screenR object
+             ScreenR object
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

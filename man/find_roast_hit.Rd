@@ -25,13 +25,19 @@ linear model analysis. Created using
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix to which perform the analysis}
 
-\item{nrot}{Number of rotation to perform the test}
+\item{nrot}{Number of rotation to perform the test.
+Higher number of rotation leads to more statistically significant
+result.}
 
-\item{number_barcode}{The hit find with the Roast method}
+\item{number_barcode}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
 
 \item{direction}{Direction of variation}
 
-\item{p_val}{P value cut off}
+\item{p_val}{The value that as to be used as p-value cut off}
 }
 \value{
 The hits found by ROAST method

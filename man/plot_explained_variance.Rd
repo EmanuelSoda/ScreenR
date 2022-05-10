@@ -11,15 +11,16 @@ plot_explained_variance(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object}
+\item{screenR_Object}{The ScreenR object obtained using the
+\code{\link{create_screenr_object}}}
 
 \item{cumulative}{A boolean value which indicates whether or not to plot
-the cumulative variance}
+the cumulative variance. If TRUE}
 
 \item{color}{The color to fill the barplot}
 }
 \value{
-The explained variance  plot
+The explained variance plot
 }
 \description{
 This function plot the explained variance by the
@@ -30,6 +31,6 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_explained_variance(object)
 
-# For the cumulative plote
+# For the cumulative plot
 plot_explained_variance(object, cumulative = TRUE)
 }

@@ -20,25 +20,27 @@ compute_camera(
 
 \item{lrt}{object created with \code{\link[edgeR]{glmFit}}}
 
-\item{DGEList}{object of edgeR}
+\item{DGEList}{edgeR object}
 
-\item{matrix_model}{The matrix that will be used to perform the
-linear model analysis. Created using
+\item{...}{
+  Arguments passed on to \code{\link[=find_camera_hit]{find_camera_hit}}
+  \describe{
+    \item{\code{matrix_model}}{The matrix that will be used to perform the
+linear model analysis created using
 \code{\link[stats]{model.matrix}}}
-
-\item{contrast}{A vector or a single value indicating the index or the name
-of the column of model_matrix to which perform the analysis}
-
-\item{number_barcode}{Number of barcode to be considered a hit}
-
-\item{thresh}{The threshold used to select the hits}
-
-\item{lfc}{The Log2FC threshold}
+    \item{\code{thresh}}{The threshold}
+    \item{\code{lfc}}{The Log2FC}
+    \item{\code{number_barcode}}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
+  }}
 }
 \value{
 The list of hits found by the camera method
 }
 \description{
-This function computes the actual hits using camera
+This internal function computes the actual hits using camera.
 }
 \keyword{internal}

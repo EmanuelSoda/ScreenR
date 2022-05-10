@@ -16,8 +16,10 @@ method}
 \item{hit_roast}{The matrix obtained by the \code{\link{find_roast_hit}}
 method}
 
-\item{common_in}{Number of method in which the hit should be part at
-the same time. The default value is 3}
+\item{common_in}{Number of methods in which the hit has to be in common
+in order to be considered a candidate hit.
+The default value is 3, which means that has to be present
+in the result of all the three methods.}
 }
 \value{
 A vector containing the common hit

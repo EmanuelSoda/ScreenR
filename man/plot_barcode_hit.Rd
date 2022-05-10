@@ -18,19 +18,24 @@ plot_barcode_hit(
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{matrix_model}{the matrix that will be used to perform the
-linear model analysis}
+\item{matrix_model}{The matrix that will be used to perform the
+linear model analysis. It is created using
+model.matrix.}
 
 \item{contrast}{An object created with \code{\link[limma]{makeContrasts}}
 function.}
 
-\item{number_barcode}{Number of barcode to have under the median}
+\item{number_barcode}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
 
-\item{gene}{A  gene name to plot}
+\item{gene}{The name of the gene that has to be plot}
 
 \item{quantile}{Quantile to display on the plot}
 
-\item{labels}{Title of the plot}
+\item{labels}{The label to be displayed on the quantile sidet}
 }
 \value{
 The barcode plot

@@ -92,3 +92,14 @@ test_that("filter_by_variance", {
 
     expect_equal(class(data)[1], "tbl_df")
 })
+
+
+
+test_that("remove_all_zero_row", {
+    library(tibble)
+    object <- get0("object", envir = asNamespace("ScreenR"))
+
+    object <- remove_all_zero_row(object)
+    n_row <- nrow(object@count_table)
+    expect_equal(n_row, 5317)
+})

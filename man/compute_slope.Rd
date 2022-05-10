@@ -13,7 +13,8 @@ compute_slope(screenR_Object, genes, group_var)
 \item{genes}{The genes for which the slope as to be computed. Those genes
 are the result of the three statistical methods selection}
 
-\item{group_var}{The variable to use as X for the linear model}
+\item{group_var}{The variable to use  as independent variable (x)
+for the linear model}
 }
 \value{
 A tibble containing in each row the gene and the corresponding Slope
@@ -29,6 +30,5 @@ compute_slope(object,
     genes = c("Gene_42", "Gene_24"),
     group_var = c("T1", "T2", "TRT")
 )
-
 }
 \concept{compute}

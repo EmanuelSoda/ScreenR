@@ -1,6 +1,10 @@
 #' @title Find Camera Hit
 #' @description This function finds the hits using the camera method is
-#'              a wrapper for the \code{\link[limma]{camera}} function
+#'              a wrapper for the \code{\link[limma]{camera}} function.
+#'              It implements the methods by proposed by Wu and Smyth (2012).
+#'              It performs a competitive test in the sense defined by Goeman
+#'              and Buhlmann (2007). The paper can be found here
+#'      \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param matrix_model The matrix that will be used to perform the
@@ -16,9 +20,14 @@
 #' @importFrom tibble rownames_to_column
 #' @importFrom limma camera
 #' @importFrom purrr map_lgl
-#' @param number_barcode Number of barcode to use
-#' @param direction String containing the direction of the variation
-#' @return The hit find with the camera method
+#' @param number_barcode Number of barcode that as to be differentially
+#'                       expressed (DE)in order to consider the gene associated
+#'                       DE. Example a gene is associated
+#'                       with 10 shRNA we consider a gene DE if it has at least
+#'                       number_barcode = 5 shRNA DE.
+#' @param direction String containing the direction of the variation,
+#'                  "Down" for the down regulation "Up" for the up regulation.
+#' @return The data frame with hit find using the camera method
 #' @export
 #' @concept find
 #' @examples
@@ -58,18 +67,12 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 }
 
 #' @title Compute Camera
-#' @description This function computes the actual hits using camera
+#' @description This internal function computes the actual hits using camera.
 #' @param xglm object created with \code{\link[edgeR]{estimateDisp}}
 #' @param lrt object created with \code{\link[edgeR]{glmFit}}
-#' @param DGEList object of edgeR
-#' @param matrix_model The matrix that will be used to perform the
-#'                     linear model analysis. Created using
-#'                     \code{\link[stats]{model.matrix}}
-#' @param contrast A vector or a single value indicating the index or the name
-#'                 of the column of model_matrix to which perform the analysis
-#' @param  thresh The threshold used to select the hits
-#' @param  number_barcode Number of barcode to be considered a hit
-#' @param lfc The Log2FC threshold
+#' @param DGEList edgeR object
+#' @inheritDotParams find_camera_hit lfc number_barcode thresh
+#'                   contrast matrix_model
 #' @importFrom edgeR topTags
 #' @return The list of hits found by the camera method
 #' @keywords internal
@@ -94,7 +97,7 @@ compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
 #' @title Unique gene Symbols
 #' @description Compute a unique gene symbol for gene
 #' @param gene_symbols The gene symbols list
-#' @param number_barcode The number of barcode to select
+#' @inheritDotParams  find_camera_hit number_barcode
 #' @return A list of unique gene symbols
 #' @keywords internal
 unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
@@ -114,12 +117,11 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
 #' @title Select  number of Barcode
 #' @description Compute a unique gene symbol for gene
 #' @param gene The gene name
-#' @param genesymbols The gene symbols  list
-#' @param number_barcode The number of barcode to select
+#' @inheritDotParams unique_gene_symbols gene_symbols number_barcode
 #' @return The barcode of the gene passed as input
 #' @keywords internal
-select_number_barcode <- function(gene, genesymbols, number_barcode) {
-    sel <- genesymbols == gene & !is.na(genesymbols)
+select_number_barcode <- function(gene, gene_symbols, number_barcode) {
+    sel <- gene_symbols == gene & !is.na(gene_symbols)
     if (sum(sel) > number_barcode) {
         which(sel)
     }

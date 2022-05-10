@@ -7,11 +7,16 @@
 #'                     \code{\link[stats]{model.matrix}}
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix to which perform the analysis
-#' @param nrot Number of rotation to perform the test
-#' @param number_barcode Number of barcode to consider
+#' @param nrot Number of rotation to perform the test.
+#'             Higher number of rotation leads to more statistically significant
+#'             result.
+#' @param number_barcode Number of barcode that as to be differentially
+#'                       expressed (DE)in order to consider the gene associated
+#'                       DE. Example a gene is associated
+#'                       with 10 shRNA we consider a gene DE if it has at least
+#'                       number_barcode = 5 shRNA DE.
 #' @param direction Direction of variation
-#' @param number_barcode The hit find with the Roast method
-#' @param p_val P value cut off
+#' @param p_val The value that as to be used as p-value cut off
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma mroast
 #' @importFrom tibble tibble

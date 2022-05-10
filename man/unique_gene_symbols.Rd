@@ -9,7 +9,15 @@ unique_gene_symbols(gene_symbols, number_barcode = 3)
 \arguments{
 \item{gene_symbols}{The gene symbols list}
 
-\item{number_barcode}{The number of barcode to select}
+\item{...}{
+  Arguments passed on to \code{\link[=find_camera_hit]{find_camera_hit}}
+  \describe{
+    \item{\code{number_barcode}}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
+  }}
 }
 \value{
 A list of unique gene symbols

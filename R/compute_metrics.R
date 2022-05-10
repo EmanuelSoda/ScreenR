@@ -2,18 +2,20 @@
 #' @description This function computes the  metrics that will be then used
 #'              to compute the Z-score using the function
 #'              \code{\link{find_zscore_hit}} starting from the screenR object
-#'              for a given treatment in a given day
+#'              for a given treatment in a given day. More information can
+#'              be found at this paper
+#'              \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{Z-score}
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param control The control Samples.
-#' @param treatment The treatment Samples
-#' @param day The day of the treatment
+#' @param control The vector specifying the control samples
+#' @param treatment The vector specifying the treated samples
+#' @param day A string containing the day to consider
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
 #' @importFrom stats sd median
-#' @return Return a tibble  with all the measure computed.
+#' @return Return a tibble with all the measure computed.
 #' @concept compute
 #' @export
 #' @examples

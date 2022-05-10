@@ -8,7 +8,7 @@
 #' @param fill_var The variable used to fill the boxplot
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1
-#' @param genes The vector of genes to use
+#' @param genes The vector of genes that will be displayed
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
 #' @param type The type of plot to use "boxplot" or "violinplot"

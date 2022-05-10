@@ -27,7 +27,6 @@
 #'     group_var = c("T1", "T2", "TRT"),
 #'     nrow = 2
 #' )
-#'
 plot_trend <- function(screenR_Object, genes, group_var,
     alpha = 0.5, se = FALSE, point_size = 1, line_size = 1,
     nrow = 1, ncol = 1, scales = "free") {

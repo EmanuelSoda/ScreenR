@@ -8,7 +8,9 @@
 A data frame with 5323 rows and 15 variables:
 \describe{
   \item{Barcode}{It contains an ID that identify each barcode, it can be use
-  to marge the annotation table with the count table}
+  to marge the annotation table with the count table. A Barcode is a unique
+  indentifier of an shRNA. In a genetic screening multiple
+  slightly different shRNAs, each with its efficacy.}
 
  \item{Time_1}{It contais the counts at time zero}
 

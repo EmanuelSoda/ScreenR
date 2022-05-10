@@ -6,16 +6,14 @@
 #' @importFrom dplyr rename
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#'
 #' @param genes The genes for which the slope as to be computed. Those genes
 #'              are the result of the three statistical methods selection
-#'
-#' @param slope_treatment The treatment slope threshold
-#' @param slope_control The control slope threshold
-#' @param group_var_treatment The variable to use as X for the linear model
-#'                            of the treatment
-#' @param group_var_control The variable to use as X for the linear model
-#'                          of the the control
+#' @param slope_treatment A value used as threshold for the treatment slope
+#' @param slope_control A value used as threshold for the control slope
+#' @param group_var_treatment The variable to use as independent variable (x)
+#'                            for the linear model of the treatment
+#' @param group_var_control The variable to use as independent variable (x)
+#'                          for the linear model of the the control
 #' @return A data frame with the slope for the treatment and the control
 #'         for each gene
 #' @concept filter
@@ -64,11 +62,12 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #'              as input
 #' @importFrom rlang .data
 #' @importFrom dplyr ungroup
+#' @param group_var The variable to use  as independent variable (x)
+#'                  for the linear model
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param genes The genes for which the slope as to be computed. Those genes
 #'              are the result of the three statistical methods selection
-#' @param group_var The variable to use as X for the linear model
 #' @return A tibble containing in each row the gene and the corresponding Slope
 #' @export
 #' @concept compute
@@ -79,7 +78,6 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #'     genes = c("Gene_42", "Gene_24"),
 #'     group_var = c("T1", "T2", "TRT")
 #' )
-#'
 compute_slope <- function(screenR_Object, genes, group_var) {
     data <- screenR_Object@data_table
     data <- dplyr::filter(data, .data$Gene %in% genes)
@@ -104,13 +102,12 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #' @description This function is used to improve the quality of the hits.
 #'              It compute the variance among the hits and filter the one with
 #'              a value greater than the threshold set
+#'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#'
 #' @param genes The genes for which the variance as to be computed.
 #'              Those genes are the result of the three statistical
 #'              methods selection
-#'
 #' @param variance The maximum value of variance accepted
 #' @param contrast The variable to use as X for the linear model
 #'                 for the Treatment
@@ -159,3 +156,56 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
     data <- dplyr::rename(data, Variance = .data$variance)
     return(data)
 }
+
+
+
+#' @title Remove rows that have zero count in all samples
+#' @description This function removes the rows that have zero count in
+#'              all samples. It takes care up updateing both count_table and
+#'              annotation_table. It has to be performed before the
+#'              data normalization.
+#'
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
+#' @importFrom dplyr if_all
+#' @importFrom tidyselect vars_select_helpers
+#' @export
+#' @concept compute
+#'
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' counts <- get_count_table(object)
+#' nrow(counts)
+#' object <- remove_all_zero_row(object)
+#' counts <- get_count_table(object)
+#' nrow(counts)
+remove_all_zero_row <- function(screenR_Object) {
+
+    counts  <- screenR_Object@count_table
+
+    # First of all all the row with zero counts are founded
+    counts_zeros <- filter(counts,
+                           if_all(vars_select_helpers$where(is.numeric),
+                                  ~ .x == 0))
+
+    # Then there are filtered
+    counts <- filter(counts, !.data$Barcode %in% counts_zeros$Barcode)
+
+    screenR_Object@count_table  <- counts
+
+
+    # The same procedure as to be done for the annotation_table table
+    # in order to keep thigs working
+
+    anno_table <- screenR_Object@annotation_table
+
+    anno_table <-
+        filter(anno_table,
+               !.data$Barcode %in% counts_zeros$Barcode)
+
+    screenR_Object@annotation_table <- anno_table
+
+    return(screenR_Object)
+}
+
+

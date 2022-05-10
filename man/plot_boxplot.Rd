@@ -20,7 +20,7 @@ plot_boxplot(
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{genes}{The vector of genes to use}
+\item{genes}{The vector of genes that will be displayed}
 
 \item{group_var}{The variable that as to be used to filter the data, for
 example the different treatment}

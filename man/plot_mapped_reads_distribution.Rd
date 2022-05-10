@@ -15,7 +15,7 @@ plot_mapped_reads_distribution(
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}.}
 
-\item{palette}{The color vector for the plot.}
+\item{palette}{The color vector that as to be used for the plot.}
 
 \item{alpha}{A value for the opacity of the plot.
 Allowed values are in the range 0 to 1}

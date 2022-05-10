@@ -21,7 +21,7 @@ A data frame with 5320 rows and 2 columns obtained from a
 
   \item{Library}{It contains the library from which the shRNA come from.
                  In this case is a pooled from
-                 \code{\link{https://cellecta.com/}}}
+                 \url{https://cellecta.com/}{cellecta}}
 }
 }
 \usage{

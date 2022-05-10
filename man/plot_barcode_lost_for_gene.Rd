@@ -4,7 +4,7 @@
 \alias{plot_barcode_lost_for_gene}
 \title{Plot number of barcode lost for gene}
 \usage{
-plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples = NULL)
+plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
@@ -12,7 +12,7 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples = NULL)
 
 \item{facet}{A boolean to use the facet}
 
-\item{samples}{The samples to visualize}
+\item{samples}{A vector of samples to visualize}
 }
 \value{
 Return a tibble containing the number of mapped reads for sample

@@ -10,20 +10,22 @@ compute_metrics(screenR_Object, control, treatment, day)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{control}{The control Samples.}
+\item{control}{The vector specifying the control samples}
 
-\item{treatment}{The treatment Samples}
+\item{treatment}{The vector specifying the treated samples}
 
-\item{day}{The day of the treatment}
+\item{day}{A string containing the day to consider}
 }
 \value{
-Return a tibble  with all the measure computed.
+Return a tibble with all the measure computed.
 }
 \description{
 This function computes the  metrics that will be then used
              to compute the Z-score using the function
              \code{\link{find_zscore_hit}} starting from the screenR object
-             for a given treatment in a given day
+             for a given treatment in a given day. More information can
+             be found at this paper
+             \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{Z-score}
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

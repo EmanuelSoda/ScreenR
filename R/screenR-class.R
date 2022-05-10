@@ -1,8 +1,8 @@
 #' @include  generics.R
 
-#' @title S4 ScreenR object Class
+#' @title S4 ScreenR object class
 #' The screenr_object class is the main object of the package, it is passed
-#' to a series of function to perform the analysis. I
+#' to a series of function to perform the analysis.
 #'
 #' @slot count_table It is used to store the count table to perform the
 #'                   analysis
@@ -37,7 +37,7 @@ screenr_object <- setClass("screenr_object", methods::representation(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# S4 methods
+#                                 S4 methods
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #' @rdname get_count_table
@@ -61,7 +61,6 @@ setMethod(
 )
 
 
-# get_annotation_table
 #' @rdname get_annotation_table
 #' @aliases get_annotation_table,screenr_object
 #' @export
@@ -100,7 +99,6 @@ setMethod(
 )
 
 
-# get_replicates
 #' @export
 #' @aliases get_replicates,screenr_object
 #' @rdname get_replicates
@@ -115,7 +113,7 @@ setMethod(
     }
 )
 
-# get_normalized_count_table
+
 #' @export
 #' @aliases get_normalized_count_table,screenr_object
 #' @rdname get_normalized_count_table
@@ -138,7 +136,6 @@ setMethod(
 )
 
 
-# get_data_table
 #' @export
 #' @aliases get_data_table,screenr_object
 #' @rdname get_data_table
@@ -161,7 +158,6 @@ setMethod(
 )
 
 
-########### Set
 #' @export
 #' @aliases set_count_table,screenr_object
 #' @rdname set_count_table
@@ -177,7 +173,7 @@ setMethod(
     }
 )
 
-# set_annotation_table
+
 #' @export
 #' @aliases set_annotation_table,screenr_object
 #' @rdname set_annotation_table
@@ -193,7 +189,7 @@ setMethod(
     }
 )
 
-# set_groups
+
 #' @export
 #' @aliases set_groups,screenr_object
 #' @rdname set_groups
@@ -210,7 +206,7 @@ setMethod(
 )
 
 
-# set_replicates
+
 #' @export
 #' @aliases set_replicates,screenr_object
 #' @rdname set_replicates
@@ -226,7 +222,7 @@ setMethod(
     }
 )
 
-# set_normalized_count_table
+
 #' @export
 #' @aliases set_normalized_count_table,screenr_object
 #' @rdname set_normalized_count_table
@@ -244,7 +240,6 @@ setMethod(
 )
 
 
-# set_data_table
 #' @export
 #' @aliases set_data_table,screenr_object
 #' @rdname set_data_table
@@ -260,10 +255,3 @@ setMethod(
         return(object)
     }
 )
-
-
-
-
-
-
-

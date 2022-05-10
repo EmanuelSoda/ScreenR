@@ -1,6 +1,6 @@
 #' @title Mapped Reads
 #' @description This function returns the number of mapped reads inside the
-#'              screenR object
+#'              ScreenR object
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}

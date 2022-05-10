@@ -1,6 +1,7 @@
 #' @title Count the number of mapped read
 #' @description This function counts the number of reads for Barcode
-#'              in each sample
+#'              in each sample. It is a quality control fuction (QC) to see if
+#'              the biological protocol went as planned.
 #' @importFrom rlang .data
 #' @importFrom tidyr gather
 #' @param screenR_Object The ScreenR object obtained using the
@@ -12,7 +13,6 @@
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' head(count_mapped_reads(object))
-#'
 count_mapped_reads <- function(screenR_Object) {
     # Get only the numeric column (so the sample)
     numericColumn <- screenR_Object@count_table %>%

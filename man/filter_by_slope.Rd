@@ -20,15 +20,15 @@ filter_by_slope(
 \item{genes}{The genes for which the slope as to be computed. Those genes
 are the result of the three statistical methods selection}
 
-\item{group_var_treatment}{The variable to use as X for the linear model
-of the treatment}
+\item{group_var_treatment}{The variable to use as independent variable (x)
+for the linear model of the treatment}
 
-\item{group_var_control}{The variable to use as X for the linear model
-of the the control}
+\item{group_var_control}{The variable to use as independent variable (x)
+for the linear model of the the control}
 
-\item{slope_control}{The control slope threshold}
+\item{slope_control}{A value used as threshold for the control slope}
 
-\item{slope_treatment}{The treatment slope threshold}
+\item{slope_treatment}{A value used as threshold for the treatment slope}
 }
 \value{
 A data frame with the slope for the treatment and the control

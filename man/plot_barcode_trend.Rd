@@ -14,18 +14,19 @@ plot_barcode_trend(
 }
 \arguments{
 \item{list_data_measure}{A list containing the measure table of the
-different time point}
+different time point. Generated using the
+compute_metrics function.}
 
-\item{genes}{Vector of genes name}
+\item{genes}{The vector of genes name.}
 
-\item{n_col}{The number of column to use in the facet wrap}
+\item{n_col}{The number of column to use in the facet wrap.}
 
-\item{size_line}{Rhe dimension of the line}
+\item{size_line}{The thickness of the line.}
 
-\item{color}{Vector of colors}
+\item{color}{The vector of colors. One color for each barcode.}
 }
 \value{
-The rend plot for the genes in input
+The trend plot for the genes in input.
 }
 \description{
 Plot the log2FC over time of the barcodes in the different

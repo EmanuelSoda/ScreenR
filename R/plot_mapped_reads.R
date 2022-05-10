@@ -8,6 +8,7 @@
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1
 #' @param legende_position Where to positioning the legend of the plot
+#'                         ("none", "left", "right", "bottom", "top")
 #' @importFrom magrittr %>%
 #' @importFrom  ggplot2 geom_bar
 #' @importFrom rlang .data

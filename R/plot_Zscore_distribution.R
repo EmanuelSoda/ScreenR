@@ -3,7 +3,10 @@
 #'              treated vs control in the different time points.
 #'
 #' @param time_point_measure A list containing the table for each time
-#'                           point
+#'                           point. Each table contains for eaach barcode
+#'                           the counts for the treated and control the Log2FC,
+#'                           Zscore, ZscoreRobust, Day.
+#'
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1
 #' @importFrom rlang .data

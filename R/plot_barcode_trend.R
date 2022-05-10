@@ -9,12 +9,13 @@
 #' @importFrom purrr map reduce
 #' @importFrom ggplot2 geom_line geom_point facet_wrap scale_color_manual
 #' @param list_data_measure A list containing the measure table of the
-#'                          different time point
-#' @param n_col The number of column to use in the facet wrap
-#' @param size_line Rhe dimension of the line
-#' @param genes Vector of genes name
-#' @param color Vector of colors
-#' @return The rend plot for the genes in input
+#'                          different time point. Generated using the
+#'                          compute_metrics function.
+#' @param n_col The number of column to use in the facet wrap.
+#' @param size_line The thickness of the line.
+#' @param genes The vector of genes name.
+#' @param color The vector of colors. One color for each barcode.
+#' @return The trend plot for the genes in input.
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

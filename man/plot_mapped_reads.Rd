@@ -20,7 +20,8 @@ plot_mapped_reads(
 \item{alpha}{A value for the opacity of the plot.
 Allowed values are in the range 0 to 1}
 
-\item{legende_position}{Where to positioning the legend of the plot}
+\item{legende_position}{Where to positioning the legend of the plot
+("none", "left", "right", "bottom", "top")}
 }
 \value{
 return a ggplot object

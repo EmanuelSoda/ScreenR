@@ -16,7 +16,7 @@ plot_mds(
 \item{screenR_Object}{The Object of the package
 \code{\link{create_screenr_object}}}
 
-\item{groups}{The vector to fill the plot}
+\item{groups}{The vector that has to be used to fill the plot}
 
 \item{alpha}{The opacity of the labels}
 
@@ -36,5 +36,4 @@ Plot samples on a two-dimensional scatterplot so that
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_mds(object)
-
 }

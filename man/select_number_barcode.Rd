@@ -4,14 +4,16 @@
 \alias{select_number_barcode}
 \title{Select  number of Barcode}
 \usage{
-select_number_barcode(gene, genesymbols, number_barcode)
+select_number_barcode(gene, gene_symbols, number_barcode)
 }
 \arguments{
 \item{gene}{The gene name}
 
-\item{genesymbols}{The gene symbols  list}
-
-\item{number_barcode}{The number of barcode to select}
+\item{...}{
+  Arguments passed on to \code{\link[=unique_gene_symbols]{unique_gene_symbols}}
+  \describe{
+    \item{\code{gene_symbols}}{The gene symbols list}
+  }}
 }
 \value{
 The barcode of the gene passed as input

@@ -15,11 +15,11 @@ Return a tibble containing the number of mapped read for sample
 }
 \description{
 This function counts the number of reads for Barcode
-             in each sample
+             in each sample. It is a quality control fuction (QC) to see if
+             the biological protocol went as planned.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 head(count_mapped_reads(object))
-
 }
 \concept{compute}

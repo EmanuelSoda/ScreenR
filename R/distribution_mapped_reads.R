@@ -5,7 +5,7 @@
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}.
 #'
-#' @param palette The color vector for the plot.
+#' @param palette The color vector that as to be used for the plot.
 #' @param alpha A value for the opacity of the plot.
 #'              Allowed values are in the range 0 to 1
 #' @param type The type of plot. The default is "boxplot" the other option is

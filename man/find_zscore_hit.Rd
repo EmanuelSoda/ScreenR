@@ -10,10 +10,13 @@ find_zscore_hit(table_treate_vs_control, number_barcode = 6, metric = "median")
 \item{table_treate_vs_control}{table computed with the function
 \code{compute_data_table}}
 
-\item{number_barcode}{Number of barcodes to have under the median or the
-mean}
+\item{number_barcode}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
 
-\item{metric}{A string containing the metric to use. The value  allowed are
+\item{metric}{A string containing the metric to use. The value allowed are
 "median" or "mean".}
 }
 \value{

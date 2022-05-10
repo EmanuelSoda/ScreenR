@@ -2,15 +2,20 @@
 #' @description Create a Barcode plot for the Hit
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param matrix_model the matrix that will be used to perform the
-#'                     linear model analysis
+#' @param matrix_model The matrix that will be used to perform the
+#'                     linear model analysis. It is created using
+#'                     model.matrix.
 
 #' @param contrast An object created with \code{\link[limma]{makeContrasts}}
 #'                 function.
-#' @param number_barcode Number of barcode to have under the median
+#' @param number_barcode Number of barcode that as to be differentially
+#'                       expressed (DE)in order to consider the gene associated
+#'                       DE. Example a gene is associated
+#'                       with 10 shRNA we consider a gene DE if it has at least
+#'                       number_barcode = 5 shRNA DE.
 #' @param quantile Quantile to display on the plot
-#' @param labels Title of the plot
-#' @param gene A  gene name to plot
+#' @param labels The label to be displayed on the quantile sidet
+#' @param gene The name of the gene that has to be plot
 #' @concept  plot
 #' @return The barcode plot
 #' @importFrom edgeR estimateDisp

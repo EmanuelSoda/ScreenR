@@ -25,20 +25,29 @@ linear model analysis created using
 \item{contrast}{A vector or a single value indicating the index or the name
 of the column the model_matrix wo which perform the analysis}
 
-\item{number_barcode}{Number of barcode to use}
+\item{number_barcode}{Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.}
 
 \item{thresh}{The threshold}
 
 \item{lfc}{The Log2FC}
 
-\item{direction}{String containing the direction of the variation}
+\item{direction}{String containing the direction of the variation,
+"Down" for the down regulation "Up" for the up regulation.}
 }
 \value{
-The hit find with the camera method
+The data frame with hit find using the camera method
 }
 \description{
 This function finds the hits using the camera method is
-             a wrapper for the \code{\link[limma]{camera}} function
+             a wrapper for the \code{\link[limma]{camera}} function.
+             It implements the methods by proposed by Wu and Smyth (2012).
+             It performs a competitive test in the sense defined by Goeman
+             and Buhlmann (2007). The paper can be found here
+     \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

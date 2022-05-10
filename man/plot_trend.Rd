@@ -57,5 +57,4 @@ plot_trend(object,
     group_var = c("T1", "T2", "TRT"),
     nrow = 2
 )
-
 }

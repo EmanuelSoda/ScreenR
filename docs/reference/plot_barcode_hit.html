@@ -80,19 +80,24 @@
 <dd><p>The ScreenR object obtained using the
 <code><a href="create_screenr_object.html">create_screenr_object</a></code></p></dd>
 <dt>matrix_model</dt>
-<dd><p>the matrix that will be used to perform the
-linear model analysis</p></dd>
+<dd><p>The matrix that will be used to perform the
+linear model analysis. It is created using
+model.matrix.</p></dd>
 <dt>contrast</dt>
 <dd><p>An object created with <code><a href="https://rdrr.io/pkg/limma/man/makeContrasts.html" class="external-link">makeContrasts</a></code>
 function.</p></dd>
 <dt>number_barcode</dt>
-<dd><p>Number of barcode to have under the median</p></dd>
+<dd><p>Number of barcode that as to be differentially
+expressed (DE)in order to consider the gene associated
+DE. Example a gene is associated
+with 10 shRNA we consider a gene DE if it has at least
+number_barcode = 5 shRNA DE.</p></dd>
 <dt>gene</dt>
-<dd><p>A  gene name to plot</p></dd>
+<dd><p>The name of the gene that has to be plot</p></dd>
 <dt>quantile</dt>
 <dd><p>Quantile to display on the plot</p></dd>
 <dt>labels</dt>
-<dd><p>Title of the plot</p></dd>
+<dd><p>The label to be displayed on the quantile sidet</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>

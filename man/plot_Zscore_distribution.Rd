@@ -8,7 +8,9 @@ plot_zscore_distribution(time_point_measure, alpha = 1)
 }
 \arguments{
 \item{time_point_measure}{A list containing the table for each time
-point}
+point. Each table contains for eaach barcode
+the counts for the treated and control the Log2FC,
+Zscore, ZscoreRobust, Day.}
 
 \item{alpha}{A value for the opacity of the plot.
 Allowed values are in the range 0 to 1}

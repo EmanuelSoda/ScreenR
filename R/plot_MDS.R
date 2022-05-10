@@ -4,7 +4,7 @@
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
 #'                       \code{\link{create_screenr_object}}
-#' @param groups The vector to fill the plot
+#' @param groups The vector that has to be used to fill the plot
 #' @param alpha The opacity of the labels
 #' @param size The dimension of the labels
 #' @param color The color of the labels
@@ -17,7 +17,6 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_mds(object)
-#'
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
     # We have to convert the screenR obj into an edgeR obj
@@ -53,19 +52,20 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' @title Plot the explained variance by the PC
 #' @description This function plot the explained variance by the
 #'              Principal Component.
-#' @param screenR_Object The ScreenR object
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
 #' @param cumulative A boolean value which indicates whether or not to plot
-#'                   the cumulative variance
+#'                   the cumulative variance. If TRUE
 #' @param color The color to fill the barplot
 #' @importFrom  scales percent
-#' @return The explained variance  plot
+#' @return The explained variance plot
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_explained_variance(object)
 #'
-#' # For the cumulative plote
+#' # For the cumulative plot
 #' plot_explained_variance(object, cumulative = TRUE)
 plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {

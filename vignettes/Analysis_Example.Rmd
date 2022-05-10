@@ -20,7 +20,7 @@ editor_options:
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-knitr::opts_chunk$set(fig.width = 10, fig.height = 7)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 4)
 ```
 
 # Introduction 
@@ -81,6 +81,9 @@ devtools::install_github("EmanuelSoda/ScreenR")
 
 
 # Analysis 
+Here is reported an example of the ScreenR pipeeline
+<img src="/Users/ieo5571/Documents/IEO/Stage/ScreenR/man/figures/Pipeline.png" align="top">
+
 ## Loading the package
 
 After installation, loading the package is simple as :
@@ -145,6 +148,12 @@ object <- create_screenr_object(
     table = data, annotation = total_Annotation, groups = groups,
     replicates = ""
 )
+```
+
+## Removing all zero rows
+
+```{r Removing all zero rows, message=FALSE, warning=TRUE}
+object <- remove_all_zero_row(object)
 ```
 
 
