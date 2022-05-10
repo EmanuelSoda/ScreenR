@@ -28,6 +28,9 @@
     <loc>/reference/Barcode_creation_Dataframe.html</loc>
   </url>
   <url>
+    <loc>/reference/ScreenR-package.html</loc>
+  </url>
+  <url>
     <loc>/reference/annotation_table.html</loc>
   </url>
   <url>
@@ -133,6 +136,9 @@
     <loc>/reference/normalize_data.html</loc>
   </url>
   <url>
+    <loc>/reference/normalized_count_table.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_MDS.html</loc>
   </url>
   <url>
@@ -163,7 +169,13 @@
     <loc>/reference/plot_distribution_of_barcode_lost.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_explained_variance.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_mapped_reads.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_mapped_reads_distribution.html</loc>
   </url>
   <url>
     <loc>/reference/plot_trend.html</loc>
