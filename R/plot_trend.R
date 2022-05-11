@@ -41,8 +41,10 @@ plot_trend <- function(screenR_Object, genes, group_var,
 
     if (length(genes) > 1) {
         plot <- plot +
-            ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol,
-                                scales = scales)
+            ggplot2::facet_wrap("Gene",
+                nrow = nrow, ncol = ncol,
+                scales = scales
+            )
     }
 
     return(plot)

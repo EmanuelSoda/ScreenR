@@ -169,9 +169,10 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #'                       \code{\link{create_screenr_object}}
 #' @importFrom dplyr if_all
 #' @importFrom tidyselect vars_select_helpers
+#' @return The ScreenR object with the count_table and the annotation_table
+#'         filtered.
 #' @export
 #' @concept compute
-#'
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' counts <- get_count_table(object)
@@ -180,18 +181,21 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #' counts <- get_count_table(object)
 #' nrow(counts)
 remove_all_zero_row <- function(screenR_Object) {
-
-    counts  <- screenR_Object@count_table
+    counts <- screenR_Object@count_table
 
     # First of all all the row with zero counts are founded
-    counts_zeros <- filter(counts,
-                           if_all(vars_select_helpers$where(is.numeric),
-                                  ~ .x == 0))
+    counts_zeros <- filter(
+        counts,
+        if_all(
+            vars_select_helpers$where(is.numeric),
+            ~ .x == 0
+        )
+    )
 
     # Then there are filtered
     counts <- filter(counts, !.data$Barcode %in% counts_zeros$Barcode)
 
-    screenR_Object@count_table  <- counts
+    screenR_Object@count_table <- counts
 
 
     # The same procedure as to be done for the annotation_table table
@@ -200,12 +204,12 @@ remove_all_zero_row <- function(screenR_Object) {
     anno_table <- screenR_Object@annotation_table
 
     anno_table <-
-        filter(anno_table,
-               !.data$Barcode %in% counts_zeros$Barcode)
+        filter(
+            anno_table,
+            !.data$Barcode %in% counts_zeros$Barcode
+        )
 
     screenR_Object@annotation_table <- anno_table
 
     return(screenR_Object)
 }
-
-

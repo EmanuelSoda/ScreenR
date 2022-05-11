@@ -10,6 +10,10 @@ remove_all_zero_row(screenR_Object)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 }
+\value{
+The ScreenR object with the count_table and the annotation_table
+        filtered.
+}
 \description{
 This function removes the rows that have zero count in
              all samples. It takes care up updateing both count_table and

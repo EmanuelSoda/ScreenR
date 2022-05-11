@@ -51,8 +51,10 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     }
 
     if (length(genes) > 1) {
-        plot <- plot + facet_wrap("Gene", nrow = nrow,
-                                  ncol = ncol, scales = scales)
+        plot <- plot + facet_wrap("Gene",
+            nrow = nrow,
+            ncol = ncol, scales = scales
+        )
     }
 
     return(plot)

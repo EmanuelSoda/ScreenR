@@ -14,10 +14,10 @@
 #' count_table <- get_count_table(object)
 #' head(count_table)
 setGeneric(
-  "get_count_table",
-  function(object) {
-    standardGeneric("get_count_table")
-  }
+    "get_count_table",
+    function(object) {
+        standardGeneric("get_count_table")
+    }
 )
 
 
@@ -34,10 +34,10 @@ setGeneric(
 #' annotation_table <- get_annotation_table(object)
 #' head(annotation_table)
 setGeneric(
-  "get_annotation_table",
-  function(object) {
-    standardGeneric("get_annotation_table")
-  }
+    "get_annotation_table",
+    function(object) {
+        standardGeneric("get_annotation_table")
+    }
 )
 
 #' @title Get ScreenR groups
@@ -53,10 +53,10 @@ setGeneric(
 #' groups <- get_groups(object)
 #' groups
 setGeneric(
-  "get_groups",
-  function(object) {
-    standardGeneric("get_groups")
-  }
+    "get_groups",
+    function(object) {
+        standardGeneric("get_groups")
+    }
 )
 
 
@@ -73,10 +73,10 @@ setGeneric(
 #' replicates <- get_replicates(object)
 #' replicates
 setGeneric(
-  "get_replicates",
-  function(object) {
-    standardGeneric("get_replicates")
-  }
+    "get_replicates",
+    function(object) {
+        standardGeneric("get_replicates")
+    }
 )
 
 #' @title Get ScreenR normalized_count_table
@@ -93,10 +93,10 @@ setGeneric(
 #' normalized_count_table <- get_normalized_count_table(object)
 #' normalized_count_table
 setGeneric(
-  "get_normalized_count_table",
-  function(object) {
-    standardGeneric("get_normalized_count_table")
-  }
+    "get_normalized_count_table",
+    function(object) {
+        standardGeneric("get_normalized_count_table")
+    }
 )
 
 
@@ -113,10 +113,10 @@ setGeneric(
 #' data_table <- get_data_table(object)
 #' data_table
 setGeneric(
-  "get_data_table",
-  function(object) {
-    standardGeneric("get_data_table")
-  }
+    "get_data_table",
+    function(object) {
+        standardGeneric("get_data_table")
+    }
 )
 
 
@@ -140,10 +140,10 @@ setGeneric(
 #' counts <- get_count_table(object)
 #' set_count_table(object, counts)
 setGeneric(
-  "set_count_table",
-  function(object, count_table) {
-    standardGeneric("set_count_table")
-  }
+    "set_count_table",
+    function(object, count_table) {
+        standardGeneric("set_count_table")
+    }
 )
 
 #' @title Set ScreenR annotation table
@@ -161,10 +161,10 @@ setGeneric(
 #' annotation <- get_annotation_table(object)
 #' set_annotation_table(object, annotation)
 setGeneric(
-  "set_annotation_table",
-  function(object, annotation_table) {
-    standardGeneric("set_annotation_table")
-  }
+    "set_annotation_table",
+    function(object, annotation_table) {
+        standardGeneric("set_annotation_table")
+    }
 )
 
 #' @title Set ScreenR groups
@@ -181,10 +181,10 @@ setGeneric(
 #' groups <- get_groups(object)
 #' set_groups(object, groups)
 setGeneric(
-  "set_groups",
-  function(object, groups) {
-    standardGeneric("set_groups")
-  }
+    "set_groups",
+    function(object, groups) {
+        standardGeneric("set_groups")
+    }
 )
 
 
@@ -203,10 +203,10 @@ setGeneric(
 #' replicates <- get_replicates(object)
 #' set_replicates(object, replicates)
 setGeneric(
-  "set_replicates",
-  function(object, replicates) {
-    standardGeneric("set_replicates")
-  }
+    "set_replicates",
+    function(object, replicates) {
+        standardGeneric("set_replicates")
+    }
 )
 
 #' @title Set ScreenR normalized_count_table
@@ -225,10 +225,10 @@ setGeneric(
 #' normalized_count_table
 #' set_normalized_count_table(object, normalized_count_table)
 setGeneric(
-  "set_normalized_count_table",
-  function(object, normalized_count_table) {
-    standardGeneric("set_normalized_count_table")
-  }
+    "set_normalized_count_table",
+    function(object, normalized_count_table) {
+        standardGeneric("set_normalized_count_table")
+    }
 )
 
 #' @title Set ScreenR data_table
@@ -245,9 +245,8 @@ setGeneric(
 #' data_table <- get_data_table(object)
 #' set_data_table(object, data_table)
 setGeneric(
-  "set_data_table",
-  function(object, data_table) {
-    standardGeneric("set_data_table")
-  }
+    "set_data_table",
+    function(object, data_table) {
+        standardGeneric("set_data_table")
+    }
 )
-

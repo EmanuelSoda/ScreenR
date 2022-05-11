@@ -205,3 +205,6 @@ test_that("set_normalized_count_table NULL", {
     expect_error(set_data_table(object = NULL, data_table))
 })
 
+
+
+

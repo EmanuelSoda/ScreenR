@@ -48,13 +48,17 @@ head(count_table)
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
 
-groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-                   "Control", "Control", "Control", "Treated", "Treated",
-                   "Treated", "Control", "Control", "Control"))
+groups <- factor(c(
+    "T1/T2", "T1/T2", "Treated", "Treated", "Treated",
+    "Control", "Control", "Control", "Treated", "Treated",
+    "Treated", "Control", "Control", "Control"
+))
 
-obj <- create_screenr_object(table = count_table,
-                             annotation = annotation_table,
-                             groups = groups,
-                             replicates = c(""))
+obj <- create_screenr_object(
+    table = count_table,
+    annotation = annotation_table,
+    groups = groups,
+    replicates = c("")
+)
 }
 \concept{objects}

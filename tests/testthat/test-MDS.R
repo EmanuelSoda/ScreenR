@@ -80,3 +80,7 @@ test_that("plot_explained_variance CUM", {
     )
     expect_equal(class(plot)[[1]], "gg")
 })
+
+
+
+

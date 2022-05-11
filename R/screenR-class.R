@@ -19,14 +19,18 @@
 #' data("count_table", package = "ScreenR")
 #' data("annotation_table", package = "ScreenR")
 #'
-#' groups <- factor(c("T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-#'                    "Control", "Control", "Control", "Treated", "Treated",
-#'                    "Treated", "Control", "Control", "Control"))
+#' groups <- factor(c(
+#'     "T1/T2", "T1/T2", "Treated", "Treated", "Treated",
+#'     "Control", "Control", "Control", "Treated", "Treated",
+#'     "Treated", "Control", "Control", "Control"
+#' ))
 #'
-#' obj <- create_screenr_object(table = count_table,
-#'                              annotation = annotation_table,
-#'                              groups = groups,
-#'                              replicates = c(""))
+#' obj <- create_screenr_object(
+#'     table = count_table,
+#'     annotation = annotation_table,
+#'     groups = groups,
+#'     replicates = c("")
+#' )
 screenr_object <- setClass("screenr_object", methods::representation(
     count_table = "data.frame",
     annotation_table = "data.frame", groups = "factor", replicates = "vector",
@@ -233,8 +237,10 @@ setMethod(
         if (is.null(object)) {
             stop("The object is not defined!")
         }
-        slot(object = object,
-             name = "normalized_count_table") <- normalized_count_table
+        slot(
+            object = object,
+            name = "normalized_count_table"
+        ) <- normalized_count_table
         return(object)
     }
 )
@@ -250,8 +256,10 @@ setMethod(
         if (is.null(object)) {
             stop("The object is not defined!")
         }
-        slot(object = object,
-             name = "data_table") <- data_table
+        slot(
+            object = object,
+            name = "data_table"
+        ) <- data_table
         return(object)
     }
 )

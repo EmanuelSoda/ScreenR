@@ -15,10 +15,11 @@ hits from barcode counts data and integrates a wide range of
 visualization for each step of the analysis.
 }
 \details{
-\strong{ScreenR} takes the a count table as input and create the screenr_object
-to perform the analysis. Throught the pipeline \strong{ScreenR} anable the user to
-perform quality control, visual inspection, dimensionality reduction of
-the data. Using three statistical methods:
+\strong{ScreenR} takes the a count table as input and create the
+screenr_object to perform the analysis. Throught the pipeline
+\strong{ScreenR} anable the user to perform quality control, visual
+inspection, dimensionality reduction of the data. Using three statistical
+methods:
 
 \itemize{
   \item \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896}{ROAST}
