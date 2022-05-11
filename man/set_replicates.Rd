@@ -14,7 +14,7 @@ set_replicates(object, replicates)
 \item{object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{replicates}{The vecotr containing the replicates name}
+\item{replicates}{The vector containing the replicates name}
 }
 \value{
 The ScreenR object with the specific replicates

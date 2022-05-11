@@ -135,6 +135,3 @@ test_that("find_robust_zscore_hit median ", {
     hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 2)
     expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
 })
-
-
-

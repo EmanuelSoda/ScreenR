@@ -35,7 +35,7 @@ analysis}
 
 \item{\code{replicates}}{It is used to store information about the replicates}
 
-\item{\code{normalized_count_table}}{It is used to store a normalized verision of
+\item{\code{normalized_count_table}}{It is used to store a normalized version of
 the count table}
 
 \item{\code{data_table}}{It is used to store a tidy format of the count table}

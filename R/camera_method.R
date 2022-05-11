@@ -11,7 +11,8 @@
 #'                     linear model analysis created using
 #'                     \code{\link[stats]{model.matrix}}
 #' @param contrast A vector or a single value indicating the index or the name
-#'                 of the column the model_matrix wo which perform the analysis
+#'                 of the column the model_matrix with which perform the
+#'                 analysis
 #' @param thresh The threshold
 #' @param lfc The Log2FC
 #' @importFrom edgeR estimateDisp

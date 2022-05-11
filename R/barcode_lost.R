@@ -1,5 +1,5 @@
 #' @title Count Barcode Lost
-#' @description This fuction counts the number of Barcode lost during the
+#' @description This function counts the number of Barcode lost during the
 #'              sequencing. A barcode is lost if it has zero mapped read.
 #'
 

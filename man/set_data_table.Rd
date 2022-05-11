@@ -17,7 +17,7 @@ set_data_table(object, data_table)
 \item{data_table}{A count table in a tidy format}
 }
 \value{
-The ScreenR object with the setted data_table
+The ScreenR object with the set data_table
 }
 \description{
 Set function for the data_table of the ScreenR object

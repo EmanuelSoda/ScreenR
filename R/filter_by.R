@@ -161,7 +161,7 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 
 #' @title Remove rows that have zero count in all samples
 #' @description This function removes the rows that have zero count in
-#'              all samples. It takes care up updateing both count_table and
+#'              all samples. It takes care up updating both count_table and
 #'              annotation_table. It has to be performed before the
 #'              data normalization.
 #'

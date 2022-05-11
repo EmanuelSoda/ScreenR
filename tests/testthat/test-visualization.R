@@ -262,6 +262,3 @@ test_that("Plot common Hit", {
 
     expect_equal("gg", class(plot)[1])
 })
-
-
-

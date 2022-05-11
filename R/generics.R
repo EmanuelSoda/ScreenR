@@ -194,7 +194,7 @@ setGeneric(
 #'                       \code{\link{create_screenr_object}}
 #' @param replicates Additional parameter
 #' @return The ScreenR object with the specific replicates
-#' @param  replicates The vecotr containing the replicates name
+#' @param  replicates The vector containing the replicates name
 #' @export
 #' @rdname set_replicates
 #' @concept objects
@@ -215,7 +215,7 @@ setGeneric(
 #' @param object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param normalized_count_table A table of the normalized count table
-#' @return The ScreenR object with the setted normalized_count_table
+#' @return The ScreenR object with the set normalized_count_table
 #' @export
 #' @rdname set_normalized_count_table
 #' @concept objects
@@ -236,7 +236,7 @@ setGeneric(
 #' @param object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param data_table A count table in a tidy format
-#' @return The ScreenR object with the setted data_table
+#' @return The ScreenR object with the set data_table
 #' @export
 #' @rdname set_data_table
 #' @concept objects

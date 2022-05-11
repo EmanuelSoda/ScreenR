@@ -12,7 +12,7 @@ A data frame with 5323 rows and 15 variables:
   indentifier of an shRNA. In a genetic screening multiple
   slightly different shRNAs, each with its efficacy.}
 
- \item{Time_1}{It contais the counts at time zero}
+ \item{Time_1}{It contains the counts at time zero}
 
   \item{Time_2}{It contains the counts after the cell were washed}
   \item{Time_3_TRT_rep1}{It contains the counts for the first replicate

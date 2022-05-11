@@ -35,7 +35,7 @@ number_barcode = 5 shRNA DE.}
 
 \item{quantile}{Quantile to display on the plot}
 
-\item{labels}{The label to be displayed on the quantile sidet}
+\item{labels}{The label to be displayed on the quantile side}
 }
 \value{
 The barcode plot

@@ -23,7 +23,8 @@ linear model analysis created using
 \code{\link[stats]{model.matrix}}}
 
 \item{contrast}{A vector or a single value indicating the index or the name
-of the column the model_matrix wo which perform the analysis}
+of the column the model_matrix with which perform the
+analysis}
 
 \item{number_barcode}{Number of barcode that as to be differentially
 expressed (DE)in order to consider the gene associated

@@ -17,14 +17,14 @@ downloads](https://img.shields.io/github/downloads/EmanuelSoda/ScreenR/total)]()
 [![last
 commit](https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR)]()
 [![Version](https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master)]()
-[![Lenguage](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]()
+[![Language](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]()
 
 <!-- badges: end -->
 
 ScreenR is an easy and effective package to perform hits identification
 in loss of function High Throughput Biological Screening performed with
-shRNAs library. ScreenR combines the power of softwares like edgeR with
-the semplicity of the Tydiverse metapackage. ScreenR executes a pipeline
+shRNAs library. ScreenR combines the power of software like edgeR with
+the simplicity of the Tidyverse metapackage. ScreenR executes a pipeline
 able to find candidate hits from barcode counts data and integrates a
 wide range of visualization for each step of the analysis
 

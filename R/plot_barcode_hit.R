@@ -14,7 +14,7 @@
 #'                       with 10 shRNA we consider a gene DE if it has at least
 #'                       number_barcode = 5 shRNA DE.
 #' @param quantile Quantile to display on the plot
-#' @param labels The label to be displayed on the quantile sidet
+#' @param labels The label to be displayed on the quantile side
 #' @param gene The name of the gene that has to be plot
 #' @concept  plot
 #' @return The barcode plot

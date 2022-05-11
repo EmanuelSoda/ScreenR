@@ -15,7 +15,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Importing Pacakge
+# Importing Package
 ```{r packages, message=FALSE, warning=TRUE}
 library(ggplot2)
 library(dplyr)
@@ -46,7 +46,7 @@ BiocManager::install("ScreenR")
 
 In the unlikely case that a manual installation is required, e.g., if you do
 not install **ScreenR** via Bioconductor (which is highly recommended),
-you can install CRAN pacakges using: 
+you can install CRAN packages using: 
 
 ```{r pkg install, eval=FALSE, message=FALSE, warning=TRUE}
 install.packages("<package_name>")
@@ -81,7 +81,7 @@ devtools::install_github("EmanuelSoda/ScreenR")
 
 
 # Analysis 
-Here is reported an example of the ScreenR pipeeline
+Here is reported an example of the ScreenR pipeline
 <img src="/Users/ieo5571/Documents/IEO/Stage/ScreenR/man/figures/Pipeline.png" align="top">
 
 ## Loading the package
@@ -161,7 +161,7 @@ object <- remove_all_zero_row(object)
 In order to start the analysis the data has first to be normalized and the 
 *data_table*.
 
-For what concern the normalizzation ScreenR uses a normalizzation that is 
+For what concern the normalization ScreenR uses a normalization that is 
 called *Counts Per Million (CPM)* which has the following mathematical 
 expression:
 
@@ -173,7 +173,7 @@ number of reads in that sample and multiplied by one million.
 Then has to be computed the *data_table*. The *data_table* can be seen as a 
 tidy version of the original *count table* and will be used throughout the 
 analysis.
-```{r normalizzation, message=FALSE, warning=TRUE}
+```{r normalization, message=FALSE, warning=TRUE}
 object <- normalize_data(object)
 object <- compute_data_table(object)
 ```

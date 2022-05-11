@@ -15,7 +15,7 @@ Return a tibble containing the number of barcodes lost for each
         sample
 }
 \description{
-This fuction counts the number of Barcode lost during the
+This function counts the number of Barcode lost during the
              sequencing. A barcode is lost if it has zero mapped read.
 }
 \examples{

@@ -204,7 +204,3 @@ test_that("set_normalized_count_table NULL", {
     data_table <- get_data_table(object)
     expect_error(set_data_table(object = NULL, data_table))
 })
-
-
-
-

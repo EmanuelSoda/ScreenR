@@ -41,7 +41,7 @@ Allowed values are in the range 0 to 1}
 
 \item{title}{The title to display above the plot}
 
-\item{color}{The three vector color for the veen}
+\item{color}{The three vector color for the venn}
 
 \item{show_elements}{Show set elements instead of count/percentage.}
 }

@@ -67,7 +67,7 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' @param show_elements Show set elements instead of count/percentage.
 #' @param title The title to display above the plot
 #' @return A vector containing the common hit
-#' @param color The three vector color for the veen
+#' @param color The three vector color for the venn
 #' @importFrom ggplot2 ggtitle
 #' @export
 #' @examples

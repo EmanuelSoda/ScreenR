@@ -103,4 +103,3 @@ test_that("remove_all_zero_row", {
     n_row <- nrow(object@count_table)
     expect_equal(n_row, 5317)
 })
-

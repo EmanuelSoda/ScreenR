@@ -3,7 +3,7 @@
 #'              treated vs control in the different time points.
 #'
 #' @param time_point_measure A list containing the table for each time
-#'                           point. Each table contains for eaach barcode
+#'                           point. Each table contains for each barcode
 #'                           the counts for the treated and control the Log2FC,
 #'                           Zscore, ZscoreRobust, Day.
 #'

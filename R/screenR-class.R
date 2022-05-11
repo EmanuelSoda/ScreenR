@@ -9,7 +9,7 @@
 #' @slot annotation_table It is used to store the annotation of the shRNA
 #' @slot groups It is used to store the vector of treated and untreated
 #' @slot replicates It is used to store information about the replicates
-#' @slot normalized_count_table It is used to store a normalized verision of
+#' @slot normalized_count_table It is used to store a normalized version of
 #'                              the count table
 #' @slot data_table It is used to store a tidy format of the count table
 #' @exportClass screenr_object

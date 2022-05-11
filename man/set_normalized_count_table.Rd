@@ -17,7 +17,7 @@ set_normalized_count_table(object, normalized_count_table)
 \item{normalized_count_table}{A table of the normalized count table}
 }
 \value{
-The ScreenR object with the setted normalized_count_table
+The ScreenR object with the set normalized_count_table
 }
 \description{
 Set function for the normalized_count_table of

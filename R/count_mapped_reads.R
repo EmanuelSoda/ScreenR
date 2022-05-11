@@ -1,6 +1,6 @@
 #' @title Count the number of mapped read
 #' @description This function counts the number of reads for Barcode
-#'              in each sample. It is a quality control fuction (QC) to see if
+#'              in each sample. It is a quality control function (QC) to see if
 #'              the biological protocol went as planned.
 #' @importFrom rlang .data
 #' @importFrom tidyr gather

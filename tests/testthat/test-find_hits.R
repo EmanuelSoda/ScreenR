@@ -81,6 +81,3 @@ test_that("find_roast_hit", {
         contrast = "Treated", nrot = 20
     ))
 })
-
-
-

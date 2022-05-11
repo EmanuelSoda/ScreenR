@@ -9,7 +9,7 @@
 \strong{ScreenR} is an easy and effective package to perform hits
 identification in loss of function High Throughput Biological
 Screening performed with shRNAs library. ScreenR combines the
-power of software like edgeR with the simplicity of the Tydiverse
+power of software like edgeR with the simplicity of the Tidyverse
 metapackage. ScreenR executes a pipeline able to find candidate
 hits from barcode counts data and integrates a wide range of
 visualization for each step of the analysis.
@@ -17,7 +17,7 @@ visualization for each step of the analysis.
 \details{
 \strong{ScreenR} takes the a count table as input and create the
 screenr_object to perform the analysis. Throught the pipeline
-\strong{ScreenR} anable the user to perform quality control, visual
+\strong{ScreenR} enable the user to perform quality control, visual
 inspection, dimensionality reduction of the data. Using three statistical
 methods:
 
