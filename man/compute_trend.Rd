@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_trend.R
 \name{compute_trend}
 \alias{compute_trend}
-\title{Compute Trend}
+\title{Compute trend}
 \usage{
 compute_trend(screenR_Object, genes, group_var)
 }
@@ -17,6 +17,7 @@ compute_trend(screenR_Object, genes, group_var)
 A table with the trend of the genes passed as input
 }
 \description{
-This function computes the trend of a gene
+This is an internal function  used to computes the trend of
+             a gene
 }
 \keyword{internal}

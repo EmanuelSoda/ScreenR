@@ -1,5 +1,11 @@
 #' @title Find Roast Hit
-#' @description Find the hit using the Roast method
+#' @description Find the hit using the roast method. Roast is a competitive gene
+#'              set test which uses rotation instead of permutation. Here is
+#'              applied in a contest of a genetic screening so it perform a
+#'              barcode competitive test testing for barcode which are
+#'              differentially expressed within a gene. More information can be
+#'              found in
+#'           \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param matrix_model The matrix that will be used to perform the

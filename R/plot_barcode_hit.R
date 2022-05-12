@@ -1,5 +1,9 @@
-#' @title Plot Barcode Hit
-#' @description Create a Barcode plot for the Hit
+#' @title Plot barcode hit
+#' @description Create a barcode plot for a hit.
+#'              A barcode plot displays if the hit is differentially up or
+#'              down regulated. If most of the vertical line are on the left
+#'              side the gene associated to the barcodes is down regulated
+#'              otherwise is up regulated.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param matrix_model The matrix that will be used to perform the
@@ -9,9 +13,9 @@
 #' @param contrast An object created with \code{\link[limma]{makeContrasts}}
 #'                 function.
 #' @param number_barcode Number of barcode that as to be differentially
-#'                       expressed (DE)in order to consider the gene associated
-#'                       DE. Example a gene is associated
-#'                       with 10 shRNA we consider a gene DE if it has at least
+#'                       expressed (DE) in order to consider the associated gene
+#'                       DE. Example a gene is associated with 10 shRNA we
+#'                       consider a gene DE if it has at least
 #'                       number_barcode = 5 shRNA DE.
 #' @param quantile Quantile to display on the plot
 #' @param labels The label to be displayed on the quantile side
@@ -33,7 +37,6 @@
 #'     contrast = contrast,
 #'     gene = "Gene_300"
 #' )
-#'
 plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
     quantile = c(-0.5, 0.5), labels = c("Negative logFC", "Positive logFC")) {

@@ -17,8 +17,8 @@ Return the ScreenR object with the normalize data
 This function perform a normalization on the data considering
              the fact that each shRNA has a defined length so this will not
              influence the data. Basically is computed the sum for
-             each row and then multiply by 1e6. At the end we will obtain a
-             sort of transcript per million.
+             each row and then multiply by 1e6. At the end the data obtained
+             will be Count Per Million.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

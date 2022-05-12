@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_barcode_trend.R
 \name{plot_barcode_trend}
 \alias{plot_barcode_trend}
-\title{Plot the trend over time of the Barcodes}
+\title{Plot the trend over time of the barcodes}
 \usage{
 plot_barcode_trend(
   list_data_measure,
@@ -30,7 +30,8 @@ The trend plot for the genes in input.
 }
 \description{
 Plot the log2FC over time of the barcodes in the different
-             time point
+             time point. This plot is useful to check we efficacy of each
+             shRNA. Good shRNAs should have consistent trend trend over time.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

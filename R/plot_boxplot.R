@@ -1,6 +1,7 @@
 #' @title Plot Barcodes Hit
 #' @description This function plots a boxplot for each sample for the genes
-#'              passed as input.
+#'              passed as input. It can be used to see the overall trend of a
+#'              gene and so to visualize if the gene is up or down regulated.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param group_var The variable that as to be used to filter the data, for
@@ -12,8 +13,8 @@
 #' @param nrow The number of rows in case multiple genes are plotted
 #' @param ncol The number of columns in case multiple genes are plotted
 #' @param type The type of plot to use "boxplot" or "violinplot"
-#' @param scales The scales used for the facet. Possible values can be "free",
-#'               "fixed" and "free_y"
+#' @param scales The scales used for the facet.
+#'               Possible values can be "free", "fixed" and "free_y"
 #' @concept  plot
 #' @importFrom dplyr sym
 #' @importFrom ggplot2 geom_violin

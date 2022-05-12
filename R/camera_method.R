@@ -1,9 +1,10 @@
 #' @title Find Camera Hit
-#' @description This function finds the hits using the camera method is
-#'              a wrapper for the \code{\link[limma]{camera}} function.
-#'              It implements the methods by proposed by Wu and Smyth (2012).
-#'              It performs a competitive test in the sense defined by Goeman
-#'              and Buhlmann (2007). The paper can be found here
+#' @description This function implements the method by proposed by Wu and
+#'              Smyth (2012).
+#'              The original \code{\link[limma]{camera}} method is a gene set
+#'              test, here is applied in the contest of a genetic screening
+#'              and so it erforms a competitive barcode set test.
+#'              The paper can be found here
 #'      \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
@@ -13,14 +14,9 @@
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix with which perform the
 #'                 analysis
-#' @param thresh The threshold
-#' @param lfc The Log2FC
-#' @importFrom edgeR estimateDisp
-#' @importFrom edgeR glmFit
-#' @importFrom edgeR glmLRT
-#' @importFrom tibble rownames_to_column
-#' @importFrom limma camera
-#' @importFrom purrr map_lgl
+#' @param thresh The threshold for the False Discovery Rate (FDR) that has to be
+#'               used to select the statistically significant hits.
+#' @param lfc The Log2FC threshold.
 #' @param number_barcode Number of barcode that as to be differentially
 #'                       expressed (DE)in order to consider the gene associated
 #'                       DE. Example a gene is associated
@@ -28,7 +24,13 @@
 #'                       number_barcode = 5 shRNA DE.
 #' @param direction String containing the direction of the variation,
 #'                  "Down" for the down regulation "Up" for the up regulation.
-#' @return The data frame with hit find using the camera method
+#' @importFrom edgeR estimateDisp
+#' @importFrom edgeR glmFit
+#' @importFrom edgeR glmLRT
+#' @importFrom tibble rownames_to_column
+#' @importFrom limma camera
+#' @importFrom purrr map_lgl
+#' @return The data frame containing the hit found using the camera method
 #' @export
 #' @concept find
 #' @examples
@@ -68,7 +70,8 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 }
 
 #' @title Compute Camera
-#' @description This internal function computes the actual hits using camera.
+#' @description This internal function computes the actual hits using  the
+#'              camera method.
 #' @param xglm object created with \code{\link[edgeR]{estimateDisp}}
 #' @param lrt object created with \code{\link[edgeR]{glmFit}}
 #' @param DGEList edgeR object

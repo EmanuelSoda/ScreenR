@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcode_lost.R
 \name{plot_barcode_lost_for_gene}
 \alias{plot_barcode_lost_for_gene}
-\title{Plot number of barcode lost for gene}
+\title{Plot number of barcode lost for  gene}
 \usage{
 plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 }
@@ -10,15 +10,23 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{facet}{A boolean to use the facet}
+\item{facet}{A boolean to use the facet.}
 
-\item{samples}{A vector of samples to visualize}
+\item{samples}{A vector of samples that as to be visualize}
 }
 \value{
-Return a tibble containing the number of mapped reads for sample
+Return the plot displaying the number of barcode lost for each gene
+        in each sample.
 }
 \description{
 This function plots the number of barcodes lost in each sample
+             for each gene. Usually in a genetic screening each gene is
+             is associated with multiple shRNAs and so barcodes. For this
+             reason a reasonable number of barcodes associated with the
+             gene has to be retrieved in order to have a robust result.
+             Visualizing the number of genes that have lost lot's of barcode
+             is a Quality Check procedure in order to be aware of the number
+             of barcode for the hit identified.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

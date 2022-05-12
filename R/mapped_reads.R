@@ -12,7 +12,6 @@
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' mapped_reads(object)
-#'
 mapped_reads <- function(screenR_Object) {
     table <- count_mapped_reads(screenR_Object)
 

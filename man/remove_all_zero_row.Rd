@@ -16,9 +16,10 @@ The ScreenR object with the count_table and the annotation_table
 }
 \description{
 This function removes the rows that have zero count in
-             all samples. It takes care up updating both count_table and
-             annotation_table. It has to be performed before the
-             data normalization.
+             all samples. It takes care of updating both count_table and
+             annotation_table.
+             Very_Important: It has to be performed before the
+                             data normalization.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

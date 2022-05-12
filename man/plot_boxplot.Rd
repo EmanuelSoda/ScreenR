@@ -36,15 +36,16 @@ Allowed values are in the range 0 to 1}
 
 \item{type}{The type of plot to use "boxplot" or "violinplot"}
 
-\item{scales}{The scales used for the facet. Possible values can be "free",
-"fixed" and "free_y"}
+\item{scales}{The scales used for the facet.
+Possible values can be "free", "fixed" and "free_y"}
 }
 \value{
 A boxplot
 }
 \description{
 This function plots a boxplot for each sample for the genes
-             passed as input.
+             passed as input. It can be used to see the overall trend of a
+             gene and so to visualize if the gene is up or down regulated.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

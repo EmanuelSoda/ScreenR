@@ -10,22 +10,32 @@ compute_metrics(screenR_Object, control, treatment, day)
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{control}{The vector specifying the control samples}
+\item{control}{A string specifying the sample that as to be used as
+control in the analysis.
+This string has to be equal to the interested sample in the
+Treatment column of the data_table slot}
 
-\item{treatment}{The vector specifying the treated samples}
+\item{treatment}{A string specifying the sample that as to be used as
+treatment in the analysis.
+This string has to be equal to the interested sample in the
+Treatment column of the data_table slot.}
 
-\item{day}{A string containing the day to consider}
+\item{day}{A string containing the day (time point) to consider in the
+metrics computation.
+This string has to be equal to the interested sample in the
+Day column of the data_table slot.}
 }
 \value{
 Return a tibble with all the measure computed.
 }
 \description{
-This function computes the  metrics that will be then used
-             to compute the Z-score using the function
-             \code{\link{find_zscore_hit}} starting from the screenR object
-             for a given treatment in a given day. More information can
-             be found at this paper
-             \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{Z-score}
+This function computes the metrics that will be then used
+             to compute the z-score using the function
+             \code{\link{find_zscore_hit}} starting from the screenr object
+             for a given treatment in a given day. More information about the
+             z-score and other metrics used in genetic screening can be found
+             at this paper
+             \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{z-score}
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -34,6 +44,5 @@ metrics <- compute_metrics(object,
     treatment = "Time3", day = "Time3"
 )
 head(metrics)
-
 }
 \concept{compute}

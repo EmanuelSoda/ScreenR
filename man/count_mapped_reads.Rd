@@ -14,9 +14,11 @@ count_mapped_reads(screenR_Object)
 Return a tibble containing the number of mapped read for sample
 }
 \description{
-This function counts the number of reads for Barcode
+This function counts the number of reads for each barcode
              in each sample. It is a quality control function (QC) to see if
              the biological protocol went as planned.
+             If a sample has very low mapped compared to the other means
+             that is has a lower quality.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

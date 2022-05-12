@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_barcode_hit.R
 \name{plot_barcode_hit}
 \alias{plot_barcode_hit}
-\title{Plot Barcode Hit}
+\title{Plot barcode hit}
 \usage{
 plot_barcode_hit(
   screenR_Object,
@@ -26,9 +26,9 @@ model.matrix.}
 function.}
 
 \item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
+expressed (DE) in order to consider the associated gene
+DE. Example a gene is associated with 10 shRNA we
+consider a gene DE if it has at least
 number_barcode = 5 shRNA DE.}
 
 \item{gene}{The name of the gene that has to be plot}
@@ -41,7 +41,11 @@ number_barcode = 5 shRNA DE.}
 The barcode plot
 }
 \description{
-Create a Barcode plot for the Hit
+Create a barcode plot for a hit.
+             A barcode plot displays if the hit is differentially up or
+             down regulated. If most of the vertical line are on the left
+             side the gene associated to the barcodes is down regulated
+             otherwise is up regulated.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -53,6 +57,5 @@ plot_barcode_hit(object, matrix_model,
     contrast = contrast,
     gene = "Gene_300"
 )
-
 }
 \concept{plot}

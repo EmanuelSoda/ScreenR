@@ -20,6 +20,5 @@ This function returns the number of mapped reads inside the
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 mapped_reads(object)
-
 }
 \concept{compute}

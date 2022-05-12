@@ -15,16 +15,16 @@ plot_explained_variance(
 \code{\link{create_screenr_object}}}
 
 \item{cumulative}{A boolean value which indicates whether or not to plot
-the cumulative variance. If TRUE}
+the cumulative variance. The default value is FALSE.}
 
-\item{color}{The color to fill the barplot}
+\item{color}{The color to fill the barplot the default value is steelblue}
 }
 \value{
 The explained variance plot
 }
 \description{
 This function plot the explained variance by the
-             Principal Component.
+             Principal Component analysis.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

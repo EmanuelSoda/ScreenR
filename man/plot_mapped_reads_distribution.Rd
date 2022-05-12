@@ -24,11 +24,14 @@ Allowed values are in the range 0 to 1}
 "density."}
 }
 \value{
-Return a tibble containing the number of mapped read for sample
+Return a tibble containing the number of mapped read for each sample
 }
 \description{
-This function creates a boxplot to show the distribution of
-             the mapped reads in different samples.
+This function creates a boxplot or a densityplot to show the
+             distribution of the mapped reads in different samples. This
+             function can be used to assess the quality of the samples.
+             Samples which show roughly the same distribution have
+             good quality.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

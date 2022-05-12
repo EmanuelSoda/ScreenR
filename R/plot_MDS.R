@@ -4,10 +4,13 @@
 #'              changes between the samples.
 #' @param screenR_Object The Object of the package
 #'                       \code{\link{create_screenr_object}}
-#' @param groups The vector that has to be used to fill the plot
-#' @param alpha The opacity of the labels
-#' @param size The dimension of the labels
-#' @param color The color of the labels
+#' @param groups The vector that has to be used to fill the plot if NULL the
+#'               function will use the default groups slot in the object passed
+#'               as input.
+#' @param alpha The opacity of the labels.
+#'              Possible value are in a range from 0 to 1.
+#' @param size The dimension of the labels. The default value is 2.5
+#' @param color The color of the labels. The default value is black
 #' @importFrom ggplot2 geom_label labs
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom limma plotMDS
@@ -51,12 +54,12 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 
 #' @title Plot the explained variance by the PC
 #' @description This function plot the explained variance by the
-#'              Principal Component.
+#'              Principal Component analysis.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param cumulative A boolean value which indicates whether or not to plot
-#'                   the cumulative variance. If TRUE
-#' @param color The color to fill the barplot
+#'                   the cumulative variance. The default value is FALSE.
+#' @param color The color to fill the barplot the default value is steelblue
 #' @importFrom  scales percent
 #' @return The explained variance plot
 #' @export
@@ -116,9 +119,9 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
     return(plot)
 }
 
-#' @title Compute the Explained Variance
-#' @description This function compute the explained variance by each of the
-#'              Principal Components
+#' @title Compute explained variance
+#' @description This  is an internal function  used to compute
+#'              the explained variance by each of the Principal Components.
 #' @importFrom stats  prcomp
 #' @param screenR_Object The Object of the package
 #' @return A data.frame containing all the information of the variance

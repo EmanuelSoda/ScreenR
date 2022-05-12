@@ -1,7 +1,9 @@
 #' @title Plot the distribution of the mapped reads
-#' @description This function creates a boxplot to show the distribution of
-#'              the mapped reads in different samples.
-#'
+#' @description This function creates a boxplot or a densityplot to show the
+#'              distribution of the mapped reads in different samples. This
+#'              function can be used to assess the quality of the samples.
+#'              Samples which show roughly the same distribution have
+#'              good quality.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}.
 #'
@@ -12,7 +14,7 @@
 #'             "density."
 #' @importFrom ggplot2 geom_boxplot geom_density
 #' @concept plot
-#' @return Return a tibble containing the number of mapped read for sample
+#' @return Return a tibble containing the number of mapped read for each sample
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

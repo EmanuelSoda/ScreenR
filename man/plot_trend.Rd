@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_trend.R
 \name{plot_trend}
 \alias{plot_trend}
-\title{Plot the trend Hit Gene}
+\title{Plot the trend hit gene}
 \usage{
 plot_trend(
   screenR_Object,
@@ -42,7 +42,7 @@ Allowed values are in the range 0 to 1}
 \item{scales}{The scales to be used in the facette}
 }
 \value{
-The the plot of the
+The plot of the trend over time for a specific treatment.
 }
 \description{
 This function plot the trend of a gene resulted as hit

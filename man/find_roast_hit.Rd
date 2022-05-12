@@ -43,7 +43,13 @@ number_barcode = 5 shRNA DE.}
 The hits found by ROAST method
 }
 \description{
-Find the hit using the Roast method
+Find the hit using the roast method. Roast is a competitive gene
+             set test which uses rotation instead of permutation. Here is
+             applied in a contest of a genetic screening so it perform a
+             barcode competitive test testing for barcode which are
+             differentially expressed within a gene. More information can be
+             found in
+     \code{\link{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}}
 }
 \examples{
 set.seed(42)

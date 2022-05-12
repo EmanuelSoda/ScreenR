@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_mds.R
 \name{compute_explained_variance}
 \alias{compute_explained_variance}
-\title{Compute the Explained Variance}
+\title{Compute explained variance}
 \usage{
 compute_explained_variance(screenR_Object)
 }
@@ -14,8 +14,8 @@ A data.frame containing all the information of the variance
         expressed by the components
 }
 \description{
-This function compute the explained variance by each of the
-             Principal Components
+This  is an internal function  used to compute
+             the explained variance by each of the Principal Components.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

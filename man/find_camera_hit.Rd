@@ -32,22 +32,24 @@ DE. Example a gene is associated
 with 10 shRNA we consider a gene DE if it has at least
 number_barcode = 5 shRNA DE.}
 
-\item{thresh}{The threshold}
+\item{thresh}{The threshold for the False Discovery Rate (FDR) that has to be
+used to select the statistically significant hits.}
 
-\item{lfc}{The Log2FC}
+\item{lfc}{The Log2FC threshold.}
 
 \item{direction}{String containing the direction of the variation,
 "Down" for the down regulation "Up" for the up regulation.}
 }
 \value{
-The data frame with hit find using the camera method
+The data frame containing the hit found using the camera method
 }
 \description{
-This function finds the hits using the camera method is
-             a wrapper for the \code{\link[limma]{camera}} function.
-             It implements the methods by proposed by Wu and Smyth (2012).
-             It performs a competitive test in the sense defined by Goeman
-             and Buhlmann (2007). The paper can be found here
+This function implements the method by proposed by Wu and
+             Smyth (2012).
+             The original \code{\link[limma]{camera}} method is a gene set
+             test, here is applied in the contest of a genetic screening
+             and so it erforms a competitive barcode set test.
+             The paper can be found here
      \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
 }
 \examples{

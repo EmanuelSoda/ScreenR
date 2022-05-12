@@ -16,13 +16,16 @@ plot_mds(
 \item{screenR_Object}{The Object of the package
 \code{\link{create_screenr_object}}}
 
-\item{groups}{The vector that has to be used to fill the plot}
+\item{groups}{The vector that has to be used to fill the plot if NULL the
+function will use the default groups slot in the object passed
+as input.}
 
-\item{alpha}{The opacity of the labels}
+\item{alpha}{The opacity of the labels.
+Possible value are in a range from 0 to 1.}
 
-\item{size}{The dimension of the labels}
+\item{size}{The dimension of the labels. The default value is 2.5}
 
-\item{color}{The color of the labels}
+\item{color}{The color of the labels. The default value is black}
 }
 \value{
 The MDS Plot

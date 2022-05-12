@@ -26,7 +26,6 @@
 #' )
 #'
 #' plot_zscore_distribution(list(table1, table2), alpha = 0.5)
-#'
 plot_zscore_distribution <- function(time_point_measure, alpha = 1) {
     dplyr::bind_rows(time_point_measure) %>%
         ggplot(aes(x = .data$Log2FC, fill = .data$Day)) +

@@ -5,7 +5,8 @@
 #' @concept data
 #'
 #' @format A data frame with 5320 rows and 2 columns obtained from a
-#'         loss-of-function genetic screening:
+#'         loss-of-function genetic screening. This table is used to
+#'         store information about the shRNAs:
 #' \describe{
 #'   \item{Gene}{It Contains the gene name}
 #'   \item{Barcode}{It contains an ID that identify each barcode

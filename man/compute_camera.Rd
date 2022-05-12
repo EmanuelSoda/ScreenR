@@ -28,8 +28,9 @@ compute_camera(
     \item{\code{matrix_model}}{The matrix that will be used to perform the
 linear model analysis created using
 \code{\link[stats]{model.matrix}}}
-    \item{\code{thresh}}{The threshold}
-    \item{\code{lfc}}{The Log2FC}
+    \item{\code{thresh}}{The threshold for the False Discovery Rate (FDR) that has to be
+used to select the statistically significant hits.}
+    \item{\code{lfc}}{The Log2FC threshold.}
     \item{\code{number_barcode}}{Number of barcode that as to be differentially
 expressed (DE)in order to consider the gene associated
 DE. Example a gene is associated
@@ -41,6 +42,7 @@ number_barcode = 5 shRNA DE.}
 The list of hits found by the camera method
 }
 \description{
-This internal function computes the actual hits using camera.
+This internal function computes the actual hits using  the
+             camera method.
 }
 \keyword{internal}

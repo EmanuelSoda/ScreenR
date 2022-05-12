@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcode_lost.R
 \name{barcode_lost}
 \alias{barcode_lost}
-\title{Count Barcode Lost}
+\title{Count number of barcode lost}
 \usage{
 barcode_lost(screenR_Object)
 }
@@ -11,17 +11,18 @@ barcode_lost(screenR_Object)
 \code{\link{create_screenr_object}}}
 }
 \value{
-Return a tibble containing the number of barcodes lost for each
+Return a tibble containing the number of barcode lost for each
         sample
 }
 \description{
-This function counts the number of Barcode lost during the
-             sequencing. A barcode is lost if it has zero mapped read.
+This function counts the number of barcodes lost during the
+             sequencing. A barcode is lost if its associated shRNA has zero
+             mapped read in a sample.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
-# In order to count the number of barcode lost just the ScreenR object is
+# In order to count the number of barcodes lost just the ScreenR object is
 # needed
 head(barcode_lost(object))
 

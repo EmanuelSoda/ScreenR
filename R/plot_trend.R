@@ -1,4 +1,4 @@
-#' @title Plot the trend Hit Gene
+#' @title Plot the trend hit gene
 #' @description This function plot the trend of a gene resulted as hit
 #' @importFrom rlang .data
 #' @param screenR_Object The ScreenR object obtained using the
@@ -14,7 +14,7 @@
 #' @param ncol The number of columns in case multiple genes are plotted
 #' @param genes The vector of genes to use
 #' @param scales The scales to be used in the facette
-#' @return The the plot of the
+#' @return The plot of the trend over time for a specific treatment.
 #' @importFrom ggplot2 geom_smooth
 #' @export
 #' @examples
@@ -42,16 +42,15 @@ plot_trend <- function(screenR_Object, genes, group_var,
     if (length(genes) > 1) {
         plot <- plot +
             ggplot2::facet_wrap("Gene",
-                nrow = nrow, ncol = ncol,
-                scales = scales
-            )
+                nrow = nrow, ncol = ncol,scales = scales)
     }
 
     return(plot)
 }
 
-#' @title Compute Trend
-#' @description This function computes the trend of a gene
+#' @title Compute trend
+#' @description This is an internal function  used to computes the trend of
+#'              a gene
 #' @param screenR_Object object created with \code{\link[edgeR]{estimateDisp}}
 #' @param genes a list of genes
 #' @param group_var the variable that as to be used as grouping variable

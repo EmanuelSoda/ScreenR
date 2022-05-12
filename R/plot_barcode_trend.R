@@ -1,6 +1,7 @@
-#' @title Plot the trend over time of the Barcodes
+#' @title Plot the trend over time of the barcodes
 #' @description Plot the log2FC over time of the barcodes in the different
-#'              time point
+#'              time point. This plot is useful to check we efficacy of each
+#'              shRNA. Good shRNAs should have consistent trend trend over time.
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
 #' @importFrom patchwork wrap_plots
@@ -51,10 +52,7 @@ plot_barcode_trend <- function(list_data_measure, genes,
             )) +
                 geom_line(size = size_line) +
                 geom_point() +
-                facet_wrap(
-                    facets = "Gene",
-                    scales = "free"
-                )
+                facet_wrap(facets = "Gene", scales = "free")
         )
     } else {
         gg_l <- map(

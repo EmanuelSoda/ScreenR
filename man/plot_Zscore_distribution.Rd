@@ -36,5 +36,4 @@ table2 <- compute_metrics(object,
 )
 
 plot_zscore_distribution(list(table1, table2), alpha = 0.5)
-
 }

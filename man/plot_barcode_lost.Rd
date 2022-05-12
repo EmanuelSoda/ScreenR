@@ -15,7 +15,7 @@ plot_barcode_lost(
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{palette}{A vector of colors}
+\item{palette}{A vector of colors to be used to fill the barplot.}
 
 \item{alpha}{A value for the opacity of the plot.
 Allowed values are in the range 0 to 1}
@@ -25,10 +25,13 @@ Allowed values are in the "top", "bottom", "right",
 "left", "none".}
 }
 \value{
-Returns a tibble containing the number of mapped read for sample
+Returns the plot displaying the number of barcode lost in each
+        sample
 }
 \description{
-This function plots the number of barcodes lost in each sample
+This function plots the number of barcode lost in each sample.
+             Usually lots of barcodes lost mean that the sample has low
+             quality.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

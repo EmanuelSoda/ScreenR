@@ -4,12 +4,14 @@
 #' @keywords datasets
 #' @concept  data
 #'
-#' @format A data frame with 5323 rows and 15 variables:
+#' @format A data frame with 5323 rows and 15 variables obtained from
+#'         barcode alignment to the reference genome/library.
 #' \describe{
-#'   \item{Barcode}{It contains an ID that identify each barcode, it can be use
+#'   \item{Barcode}{It contains an ID that identify each barcode. It can be use
 #'   to marge the annotation table with the count table. A Barcode is a unique
-#'   indentifier of an shRNA. In a genetic screening multiple
-#'   slightly different shRNAs, each with its efficacy.}
+#'   identifier of an shRNA. In a genetic screening multiple slightly different
+#'   shRNAs perform a knockout a gene each with its efficacy. For this reason
+#'   it is importat to keep track of each shRNA using a unique barcode.}
 #'
 #'  \item{Time_1}{It contains the counts at time zero}
 #'

@@ -1,16 +1,26 @@
 #' @title Compute Metrics
-#' @description This function computes the  metrics that will be then used
-#'              to compute the Z-score using the function
-#'              \code{\link{find_zscore_hit}} starting from the screenR object
-#'              for a given treatment in a given day. More information can
-#'              be found at this paper
-#'              \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{Z-score}
+#' @description This function computes the metrics that will be then used
+#'              to compute the z-score using the function
+#'              \code{\link{find_zscore_hit}} starting from the screenr object
+#'              for a given treatment in a given day. More information about the
+#'              z-score and other metrics used in genetic screening can be found
+#'              at this paper
+#'              \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{z-score}
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param control The vector specifying the control samples
-#' @param treatment The vector specifying the treated samples
-#' @param day A string containing the day to consider
+#' @param control A string specifying the sample that as to be used as
+#'                control in the analysis.
+#'                This string has to be equal to the interested sample in the
+#'                Treatment column of the data_table slot
+#' @param treatment A string specifying the sample that as to be used as
+#'                  treatment in the analysis.
+#'                  This string has to be equal to the interested sample in the
+#'                  Treatment column of the data_table slot.
+#' @param day A string containing the day (time point) to consider in the
+#'            metrics computation.
+#'            This string has to be equal to the interested sample in the
+#'            Day column of the data_table slot.
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
@@ -25,7 +35,6 @@
 #'     treatment = "Time3", day = "Time3"
 #' )
 #' head(metrics)
-#'
 compute_metrics <- function(screenR_Object, control,
     treatment, day) {
     control <- screenR_Object@data_table %>%
