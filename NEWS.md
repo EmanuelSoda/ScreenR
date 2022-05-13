@@ -1,4 +1,7 @@
-# ScreenR 0.99.5  
+# ScreenR 0.99.51
+* Changes in version 0.99.51:
+ * Pushed to Bioconductor
+
 * Changes in version 0.99.5:
   * Now ScreenR uses R 4.2 or above
   * Lazy data is set to FALSE
