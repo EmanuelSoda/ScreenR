@@ -58,6 +58,7 @@ Collate:
     'compute_metrics.R'
     'count_mapped_reads.R'
     'count_table.R'
+    'create_object.R'
     'distribution_mapped_reads.R'
     'filter_by.R'
     'find_common_hit.R'
@@ -76,4 +77,3 @@ Collate:
     'plot_zscore_distribution.R'
     'screenr-class.R'
     'zzz.R'
-    'create_object.R'
