@@ -49,7 +49,7 @@ Find the hit using the roast method. Roast is a competitive gene
              barcode competitive test testing for barcode which are
              differentially expressed within a gene. More information can be
              found in
-     \code{\link{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}}
+          \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
 }
 \examples{
 set.seed(42)
