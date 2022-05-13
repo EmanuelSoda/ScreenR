@@ -9,7 +9,7 @@ Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
              person("Elena", "Ceccacci", role = c("aut"),
                    email = "elena.ceccacci@ieo.it", 
                    comment = c(ORICD = "0000-0002-2285-8994")))
-Description:ScreenR is a package suitable to perform hit identification in loss 
+Description: ScreenR is a package suitable to perform hit identification in loss 
             of function High Throughput Biological Screenings performed using 
             barcoded shRNA-based  libraries. ScreenR combines the computing 
             power of software such as  edgeR with the simplicity of use of the 
