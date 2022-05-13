@@ -18,3 +18,7 @@ docs
 /vignettes/*.md
 /vignettes/*.R
 
+<<<<<<< HEAD
+=======
+README.Rmd
+>>>>>>> 8bc088e (spero di essermi salvato)

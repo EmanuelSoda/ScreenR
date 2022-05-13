@@ -97,6 +97,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @importFrom rlang .data
 #' @importFrom dplyr select_if
 #' @importFrom tidyselect all_of
+#' @importFrom ggplot2 scale_x_continuous
 #' @concept plot
 #' @return Return the plot displaying the number of barcode lost for each gene
 #'         in each sample.
@@ -134,6 +135,7 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     )
     table <- dplyr::filter(table, .data$barcode_lost != 0)
     table <- tidyr::drop_na(table)
+    table <- mutate(table, barcode_lost = as.integer(.data$barcode_lost))
 
     if (!is.null(samples)) {
         table <- dplyr::filter(table, .data$Sample %in% samples)
@@ -142,12 +144,10 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     }
 
     plot <- ggplot(table, aes(.data$barcode_lost, .data$Gene,
-        fill = .data$Sample
+        color = .data$Sample
     )) +
-        geom_bar(
-            stat = "identity",
-            position = ggplot2::position_dodge(), show.legend = FALSE
-        )
+        geom_point(show.legend = FALSE) +
+        scale_x_continuous(breaks = seq(0, max(table$barcode_lost), 1))
 
     if (facet) {
         plot <- plot + ggplot2::facet_wrap(vars(.data$Sample), scales = "free")

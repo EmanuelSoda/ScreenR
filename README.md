@@ -1,7 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<<<<<<< HEAD
 # ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="120" /></a>
+=======
+# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src="man/figures/logo.png" align="right" height="120" /></a>
+>>>>>>> 8bc088e (spero di essermi salvato)
 
 <!-- badges: start -->
 

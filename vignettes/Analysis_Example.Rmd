@@ -2,10 +2,15 @@
 title: "ScreenR Example Analysis"
 output: BiocStyle::html_document
 author:
-- name: "Emanuel Michele Soda "
+- name: "Emanuel Michele Soda"
   affiliation: Istituto Europeo Oncologia (IEO),
                Milano, Italy
-  email: emanuelmichele@ieo.it or emanuelsoda@gmail.com
+  email: emanuelmichele@ieo.it
+  
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
 package: ScreenR  
 vignette: >
   %\VignetteIndexEntry{ScreenR Example Analysis}
@@ -17,17 +22,24 @@ editor_options:
 
 # Importing Package
 ```{r packages, message=FALSE, warning=TRUE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-knitr::opts_chunk$set(fig.width = 6, fig.height = 4)
 ```
 
 # Introduction 
-The R package **ScreenR** has been developed to perform the analysis of data 
-coming from RNA-seq data generated using Genetic Screening. It is based 
-on the same idea of edgeR but it also integrate the idea at the base of 
-Tidyverse. 
+The R package **ScreenR** has been developed to perform analysis of
+High-throughput RNA interference screening using pooled shRNA libraries and next
+generation sequencing.. Nowadays several short hairpin RNA (shRNA) libraries are
+commercial available, and in the last years the interest in this type of
+analysis, often called barcode screening, has greatly increased for their
+benefits both from a time-consuming point of view and for the possibility of
+carrying out screening on a large number of genes simultaneously. However, the
+bioinformatic analysis of this type of screening still lacks a golden standard.
+Here, screenR allows the user to carry out a preliminary quality check of the
+experiment, visually inspect the data and finally identify the most significant
+hits of the experiment through a series of plots and cross-statistical analyses.
 
 # Installation {#installation}
 
@@ -81,7 +93,8 @@ devtools::install_github("EmanuelSoda/ScreenR")
 
 
 # Analysis 
-Here is reported an example of the ScreenR pipeline
+
+Here is reported the ScreenR pipeline
 <img src="/Users/ieo5571/Documents/IEO/Stage/ScreenR/man/figures/Pipeline.png" align="top">
 
 ## Loading the package
@@ -92,15 +105,18 @@ library(ScreenR)
 ```
 
 ## Read Data
-The input of ScreenR is a count table. A count table is usually the starting 
-point  of an RNA-seq differentially expressed genes analysis and consists of
-a matrix containing  reads count organized with: 
+
+The input of ScreenR is a count table obtained from barcode alignment to the
+reference genome/library. A count table is usually the starting point of an
+RNA-seq differentially expressed genes analysis and consists of a matrix
+containing reads count organized with: 
 
 * Genes on the rows
 * Samples on the columns
 
-For this vignette we will use as an example a Loss of Function Genetic Screening
-performed using . 
+For this vignette we will use as an example a Loss of Function Chemical 
+lethality Genetic Screening performed using shRNA libraries where each gene is
+represented by ten slightly different shRNA each labeled with a univoce barcode.
 First of all the data has to be read.
 ```{r read_data, message=FALSE, warning=TRUE}
 data(count_table)
@@ -123,10 +139,11 @@ total_Annotation <- annotation_table
 
 ## Object Creation 
 The second needed step is to create a **ScreenR object** from the count table.
-The ScreenR object is created using the function **create_screenR_object()**.
-This object will be used to store the most important information to perform 
-the analysis. Most of the ScreenR function takes as main input the ScreenR 
-object to perform the needed operation and return a result.
+The ScreenR object is created using the function **create_screenr_object()** and
+will be used to store the most important information to perform the analysis.
+Most of the ScreenR function takes as main input the ScreenR object to perform
+the needed operation and return a result.
+
 
 ```{r Create_Object, message=FALSE, warning=TRUE}
 groups <- factor(c(
@@ -137,12 +154,10 @@ groups <- factor(c(
     "Time4_CTRL", "Time4_CTRL", "Time4_CTRL"
 ))
 
-palette <- c(
-    "#66c2a5", "#fc8d62", rep("#8da0cb", 3),
-    rep("#e78ac3", 3),
-    rep("#a6d854", 3),
-    rep("#ffd92f", 3)
-)
+
+palette <- c("#66c2a5", "#fc8d62", rep("#8da0cb", 3), rep("#e78ac3", 3),
+    rep("#a6d854", 3), rep("#ffd92f", 3))
+
 
 object <- create_screenr_object(
     table = data, annotation = total_Annotation, groups = groups,
@@ -158,28 +173,36 @@ object <- remove_all_zero_row(object)
 
 
 ## Computing the needed tables
-In order to start the analysis the data has first to be normalized and the 
-*data_table*.
 
-For what concern the normalization ScreenR uses a normalization that is 
-called *Counts Per Million (CPM)* which has the following mathematical 
-expression:
+Once the object is created, the data must be normalized to start the analysis.
+ScreenR uses *Counts Per Million* (**CPM**)  normalization  which has the
+following mathematical expression:
 
 $$CPM = \frac{Number \; of \; mapped \; reads \; to \; a \; barcode} 
              { \sum_{sample}{Number\; of \;mapped \; reads}} *10^{6}$$ 
                    
 The number of reads mapped for each Barcode in a sample are normalized by the 
 number of reads in that sample and multiplied by one million.
-Then has to be computed the *data_table*. The *data_table* can be seen as a 
-tidy version of the original *count table* and will be used throughout the 
-analysis.
+
+This information is store in a *data table* which is a tidy version of the 
+original *count table* and will be used throughout the analysis.
+
+
 ```{r normalization, message=FALSE, warning=TRUE}
 object <- normalize_data(object)
 object <- compute_data_table(object)
 ```
 
 
-## Mapped Reads
+## Quality Check
+
+The first step to perform when dealing with sequencing data is to check the
+quality of the samples. In ScreenR this can be done using several methods. 
+
+### Mapped Reads
+The total number of mapped reads can be displayed with a barplot with the 
+formula.
+
 ```{r plot_mapped_reads, message=FALSE, warning=TRUE}
 plot <- plot_mapped_reads(object, palette) +
     ggplot2::coord_flip() +
@@ -190,12 +213,10 @@ plot <- plot_mapped_reads(object, palette) +
 plot
 ```
 
-## Quality Check 
-The first step to perform when dealing with RNA-seq data is to check the 
-quality of the samples. In ScreenR this can be done using several methods.
-For example the distribution can be seen using both boxplots or density plots.
 
-### Boxplot Mapped Reads
+For example the distribution can be seen using both boxplots or density plots.
+#### Boxplot Mapped Reads
+
 ```{r  plot_mapped_reads_distribution_boxplot, message=FALSE, warning=TRUE}
 plot <- plot_mapped_reads_distribution(
     object, palette,
@@ -208,7 +229,9 @@ plot <- plot_mapped_reads_distribution(
 plot
 ```
 
-### Density plot
+
+#### Density plot
+
 ```{r  plot_mapped_reads_distribution_density, message=FALSE, warning=TRUE}
 plot <- plot_mapped_reads_distribution(
     object, palette,
@@ -223,18 +246,38 @@ plot
 
 ### Barcode Lost
 
-Moreover another very important quality check when a Genetic Screening is 
-performed is to check the barcode lost during the experiment. ScreenR implements
-a function able to  compute and plot the number of barcodes lost. 
+Another very important quality check when a Genetic Screening is performed is to
+check the barcode lost during the experiment, meaning the barcode that after
+different time points or treatments results in reads count equal to zero. 
+ScreenR implements a function able to compute and plot the number of barcodes 
+lost for each samples.
+
 ```{r  plot_barcode_lost, message=FALSE, warning=TRUE}
 plot <- plot_barcode_lost(screenR_Object = object, palette = palette) +
     ggplot2::coord_flip()
 plot
 ```
 
+Moreover it is important to check if the lost barcodes  in a sample 
+all belong to the same gene, in order to verify that an adequate number of
+barcodes per gene are still present. This can be done by visualizing the number
+of barcode lost in a sample by gene.
+
+```{r  plot_barcode_lost_for_gene, message=FALSE, warning=TRUE}
+plot <- plot_barcode_lost_for_gene(object,
+    samples = c("Time4_TRT_C", "Time4_CTRL_C")
+)
+plot
+
+```
+
 ### Plot MDS {.tabset}
-In order to see compare the samples an initial MDS analysis can be conducted.
-In ScreenR this can be done using the *plot_mds* function as follow.
+In order to see the samples clusterization an initial MDS analysis can be 
+conducted. In ScreenR this can be done using the *plot_mds* function and the 
+user can decide the color code of the graph in order to highlight the trend of 
+the samples based on replicates, treatment or timepoints simply by modifying the 
+field levels in the plot_mds function. 
+
 
 #### For Sample
 ```{r  Plot_MDS_Sample, message=FALSE, warning=TRUE}
@@ -267,18 +310,22 @@ plot_mds(
 ```
 
 ## Statistical Analysis
-Finally can be conducted the real analysis. 
-The statistical Analysis is based on three methods:
+Once the various steps of the quality check have been passed, the actual 
+statistical analysis can begin. The statistical Analysis of ScreenR is based 
+on three different methods:
 
-* Z-score filtering
-* CAMERA filtering 
-* ROAST filtering 
+* [Z-score filtering](https://pubmed.ncbi.nlm.nih.gov/21515799/)
+* [CAMERA filtering](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/)
+* [ROAST filtering]/https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/)
 
-### Compute Metrics
+
+### Z-score hit
 In order to compute the Z-score, first a list of metrics has to be computed. 
 In particular a *Log2FC* is computed for the treated vs control samples in the 
-different conditions. Here for example a treated vs control in different day 
-is computed. Then the different distribution of the Z-score can be plotted 
+different conditions. This can be done using the function *compute_metrics()*.
+Here is reported an example of treated vs control in different day. 
+
+Then the different distribution of the Z-score can be plotted 
 using the *plot_zscore_distribution* function. 
 
 ```{r  compute_metrics, message=FALSE, warning=TRUE}
@@ -301,8 +348,9 @@ plot_zscore_distribution(data_with_measure_TRT, alpha = 0.8)
 
 
 ### Z-score hit
-Now that the metrics has been computed the hits according to Z-score can be 
-found. This in ScreenR is done using the *find_zscore_hit* function.
+Based on these metrics the Z-score hit identification can be computed using the
+*find_zscore_hit* function.
+
 
 ```{r  Z_score_hit, message=FALSE, warning=TRUE}
 zscore_hit_TRT <- list(
@@ -360,12 +408,19 @@ roast_hit_TRT
 
 
 ### Find Common Hit 
-ScreenR consider as final hit only the one present in common among the three 
-methods. In particular two strategy are possible:
 
-* Are considered candidate Hits the one present in at least two of the three 
-methods
-* Are considered candidate Hits the one present in all of the three methods
+ScreenR considers as final hit only the one result as candidate hit in all three 
+statistical methods. However this is a particularly stringent method and in 
+some cases leads to a small number of results. For this reason the user can 
+also decide to opt for a less stringent method that considers only the hits 
+present in at least two of the statistical methods. The two different strategies 
+can be computed with the function::
+
+* **common_hit_TRT_at_least_2**: considering candidate Hits the one present in 
+                            at least two of the three methods (less stringent)
+
+* **common_hit_TRT_at_least_3**: considering candidate Hits the one present in 
+                                 all of the three methods
 
 
 ```{r Common_Hit,  message=FALSE, warning=TRUE}
@@ -394,7 +449,8 @@ common_hit_TRT_at_least_3 <- list(
 
 ### Plot common hit
 
-The hits can be easily visualized using the *plot_common_hit* function.
+The intersection of the hits found by the three statistical methods can be 
+easily visualized using the *plot_common_hit* function.
 
 ```{r Venn_diagram_in_at_least_2}
 plot_common_hit(
@@ -404,20 +460,19 @@ plot_common_hit(
 ```
 
 
+As we all know, when we deal with statistical methods the is the possibility of 
+*type I* error also known as "false positive". For this reason is important to 
+visualize the results obtained. This can be done by visualizing the trend 
+of the candidate hits obtained using the function **plot_trend**.
 
-We can visualize the trend of the hits found using the function *plot_trend*.
 
 ```{r plot_trend}
 candidate_hits <- common_hit_TRT_at_least_2$Time3
 
 plot_trend(screenR_Object = object, 
-           genes = candidate_hits[1:4], 
+           genes = candidate_hits[1:2], 
            nrow = 2, ncol = 2, 
            group_var = c("Time1", "Time2", "TRT"))
-
-plot_trend(screenR_Object = object, 
-           genes = candidate_hits[5:6], 
-           ncol = 2, group_var = c("Time1", "Time2", "TRT"))
 ```
 
 
