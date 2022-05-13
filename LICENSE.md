@@ -1,10 +1,5 @@
 # MIT License
-
-<<<<<<< HEAD
-Copyright (c) 2021 ScreenR authors
-=======
 Copyright (c) 2022 ScreenR authors
->>>>>>> 8bc088e (spero di essermi salvato)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +18,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-<<<<<<< HEAD
-
-=======
->>>>>>> 8bc088e (spero di essermi salvato)
