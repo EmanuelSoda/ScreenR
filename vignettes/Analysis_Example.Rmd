@@ -316,7 +316,7 @@ on three different methods:
 
 * [Z-score filtering](https://pubmed.ncbi.nlm.nih.gov/21515799/)
 * [CAMERA filtering](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/)
-* [ROAST filtering]/https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/)
+* [ROAST filtering](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/)
 
 
 ### Z-score hit
@@ -470,7 +470,12 @@ of the candidate hits obtained using the function **plot_trend**.
 candidate_hits <- common_hit_TRT_at_least_2$Time3
 
 plot_trend(screenR_Object = object, 
-           genes = candidate_hits[1:2], 
+           genes = candidate_hits[1], 
+           nrow = 2, ncol = 2, 
+           group_var = c("Time1", "Time2", "TRT"))
+
+plot_trend(screenR_Object = object, 
+           genes = candidate_hits[2], 
            nrow = 2, ncol = 2, 
            group_var = c("Time1", "Time2", "TRT"))
 ```
