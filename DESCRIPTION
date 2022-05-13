@@ -58,7 +58,7 @@ Collate:
     'compute_metrics.R'
     'count_mapped_reads.R'
     'count_table.R'
-    'create_edger_obj.R'
+    'create_screenr_obj.R'
     'create_screenr_object.R'
     'distribution_mapped_reads.R'
     'filter_by.R'
