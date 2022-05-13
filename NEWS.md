@@ -1,4 +1,7 @@
-# ScreenR 0.99.51
+# ScreenR 0.99.52
+* Changes in version 0.99.52:
+ * Pushed to Bioconductor
+ 
 * Changes in version 0.99.51:
  * Pushed to Bioconductor
 
