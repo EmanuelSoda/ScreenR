@@ -1,0 +1,15 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.travis\.yml$
+^\.github$
+^LICENSE\.md$
+^README.Rmd
+^docs$
+^codecov\.yml$
+^doc$
+^Meta$
+^ScreenR.Rproj
+^data-raw$
+^_pkgdown\.yml$
+^pkgdown$
+^README\.Rmd$
