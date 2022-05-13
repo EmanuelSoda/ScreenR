@@ -475,7 +475,6 @@ plot_trend(screenR_Object = object,
            group_var = c("Time1", "Time2", "TRT"))
 ```
 
-
 ```{r}
 sessionInfo()
 ```
