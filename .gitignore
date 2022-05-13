@@ -19,3 +19,4 @@ docs
 /vignettes/*.R
 
 README.Rmd
+.git_old
