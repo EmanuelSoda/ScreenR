@@ -318,7 +318,6 @@ on three different methods:
 * [CAMERA filtering](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/)
 * [ROAST filtering](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/)
 
-
 ### Z-score hit
 In order to compute the Z-score, first a list of metrics has to be computed. 
 In particular a *Log2FC* is computed for the treated vs control samples in the 
