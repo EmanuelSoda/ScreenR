@@ -17,9 +17,6 @@ docs
 /vignettes/*.html
 /vignettes/*.md
 /vignettes/*.R
-
-
 README.Rmd
-
 .git_old
 
