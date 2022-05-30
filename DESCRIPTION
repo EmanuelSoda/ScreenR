@@ -50,7 +50,7 @@ biocViews: Software, AssayDomain, GeneExpression
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues
 URL: https://emanuelsoda.github.io/ScreenR/
 Collate: 
-    'ScreenR-pacakage.R'
+    'ScreenR-package.R'
     'annotation_table.R'
     'barcode_lost.R'
     'camera_method.R'
