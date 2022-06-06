@@ -38,12 +38,12 @@
 #' obj
 create_screenr_object <- function(table = NULL, annotation = NULL,
                                   groups = NULL, replicates = c("")) {
-    # arcode <- as.factor(table$Barcode)
-    annotation$Barcode <- as.factor(annotation$Barcode)
     object <- methods::new("screenr_object",
                            count_table = tibble(table),
-                           annotation_table = tibble(annotation), groups = groups,
-                           replicates = replicates, normalized_count_table = tibble(),
+                           annotation_table = tibble(annotation),
+                           groups = as.factor(groups),
+                           replicates = replicates,
+                           normalized_count_table = tibble(),
                            data_table = tibble()
     )
     return(object)

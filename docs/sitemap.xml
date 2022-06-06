@@ -25,9 +25,6 @@
     <loc>/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/Barcode_creation_Dataframe.html</loc>
-  </url>
-  <url>
     <loc>/reference/ScreenR-package.html</loc>
   </url>
   <url>
@@ -61,13 +58,10 @@
     <loc>/reference/count_table.html</loc>
   </url>
   <url>
-    <loc>/reference/create_edgeR_obj.html</loc>
+    <loc>/reference/create_edger_obj.html</loc>
   </url>
   <url>
-    <loc>/reference/create_screenR_object.html</loc>
-  </url>
-  <url>
-    <loc>/reference/distribution_mapped_reads.html</loc>
+    <loc>/reference/create_screenr_object.html</loc>
   </url>
   <url>
     <loc>/reference/filter_by_slope.html</loc>
@@ -91,37 +85,19 @@
     <loc>/reference/find_zscore_hit.html</loc>
   </url>
   <url>
-    <loc>/reference/get_annotation_table-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/get_annotation_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_count_table-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/get_count_table.html</loc>
   </url>
   <url>
-    <loc>/reference/get_data_table-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/get_data_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_groups-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/get_groups.html</loc>
   </url>
   <url>
-    <loc>/reference/get_normalized_count_table-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/get_normalized_count_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_replicates-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/get_replicates.html</loc>
@@ -134,18 +110,6 @@
   </url>
   <url>
     <loc>/reference/normalize_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/normalized_count_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot_MDS.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot_PC_explained_variance.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot_Zscore_distribution.html</loc>
   </url>
   <url>
     <loc>/reference/plot_barcode_hit.html</loc>
@@ -166,9 +130,6 @@
     <loc>/reference/plot_common_hit.html</loc>
   </url>
   <url>
-    <loc>/reference/plot_distribution_of_barcode_lost.html</loc>
-  </url>
-  <url>
     <loc>/reference/plot_explained_variance.html</loc>
   </url>
   <url>
@@ -178,49 +139,34 @@
     <loc>/reference/plot_mapped_reads_distribution.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_mds.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_trend.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_zscore_distribution.html</loc>
   </url>
   <url>
     <loc>/reference/remove_all_zero_row.html</loc>
   </url>
   <url>
-    <loc>/reference/screenr_object-class.html</loc>
-  </url>
-  <url>
     <loc>/reference/select_number_barcode.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_annotation_table-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/set_annotation_table.html</loc>
   </url>
   <url>
-    <loc>/reference/set_count_table-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/set_count_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_data_table-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/set_data_table.html</loc>
   </url>
   <url>
-    <loc>/reference/set_groups-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/set_groups.html</loc>
   </url>
   <url>
-    <loc>/reference/set_normalized_count_table-screenr_object-method.html</loc>
-  </url>
-  <url>
     <loc>/reference/set_normalized_count_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_replicates-screenr_object-method.html</loc>
   </url>
   <url>
     <loc>/reference/set_replicates.html</loc>

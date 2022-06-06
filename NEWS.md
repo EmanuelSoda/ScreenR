@@ -1,4 +1,10 @@
-# ScreenR 0.99.52
+# ScreenR 0.99.53
+* Changes in version 0.99.53:
+ * Update to the documentation for the example dataset as requested by the 
+   reviewer
+ * Pushed to Bioconductor
+
+
 * Changes in version 0.99.52:
  * Pushed to Bioconductor
  

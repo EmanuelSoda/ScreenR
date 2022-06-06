@@ -1,14 +1,17 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 0.99.52
+Version: 0.99.53
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
                   comment = c(ORICD = "0000-0002-2301-6465")),
-             person("Elena", "Ceccacci", role = c("aut"),
+            person("Elena", "Ceccacci", role = c("aut"),
                    email = "elena.ceccacci@ieo.it", 
-                   comment = c(ORICD = "0000-0002-2285-8994")))
+                   comment = c(ORICD = "0000-0002-2285-8994")),
+            person("Saverio", "Minucci", role = c("fnd", "ths"),
+                   email = "saverio.minucci@ieo.it", 
+                   comment = c(ORICD = "0000-0001-5678-536X")))
 Description: ScreenR is a package suitable to perform hit identification in loss 
             of function High Throughput Biological Screenings performed using 
             barcoded shRNA-based  libraries. ScreenR combines the computing 
@@ -18,7 +21,7 @@ Description: ScreenR is a package suitable to perform hit identification in loss
             visualization modes for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Imports:
     methods (>= 4.0),
     rlang (>= 0.4),
