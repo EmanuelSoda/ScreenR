@@ -47,7 +47,7 @@ And the development version from
 [GitHub](https://github.com/EmanuelSoda/ScreenR) with:
 
 ``` r
-BiocManager::install("EmanuelSoda/ScreenR")
+devtools::install_github("EmanuelSoda/ScreenR")
 ```
 
 ## ScreenR overall workflow
