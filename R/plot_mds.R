@@ -22,6 +22,11 @@
 #' plot_mds(object)
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
+
+    if (is.null(screenR_Object@normalized_count_table)) {
+        stop("The normaliza count table cannot be NULL")
+    }
+
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- create_edger_obj(screenR_Object)
 
@@ -35,6 +40,8 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     )
 
     if (is.null(groups)) {
+        message(paste0("You did not set the the group variable ",
+                       "the defaul group variable will be used"))
         PLTdata$group <- DGEList$samples$group
     } else {
         PLTdata$group <- groups
@@ -57,8 +64,7 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #'              Principal Component analysis.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param cumulative A boolean value which indicates whether or not to plot
-#'                   the cumulative variance. The default value is FALSE.
+#' @parm variable  The variable percent or cumulative.
 #' @param color The color to fill the barplot the default value is steelblue
 #' @importFrom  scales percent
 #' @return The explained variance plot
@@ -69,60 +75,44 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
 #' plot_explained_variance(object)
 #'
 #' # For the cumulative plot
-#' plot_explained_variance(object, cumulative = TRUE)
-plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
-    color = "steelblue") {
-    PC <- compute_explained_variance(screenR_Object)
-    # Remove the Standard deviation row
-    PC <- filter(PC, .data$Name != "Standard deviation")
+#' plot_explained_variance(object, variable = "cumulative")
+plot_explained_variance <- function(screenR_Object,
+                                    variable = "percent",
+                                    color = "steelblue") {
+    variable <- tolower(variable)
 
-    # Get only the numeric columns which corresponds to the PCs
-    numeric_col <- colnames(PC[, unlist(lapply(PC, is.numeric))])
-
-    # Transform the data in a longer format
-    PC <- tidyr::pivot_longer(
-        data = PC, cols = all_of(numeric_col),
-        names_to = "name"
-    )
-    PC <- dplyr::mutate(PC, name = factor(
-        x = .data$name,
-        levels = unique(.data$name)
-    ))
-    plot <- NULL
-
-
-    if (cumulative) {
-        # Select only the Cumulative Proportion
-        PC <- dplyr::filter(PC, .data$Name == "Cumulative Proportion")
-
-        plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
-            geom_bar(stat = "identity", fill = color, col = "black") +
-            geom_point() +
-            geom_line(aes(group = .data$Name)) +
-            scale_y_continuous(labels = scales::percent) +
-            labs(
-                x = NULL,
-                y = "Cumulative Expressed Variance (%)"
-            )
-    } else {
-        # Select only the Proportion of Variance
-        PC <- dplyr::filter(PC, .data$Name == "Proportion of Variance")
-
-        plot <- ggplot2::ggplot(PC, aes(x = .data$name, y = .data$value)) +
-            geom_bar(stat = "identity", fill = color, col = "black") +
-            geom_point() +
-            geom_line(aes(group = .data$Name)) +
-            scale_y_continuous(labels = percent) +
-            labs(x = NULL, y = "Expressed Variance (%)")
+    if (!variable %in% c("percent", "cumulative")) {
+        stop("The accepted value are percent or cumulative")
     }
 
-    return(plot)
+
+    PC <- compute_explained_variance(screenR_Object)
+
+    PC <- PC %>%  mutate(PC = paste0("PC", .data$PC)) %>%
+        mutate(PC = fct_reorder(.data$PC, - .data$percent))
+
+
+    p <- ggplot2::ggplot(PC, aes(x = .data$PC, y = .data[[variable]])) +
+        geom_bar(stat = "identity", fill = color, col = "black") +
+        geom_point() +
+        geom_line(aes(group = .data[[variable]]))  +
+        scale_y_continuous(labels = scales::percent)
+
+    if(variable == "percent"){
+        p <- p + labs(x = NULL, y = "Expressed Variance (%)")
+    } else {
+        p <- p + labs(x = NULL, y = "Cumulative Expressed Variance (%)")
+    }
+
+    return(p)
 }
 
 #' @title Compute explained variance
 #' @description This  is an internal function  used to compute
 #'              the explained variance by each of the Principal Components.
 #' @importFrom stats  prcomp
+#' @importFrom purrr  map_lgl
+#' @importFrom broom  tidy
 #' @param screenR_Object The Object of the package
 #' @return A data.frame containing all the information of the variance
 #'         expressed by the components
@@ -133,9 +123,12 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
 #'
 #' compute_explained_variance(object)
 compute_explained_variance <- function(screenR_Object) {
+    if (is.null(screenR_Object@count_table)) {
+        stop("The count_table cannot be NULL")
+    }
     data <- screenR_Object@count_table
     # Get only the numeric columns
-    numeric_col <- unlist(lapply(data, is.numeric))
+    numeric_col <- purrr::map_lgl(data, is.numeric)
 
     # The data for the PC corresponds only on the numeric column
     data_PC <- data[, numeric_col]
@@ -149,15 +142,7 @@ compute_explained_variance <- function(screenR_Object) {
     # Computing the PCS
     PC <- prcomp(data_PC)
 
-    # Extract the importance ad create a data.frame
-    PC <- data.frame(summary(PC)$importance)
-
-    PC <- tibble::rownames_to_column(PC, var = "Name")
-
-    PC <- dplyr::mutate(PC, Name = factor(
-        x = .data$Name,
-        levels = unique(.data$Name)
-    ))
+    PC <- broom::tidy(PC, "pcs")
 
     return(PC)
 }

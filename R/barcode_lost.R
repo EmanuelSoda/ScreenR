@@ -24,11 +24,13 @@
 #' head(barcode_lost(object))
 #'
 #' @export
-barcode_lost <- function(screenR_Object) {
+barcode_lost <- function(screenR_Object,
+                         group_var = "Sample",
+                         mapped_var = "Mapped") {
     table <- ScreenR::count_mapped_reads(screenR_Object)
     table <- table %>%
-        dplyr::group_by(.data$Sample) %>%
-        dplyr::filter(.data$Mapped == 0) %>%
+        dplyr::group_by(.data[[group_var]]) %>%
+        dplyr::filter(.data[[mapped_var]]== 0) %>%
         dplyr::summarise(LostBarcode = n())
 
     return(table)

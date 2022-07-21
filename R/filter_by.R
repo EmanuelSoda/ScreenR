@@ -168,6 +168,7 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #'
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
+#' @param barcode_var The column in which are stored the barcodes
 #' @importFrom dplyr if_all
 #' @importFrom tidyselect vars_select_helpers
 #' @return The ScreenR object with the count_table and the annotation_table
@@ -181,7 +182,8 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #' object <- remove_all_zero_row(object)
 #' counts <- get_count_table(object)
 #' nrow(counts)
-remove_all_zero_row <- function(screenR_Object) {
+remove_all_zero_row <- function(screenR_Object,
+                                barcode_var = "Barcode") {
     counts <- screenR_Object@count_table
 
     # First of all all the row with zero counts are founded
@@ -194,7 +196,8 @@ remove_all_zero_row <- function(screenR_Object) {
     )
 
     # Then there are filtered
-    counts <- filter(counts, !.data$Barcode %in% counts_zeros$Barcode)
+    counts <- filter(counts, !.data[[barcode_var]] %in%
+                         counts_zeros[[barcode_var]])
 
     screenR_Object@count_table <- counts
 
@@ -207,10 +210,12 @@ remove_all_zero_row <- function(screenR_Object) {
     anno_table <-
         filter(
             anno_table,
-            !.data$Barcode %in% counts_zeros$Barcode
+            !.data[[barcode_var]] %in% counts_zeros[[barcode_var]]
         )
 
     screenR_Object@annotation_table <- anno_table
 
     return(screenR_Object)
 }
+
+

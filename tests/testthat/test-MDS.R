@@ -66,7 +66,7 @@ test_that("plot_explained_variance", {
     library(tibble)
     object <- create_test_object()
 
-    plot <- plot_explained_variance(object, cumulative = FALSE)
+    plot <- plot_explained_variance(object)
     expect_equal(class(plot)[[1]], "gg")
 })
 
@@ -75,8 +75,15 @@ test_that("plot_explained_variance CUM", {
     object <- create_test_object()
 
     plot <- plot_explained_variance(
-        screenR_Object = object,
-        cumulative = TRUE
-    )
+        screenR_Object = object, variable = "cumulative")
     expect_equal(class(plot)[[1]], "gg")
+})
+
+test_that("plot_explained_variance fail", {
+    library(tibble)
+    object <- create_test_object()
+
+    plot <- plot_explained_variance(
+        screenR_Object = object, variable = "ciap")
+    expect_failure()
 })

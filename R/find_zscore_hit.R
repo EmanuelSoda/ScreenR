@@ -8,6 +8,8 @@
 #'                       number_barcode = 5 shRNA DE.
 #' @param metric A string containing the metric to use. The value allowed are
 #'               "median" or "mean".
+#' @param group_var The name of the column which contain the grouping variable
+#'                  usually the Gene column
 #' @return Return a tibble containing the hit for the Z-score
 #' @export
 #' @concept find
@@ -26,29 +28,33 @@
 #' result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 #' head(result)
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
-    metric = "median") {
-    if (metric == "median") {
-        hit_table <- table_treate_vs_control %>%
-            # Filtering of the gene that have the Z-score under the median of
-            # the Z-scores
-            dplyr::filter(.data$Zscore < median(.data$Zscore)) %>%
-            dplyr::group_by(.data$Gene) %>%
-            dplyr::summarise(numberOfBarcode = n()) %>%
-            # Take only the gene that have 6 barcode under the median of the
-            # Z-scores
-            dplyr::filter(.data$numberOfBarcode > number_barcode)
-    } else if (metric == "mean") {
-        hit_table <- table_treate_vs_control %>%
-            # Filtering of the gene that have the Z-score under the median of
-            # the Z-scores
-            dplyr::filter(.data$Zscore < mean(.data$Zscore)) %>%
-            dplyr::group_by(.data$Gene) %>%
-            dplyr::mutate(numberOfBarcode = n()) %>%
-            dplyr::summarise(.data$numberOfBarcode) %>%
-            # Take only the gene that have 6 barcode under the median of the
-            # Z-scores
-            dplyr::filter(.data$numberOfBarcode > number_barcode)
+    metric = "median", group_var = "Gene") {
+
+    if (sum(colnames(table_treate_vs_control) == group_var) == 0 ) {
+        message("The group_var specified is not a column of the dataset")
     }
-    hit_table <- dplyr::ungroup(hit_table)
-    return(hit_table)
+    else {
+        hit_table <- table_treate_vs_control
+        if (metric == "median") {
+            hit_table <- hit_table %>%
+                # Filtering of the gene that have the Z-score under the median
+                # of the Z-scores
+                dplyr::filter(.data$Zscore < median(.data$Zscore))
+            } else if (metric == "mean") {
+                hit_table <- hit_table %>%
+                # Filtering of the gene that have the Z-score under the mean
+                # of the Z-scores
+                dplyr::filter(.data$Zscore < mean(.data$Zscore))
+                }
+        hit_table <- hit_table %>%
+            dplyr::group_by(.data[[group_var]]) %>%
+            # Count how many barcodes for gene
+            dplyr::summarise(numberOfBarcode = n()) %>%
+            # Take only the gene that have number_barcode barcode under the
+            # metric selected
+            dplyr::filter(.data$numberOfBarcode > number_barcode) %>%
+            dplyr::ungroup(hit_table)
+
+        return(hit_table)
+    }
 }
