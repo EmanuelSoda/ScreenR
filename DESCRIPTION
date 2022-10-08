@@ -21,7 +21,7 @@ Description: ScreenR is a package suitable to perform hit identification in loss
             visualization modes for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Imports:
     methods (>= 4.0),
     rlang (>= 0.4),
