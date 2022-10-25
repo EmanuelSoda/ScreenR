@@ -64,15 +64,7 @@ Please note that the `ScreenR` was only made possible thanks to many
 other R and bioinformatics software authors, which are cited either in
 the vignettes and/or the paper(s) describing this package.
 
-## Citation
 
-Below is the citation output from using `citation('ScreenR')` in `R`.
-Please run this yourself to check for any updates on how to cite
-**ScreenR**.
-
-``` r
-# print(citation('ScreenR'), bibtex = TRUE)
-```
 
 ## Code of Conduct
 
