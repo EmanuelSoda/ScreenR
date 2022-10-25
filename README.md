@@ -54,11 +54,11 @@ devtools::install_github("EmanuelSoda/ScreenR")
 
 <img src="man/figures/Pipeline.png" align="top">
 
-<!-- ## Citation -->
-<!-- Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. -->
-<!-- ```{r 'citation', eval = requireNamespace('ScreenR')} -->
-<!-- print(citation('ScreenR'), bibtex = TRUE) -->
-<!-- ``` -->
+## Citation
+Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. -->
+```{r 'citation', eval = requireNamespace('ScreenR')} -->
+print(citation('ScreenR'), bibtex = TRUE) -->
+```
 
 Please note that the `ScreenR` was only made possible thanks to many
 other R and bioinformatics software authors, which are cited either in
