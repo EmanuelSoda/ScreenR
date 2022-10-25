@@ -19,6 +19,7 @@ commit](https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR)]()
 [![Version](https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master)]()
 [![Language](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]()
 
+[![R-CMD-check](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ScreenR is an easy and effective package to perform hits identification
@@ -54,17 +55,35 @@ devtools::install_github("EmanuelSoda/ScreenR")
 
 <img src="man/figures/Pipeline.png" align="top">
 
-## Citation
-Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. 
-```{r 'citation', eval = requireNamespace('ScreenR')}
-print(citation('ScreenR'), bibtex = TRUE) 
-```
-
 Please note that the `ScreenR` was only made possible thanks to many
 other R and bioinformatics software authors, which are cited either in
 the vignettes and/or the paper(s) describing this package.
 
+## Citation
 
+Below is the citation output from using `citation('ScreenR')` in `R`.
+Please run this yourself to check for any updates on how to cite
+**ScreenR**.
+
+``` r
+print(citation('ScreenR'))
+#> 
+#> To cite package 'ScreenR' in publications use:
+#> 
+#>   Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
+#>   Throughput Biological Screening_. R package version 0.99.53,
+#>   <https://emanuelsoda.github.io/ScreenR/>.
+#> 
+#> A BibTeX entry for LaTeX users is
+#> 
+#>   @Manual{,
+#>     title = {ScreenR: Package to Perform High Throughput Biological Screening},
+#>     author = {Emanuel Michele Soda and Elena Ceccacci},
+#>     year = {2022},
+#>     note = {R package version 0.99.53},
+#>     url = {https://emanuelsoda.github.io/ScreenR/},
+#>   }
+```
 
 ## Code of Conduct
 
