@@ -55,7 +55,7 @@ devtools::install_github("EmanuelSoda/ScreenR")
 <img src="man/figures/Pipeline.png" align="top">
 
 ## Citation
-Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. -->
+Below is the citation output from using `citation('ScreenR')` in R. Please run this yourself to check for any updates on how to cite **ScreenR**. 
 ```{r 'citation', eval = requireNamespace('ScreenR')}
 print(citation('ScreenR'), bibtex = TRUE) 
 ```
