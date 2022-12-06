@@ -79,16 +79,20 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>ScreenR Example Analysis</h1>
-                        <h4 data-toc-skip class="author">Emanuel Michele Soda</h4>
+                        <h4 data-toc-skip class="author">Emanuel Michele
+Soda</h4>
             <address class="author_afil">
-      Istituto Europeo Oncologia (IEO), Milano, Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:emanuelmichele@ieo.it" class="email">emanuelmichele@ieo.it</a>
+      Istituto Europeo Oncologia (IEO), Milano,
+Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:emanuelmichele@ieo.it" class="email">emanuelmichele@ieo.it</a>
       </address>
-                              <h4 data-toc-skip class="author">Elena Ceccacci</h4>
+                              <h4 data-toc-skip class="author">Elena
+Ceccacci</h4>
             <address class="author_afil">
-      Istituto Europeo Oncologia (IEO), Milano, Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
+      Istituto Europeo Oncologia (IEO), Milano,
+Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2022-10-25</h4>
+            <h4 data-toc-skip class="date">2022-12-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/HEAD/vignettes/Analysis_Example.Rmd" class="external-link"><code>vignettes/Analysis_Example.Rmd</code></a></small>
       <div class="d-none name"><code>Analysis_Example.Rmd</code></div>
@@ -117,7 +121,19 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The R package <strong>ScreenR</strong> has been developed to perform analysis of High-throughput RNA interference screening using pooled shRNA libraries and next generation sequencing.. Nowadays several short hairpin RNA (shRNA) libraries are commercial available, and in the last years the interest in this type of analysis, often called barcode screening, has greatly increased for their benefits both from a time-consuming point of view and for the possibility of carrying out screening on a large number of genes simultaneously. However, the bioinformatic analysis of this type of screening still lacks a golden standard. Here, ScreenR allows the user to carry out a preliminary quality check of the experiment, visually inspect the data and finally identify the most significant hits of the experiment through a series of plots and cross-statistical analyses.</p>
+<p>The R package <strong>ScreenR</strong> has been developed to perform
+analysis of High-throughput RNA interference screening using pooled
+shRNA libraries and next generation sequencing.. Nowadays several short
+hairpin RNA (shRNA) libraries are commercial available, and in the last
+years the interest in this type of analysis, often called barcode
+screening, has greatly increased for their benefits both from a
+time-consuming point of view and for the possibility of carrying out
+screening on a large number of genes simultaneously. However, the
+bioinformatic analysis of this type of screening still lacks a golden
+standard. Here, ScreenR allows the user to carry out a preliminary
+quality check of the experiment, visually inspect the data and finally
+identify the most significant hits of the experiment through a series of
+plots and cross-statistical analyses.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -125,7 +141,10 @@
 <div class="section level3">
 <h3 id="bioconductor">Bioconductor<a class="anchor" aria-label="anchor" href="#bioconductor"></a>
 </h3>
-<p><strong>ScreenR</strong> requires several CRAN and Bioconductor R packages to be installed. Dependencies are usually handled automatically, when installing the package using the following commands:</p>
+<p><strong>ScreenR</strong> requires several CRAN and Bioconductor R
+packages to be installed. Dependencies are usually handled
+automatically, when installing the package using the following
+commands:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
@@ -135,7 +154,8 @@
 <div class="section level3">
 <h3 id="github">Github<a class="anchor" aria-label="anchor" href="#github"></a>
 </h3>
-<p>The newest version can directly be installed from GitHub using the CRAN package devtools:</p>
+<p>The newest version can directly be installed from GitHub using the
+CRAN package devtools:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>   <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
@@ -146,7 +166,8 @@
 <div class="section level2">
 <h2 id="analysis">Analysis<a class="anchor" aria-label="anchor" href="#analysis"></a>
 </h2>
-<p>Here is reported the ScreenR pipeline <img src="../../../../../../Users/ieo5571/Documents/IEO/Stage/ScreenR/reference/figures/Pipeline.png" align="top"></p>
+<p>Here is reported the ScreenR pipeline
+<img src="../../../../../../Users/ieo5571/Documents/IEO/Stage/ScreenR/reference/figures/Pipeline.png" align="top"></p>
 <div class="section level3">
 <h3 id="loading-the-package">Loading the package<a class="anchor" aria-label="anchor" href="#loading-the-package"></a>
 </h3>
@@ -166,22 +187,37 @@
 <div class="section level3">
 <h3 id="read-data">Read Data<a class="anchor" aria-label="anchor" href="#read-data"></a>
 </h3>
-<p>The input of ScreenR is a count table obtained from barcode alignment to the reference genome/library. A count table is usually the starting point of an RNA-seq deferentially expressed genes analysis and consists of a matrix containing reads count organized with:</p>
+<p>The input of ScreenR is a count table obtained from barcode alignment
+to the reference genome/library. A count table is usually the starting
+point of an RNA-seq deferentially expressed genes analysis and consists
+of a matrix containing reads count organized with:</p>
 <ul>
 <li>Genes on the rows</li>
 <li>Samples on the columns</li>
 </ul>
-<p>For this vignette we will use as an example a Loss of Function Chemical lethality Genetic Screening performed using shRNA libraries where each gene is represented by ten slightly different shRNA each labeled with a unique barcode coming from an unpublished dataset generated using the <a href="https://cellecta.com/" class="external-link">Cellecta</a> protocol.</p>
-<p>First of all the data has to be read. Then another very important step is to set up the column names in the following way:</p>
+<p>For this vignette we will use as an example a Loss of Function
+Chemical lethality Genetic Screening performed using shRNA libraries
+where each gene is represented by ten slightly different shRNA each
+labeled with a unique barcode coming from an unpublished dataset
+generated using the <a href="https://cellecta.com/" class="external-link">Cellecta</a>
+protocol.</p>
+<p>First of all the data has to be read. Then another very important
+step is to set up the column names in the following way:</p>
 <ul>
 <li>The first part of the string is the timepoint</li>
-<li>The second is the type of sample (example: treated or control or the name of the treatment)</li>
-<li>Third slot is a way to make each replicate unique (for example a letter or a number)</li>
+<li>The second is the type of sample (example: treated or control or the
+name of the treatment)</li>
+<li>Third slot is a way to make each replicate unique (for example a
+letter or a number)</li>
 </ul>
 <p>In the end we have</p>
 <p><strong><code>Time point_Type of sample_replicate</code></strong></p>
-<p>and for example we could have <strong>h24_control_1</strong> which mean the first replicate of the control sample at 24 hour.</p>
-<p>Since this dataset comes from a Chemical Synthetic Lethality experiments the samples treated with the drug combined with the shRNAs knockdown should present a decreased number of reads compared to the controls.</p>
+<p>and for example we could have <strong>h24_control_1</strong> which
+mean the first replicate of the control sample at 24 hour.</p>
+<p>Since this dataset comes from a Chemical Synthetic Lethality
+experiments the samples treated with the drug combined with the shRNAs
+knockdown should present a decreased number of reads compared to the
+controls.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span></span>
@@ -204,7 +240,12 @@
 <div class="section level3">
 <h3 id="object-creation">Object Creation<a class="anchor" aria-label="anchor" href="#object-creation"></a>
 </h3>
-<p>The second needed step is to create a <strong>ScreenR object</strong> from the count table. The ScreenR object is created using the function <strong>create_screenr_object()</strong> and will be used to store the most important information to perform the analysis. Most of the ScreenR function takes as main input the ScreenR object to perform the needed operation and return a result.</p>
+<p>The second needed step is to create a <strong>ScreenR object</strong>
+from the count table. The ScreenR object is created using the function
+<strong>create_screenr_object()</strong> and will be used to store the
+most important information to perform the analysis. Most of the ScreenR
+function takes as main input the ScreenR object to perform the needed
+operation and return a result.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"T1/T2"</span>, <span class="st">"T1/T2"</span>,</span>
@@ -233,11 +274,20 @@
 <div class="section level3">
 <h3 id="computing-the-needed-tables">Computing the needed tables<a class="anchor" aria-label="anchor" href="#computing-the-needed-tables"></a>
 </h3>
-<p>Once the object is created, the data must be normalized to start the analysis. ScreenR uses <em>Counts Per Million</em> (<strong>CPM</strong>) normalization which has the following mathematical expression:</p>
-<p><span class="math display">\[CPM = \frac{Number \; of \; mapped \; reads \; to \; a \; barcode} 
-             { \sum_{sample}{Number\; of \;mapped \; reads}} *10^{6}\]</span></p>
-<p>The number of reads mapped for each barcode in a sample are normalized by the number of reads in that sample and multiplied by one million.</p>
-<p>This information is store in a <em>data table</em> which is a tidy version of the original <em>count table</em> and will be used throughout the analysis.</p>
+<p>Once the object is created, the data must be normalized to start the
+analysis. ScreenR uses <em>Counts Per Million</em>
+(<strong>CPM</strong>) normalization which has the following
+mathematical expression:</p>
+<p><span class="math display">\[CPM = \frac{Number \; of \; mapped \;
+reads \; to \; a \; barcode}
+             { \sum_{sample}{Number\; of \;mapped \; reads}}
+*10^{6}\]</span></p>
+<p>The number of reads mapped for each barcode in a sample are
+normalized by the number of reads in that sample and multiplied by one
+million.</p>
+<p>This information is store in a <em>data table</em> which is a tidy
+version of the original <em>count table</em> and will be used throughout
+the analysis.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
@@ -245,11 +295,14 @@
 <div class="section level3">
 <h3 id="quality-check">Quality Check<a class="anchor" aria-label="anchor" href="#quality-check"></a>
 </h3>
-<p>The first step to perform when dealing with sequencing data is to check the quality of the samples. In ScreenR this can be done using several methods.</p>
+<p>The first step to perform when dealing with sequencing data is to
+check the quality of the samples. In ScreenR this can be done using
+several methods.</p>
 <div class="section level4">
 <h4 id="mapped-reads">Mapped Reads<a class="anchor" aria-label="anchor" href="#mapped-reads"></a>
 </h4>
-<p>The total number of mapped reads can be displayed with a barplot with the formula.</p>
+<p>The total number of mapped reads can be displayed with a barplot with
+the formula.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads.html">plot_mapped_reads</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -259,7 +312,8 @@
 <span></span>
 <span><span class="va">plot</span></span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/plot_mapped_reads-1.png" width="700"></p>
-<p>For example the distribution can be seen using both boxplots or density plots.</p>
+<p>For example the distribution can be seen using both boxplots or
+density plots.</p>
 <p>#### Boxplot Mapped Reads</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_mapped_reads_distribution.html">plot_mapped_reads_distribution</a></span><span class="op">(</span></span>
@@ -290,13 +344,20 @@
 <div class="section level4">
 <h4 id="barcode-lost">Barcode Lost<a class="anchor" aria-label="anchor" href="#barcode-lost"></a>
 </h4>
-<p>Another very important quality check when a Genetic Screening is performed is to check the barcode lost during the experiment, meaning the barcode that after different time points or treatments results in reads count equal to zero. ScreenR implements a function able to compute and plot the number of barcodes lost for each samples.</p>
+<p>Another very important quality check when a Genetic Screening is
+performed is to check the barcode lost during the experiment, meaning
+the barcode that after different time points or treatments results in
+reads count equal to zero. ScreenR implements a function able to compute
+and plot the number of barcodes lost for each samples.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_barcode_lost.html">plot_barcode_lost</a></span><span class="op">(</span>screenR_Object <span class="op">=</span> <span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">plot</span></span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/plot_barcode_lost-1.png" width="700"></p>
-<p>Moreover it is important to check if the lost barcodes in a sample all belong to the same gene, in order to verify that an adequate number of barcodes per gene are still present. This can be done by visualizing the number of barcode lost in a sample by gene.</p>
+<p>Moreover it is important to check if the lost barcodes in a sample
+all belong to the same gene, in order to verify that an adequate number
+of barcodes per gene are still present. This can be done by visualizing
+the number of barcode lost in a sample by gene.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_barcode_lost_for_gene.html">plot_barcode_lost_for_gene</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time4_TRT_C"</span>, <span class="st">"Time4_CTRL_C"</span><span class="op">)</span></span>
@@ -307,7 +368,12 @@
 <div class="section level4">
 <h4 class="tabset" id="plot-mds">Plot MDS<a class="anchor" aria-label="anchor" href="#plot-mds"></a>
 </h4>
-<p>In order to see the samples clusterization an initial MDS analysis can be conducted. In ScreenR this can be done using the <em>plot_mds</em> function and the user can decide the color code of the graph in order to highlight the trend of the samples based on replicates, treatment or timepoints simply by modifying the field levels in the plot_mds function.</p>
+<p>In order to see the samples clusterization an initial MDS analysis
+can be conducted. In ScreenR this can be done using the
+<em>plot_mds</em> function and the user can decide the color code of the
+graph in order to highlight the trend of the samples based on
+replicates, treatment or timepoints simply by modifying the field levels
+in the plot_mds function.</p>
 <div class="section level5">
 <h5 id="for-sample">For Sample<a class="anchor" aria-label="anchor" href="#for-sample"></a>
 </h5>
@@ -351,17 +417,27 @@
 <div class="section level3">
 <h3 id="statistical-analysis">Statistical Analysis<a class="anchor" aria-label="anchor" href="#statistical-analysis"></a>
 </h3>
-<p>Once the various steps of the quality check have been passed, the actual statistical analysis can begin. The statistical Analysis of ScreenR is based on three different methods:</p>
+<p>Once the various steps of the quality check have been passed, the
+actual statistical analysis can begin. The statistical Analysis of
+ScreenR is based on three different methods:</p>
 <ul>
-<li><a href="https://pubmed.ncbi.nlm.nih.gov/21515799/" class="external-link">Z-score filtering</a></li>
-<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/" class="external-link">CAMERA filtering</a></li>
-<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/" class="external-link">ROAST filtering</a></li>
+<li><a href="https://pubmed.ncbi.nlm.nih.gov/21515799/" class="external-link">Z-score
+filtering</a></li>
+<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/" class="external-link">CAMERA
+filtering</a></li>
+<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/" class="external-link">ROAST
+filtering</a></li>
 </ul>
 <div class="section level4">
 <h4 id="z-score-hit">Z-score hit<a class="anchor" aria-label="anchor" href="#z-score-hit"></a>
 </h4>
-<p>In order to compute the Z-score, first a list of metrics has to be computed. In particular a <em>Log2FC</em> is computed for the treated vs control samples in the different conditions. This can be done using the function <em>compute_metrics()</em>. Here is reported an example of treated vs control in different day.</p>
-<p>Then the different distribution of the Z-score can be plotted using the <em>plot_zscore_distribution</em> function.</p>
+<p>In order to compute the Z-score, first a list of metrics has to be
+computed. In particular a <em>Log2FC</em> is computed for the treated vs
+control samples in the different conditions. This can be done using the
+function <em>compute_metrics()</em>. Here is reported an example of
+treated vs control in different day.</p>
+<p>Then the different distribution of the Z-score can be plotted using
+the <em>plot_zscore_distribution</em> function.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># 2DG</span></span>
 <span><span class="va">data_with_measure_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -383,7 +459,8 @@
 <div class="section level4">
 <h4 id="z-score-hit-1">Z-score hit<a class="anchor" aria-label="anchor" href="#z-score-hit-1"></a>
 </h4>
-<p>Based on these metrics the Z-score hit identification can be computed using the <em>find_zscore_hit</em> function.</p>
+<p>Based on these metrics the Z-score hit identification can be computed
+using the <em>find_zscore_hit</em> function.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zscore_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span></span>
@@ -431,7 +508,8 @@
 <div class="section level4">
 <h4 id="camera">CAMERA<a class="anchor" aria-label="anchor" href="#camera"></a>
 </h4>
-<p>The same can be done with the CAMERA hit using the function <em>find_camera_hit</em>.</p>
+<p>The same can be done with the CAMERA hit using the function
+<em>find_camera_hit</em>.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">matrix_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">groups</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">matrix_model</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">groups</span><span class="op">)</span></span>
@@ -484,7 +562,8 @@
 <div class="section level4">
 <h4 id="roast">ROAST<a class="anchor" aria-label="anchor" href="#roast"></a>
 </h4>
-<p>Last but not least this is done also for the ROAST hit using the function<br><em>find_roast_hit</em>.</p>
+<p>Last but not least this is done also for the ROAST hit using the
+function<br><em>find_roast_hit</em>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">roast_hit_TRT</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    Time3 <span class="op">=</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span></span>
@@ -504,39 +583,48 @@
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Gene_372     12    0.917    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.008<span style="text-decoration: underline;">9</span>       0.000<span style="text-decoration: underline;">1</span>   0.013<span style="text-decoration: underline;">4</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Gene_364     12    0.833    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.008<span style="text-decoration: underline;">9</span>       0.000<span style="text-decoration: underline;">1</span>   0.013<span style="text-decoration: underline;">4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Gene_374     10    0.7      0   Down      0.000<span style="text-decoration: underline;">2</span> 0.020<span style="text-decoration: underline;">0</span>       0.000<span style="text-decoration: underline;">6</span>   0.069<span style="text-decoration: underline;">4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Gene_179     10    0.3      0   Down      0.000<span style="text-decoration: underline;">6</span> 0.057<span style="text-decoration: underline;">8</span>       0.018<span style="text-decoration: underline;">4</span>   0.232 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Gene_75      10    0.4      0   Down      0.000<span style="text-decoration: underline;">7</span> 0.057<span style="text-decoration: underline;">8</span>       0.021<span style="text-decoration: underline;">3</span>   0.232 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Gene_88      10    0.5      0.1 Down      0.000<span style="text-decoration: underline;">9</span> 0.064<span style="text-decoration: underline;">8</span>       0.002<span style="text-decoration: underline;">5</span>   0.131 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Gene_282     10    0.5      0   Down      0.001<span style="text-decoration: underline;">2</span> 0.076<span style="text-decoration: underline;">8</span>       0.023<span style="text-decoration: underline;">4</span>   0.244 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Gene_208     10    0.2      0   Down      0.006<span style="text-decoration: underline;">1</span> 0.202        0.075<span style="text-decoration: underline;">9</span>   0.412 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Gene_490     10    0.4      0.1 Down      0.007<span style="text-decoration: underline;">7</span> 0.223        0.010<span style="text-decoration: underline;">5</span>   0.164 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Gene_350     10    0.2      0   Down      0.008<span style="text-decoration: underline;">4</span> 0.223        0.020<span style="text-decoration: underline;">7</span>   0.232 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Gene_374     10    0.7      0   Down      0.000<span style="text-decoration: underline;">2</span> 0.020<span style="text-decoration: underline;">0</span>       0.000<span style="text-decoration: underline;">7</span>   0.100 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Gene_88      10    0.5      0.1 Down      0.000<span style="text-decoration: underline;">5</span> 0.040<span style="text-decoration: underline;">0</span>       0.001<span style="text-decoration: underline;">5</span>   0.103 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Gene_179     10    0.3      0   Down      0.000<span style="text-decoration: underline;">5</span> 0.040<span style="text-decoration: underline;">0</span>       0.017<span style="text-decoration: underline;">5</span>   0.227 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Gene_75      10    0.4      0   Down      0.000<span style="text-decoration: underline;">6</span> 0.042<span style="text-decoration: underline;">0</span>       0.022<span style="text-decoration: underline;">4</span>   0.244 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Gene_282     10    0.5      0   Down      0.001<span style="text-decoration: underline;">3</span> 0.072<span style="text-decoration: underline;">1</span>       0.025<span style="text-decoration: underline;">7</span>   0.265 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Gene_208     10    0.2      0   Down      0.004<span style="text-decoration: underline;">8</span> 0.169        0.076<span style="text-decoration: underline;">3</span>   0.414 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Gene_490     10    0.4      0.1 Down      0.006<span style="text-decoration: underline;">5</span> 0.200        0.009<span style="text-decoration: underline;">4</span>   0.159 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Gene_350     10    0.2      0   Down      0.006<span style="text-decoration: underline;">8</span> 0.200        0.020<span style="text-decoration: underline;">7</span>   0.244 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># … with 19 more rows, and abbreviated variable name ¹​FDR.Mixed</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $Time4</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 107 × 9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 104 × 9</span></span></span>
 <span><span class="co">#&gt;    Gene     NGenes PropDown PropUp Direction PValue     FDR PValue.Mixed FDR.M…¹</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Gene_364     12      1      0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Gene_372     12      1      0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Gene_282     10      0.9    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Gene_296     10      0.9    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Gene_374     10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Gene_75      10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Gene_323     10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">1</span> 7.85<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Gene_412     10      0.6    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">6</span> 3.46<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Gene_179     10      0.4    0.1 Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">2</span> 1.54<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Gene_350     10      0.4    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">22</span>       0.000<span style="text-decoration: underline;">2</span> 1.54<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 97 more rows, and abbreviated variable name ¹​FDR.Mixed</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Gene_364     12      1      0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Gene_372     12      1      0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Gene_282     10      0.9    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Gene_374     10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Gene_80      10      0.7    0.1 Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Gene_75      10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Gene_323     10      0.7    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">1</span> 7.63<span style="color: #949494;">e</span><span style="color: #BB0000;">-4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Gene_412     10      0.6    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">9</span> 4.41<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Gene_105     10      0.4    0.1 Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.000<span style="text-decoration: underline;">9</span> 4.41<span style="color: #949494;">e</span><span style="color: #BB0000;">-3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Gene_25      10      0.4    0   Down      0.000<span style="text-decoration: underline;">1</span> 0.002<span style="text-decoration: underline;">05</span>       0.013  2.62<span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 94 more rows, and abbreviated variable name ¹​FDR.Mixed</span></span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="find-common-hit">Find Common Hit<a class="anchor" aria-label="anchor" href="#find-common-hit"></a>
 </h4>
-<p>ScreenR considers as final hit only the one result as candidate hit in all three statistical methods. However this is a particularly stringent method and in some cases leads to a small number of results. For this reason the user can also decide to opt for a less stringent method that considers only the hits present in at least two of the statistical methods. The two different strategies can be computed with the function::</p>
+<p>ScreenR considers as final hit only the one result as candidate hit
+in all three statistical methods. However this is a particularly
+stringent method and in some cases leads to a small number of results.
+For this reason the user can also decide to opt for a less stringent
+method that considers only the hits present in at least two of the
+statistical methods. The two different strategies can be computed with
+the function::</p>
 <ul>
-<li><p><strong>common_hit_TRT_at_least_2</strong>: considering candidate Hits the one present in at least two of the three methods (less stringent)</p></li>
-<li><p><strong>common_hit_TRT_at_least_3</strong>: considering candidate Hits the one present in all of the three methods</p></li>
+<li><p><strong>common_hit_TRT_at_least_2</strong>: considering candidate
+Hits the one present in at least two of the three methods (less
+stringent)</p></li>
+<li><p><strong>common_hit_TRT_at_least_3</strong>: considering candidate
+Hits the one present in all of the three methods</p></li>
 </ul>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">common_hit_TRT_at_least_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -564,14 +652,20 @@
 <div class="section level4">
 <h4 id="plot-common-hit">Plot common hit<a class="anchor" aria-label="anchor" href="#plot-common-hit"></a>
 </h4>
-<p>The intersection of the hits found by the three statistical methods can be easily visualized using the <em>plot_common_hit</em> function.</p>
+<p>The intersection of the hits found by the three statistical methods
+can be easily visualized using the <em>plot_common_hit</em>
+function.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span></span>
 <span>    hit_zscore <span class="op">=</span> <span class="va">zscore_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, hit_camera <span class="op">=</span> <span class="va">camera_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>,</span>
 <span>    <span class="va">roast_hit_TRT</span><span class="op">$</span><span class="va">Time4</span>, show_elements <span class="op">=</span> <span class="cn">FALSE</span>, show_percentage <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Analysis_Example_files/figure-html/Venn_diagram_in_at_least_2-1.png" width="700"></p>
-<p>As we all know, when we deal with statistical methods the is the possibility of <em>type I</em> error also known as “false positive”. For this reason is important to visualize the results obtained. This can be done by visualizing the trend of the candidate hits obtained using the function <strong>plot_trend</strong>.</p>
+<p>As we all know, when we deal with statistical methods the is the
+possibility of <em>type I</em> error also known as “false positive”. For
+this reason is important to visualize the results obtained. This can be
+done by visualizing the trend of the candidate hits obtained using the
+function <strong>plot_trend</strong>.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">candidate_hits</span> <span class="op">&lt;-</span> <span class="va">common_hit_TRT_at_least_2</span><span class="op">$</span><span class="va">Time3</span></span>
 <span></span>
@@ -589,13 +683,13 @@
 <p><img src="Analysis_Example_files/figure-html/plot_trend-2.png" width="700"></p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.2.1 (2022-06-23)</span></span>
+<span><span class="co">#&gt; R version 4.2.2 (2022-10-31)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
-<span><span class="co">#&gt; Running under: Ubuntu 20.04.5 LTS</span></span>
+<span><span class="co">#&gt; Running under: Ubuntu 22.04.1 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Matrix products: default</span></span>
-<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0</span></span>
-<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0</span></span>
+<span><span class="co">#&gt; BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3</span></span>
+<span><span class="co">#&gt; LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; locale:</span></span>
 <span><span class="co">#&gt;  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
@@ -607,31 +701,31 @@
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ScreenR_0.99.53  tidyr_1.2.1      dplyr_1.0.10     ggplot2_3.3.6   </span></span>
+<span><span class="co">#&gt; [1] ScreenR_0.99.53  tidyr_1.2.1      dplyr_1.0.10     ggplot2_3.4.0   </span></span>
 <span><span class="co">#&gt; [5] BiocStyle_2.24.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] tidyselect_1.2.0    locfit_1.5-9.6      xfun_0.34          </span></span>
-<span><span class="co">#&gt;  [4] bslib_0.4.0         purrr_0.3.5         splines_4.2.1      </span></span>
-<span><span class="co">#&gt;  [7] lattice_0.20-45     colorspace_2.0-3    vctrs_0.5.0        </span></span>
-<span><span class="co">#&gt; [10] generics_0.1.3      htmltools_0.5.3     mgcv_1.8-40        </span></span>
+<span><span class="co">#&gt;  [1] tidyselect_1.2.0    locfit_1.5-9.6      xfun_0.35          </span></span>
+<span><span class="co">#&gt;  [4] bslib_0.4.1         purrr_0.3.5         splines_4.2.2      </span></span>
+<span><span class="co">#&gt;  [7] lattice_0.20-45     colorspace_2.0-3    vctrs_0.5.1        </span></span>
+<span><span class="co">#&gt; [10] generics_0.1.3      htmltools_0.5.3     mgcv_1.8-41        </span></span>
 <span><span class="co">#&gt; [13] yaml_2.3.6          utf8_1.2.2          rlang_1.0.6        </span></span>
 <span><span class="co">#&gt; [16] pkgdown_2.0.6       jquerylib_0.1.4     pillar_1.8.1       </span></span>
 <span><span class="co">#&gt; [19] glue_1.6.2          withr_2.5.0         lifecycle_1.0.3    </span></span>
-<span><span class="co">#&gt; [22] stringr_1.4.1       munsell_0.5.0       gtable_0.3.1       </span></span>
-<span><span class="co">#&gt; [25] ragg_1.2.3          memoise_2.0.1       evaluate_0.17      </span></span>
-<span><span class="co">#&gt; [28] labeling_0.4.2      knitr_1.40          fastmap_1.1.0      </span></span>
+<span><span class="co">#&gt; [22] stringr_1.5.0       munsell_0.5.0       gtable_0.3.1       </span></span>
+<span><span class="co">#&gt; [25] ragg_1.2.4          memoise_2.0.1       evaluate_0.18      </span></span>
+<span><span class="co">#&gt; [28] labeling_0.4.2      knitr_1.41          fastmap_1.1.0      </span></span>
 <span><span class="co">#&gt; [31] fansi_1.0.3         highr_0.9           Rcpp_1.0.9         </span></span>
-<span><span class="co">#&gt; [34] edgeR_3.38.4        scales_1.2.1        BiocManager_1.30.18</span></span>
+<span><span class="co">#&gt; [34] edgeR_3.38.4        scales_1.2.1        BiocManager_1.30.19</span></span>
 <span><span class="co">#&gt; [37] cachem_1.0.6        limma_3.52.4        desc_1.4.2         </span></span>
 <span><span class="co">#&gt; [40] jsonlite_1.8.3      farver_2.1.1        systemfonts_1.0.4  </span></span>
 <span><span class="co">#&gt; [43] fs_1.5.2            textshaping_0.3.6   digest_0.6.30      </span></span>
-<span><span class="co">#&gt; [46] stringi_1.7.8       bookdown_0.29       grid_4.2.1         </span></span>
+<span><span class="co">#&gt; [46] stringi_1.7.8       bookdown_0.30       grid_4.2.2         </span></span>
 <span><span class="co">#&gt; [49] rprojroot_2.0.3     ggvenn_0.1.9        cli_3.4.1          </span></span>
-<span><span class="co">#&gt; [52] tools_4.2.1         magrittr_2.0.3      sass_0.4.2         </span></span>
+<span><span class="co">#&gt; [52] tools_4.2.2         magrittr_2.0.3      sass_0.4.4         </span></span>
 <span><span class="co">#&gt; [55] patchwork_1.1.2     tibble_3.1.8        pkgconfig_2.0.3    </span></span>
-<span><span class="co">#&gt; [58] Matrix_1.4-1        ellipsis_0.3.2      rmarkdown_2.17     </span></span>
-<span><span class="co">#&gt; [61] R6_2.5.1            nlme_3.1-157        compiler_4.2.1</span></span></code></pre></div>
+<span><span class="co">#&gt; [58] Matrix_1.5-1        ellipsis_0.3.2      rmarkdown_2.18     </span></span>
+<span><span class="co">#&gt; [61] R6_2.5.1            nlme_3.1-160        compiler_4.2.2</span></span></code></pre></div>
 </div>
 </div>
 </div>
