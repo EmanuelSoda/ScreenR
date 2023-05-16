@@ -24,19 +24,21 @@ compute_mds <- function(screenR_Object, groups = NULL, dimensions = 2) {
             limma::plotMDS(DGEList, plot = FALSE, ndim = dimensions)
         
         # Create the Updated plot MDS
-        PLTdata <- data.frame(
+        embedding <- data.frame(
             Sample = unique(screenR_Object@data_table$Sample),
             MDS1 = plotMDS$x,
             MDS2 = plotMDS$y
         )
        
         if (is.null(groups)) {
-            PLTdata$group <- screenR_Object@groups
+            embedding$group <- screenR_Object@groups
         } else {
-            PLTdata$group <- groups
+            embedding$group <- groups
         }
-        screenR_Object@reduction <- c(screenR_Object@reduction,
-                                      list("MDS" = PLTdata))
+        
+        mds_result <- list(embedding = embedding)
+        screenR_Object@reduction <- c(screenR_Object@reduction,  
+                                      list("MDS" = mds_result))
     }
     return(screenR_Object)
 }
@@ -68,7 +70,7 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 5,
                      color = "black") {
     
     screenR_Object <- compute_mds(screenR_Object, groups)
-    PLTdata <- screenR_Object@reduction$MDS
+    PLTdata <- screenR_Object@reduction$MDS$embedding
     
     plot <- ggplot2::ggplot(PLTdata, aes(
         x = .data$MDS1, y = .data$MDS2,
