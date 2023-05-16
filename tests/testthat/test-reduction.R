@@ -46,20 +46,7 @@ create_test_object <- function() {
 
     return(obj)
 }
-test_that("plot_mds NULL", {
-    object <- create_test_object()
-    plot <- suppressWarnings(plot_mds(screenR_Object = object))
-    expect_equal(class(plot)[1], "gg")
-})
 
-test_that("plot_mds", {
-    object <- create_test_object()
-    plot <- suppressWarnings(plot_mds(
-        screenR_Object = object,
-        groups = c(rep("T1/T2", 2), rep("Time3", 6), rep("Time4", 6))
-    ))
-    expect_equal(class(plot)[1], "gg")
-})
 
 test_that("test compute mds", {
     object <- create_test_object()
@@ -67,6 +54,26 @@ test_that("test compute mds", {
         compute_mds(screenR_Object = object, groups = groups)
     expect_equal("MDS" %in% names(object@reduction), TRUE)
 })
+
+test_that("plot_mds NULL", {
+    object <- create_test_object()
+    object <- 
+        compute_mds(screenR_Object = object, groups = groups)
+    plot <- suppressWarnings(plot_mds(screenR_Object = object))
+    expect_equal(class(plot)[1], "gg")
+})
+
+test_that("plot_mds", {
+    object <- create_test_object()
+    object <- 
+        compute_mds(screenR_Object = object, groups = groups)
+    plot <- suppressWarnings(plot_mds(
+        screenR_Object = object,
+        groups = c(rep("T1/T2", 2), rep("Time3", 6), rep("Time4", 6))
+    ))
+    expect_equal(class(plot)[1], "gg")
+})
+
 test_that("test compute pca", {
     library(tibble)
     object <- create_test_object()
@@ -76,10 +83,24 @@ test_that("test compute pca", {
     expect_equal("PCA" %in% names(object@reduction), TRUE)
 })
 
+
+test_that("plot pca", {
+    library(tibble)
+    object <- create_test_object()
+    object <- 
+        compute_pca(screenR_Object = object, groups = groups,
+                    dimensions = 2, log = TRUE)
+    
+    plot <- plot_pca(object)
+    expect_equal(class(plot)[1], "gg")
+})
+
 test_that("plot_explained_variance", {
     library(tibble)
     object <- create_test_object()
-
+    object <- 
+        compute_pca(screenR_Object = object, groups = groups,
+                    dimensions = 2, log = TRUE)
     plot <- plot_explained_variance(object, cumulative = FALSE)
     expect_equal(class(plot)[[1]], "gg")
 })

@@ -27,9 +27,8 @@
 barcode_lost <- function(screenR_Object) {
     table <- ScreenR::count_mapped_reads(screenR_Object)
     table <- table %>%
-        dplyr::group_by(.data$Sample) %>%
         dplyr::filter(.data$Mapped == 0) %>%
-        dplyr::summarise(LostBarcode = n())
+        dplyr::count(.data$Sample, name = "LostBarcode") 
 
     return(table)
 }
