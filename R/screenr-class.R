@@ -12,6 +12,7 @@
 #' @slot normalized_count_table It is used to store a normalized version of
 #'                              the count table
 #' @slot data_table It is used to store a tidy format of the count table
+#' @slot reduction The dimensionality reduction created
 #' @exportClass screenr_object
 #' @concept objects
 #' @rdname get_count_table
@@ -37,7 +38,8 @@ screenr_object <- setClass("screenr_object", methods::representation(
   groups = "factor",
   replicates = "vector",
   normalized_count_table = "data.frame",
-  data_table = "data.frame"
+  data_table = "data.frame",
+  reduction = "list"
 ))
 
 
@@ -164,6 +166,25 @@ setMethod(
   }
 )
 
+#' @export
+#' @aliases get_reduction,screenr_object
+#' @rdname get_reduction
+setMethod(
+  f = "get_reduction",
+  signature = "screenr_object",
+  definition = function(object) {
+    if (is.null(object)) {
+      stop("The object is not defined!")
+    }
+    reduction <-
+      slot(object = object, name = "reduction")
+    cat(
+      "The available reductions are: "
+    )
+    return(reduction)
+  }
+)
+
 
 #' @export
 #' @aliases set_count_table,screenr_object
@@ -263,6 +284,25 @@ setMethod(
       object = object,
       name = "data_table"
     ) <- data_table
+    return(object)
+  }
+)
+
+
+#' @export
+#' @aliases set_reduction,screenr_object
+#' @rdname set_reduction
+setMethod(
+  f = "set_reduction",
+  signature = "screenr_object",
+  definition = function(object, reduction) {
+    if (is.null(object)) {
+      stop("The object is not defined!")
+    }
+    slot(
+      object = object,
+      name = "reduction"
+    ) <- reduction
     return(object)
   }
 )

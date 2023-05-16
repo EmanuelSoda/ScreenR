@@ -22,24 +22,10 @@
 #' plot_mds(object)
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
-    # We have to convert the screenR obj into an edgeR obj
-    DGEList <- create_edger_obj(screenR_Object)
-
-    # The Standard plotMDS
-    plotMDS <- limma::plotMDS(DGEList, plot = FALSE, ndim = 2)
-
-    # Create the Updated plot MDS
-    PLTdata <- data.frame(
-        Sample = rownames(plotMDS$distance.matrix.squared),
-        x = plotMDS$x, y = plotMDS$y
-    )
-
-    if (is.null(groups)) {
-        PLTdata$group <- DGEList$samples$group
-    } else {
-        PLTdata$group <- groups
-    }
-
+    
+    screenR_Object <- compute_mds(screenR_Object, groups)
+    PLTdata <- screenR_Object@reduction$MDS
+    
     plot <- ggplot2::ggplot(PLTdata, aes(
         x = .data$x, y = .data$y,
         fill = .data$group

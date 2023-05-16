@@ -250,3 +250,57 @@ setGeneric(
         standardGeneric("set_data_table")
     }
 )
+
+#' @title Set ScreenR data_table
+#' @description Set function for the data_table of the ScreenR object
+#' @param object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
+#' @param data_table A count table in a tidy format
+#' @return The ScreenR object with the set data_table
+#' @export
+#' @rdname set_data_table
+#' @concept objects
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' data_table <- get_data_table(object)
+#' set_data_table(object, data_table)
+setGeneric(
+    "set_data_table",
+    function(object, data_table) {
+        standardGeneric("set_data_table")
+    }
+)
+
+
+#' @title Get ScreenR reduction
+#' @description Get the ScreenR reductions
+#' @param object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
+#' @return The ScreenR object with the set data_table
+#' @export
+#' @rdname get_reduction
+#' @concept objects
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' get_reduction(object)
+setGeneric(
+    "get_reduction",
+    function(object) {
+        standardGeneric("get_reduction")
+    }
+)
+
+#' @title Set ScreenR reduction
+#' @description Set ScreenR reduction
+#' @param object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
+#' @param reduction A computed reduction
+#' @return The ScreenR object with the set data_table
+#' @rdname set_reduction
+#' @concept objects
+setGeneric(
+    "set_reduction",
+    function(object, reduction) {
+        standardGeneric("set_reduction")
+    }
+)

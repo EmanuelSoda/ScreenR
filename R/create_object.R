@@ -44,7 +44,8 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
                            groups = as.factor(groups),
                            replicates = replicates,
                            normalized_count_table = tibble(),
-                           data_table = tibble()
+                           data_table = tibble(),
+                           reduction = list()
     )
     return(object)
 }

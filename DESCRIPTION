@@ -71,6 +71,7 @@ Collate:
     'generics.R'
     'mapped_reads.R'
     'normalize_data.R'
+    'reduction.R'
     'plot_barcode_hit.R'
     'plot_barcode_trend.R'
     'plot_boxplot.R'

@@ -61,12 +61,37 @@ test_that("plot_mds", {
     expect_equal(class(plot)[1], "gg")
 })
 
+test_that("test compute mds", {
+    object <- create_test_object()
+    object <- 
+        compute_mds(screenR_Object = object, groups = groups)
+    expect_equal("MDS" %in% names(object@reduction), TRUE)
+})
+test_that("test compute pca", {
+    library(tibble)
+    object <- create_test_object()
+    object <- 
+        compute_pca(screenR_Object = object, groups = groups,
+                    dimensions = 2, log = TRUE)
+    expect_equal("PCA" %in% names(object@reduction), TRUE)
+})
 
 test_that("plot_explained_variance", {
     library(tibble)
     object <- create_test_object()
 
     plot <- plot_explained_variance(object, cumulative = FALSE)
+    expect_equal(class(plot)[[1]], "gg")
+})
+
+test_that("plot_explained_variance CUM", {
+    library(tibble)
+    object <- create_test_object()
+
+    plot <- plot_explained_variance(
+        screenR_Object = object,
+        cumulative = TRUE
+    )
     expect_equal(class(plot)[[1]], "gg")
 })
 
