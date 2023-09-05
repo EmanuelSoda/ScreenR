@@ -80,15 +80,16 @@ test_that("filter_by_slope_fold", {
     library(tibble)
     object <- create_test_object()
     
-    data <- filter_by_slope(
+    data_p <- filter_by_slope(
         screenR_Object = object,
-        genes = c("Gene_1", "Gene_300"),
+        genes = c("Gene_1", "Gene_2", "Gene_3", "Gene_4", "Gene_5",
+                  "Gene_6", "Gene_7", "Gene_8", "Gene_9", "Gene_10",
+                  "Gene_11", "Gene_12", "Gene_13", "Gene_14", "Gene_15"),
         group_var_treatment = c("T1", "T2", "TRT"),
         group_var_control = c("T1", "T2", "Time3", "Time4"),
-        slope_treatment = -0.5, slope_control = 0.5
-    )
-    expect_equal(class(data)[1], "tbl_df")
-    #data %>%  dplyr::select(-c("Sequence", "Library", "Gene_ID"))
+        slope_treatment = NULL, slope_control = NULL
+    ) 
+    expect_true(all(abs(data_p$slope_treatment) > abs(data_p$slope_control)))
 })
 
 

@@ -29,32 +29,44 @@
 #' )
 #'
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
-    group_var_control, slope_control, slope_treatment) {
+    group_var_control, slope_control = NULL, slope_treatment = NULL) {
 
     # Compute the slope of the hits in the treatment Samples
-    slope_treatment <- ScreenR::compute_slope(screenR_Object, genes,
+    slope_trt <- ScreenR::compute_slope(screenR_Object, genes,
         group_var = group_var_treatment
     )
 
     
     # Compute the slope of the hits in the control Samples
-    slope_DMSO <- ScreenR::compute_slope(screenR_Object, genes,
+    slope_contr <- ScreenR::compute_slope(screenR_Object, genes,
         group_var = group_var_control
     )
 
     data <- screenR_Object@data_table
 
-    data <- dplyr::left_join(data, slope_treatment, by = "Gene")
+    data <- dplyr::left_join(data, slope_trt, by = "Gene")
     data <- dplyr::rename(data, slope_treatment = .data$Slope)
 
-    data <- dplyr::left_join(data, slope_DMSO, by = "Gene")
+    data <- dplyr::left_join(data, slope_contr, by = "Gene")
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
+    if(!is.null(slope_control)){
+        print(unique(data$slope_control))
+        data <- dplyr::filter(data, abs(.data$slope_control)  <=
+                                  abs(slope_control))
+    }
+    
+    if(!is.null(slope_treatment)){
+        data <- dplyr::filter(data, abs(.data$slope_treatment) >=
+                                  abs(slope_treatment))
+    }
 
-    data <- dplyr::filter(data, .data$slope_control >= slope_control)
-
-    data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
-
+    # The treatment has more effect than the control 
+    data <- dplyr::filter(data, abs(.data$slope_control) <= 
+                              abs(.data$slope_treatment))
+    
+    data <- dplyr::distinct(data, .data$Gene, 
+                            .data$slope_control, .data$slope_treatment)
     return(data)
 }
 
