@@ -36,6 +36,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
         group_var = group_var_treatment
     )
 
+    
     # Compute the slope of the hits in the control Samples
     slope_DMSO <- ScreenR::compute_slope(screenR_Object, genes,
         group_var = group_var_control
