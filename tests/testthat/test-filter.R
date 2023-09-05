@@ -76,6 +76,22 @@ test_that("filter_by_slope", {
 })
 
 
+test_that("filter_by_slope_fold", {
+    library(tibble)
+    object <- create_test_object()
+    
+    data <- filter_by_slope(
+        screenR_Object = object,
+        genes = c("Gene_1", "Gene_300"),
+        group_var_treatment = c("T1", "T2", "TRT"),
+        group_var_control = c("T1", "T2", "Time3", "Time4"),
+        slope_treatment = -0.5, slope_control = 0.5
+    )
+    expect_equal(class(data)[1], "tbl_df")
+    #data %>%  dplyr::select(-c("Sequence", "Library", "Gene_ID"))
+})
+
+
 test_that("filter_by_variance", {
     library(tibble)
     object <- create_test_object()

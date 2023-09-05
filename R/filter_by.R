@@ -50,7 +50,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
 
-    data <- dplyr::filter(data, .data$slope_control => slope_control)
+    data <- dplyr::filter(data, .data$slope_control >= slope_control)
 
     data <- dplyr::filter(data, .data$slope_treatment <= slope_treatment)
 
