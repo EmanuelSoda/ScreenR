@@ -68,13 +68,13 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     
     
     data <- dplyr::mutate(data, keep = dplyr::case_when(
+        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE,
+        
         .data$slope_control <= 0 & .data$slope_treatment <= 0 & 
             .data$slope_treatment < .data$slope_control  ~ TRUE,
         
         .data$slope_control >= 0 & .data$slope_treatment >= 0 & 
-            .data$slope_treatment >= .data$slope_control ~ FALSE,
-        
-        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE)
+            .data$slope_treatment >= .data$slope_control ~ FALSE)
         )
     
     data <- dplyr::filter(data, .data$keep)
