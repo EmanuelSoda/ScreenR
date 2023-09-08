@@ -65,6 +65,7 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
                             .data$slope_control, .data$slope_treatment)
     # The treatment has more effect than the control 
     
+    
     data <- dplyr::mutate(data, keep = dplyr::case_when(
         .data$slope_control <= 0 & .data$slope_treatment <= 0 & 
             .data$slope_treatment < .data$slope_control  ~ TRUE,
