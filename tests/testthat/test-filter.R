@@ -87,7 +87,7 @@ test_that("filter_by_slope_fold", {
                   "Gene_11", "Gene_12", "Gene_13", "Gene_14", "Gene_15"),
         group_var_treatment = c("T1", "T2", "TRT"),
         group_var_control = c("T1", "T2", "Time3", "Time4"),
-        slope_treatment = NULL, slope_control = NULL
+        slope_treatment = NULL, slope_control = NULL, 
     ) 
     expect_true(all(abs(data_p$slope_treatment) > abs(data_p$slope_control)))
 })
