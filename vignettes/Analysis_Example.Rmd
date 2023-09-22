@@ -6,7 +6,7 @@ author:
 - name: "Emanuel Michele Soda"
   affiliation: Istituto Europeo Oncologia (IEO),
                Milano, Italy
-  email: emanuelmichele@ieo.it
+  email: emanuelsoda@gmail.com
 - name: "Elena Ceccacci"
   affiliation: Istituto Europeo Oncologia (IEO),
                Milano, Italy
