@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.13.0
+Version: 1.13.1
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
@@ -47,7 +47,7 @@ Suggests:
     covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.2)
+    R (>= 4.3)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues
