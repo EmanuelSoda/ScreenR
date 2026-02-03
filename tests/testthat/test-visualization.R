@@ -259,6 +259,6 @@ test_that("Plot common Hit", {
     plot <- suppressWarnings(plot_common_hit(hit_zscore, hit_camera, hit_zscore,
         show_percentage = FALSE
     ))
-
-    expect_equal("gg", class(plot)[1])
+    expect_true(inherits(plot, "ggplot"))
+    #expect_equal("gg", class(plot)[1])
 })

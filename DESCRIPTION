@@ -44,10 +44,11 @@ Suggests:
     knitr (>= 1.37),
     testthat (>= 3.0.0),
     BiocStyle (>= 2.22.0),
-    covr (>= 3.5)
+    covr (>= 3.5),
+    tibble
 Config/testthat/edition: 3
 Depends: 
-    R (>= 4.2)
+    R (>= 4.3)
 VignetteBuilder: knitr
 biocViews: Software, AssayDomain, GeneExpression
 BugReports: https://github.com/EmanuelSoda/ScreenR/issues
