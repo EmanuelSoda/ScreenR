@@ -54,7 +54,7 @@ test_that("plot trend hit", {
         screenR_Object = object, genes = c("Gene_1", "Gene_300"),
         group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2
     )
-    expect_equal(class(plot)[[1]], "gg")
+    expect_contains(class(plot), "ggplot") 
 })
 
 
@@ -68,7 +68,7 @@ test_that("Plot Boxplot violinplot", {
         type = "violinplot"
     )
 
-    expect_equal(class(p)[1], "gg")
+    expect_true(inherits(p, "ggplot"))
 })
 
 
@@ -82,7 +82,7 @@ test_that("Plot Boxplot boxplot", {
         type = "boxplot"
     )
 
-    expect_equal(class(p)[1], "gg")
+    expect_true(inherits(p, "ggplot"))
 })
 
 test_that("Plot Boxplot error", {
@@ -99,13 +99,13 @@ test_that("Plot Boxplot error", {
 test_that("plot_barcode_lost_for_gene", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     p <- plot_barcode_lost_for_gene(object, samples = c("Time3_A", "Time3_B"))
-    expect_equal(class(p)[1], "gg")
+    expect_true(inherits(p, "ggplot"))
 })
 
 test_that("plot_barcode_lost_for_gene", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     p <- plot_barcode_lost_for_gene(object, samples = c("Time3_A", "Time3_B"))
-    expect_equal(class(p)[1], "gg")
+    expect_true(inherits(p, "ggplot"))
 })
 
 test_that("plot_barcode_trend", {
@@ -176,7 +176,7 @@ test_that("plot_zscore_distribution", {
     )
     p <- plot_zscore_distribution(tables, alpha = 0.5)
 
-    expect_equal(class(p)[1], "gg")
+    expect_contains(class(p), "gg") 
 })
 
 test_that("plot_barcode_hit", {
@@ -202,7 +202,7 @@ test_that("Plot number mapped reads", {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     plot <- plot_mapped_reads(object, palette)
-    expect_equal(class(plot)[2], "ggplot")
+    expect_true(inherits(plot, "ggplot"))
 })
 
 
@@ -212,7 +212,7 @@ test_that("Plot number mapped reads", {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     plot <- plot_mapped_reads(object, NULL)
-    expect_equal(class(plot)[2], "ggplot")
+    expect_true(inherits(plot, "ggplot"))
 })
 
 test_that("Boxplot mapped reads", {
@@ -225,7 +225,7 @@ test_that("Boxplot mapped reads", {
         type = "boxplot"
     )
 
-    expect_equal(class(plot)[2], "ggplot")
+    expect_true(inherits(plot, "ggplot"))
 })
 
 test_that("Density mapped reads", {
@@ -237,7 +237,7 @@ test_that("Density mapped reads", {
         alpha = 0.8,
         type = "density"
     )
-    expect_equal(class(plot)[2], "ggplot")
+    expect_true(inherits(plot, "ggplot"))
 })
 
 
@@ -248,7 +248,7 @@ test_that("Plot number of Barcode Lost", {
     )
 
     plot <- plot_barcode_lost(screenR_Object = object, palette = palette)
-    expect_equal(class(plot)[2], "ggplot")
+    expect_true(inherits(plot, "ggplot"))
 })
 
 
@@ -259,6 +259,5 @@ test_that("Plot common Hit", {
     plot <- suppressWarnings(plot_common_hit(hit_zscore, hit_camera, hit_zscore,
         show_percentage = FALSE
     ))
-
-    expect_equal("gg", class(plot)[1])
+    expect_true(inherits(plot, "ggplot"))
 })
