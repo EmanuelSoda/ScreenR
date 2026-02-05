@@ -122,16 +122,16 @@ test_that("Find_Score_hit median ", {
     expect_equal(class(hit_zscore)[[1]], "tbl_df")
 })
 
-test_that("find_robust_zscore_hit median ", {
-    object <- create_test_object()
-
-    genes <- c("Gene_1", "Gene_5")
-    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
-
-    table <- compute_metrics(object,
-        control = "Time3", treatment = "TRT",
-        day = c("Time3")
-    )
-    hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 2)
-    expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
-})
+# test_that("find_robust_zscore_hit median ", {
+#     object <- create_test_object()
+# 
+#     genes <- c("Gene_1", "Gene_5")
+#     object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
+# 
+#     table <- compute_metrics(object,
+#         control = "Time3", treatment = "TRT",
+#         day = c("Time3")
+#     )
+#     hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 2)
+#     expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
+# })

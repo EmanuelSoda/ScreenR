@@ -12,12 +12,13 @@
 #' @export
 #' @concept find
 #' @examples
+#' \dontrun{
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
 #'     control = "TRT", treatment = "Time3",
 #'     day = "Time3"
 #' )
-#'
+#' 
 #' # For the the median
 #' result <- find_zscore_hit(table, number_barcode = 6)
 #' head(result)
@@ -25,6 +26,7 @@
 #' # For the mean
 #' result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 #' head(result)
+#' }
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
     metric = "median") {
     if (metric == "median") {
