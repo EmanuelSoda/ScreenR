@@ -41,6 +41,7 @@ Imports:
     tidyselect (>= 1.1.2)
 Suggests: 
     rmarkdown (>= 2.11),
+    markdown,
     knitr (>= 1.37),
     testthat (>= 3.0.0),
     BiocStyle (>= 2.22.0),
