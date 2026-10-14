@@ -172,12 +172,12 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'              with \code{\link[limma]{camera}}.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
-#' @param treatment The value(s) of the Treatment column of the data table
-#'                  for the treated samples.
-#' @param control The value(s) of the Treatment column of the data table
-#'                for the control samples.
+#' @param treatment The value(s) of the Treatment column of
+#'                  \code{\link{get_sample_table}} for the treated samples.
+#' @param control The value(s) of the Treatment column of
+#'                \code{\link{get_sample_table}} for the control samples.
 #' @param days The time points to use, in temporal order, as in the Day
-#'             column of the data table.
+#'             column of \code{\link{get_sample_table}}.
 #' @param baseline Optional value(s) of the Treatment column of samples
 #'                 taken before the treatment (for example the first time
 #'                 points), which are used as untreated samples.
@@ -197,9 +197,7 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' samples <- unique(slot(object, "data_table")[, c("Sample", "Day",
-#'     "Treatment")])
-#' samples
+#' get_sample_table(object)
 #' find_time_hit(object,
 #'     treatment = "TRT", control = c("Time3", "Time4"),
 #'     days = c("Time3", "Time4"), fdr = 1
@@ -211,7 +209,7 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
     if (length(days) < 2) {
         stop("At least two time points are needed.")
     }
-    info <- sample_info(screenR_Object)
+    info <- get_sample_table(screenR_Object)
     use <- info$Day %in% days &
         info$Treatment %in% c(treatment, control, baseline)
     info <- info[use, ]
@@ -249,24 +247,6 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
         dplyr::filter(.data$FDR <= fdr)
 
     return(time_hit)
-}
-
-#' @title Sample Information
-#' @description Internal function that extracts the Day and the Treatment of
-#'              each sample from the sample names, with the same rule used by
-#'              \code{\link{compute_data_table}}.
-#' @param screenR_Object The ScreenR object.
-#' @return A tibble with the columns Sample, Day and Treatment.
-#' @keywords internal
-sample_info <- function(screenR_Object) {
-    count_table <- screenR_Object@count_table
-    samples <- colnames(count_table)[vapply(count_table, is.numeric,
-        logical(1))]
-    tibble::tibble(
-        Sample = samples,
-        Day = stringr::str_split_fixed(samples, pattern = "_", n = 3)[, 1],
-        Treatment = gsub(".*_", "", gsub("(.*)_\\w+", "\\1", samples))
-    )
 }
 
 #' @title Summarise Hits

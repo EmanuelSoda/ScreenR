@@ -209,3 +209,13 @@ test_that("find_discordant_barcodes flags outlying barcodes", {
     expect_equal(discordant$Barcode, "b10")
     expect_error(find_discordant_barcodes(table[, -1]), "Missing")
 })
+
+test_that("plot_gini plots the Gini index of each sample", {
+    object <- get_object()
+    plot <- plot_gini(object)
+    expect_true(ggplot2::is_ggplot(plot))
+    expect_equal(plot$data$Gini, compute_gini(object)$Gini)
+
+    palette <- rep("grey50", ncol(object@count_table) - 1)
+    expect_true(ggplot2::is_ggplot(plot_gini(object, palette = palette)))
+})

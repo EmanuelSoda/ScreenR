@@ -1,3 +1,31 @@
+# ScreenR 1.15.5
+
+## More general input
+
+* `create_screenr_object()` accepts tables with any column names:
+  `barcode_column` and `gene_column` give the names of the barcode and gene
+  columns, which are renamed internally to `Barcode` and `Gene`.
+  `get_column_names()` returns the original names. When a column is not found
+  the error suggests the most similar column and the argument to use.
+* The Day and Treatment of each sample can be given with `sample_table` (and
+  `sample_columns` for its column names) instead of relying on sample names of
+  the form `Day_Treatment_Replicate`. `get_sample_table()` shows how the
+  samples are interpreted; a message is given when sample names do not follow
+  the convention.
+* The input is checked when the object is created: `groups` must have one
+  value for each sample; sample columns stored as text are converted to
+  numbers; other non-numeric columns of the count table are removed with a
+  message; duplicated barcodes and barcodes missing from the annotation give
+  a warning; duplicated barcodes in the annotation are reduced to their first
+  row.
+* The annotation columns `Sequence`, `Library` and `Gene_ID` are now optional.
+* New `show()` method, so that objects saved with older versions of ScreenR
+  can still be printed.
+
+## New features
+
+* `plot_gini()` plots the Gini index computed by `compute_gini()`.
+
 # ScreenR 1.15.4
 
 ## Bug fixes in the vignette

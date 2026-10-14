@@ -33,6 +33,50 @@ compute_gini <- function(screenR_Object) {
     )
 }
 
+#' @title Plot Gini Index
+#' @description Plots the Gini index of each sample computed with
+#'              \code{\link{compute_gini}}: 0 means that all the barcodes
+#'              have the same number of reads, values close to 1 that a few
+#'              barcodes take most of the reads. In a dropout screen it
+#'              usually increases over time; a strong increase or a large
+#'              difference between replicates can signal a bottleneck.
+#' @param screenR_Object The ScreenR object obtained using the
+#'                       \code{\link{create_screenr_object}}
+#' @param palette An optional vector of colors, one for each sample.
+#' @param alpha The opacity of the bars.
+#' @param legende_position The position of the legend ("none" by default).
+#' @importFrom ggplot2 ggplot aes geom_col geom_text scale_fill_manual
+#' @importFrom ggplot2 theme element_text labs scale_y_continuous expansion
+#' @return A ggplot object.
+#' @concept plot
+#' @export
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' plot_gini(object)
+plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
+    legende_position = "none") {
+    gini <- compute_gini(screenR_Object)
+    plot <- ggplot2::ggplot(gini, ggplot2::aes(
+        x = .data$Sample, y = .data$Gini, fill = .data$Sample
+    )) +
+        ggplot2::geom_col(alpha = alpha) +
+        ggplot2::geom_text(ggplot2::aes(label = round(.data$Gini, 2)),
+            vjust = -0.4, size = 3
+        ) +
+        ggplot2::scale_y_continuous(
+            limits = c(0, 1), expand = ggplot2::expansion(mult = c(0, 0.02))
+        ) +
+        ggplot2::labs(x = NULL, y = "Gini index") +
+        ggplot2::theme(
+            legend.position = legende_position,
+            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+        )
+    if (!is.null(palette)) {
+        plot <- plot + ggplot2::scale_fill_manual(values = palette)
+    }
+    return(plot)
+}
+
 #' @title Plot Replicate Correlation
 #' @description Plots the correlation between all the pairs of samples,
 #'              computed on the log2 of the counts per million (plus 1).

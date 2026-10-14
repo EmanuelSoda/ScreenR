@@ -39,6 +39,15 @@ analysis}
 the count table}
 
 \item{\code{data_table}}{It is used to store a tidy format of the count table}
+
+\item{\code{sample_table}}{It is used to store the Day and Treatment of each
+sample when they are given explicitly (see
+\code{\link{create_screenr_object}}); when it is
+empty they are taken from the sample names}
+
+\item{\code{column_names}}{It is used to store the names that the columns had in
+the tables given by the user (see
+\code{\link{get_column_names}})}
 }}
 
 \examples{

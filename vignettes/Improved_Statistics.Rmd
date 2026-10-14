@@ -109,13 +109,11 @@ that a few barcodes take most of the reads. In a dropout screen it usually
 increases over time; a strong increase or a large difference between
 replicates can signal a bottleneck.
 
+`compute_gini()` returns the values and `plot_gini()` plots them.
+
 ```{r gini}
-gini <- compute_gini(object)
-ggplot(gini, aes(x = Sample, y = Gini)) +
-    geom_col(fill = "#4C72B0") +
-    coord_cartesian(ylim = c(0, max(gini$Gini) * 1.1)) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = NULL, y = "Gini index")
+compute_gini(object)
+plot_gini(object)
 ```
 
 ## Normalization

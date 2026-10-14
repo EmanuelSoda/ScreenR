@@ -12,6 +12,13 @@
 #' @slot normalized_count_table It is used to store a normalized version of
 #'                              the count table
 #' @slot data_table It is used to store a tidy format of the count table
+#' @slot sample_table It is used to store the Day and Treatment of each
+#'                    sample when they are given explicitly (see
+#'                    \code{\link{create_screenr_object}}); when it is
+#'                    empty they are taken from the sample names
+#' @slot column_names It is used to store the names that the columns had in
+#'                    the tables given by the user (see
+#'                    \code{\link{get_column_names}})
 #' @exportClass screenr_object
 #' @concept objects
 #' @rdname get_count_table
@@ -37,7 +44,9 @@ screenr_object <- setClass("screenr_object", methods::representation(
   groups = "factor",
   replicates = "vector",
   normalized_count_table = "data.frame",
-  data_table = "data.frame"
+  data_table = "data.frame",
+  sample_table = "data.frame",
+  column_names = "list"
 ))
 
 
@@ -264,5 +273,35 @@ setMethod(
       name = "data_table"
     ) <- data_table
     return(object)
+  }
+)
+
+#' @title Show a ScreenR Object
+#' @description Prints the slots of a ScreenR object. Objects created with
+#'              older versions of ScreenR can lack some of the slots added
+#'              later (sample_table, column_names); only the slots present
+#'              in the object are printed.
+#' @param object A ScreenR object.
+#' @importFrom methods show slotNames slot .hasSlot
+#' @return NULL, invisibly.
+#' @concept objects
+#' @rdname show-screenr_object
+#' @export
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#' object
+setMethod(
+  f = "show",
+  signature = "screenr_object",
+  definition = function(object) {
+    cat("An object of class \"screenr_object\"\n")
+    for (name in methods::slotNames("screenr_object")) {
+      if (methods::.hasSlot(object, name)) {
+        cat("Slot \"", name, "\":\n", sep = "")
+        print(methods::slot(object, name))
+        cat("\n")
+      }
+    }
+    invisible(NULL)
   }
 )

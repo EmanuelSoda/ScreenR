@@ -17,7 +17,8 @@ ScreenR_Object with the data_table filed containing the table.
 This function computes the data table that will be used
              for the analysis. The data_table is a tidy and normalized
              version of the original count_table and will be used
-             throughout the analysis.
+             throughout the analysis. The Day and Treatment columns come
+             from \code{\link{get_sample_table}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

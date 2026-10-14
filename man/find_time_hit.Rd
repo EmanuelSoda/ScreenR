@@ -19,14 +19,14 @@ find_time_hit(
 \item{screenR_Object}{The ScreenR object obtained using the
 \code{\link{create_screenr_object}}}
 
-\item{treatment}{The value(s) of the Treatment column of the data table
-for the treated samples.}
+\item{treatment}{The value(s) of the Treatment column of
+\code{\link{get_sample_table}} for the treated samples.}
 
-\item{control}{The value(s) of the Treatment column of the data table
-for the control samples.}
+\item{control}{The value(s) of the Treatment column of
+\code{\link{get_sample_table}} for the control samples.}
 
 \item{days}{The time points to use, in temporal order, as in the Day
-column of the data table.}
+column of \code{\link{get_sample_table}}.}
 
 \item{baseline}{Optional value(s) of the Treatment column of samples
 taken before the treatment (for example the first time
@@ -64,9 +64,7 @@ Finds the genes whose depletion (or enrichment) caused by
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
-samples <- unique(slot(object, "data_table")[, c("Sample", "Day",
-    "Treatment")])
-samples
+get_sample_table(object)
 find_time_hit(object,
     treatment = "TRT", control = c("Time3", "Time4"),
     days = c("Time3", "Time4"), fdr = 1
