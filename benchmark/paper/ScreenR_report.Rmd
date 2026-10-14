@@ -314,6 +314,22 @@ include_graphics(fig("k562_precision_recall"))
 
 RESULTS_K562_TEXT
 
+## ScreenR example dataset
+
+```{r screenr-dataset-table}
+tab("screenr_dataset_hits.csv") %>%
+    rename(Method = method, `Hits at 5% FDR` = n_hits,
+        `Shared with MAGeCK RRA` = overlap_with_MAGeCK_RRA,
+        `Shared with MAGeCK MLE` = overlap_with_MAGeCK_MLE) %>%
+    kable(caption = "ScreenR example dataset, day 4 treated vs control: genes called at 5% FDR (the legacy rule has no FDR) and overlap with MAGeCK.")
+```
+
+```{r fig-screenr-dataset, out.width = "65%", fig.cap = "ScreenR example dataset: Spearman correlation between the p-value rankings of the methods."}
+include_graphics(fig("screenr_dataset_correlation"))
+```
+
+RESULTS_SCREENR_DATASET_TEXT
+
 # Discussion
 
 DISCUSSION_TEXT

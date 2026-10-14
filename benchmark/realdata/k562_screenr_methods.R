@@ -1,14 +1,20 @@
 # ScreenR methods on the K562 shRNA screen, compared with MAGeCK RRA on the
 # core essential / non-essential reference genes.
 # Usage: Rscript k562_screenr_methods.R <ScreenR lib> <ScreenR repo> \
-#            <MAGeCK RRA gene_summary.txt of the K562 screen>
-# The MAGeCK output is produced by run_realdata.R.
+#            <MAGeCK RRA gene_summary.txt> [MAGeCK MLE gene_summary.txt]
+# The MAGeCK outputs are produced by run_realdata.R (for the MLE we used
+# --no-permutation-by-group --permutation-round 1: only the Wald z is used).
 suppressMessages({library(ScreenR, lib.loc = commandArgs(TRUE)[1]); library(dplyr)})
 repo <- commandArgs(TRUE)[2]
 for (f in c("k562_count_table", "k562_annotation_table", "k562_reference_genes"))
     load(file.path(repo, "data", paste0(f, ".rda")))
 rra <- read.delim(commandArgs(TRUE)[3], check.names = FALSE)
 res <- list(MAGeCK_RRA = data.frame(Gene = rra$id, PValue = rra[["neg|p-value"]], FDR = rra[["neg|fdr"]], time = NA))
+if (length(commandArgs(TRUE)) >= 4) {
+    mle <- read.delim(commandArgs(TRUE)[4], check.names = FALSE)
+    p <- pnorm(mle[["treatment|z"]])
+    res$MAGeCK_MLE <- data.frame(Gene = mle$Gene, PValue = p, FDR = p.adjust(p, "BH"), time = NA)
+}
 samples <- data.frame(Sample = c("Plasmid", "T14_A", "T14_B"), Day = "Screen", Treatment = c("Plasmid", "T14", "T14"))
 t0 <- system.time({
 obj <- suppressMessages(create_screenr_object(table = k562_count_table, annotation = k562_annotation_table,
@@ -40,5 +46,5 @@ ev <- function(r, ref = k562_reference_genes) {
     out$AUPRC <- if (all(is.na(r$PValue))) NA else sum(prec[hit]) / sum(hit)
     out$time <- r$time[1]; out }
 e <- bind_rows(lapply(names(res), function(n) cbind(method = n, ev(res[[n]]))))
-saveRDS(list(res = res, eval = e), "k562_now.rds")
+saveRDS(list(res = res, eval = e), "k562_methods.rds")
 options(width = 200); print(mutate(e, across(where(is.numeric), ~ round(.x, 3))), row.names = FALSE)

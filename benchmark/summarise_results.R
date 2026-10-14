@@ -203,4 +203,26 @@ if (file.exists("results/k562_methods.rds")) {
         guides(colour = guide_legend(nrow = 3))
     save_plot(p, "k562_precision_recall", 6.5, 5)
 }
+# ------------------------------------------------- ScreenR example data ---
+if (file.exists("results/screenr_dataset.rds")) {
+    sd <- readRDS("results/screenr_dataset.rds")
+    write.csv(sd$summary, "results/tables/screenr_dataset_hits.csv",
+        row.names = FALSE)
+    short <- c(MAGeCK_RRA = "MAGeCK RRA", MAGeCK_MLE = "MAGeCK MLE",
+        CAMERA = "CAMERA", ROAST = "ROAST", FRY = "FRY",
+        Zscore_mean = "Z-score (mean)", Zscore_edgeR = "Z-score (edgeR)")
+    correlation <- as.data.frame(as.table(sd$correlation)) %>%
+        mutate(Var1 = factor(short[as.character(Var1)], levels = short),
+            Var2 = factor(short[as.character(Var2)], levels = short))
+    p <- ggplot(correlation, aes(Var1, Var2, fill = Freq)) +
+        geom_tile(colour = "white") +
+        geom_text(aes(label = sprintf("%.2f", Freq)), size = 3) +
+        scale_fill_gradient(low = "white", high = "#2166AC",
+            limits = c(0, 1)) +
+        scale_y_discrete(limits = rev) +
+        labs(x = NULL, y = NULL, fill = "Spearman") +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+            legend.position = "right")
+    save_plot(p, "screenr_dataset_correlation", 6, 4.8)
+}
 cat("Simulation runs:", length(files), "files,", n_seeds, "seeds\n")
