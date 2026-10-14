@@ -30,8 +30,17 @@ power_table <- tab("simulation_power.csv")
 k562 <- tab("k562_evaluation.csv")
 before_after <- tab("before_after.csv")
 n_runs <- length(list.files(file.path(results, "simulation_v2"), "\\.rds$"))
+pretty <- c(MAGeCK_RRA = "MAGeCK RRA", MAGeCK_MLE = "MAGeCK MLE",
+    CAMERA = "ScreenR CAMERA", CAMERA_storey = "ScreenR CAMERA (Storey)",
+    FRY = "ScreenR FRY", ROAST = "ScreenR ROAST",
+    Zscore_mean = "ScreenR Z-score (mean)",
+    Zscore_median = "ScreenR Z-score (median)",
+    Zscore_controls = "ScreenR Z-score (controls)",
+    Zscore_edgeR = "ScreenR Z-score (edgeR)",
+    legacy_rule = "ScreenR legacy rule")
 get <- function(table, method, column, ...) {
-    row <- table[table$Method == method | table$method == method, ]
+    key <- if ("Method" %in% names(table)) table$Method else table$method
+    row <- table[key == method, ]
     filters <- list(...)
     for (f in names(filters)) row <- row[row[[f]] == filters[[f]], ]
     row[[column]][1]
@@ -255,11 +264,17 @@ null_table %>% filter(alpha == 0.05) %>%
     kable(booktabs = TRUE, caption = "Screens with no true hits: fraction of genes with p < 0.05 (should be 0.05) and mean number of genes called at 5% FDR (should be close to 0).")
 ```
 
-```{r fig-null, fig.cap = "Fraction of genes with p < 0.05 in screens with no true hits (mean ± 2 SE over seeds). The dashed line is the nominal 5%."}
+```{r fig-null, fig.cap = "Fraction of genes with p < 0.05 in screens with no true hits (mean and 2 standard errors over seeds). The dashed line is the nominal 5%."}
 include_graphics(fig("simulation_null"))
 ```
 
-RESULTS_NULL_TEXT
+With no true hits every method had close to 5% of the genes with p < 0.05,
+so all the p-values are valid; MAGeCK MLE was slightly liberal
+(`r pct(get(null_table, "MAGeCK MLE", "fraction", alpha = 0.05))`). At 5% FDR
+the calibrated methods called almost no gene, while the legacy ScreenR rule
+called on average
+`r round(mean(subset(bind_rows(lapply(list.files(file.path(results, "simulation_v2"), full.names = TRUE), function(f) readRDS(f)$evaluation)), method == "ScreenR_legacy_rule" & scenario == "S0_null" & alpha == 0.05)$n_called))`
+genes, all of them false.
 
 ## FDR control and power
 
@@ -267,7 +282,7 @@ RESULTS_NULL_TEXT
 include_graphics(fig("simulation_calibration"))
 ```
 
-```{r fig-power, fig.cap = "True positive rate at 5% FDR (mean ± SE over seeds)."}
+```{r fig-power, fig.cap = "True positive rate at 5% FDR (mean and standard error over seeds)."}
 include_graphics(fig("simulation_power"))
 ```
 
@@ -281,7 +296,40 @@ summary_table %>%
     kable(booktabs = TRUE, caption = "Summary at 5% FDR over the five scenarios with hits: mean FDP, worst scenario mean FDP, mean TPR, mean AUPRC and median run time (seconds).")
 ```
 
-RESULTS_POWER_TEXT
+**FDR control.** CAMERA and the gene Z-score test (mean, median and on the
+edgeR statistics) kept the observed FDR below the nominal level in every
+scenario (worst scenario mean at 5%: 3.1%). They are still conservative when
+there are true hits, for two reasons. CAMERA is a competitive test and the
+Z-score test compares each gene with all the barcodes: the true hits are part
+of the reference and widen it. And Benjamini-Hochberg controls the FDR at
+π~0~α. The Storey correction did not change CAMERA: its one-sided p-values
+of the genes without effect are shifted towards 1 (they look "up" compared
+with an average lowered by the depleted hits), so the estimate of π~0~ was above 1 (1.03–1.32) and was capped at 1.
+
+MAGeCK MLE exceeded the nominal FDR with off-target effects (10.7% at 5%),
+and MAGeCK RRA with the non-targeting controls exceeded it in every scenario
+(up to 19%). The Z-score test with the non-targeting reference was close to
+nominal (3.9–7.5%). ROAST and FRY, which are self-contained tests, called
+shRNAs with off-target effects (FRY 9.8%, 10% in the weak-effect scenario).
+The legacy rule had an FDP of 50–60% in every scenario.
+
+**Power and ranking.** In the baseline all the calibrated methods except
+ROAST, FRY and MAGeCK RRA found more than 90% of the hits. With weak effects
+or noisy data, at 5% FDR MAGeCK MLE found 45–53% of the hits, the ScreenR
+Z-score test 36–43%, CAMERA 32–35% and MAGeCK RRA 3–7%; the Z-score test with
+the non-targeting reference found the most (56–64%). The ranking of the genes
+(AUPRC), which does not depend on the FDR threshold, was best for CAMERA and
+the Z-score tests in four of the five scenarios (weak effect 0.88 vs 0.85
+for MAGeCK MLE and 0.61 for MAGeCK RRA; noisy 0.89 vs 0.86 and 0.71); with
+off-target effects MAGeCK MLE (0.983) and the median Z-score (0.988) were
+best, since a median ignores single shRNAs with a seed effect. ROAST and FRY
+had little power with 2 replicates or noisy data: they test each gene on its
+own barcodes, so they rely on the replicate variance, while the competitive
+tests borrow information from all the genes.
+
+**Run time.** MAGeCK MLE took a median of
+`r round(get(summary_table, "MAGeCK MLE", "Time (s)"))` s per screen; MAGeCK
+RRA and every ScreenR method 0.3–7 s (including the creation of the object).
 
 ## Before and after the calibration
 
@@ -294,13 +342,18 @@ before_after %>% mutate(across(where(is.numeric), ~ round(.x, 3))) %>%
     kable(booktabs = TRUE, caption = "Before and after the calibration, mean over the scenarios with hits at 5% FDR. The two versions used different simulations (no non-targeting shRNAs and 3 seeds before), so the MAGeCK rows show the difference due to the simulation alone.")
 ```
 
-RESULTS_BEFORE_AFTER_TEXT
+The calibration fixes increased the power of every ScreenR method without
+losing FDR control: at 5% FDR the true positive rate of the Z-score test
+rose from 21% to 63%, that of the Z-score test on the edgeR statistics from
+41% to 65%, CAMERA from 61% to 65% and ROAST from 15% to 25%, while the
+observed FDR stayed below 2%. The MAGeCK rows changed little, showing that
+the difference is due to the fixes and not to the new simulation.
 
 ## K562 essentiality screen
 
 ```{r k562-table}
 k562 %>% filter(alpha == 0.05) %>%
-    transmute(Method = method, `Essential called` = essential_called,
+    transmute(Method = pretty[method], `Essential called` = essential_called,
         `Non-essential called` = nonessential_called,
         Recall = round(recall, 3),
         `Non-essential fraction` = round(false_frac, 3),
@@ -312,12 +365,39 @@ k562 %>% filter(alpha == 0.05) %>%
 include_graphics(fig("k562_precision_recall"))
 ```
 
-RESULTS_K562_TEXT
+```{r k562-numbers}
+k5 <- filter(k562, alpha == 0.05)
+kv <- function(m, col) k5[[col]][k5$method == m]
+has_mle <- "MAGeCK_MLE" %in% k5$method
+```
+
+On the K562 screen the gene Z-score test (mean) found
+`r kv("Zscore_mean", "essential_called")` of the 681 core essential genes at
+5% FDR with `r kv("Zscore_mean", "nonessential_called")` non-essential genes,
+MAGeCK RRA `r kv("MAGeCK_RRA", "essential_called")` with
+`r kv("MAGeCK_RRA", "nonessential_called")`, and CAMERA
+`r kv("CAMERA", "essential_called")` with
+`r kv("CAMERA", "nonessential_called")`; the ranking of the Z-score test was
+as good as MAGeCK RRA (AUPRC `r round(kv("Zscore_mean", "AUPRC"), 3)` vs
+`r round(kv("MAGeCK_RRA", "AUPRC"), 3)`)`r if (has_mle) paste0(" and MAGeCK MLE found ", kv("MAGeCK_MLE", "essential_called"), " essential and ", kv("MAGeCK_MLE", "nonessential_called"), " non-essential genes (AUPRC ", round(kv("MAGeCK_MLE", "AUPRC"), 3), ")") else ""`.
+The legacy rule called `r kv("legacy_rule", "essential_called")` essential
+but also `r kv("legacy_rule", "nonessential_called")` non-essential genes.
+
+Two results differ from the simulations. First, the Z-score test with the
+non-targeting shRNAs as reference called
+`r kv("Zscore_controls", "nonessential_called")` non-essential genes: in
+shRNA screens nearly every targeting shRNA is somewhat depleted compared with
+non-targeting ones (off-target and RNAi-machinery toxicity), so the
+non-targeting shRNAs are not a good model of a gene without effect. Second,
+ROAST and FRY called no gene: with a single plasmid sample there is almost no
+replicate information for a self-contained test, although their ranking was
+still informative (AUPRC `r round(kv("FRY", "AUPRC"), 2)`).
 
 ## ScreenR example dataset
 
 ```{r screenr-dataset-table}
 tab("screenr_dataset_hits.csv") %>%
+    mutate(method = pretty[method]) %>%
     rename(Method = method, `Hits at 5% FDR` = n_hits,
         `Shared with MAGeCK RRA` = overlap_with_MAGeCK_RRA,
         `Shared with MAGeCK MLE` = overlap_with_MAGeCK_MLE) %>%
@@ -328,11 +408,47 @@ tab("screenr_dataset_hits.csv") %>%
 include_graphics(fig("screenr_dataset_correlation"))
 ```
 
-RESULTS_SCREENR_DATASET_TEXT
+The ScreenR example dataset has a weak treatment effect: at 5% FDR MAGeCK
+RRA, CAMERA and the Z-score test on the edgeR statistics called no gene,
+MAGeCK MLE called 4 and ROAST and FRY 9, including the 4 of MAGeCK MLE. The
+legacy rule called 97 genes. The rankings of the ScreenR methods were highly
+correlated with MAGeCK MLE (Spearman 0.81–0.88) and less with MAGeCK RRA
+(0.35–0.53), which also agreed poorly with MAGeCK MLE (0.39).
 
 # Discussion
 
-DISCUSSION_TEXT
+**The legacy rule should not be used to call hits.** In every simulated
+scenario about half of its hits were false, it called about 87 genes in
+screens without any effect and half of its K562 calls were non-essential
+genes. It is kept for compatibility, but the vignettes now use the
+calibrated tests.
+
+**Recommended methods.** The gene Z-score permutation test (mean) and CAMERA
+control the FDR in all the scenarios, rank the hits as well as or better
+than MAGeCK MLE, are as good as MAGeCK RRA on the K562 screen and run in
+seconds, 100–300 times faster than MAGeCK MLE. At a fixed FDR they are more
+conservative than MAGeCK MLE, which finds more hits with weak or noisy
+effects but exceeded the nominal FDR with off-target effects. The median
+Z-score is the most robust to off-target shRNAs. ROAST and FRY answer a
+different question (does the gene change at all?) and need replicates in
+both conditions.
+
+**Controls.** A reference of non-targeting shRNAs increased the power when
+they behave like genes without effect (simulation), but produced many false
+hits in the K562 screen, where they do not. Non-targeting shRNAs should be
+used as reference only after checking, for example, that their fold changes
+match those of known non-essential genes; the default reference (all the
+barcodes) is safer.
+
+**Limitations and future work.** The simulations use a simple model of
+knockdown efficiency and off-target effects; the K562 evaluation is limited
+to an essentiality screen with one plasmid sample. The conservativeness of
+the competitive tests when many genes are hits could be reduced by an
+empirical-null or iterative reference (removing the strongest hits from the
+reference), and the power with weak effects by weighting the shRNAs by their
+estimated efficiency, as MAGeCK MLE does. A larger evaluation on several
+screens with known hits (for example drug-resistance screens with validated
+genes) would strengthen the comparison.
 
 # Reproducibility
 
