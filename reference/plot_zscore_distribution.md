@@ -1,0 +1,45 @@
+# Plot distribution Z-score
+
+This function plots the Log2FC Z-score distribution of the treated vs
+control in the different time points.
+
+## Usage
+
+``` r
+plot_zscore_distribution(time_point_measure, alpha = 1)
+```
+
+## Arguments
+
+- time_point_measure:
+
+  A list containing the table for each time point. Each table contains
+  for each barcode the counts for the treated and control the Log2FC,
+  Zscore, ZscoreRobust, Day.
+
+- alpha:
+
+  A value for the opacity of the plot. Allowed values are in the range 0
+  to 1
+
+## Value
+
+return the density plot of the distribution of the Z-score
+
+## Examples
+
+``` r
+object <- get0("object", envir = asNamespace("ScreenR"))
+
+table1 <- compute_metrics(object,
+    control = "TRT", treatment = "Time3",
+    day = "Time3"
+)
+
+table2 <- compute_metrics(object,
+    control = "TRT", treatment = "Time4",
+    day = "Time4"
+)
+
+plot_zscore_distribution(list(table1, table2), alpha = 0.5)
+```
