@@ -1,0 +1,45 @@
+"Method","alpha","fraction","se","false_calls"
+"MAGeCK RRA",0.01,0.012,NA,0
+"MAGeCK RRA",0.05,0.048,NA,1
+"MAGeCK RRA",0.1,0.092,NA,1
+"MAGeCK RRA",0.2,0.198,NA,1
+"MAGeCK RRA (controls)",0.01,0.006,NA,0
+"MAGeCK RRA (controls)",0.05,0.046,NA,0
+"MAGeCK RRA (controls)",0.1,0.064,NA,0
+"MAGeCK RRA (controls)",0.2,0.128,NA,1
+"MAGeCK MLE",0.01,0.01,NA,0
+"MAGeCK MLE",0.05,0.066,NA,0
+"MAGeCK MLE",0.1,0.12,NA,0
+"MAGeCK MLE",0.2,0.2,NA,1
+"ScreenR CAMERA",0.01,0.006,NA,0
+"ScreenR CAMERA",0.05,0.056,NA,0
+"ScreenR CAMERA",0.1,0.096,NA,0
+"ScreenR CAMERA",0.2,0.184,NA,0
+"ScreenR CAMERA (Storey)",0.01,0.006,NA,0
+"ScreenR CAMERA (Storey)",0.05,0.056,NA,0
+"ScreenR CAMERA (Storey)",0.1,0.096,NA,0
+"ScreenR CAMERA (Storey)",0.2,0.184,NA,0
+"ScreenR ROAST",0.01,0.006,NA,0
+"ScreenR ROAST",0.05,0.054,NA,0
+"ScreenR ROAST",0.1,0.112,NA,0
+"ScreenR ROAST",0.2,0.192,NA,0
+"ScreenR FRY",0.01,0.006,NA,0
+"ScreenR FRY",0.05,0.054,NA,0
+"ScreenR FRY",0.1,0.11,NA,0
+"ScreenR FRY",0.2,0.188,NA,2
+"ScreenR Z-score (mean)",0.01,0.01,NA,0
+"ScreenR Z-score (mean)",0.05,0.058,NA,0
+"ScreenR Z-score (mean)",0.1,0.112,NA,0
+"ScreenR Z-score (mean)",0.2,0.184,NA,1
+"ScreenR Z-score (median)",0.01,0.016,NA,0
+"ScreenR Z-score (median)",0.05,0.074,NA,0
+"ScreenR Z-score (median)",0.1,0.112,NA,0
+"ScreenR Z-score (median)",0.2,0.19,NA,0
+"ScreenR Z-score (controls)",0.01,0.01,NA,0
+"ScreenR Z-score (controls)",0.05,0.052,NA,0
+"ScreenR Z-score (controls)",0.1,0.106,NA,1
+"ScreenR Z-score (controls)",0.2,0.178,NA,1
+"ScreenR Z-score (edgeR)",0.01,0.01,NA,0
+"ScreenR Z-score (edgeR)",0.05,0.058,NA,0
+"ScreenR Z-score (edgeR)",0.1,0.11,NA,1
+"ScreenR Z-score (edgeR)",0.2,0.182,NA,1
