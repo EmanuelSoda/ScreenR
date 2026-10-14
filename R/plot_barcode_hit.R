@@ -41,24 +41,15 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
     quantile = c(-0.5, 0.5), labels = c("Negative logFC", "Positive logFC")) {
     DGEList <- create_edger_obj(screenR_Object)
-    xglm <- edgeR::estimateDisp(DGEList, coef = seq(
-        1,
-        length(colnames(matrix_model)), 1
-    ))
+    xglm <- edgeR::estimateDisp(DGEList, design = matrix_model)
     fit <- edgeR::glmFit(xglm, matrix_model)
 
     lrt <- edgeR::glmLRT(fit, contrast = contrast)
 
-
-    genesymbols <- as.character(DGEList$genes[, 1])
-    genesymbollist <- list()
-    unq <- unique(genesymbols)
-    unq <- unq[!is.na(unq)]
-    for (i in unq) {
-        sel <- genesymbols == i & !is.na(genesymbols)
-        if (sum(sel) > 3) {
-            genesymbollist[[i]] <- which(sel)
-        }
+    genesymbollist <- unique_gene_symbols(DGEList$genes$Gene, number_barcode)
+    if (is.null(genesymbollist[[gene]])) {
+        stop("Gene ", gene, " is not in the annotation or does not have ",
+            "more than number_barcode = ", number_barcode, " barcodes.")
     }
 
     plot <- limma::barcodeplot(lrt$table$logFC,

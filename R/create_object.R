@@ -65,6 +65,9 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
 #'              This function and other utility function enables the user to
 #'              not worry abut the implementation and just focus
 #'              on the analysis. The ScreenR package will take care of the rest.
+#'              The edgeR object is built from the raw counts (the count
+#'              table), as required by the edgeR negative binomial model, and
+#'              the annotation is matched to the counts by Barcode.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @importFrom  edgeR DGEList
@@ -75,14 +78,21 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' create_edger_obj(object)
 create_edger_obj <- function(screenR_Object) {
-    # First create the Matrix of the Count table
-    counts <- screenR_Object@normalized_count_table
-    counts <- as.matrix(dplyr::select_if(counts, is.numeric))
+    # edgeR models raw counts, so the count table (not the CPM) is used
+    count_table <- screenR_Object@count_table
+    counts <- as.matrix(dplyr::select_if(count_table, is.numeric))
+    barcodes <- as.character(count_table$Barcode)
+    rownames(counts) <- barcodes
     # The group for the treatment
     groups <- screenR_Object@groups
 
-    # The annotation
+    # The annotation, in the same order as the counts
     genes <- screenR_Object@annotation_table
+    genes <- genes[match(barcodes, as.character(genes$Barcode)), ]
+    if (anyNA(genes$Barcode)) {
+        stop("Some barcodes of the count table are not in the annotation ",
+            "table.")
+    }
 
     # Create the edgeR object
     DGEList <- edgeR::DGEList(counts = counts,

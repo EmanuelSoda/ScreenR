@@ -76,8 +76,7 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @keywords internal
 compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     number_barcode = 3, thresh = 1e-04, lfc = 1) {
-    # Select only the first column
-    genesymbols <- DGEList$genes[, 1]
+    genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
     # Perform the camera test
@@ -95,6 +94,7 @@ compute_camera <- function(xglm, DGEList, matrix_model, contrast,
 #' @return A list of unique gene symbols
 #' @keywords internal
 unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
+    gene_symbols <- as.character(gene_symbols)
     un_genesymbols <- unique(gene_symbols)
     un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
 
@@ -103,7 +103,7 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
         gene_symbols, number_barcode
     )
     names(gene_symbol_list) <- un_genesymbols
-    # sapply(gene_symbol_list, is.null)
+    # Drop the genes without enough barcodes
     gene_symbol_list[purrr::map_lgl(gene_symbol_list, is.null)] <- NULL
     return(gene_symbol_list)
 }
@@ -112,13 +112,13 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
 #' @description Compute a unique gene symbol for gene
 #' @param gene The gene name
 #' @inheritDotParams unique_gene_symbols gene_symbols number_barcode
-#' @return The barcode of the gene passed as input
+#' @return The indices of the barcodes of the gene passed as input, or
+#'         NULL if the gene has no more than number_barcode barcodes
 #' @keywords internal
 select_number_barcode <- function(gene, gene_symbols, number_barcode) {
     sel <- gene_symbols == gene & !is.na(gene_symbols)
     if (sum(sel) > number_barcode) {
-        which(sel)
+        return(which(sel))
     }
-
-    return(sel)
+    return(NULL)
 }

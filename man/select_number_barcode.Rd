@@ -16,7 +16,8 @@ select_number_barcode(gene, gene_symbols, number_barcode)
   }}
 }
 \value{
-The barcode of the gene passed as input
+The indices of the barcodes of the gene passed as input, or
+        NULL if the gene has no more than number_barcode barcodes
 }
 \description{
 Compute a unique gene symbol for gene

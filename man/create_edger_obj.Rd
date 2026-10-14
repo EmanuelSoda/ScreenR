@@ -19,6 +19,9 @@ Utility function that using the screenr-class
              This function and other utility function enables the user to
              not worry abut the implementation and just focus
              on the analysis. The ScreenR package will take care of the rest.
+             The edgeR object is built from the raw counts (the count
+             table), as required by the edgeR negative binomial model, and
+             the annotation is matched to the counts by Barcode.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

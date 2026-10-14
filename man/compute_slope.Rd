@@ -21,7 +21,9 @@ A tibble containing in each row the gene and the corresponding Slope
 }
 \description{
 This function is used to compute the slope of the gene passed
-             as input
+             as input. The slope is the coefficient of a linear regression
+             of the barcode frequencies on the time points (Day column of
+             the data table), numbered following the order of the samples.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

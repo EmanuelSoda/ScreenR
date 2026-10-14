@@ -51,7 +51,6 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
     if(!is.null(slope_control)){
-        print(unique(data$slope_control))
         data <- dplyr::filter(data, abs(.data$slope_control)  <=
                                   abs(slope_control))
     }
@@ -74,7 +73,9 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
         .data$slope_control >= 0 & .data$slope_treatment >= 0 & 
             .data$slope_treatment >= .data$slope_control ~ FALSE,
         
-        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE)
+        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE,
+
+        TRUE ~ FALSE)
         )
     
     data <- dplyr::filter(data, .data$keep)
@@ -84,7 +85,9 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 
 #' @title Compute Slope of a Gene
 #' @description This function is used to compute the slope of the gene passed
-#'              as input
+#'              as input. The slope is the coefficient of a linear regression
+#'              of the barcode frequencies on the time points (Day column of
+#'              the data table), numbered following the order of the samples.
 #' @importFrom rlang .data
 #' @importFrom dplyr ungroup
 #' @param group_var The variable to use  as independent variable (x)
@@ -108,11 +111,16 @@ compute_slope <- function(screenR_Object, genes, group_var) {
     data <- dplyr::filter(data, .data$Gene %in% genes)
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
-    # in order to perform the linear regression as samples are a time series
-    # the ordered Sample are encoded as number
-    data <- dplyr::group_by(data, .data$Gene)
-    data <- dplyr::mutate(data, encode = seq(1, n(), 1))
-    data <- dplyr::ungroup(data)
+    # In order to perform the linear regression as samples are a time series
+    # each time point (Day) is encoded as a number, following the order of
+    # the samples. Replicates of the same time point share the same number.
+    sample_rank <- if (is.factor(data$Sample)) {
+        as.integer(data$Sample)
+    } else {
+        match(data$Sample, unique(data$Sample))
+    }
+    days <- unique(as.character(data$Day[order(sample_rank)]))
+    data <- dplyr::mutate(data, encode = match(.data$Day, days))
 
     data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
         Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"]

@@ -24,7 +24,7 @@
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
-#' @importFrom stats sd median
+#' @importFrom stats sd median mad
 #' @return Return a tibble with all the measure computed.
 #' @concept compute
 #' @export
@@ -74,9 +74,10 @@ compute_metrics <- function(screenR_Object, control,
             1e-07)) %>%
         dplyr::mutate(Zscore = (.data$Log2FC -
             mean(.data$Log2FC)) / sd(.data$Log2FC)) %>%
-        dplyr::mutate(ZscoreRobust = 1.4826 * (.data$Log2FC -
-            mean(.data$Log2FC)) / median(abs(.data$Log2FC -
-            median(.data$Log2FC)))) %>%
+        # Robust Z-score: (x - median) / MAD, where stats::mad() already
+        # includes the 1.4826 consistency constant
+        dplyr::mutate(ZscoreRobust = (.data$Log2FC -
+            median(.data$Log2FC)) / stats::mad(.data$Log2FC)) %>%
         dplyr::mutate(Day = day, Treatment = treatment)
 
     return(data_trt)
