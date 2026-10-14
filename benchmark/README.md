@@ -64,3 +64,11 @@ Rscript k562_screenr_methods.R <ScreenR lib> <ScreenR repo> \
 
 The script that builds the K562 dataset is
 `inst/scripts/k562_essential_screen.R`.
+
+## Report
+
+`paper/ScreenR_report.Rmd` documents all the changes of ScreenR 1.15.1 –
+1.15.10 and the benchmark results; `paper/ScreenR_report.pdf` is the rendered
+version. Rebuild it with `Rscript summarise_results.R` and then
+`rmarkdown::render("paper/ScreenR_report.Rmd")` (HTML; the PDF was printed
+from the HTML with Chromium).

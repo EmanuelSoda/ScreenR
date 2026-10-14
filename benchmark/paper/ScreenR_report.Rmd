@@ -382,6 +382,15 @@ as good as MAGeCK RRA (AUPRC `r round(kv("Zscore_mean", "AUPRC"), 3)` vs
 `r round(kv("MAGeCK_RRA", "AUPRC"), 3)`)`r if (has_mle) paste0(" and MAGeCK MLE found ", kv("MAGeCK_MLE", "essential_called"), " essential and ", kv("MAGeCK_MLE", "nonessential_called"), " non-essential genes (AUPRC ", round(kv("MAGeCK_MLE", "AUPRC"), 3), ")") else ""`.
 The legacy rule called `r kv("legacy_rule", "essential_called")` essential
 but also `r kv("legacy_rule", "nonessential_called")` non-essential genes.
+MAGeCK MLE found the most essential genes but at the price of many false
+calls: `r round(100 * kv("MAGeCK_MLE", "false_frac"))`% of the reference
+genes it called at 5% FDR were non-essential, in line with its liberal FDR in
+the simulations. MAGeCK MLE also skipped the genes with more than about 40
+shRNAs (95 genes, 29 core essential and 17 non-essential), which are counted
+as not called; MAGeCK MLE was run with one permutation round
+(`--no-permutation-by-group --permutation-round 1`), since only its Wald
+statistic is used here and the default permutations would have taken more
+than ten hours.
 
 Two results differ from the simulations. First, the Z-score test with the
 non-targeting shRNAs as reference called
@@ -462,7 +471,7 @@ All the code is in the `benchmark/` folder of the ScreenR repository
 * `realdata/` runs the K562 and ScreenR-dataset comparisons;
 * `summarise_results.R` produces every table and figure of this report from
   `results/`, so the report can be rebuilt without rerunning MAGeCK;
-* `paper/ScreenR_report.Rmd` is this report.
+* `paper/ScreenR_report.Rmd` is this report (rendered to HTML and printed to `paper/ScreenR_report.pdf`).
 
 The K562 dataset is built by `inst/scripts/k562_essential_screen.R`. The
 package passes `R CMD check` with 219 tests.
