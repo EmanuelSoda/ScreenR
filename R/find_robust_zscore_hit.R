@@ -11,7 +11,8 @@
 #'                       with 10 shRNA we consider a gene DE if it has at least
 #'                       number_barcode = 5 shRNA DE.
 #' @importFrom dplyr n
-#' @return Return a tibble containing the hit for the robust Z-score
+#' @return Return an ungrouped tibble containing the hit for the robust
+#'         Z-score
 #' @export
 #' @concept find
 #' @examples
@@ -22,12 +23,12 @@
 #' )
 #' result <- find_robust_zscore_hit(table, number_barcode = 6)
 #' head(result)
-find_robust_zscore_hit <- function(table_treate_vs_control, number_barcode) {
+find_robust_zscore_hit <- function(table_treate_vs_control,
+    number_barcode = 6) {
     hit_table <- table_treate_vs_control %>%
         dplyr::filter(.data$ZscoreRobust < median(.data$ZscoreRobust)) %>%
         dplyr::group_by(.data$Gene) %>%
         dplyr::summarise(numberOfBarcode = n()) %>%
-        dplyr::group_by(.data$numberOfBarcode) %>%
         dplyr::filter(.data$numberOfBarcode > number_barcode)
 
     return(hit_table)

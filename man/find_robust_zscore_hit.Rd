@@ -4,7 +4,7 @@
 \alias{find_robust_zscore_hit}
 \title{Title Find robust Z-score Hit}
 \usage{
-find_robust_zscore_hit(table_treate_vs_control, number_barcode)
+find_robust_zscore_hit(table_treate_vs_control, number_barcode = 6)
 }
 \arguments{
 \item{table_treate_vs_control}{A table computed with the function
@@ -21,7 +21,8 @@ with 10 shRNA we consider a gene DE if it has at least
 number_barcode = 5 shRNA DE.}
 }
 \value{
-Return a tibble containing the hit for the robust Z-score
+Return an ungrouped tibble containing the hit for the robust
+        Z-score
 }
 \description{
 Title Find robust Z-score Hit

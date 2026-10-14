@@ -32,10 +32,10 @@ DE. Example a gene is associated
 with 10 shRNA we consider a gene DE if it has at least
 number_barcode = 5 shRNA DE.}
 
-\item{thresh}{The threshold for the False Discovery Rate (FDR) that has to be
-used to select the statistically significant hits.}
+\item{thresh}{Deprecated and ignored: it never had an effect on the
+result. Filter the returned table on the FDR column instead.}
 
-\item{lfc}{The Log2FC threshold.}
+\item{lfc}{Deprecated and ignored: it never had an effect on the result.}
 
 \item{direction}{String containing the direction of the variation,
 "Down" for the down regulation "Up" for the up regulation.}

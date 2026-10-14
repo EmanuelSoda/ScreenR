@@ -1,3 +1,18 @@
+# ScreenR 1.15.3
+
+## Changes
+
+* `find_zscore_hit()` now checks the `metric` argument (`"median"`, the
+  default, or `"mean"`) and gives a clear error for any other value.
+* `find_robust_zscore_hit()` now has a default `number_barcode = 6`, the same
+  as `find_zscore_hit()`, and returns an ungrouped tibble like the other hit
+  functions.
+* The `thresh` and `lfc` arguments of `find_camera_hit()` are deprecated. They
+  never had an effect on the result; passing them now gives a warning.
+  Filter the returned table on its `FDR` column instead.
+* Removed the stray `README.knit.md` file from the package.
+* Added tests for these changes and for the 1.15.2 bug fixes.
+
 # ScreenR 1.15.2
 
 ## Bug fixes (these change the results of some analyses)

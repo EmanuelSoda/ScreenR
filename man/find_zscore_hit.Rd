@@ -4,7 +4,11 @@
 \alias{find_zscore_hit}
 \title{Title Find Z-score Hit}
 \usage{
-find_zscore_hit(table_treate_vs_control, number_barcode = 6, metric = "median")
+find_zscore_hit(
+  table_treate_vs_control,
+  number_barcode = 6,
+  metric = c("median", "mean")
+)
 }
 \arguments{
 \item{table_treate_vs_control}{table computed with the function
@@ -17,7 +21,7 @@ with 10 shRNA we consider a gene DE if it has at least
 number_barcode = 5 shRNA DE.}
 
 \item{metric}{A string containing the metric to use. The value allowed are
-"median" or "mean".}
+"median" (the default) or "mean".}
 }
 \value{
 Return a tibble containing the hit for the Z-score

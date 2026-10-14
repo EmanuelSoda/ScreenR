@@ -7,7 +7,7 @@
 #'                       with 10 shRNA we consider a gene DE if it has at least
 #'                       number_barcode = 5 shRNA DE.
 #' @param metric A string containing the metric to use. The value allowed are
-#'               "median" or "mean".
+#'               "median" (the default) or "mean".
 #' @return Return a tibble containing the hit for the Z-score
 #' @export
 #' @concept find
@@ -28,15 +28,15 @@
 #' head(result)
 #' }
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
-    metric = "median") {
+    metric = c("median", "mean")) {
+    metric <- match.arg(metric)
     if (metric == "median") {
         hit_table <- table_treate_vs_control %>%
             # Filtering of the gene that have the Z-score under the median of
             # the Z-scores
             dplyr::filter(.data$Zscore < median(.data$Zscore)) %>%
             dplyr::group_by(.data$Gene) %>%
-            #dplyr::summarise(numberOfBarcode = n()) %>%
-            dplyr::reframe(numberOfBarcode = n()) %>% 
+            dplyr::reframe(numberOfBarcode = n()) %>%
             # Take only the gene that have 6 barcode under the median of the
             # Z-scores
             dplyr::filter(.data$numberOfBarcode > number_barcode)
@@ -46,9 +46,7 @@ find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
             # the Z-scores
             dplyr::filter(.data$Zscore < mean(.data$Zscore)) %>%
             dplyr::group_by(.data$Gene) %>%
-            dplyr::mutate(numberOfBarcode = n()) %>%
-            #dplyr::summarise(.data$numberOfBarcode) %>%
-            dplyr::reframe(numberOfBarcode = n()) %>% 
+            dplyr::reframe(numberOfBarcode = n()) %>%
             # Take only the gene that have 6 barcode under the median of the
             # Z-scores
             dplyr::filter(.data$numberOfBarcode > number_barcode)

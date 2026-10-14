@@ -9,9 +9,7 @@ compute_camera(
   DGEList,
   matrix_model,
   contrast,
-  number_barcode = 3,
-  thresh = 1e-04,
-  lfc = 1
+  number_barcode = 3
 )
 }
 \arguments{
@@ -25,9 +23,6 @@ compute_camera(
     \item{\code{matrix_model}}{The matrix that will be used to perform the
 linear model analysis created using
 \code{\link[stats]{model.matrix}}}
-    \item{\code{thresh}}{The threshold for the False Discovery Rate (FDR) that has to be
-used to select the statistically significant hits.}
-    \item{\code{lfc}}{The Log2FC threshold.}
     \item{\code{number_barcode}}{Number of barcode that as to be differentially
 expressed (DE)in order to consider the gene associated
 DE. Example a gene is associated

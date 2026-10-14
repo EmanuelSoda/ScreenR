@@ -67,3 +67,71 @@ test_that("compute_slope regresses on time points, not row order", {
     slope <- compute_slope(object, genes = "G", group_var = "TRT")
     expect_equal(unname(slope$Slope), 10)
 })
+
+test_that("find_zscore_hit checks the metric argument", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    metrics <- compute_metrics(object,
+        control = "TRT",
+        treatment = "Time3", day = "Time3"
+    )
+    expect_error(find_zscore_hit(metrics, metric = "mode"), "should be one of")
+    expect_equal(
+        find_zscore_hit(metrics),
+        find_zscore_hit(metrics, metric = "median")
+    )
+    expect_s3_class(find_zscore_hit(metrics, metric = "mean"), "tbl_df")
+})
+
+test_that("find_robust_zscore_hit has a default number_barcode", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    metrics <- compute_metrics(object,
+        control = "TRT",
+        treatment = "Time3", day = "Time3"
+    )
+    expect_equal(
+        find_robust_zscore_hit(metrics),
+        find_robust_zscore_hit(metrics, number_barcode = 6)
+    )
+})
+
+test_that("find_camera_hit warns only when thresh or lfc are given", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    matrix <- model.matrix(~ slot(object, "groups"))
+    colnames(matrix) <- c("Control", "T1_T2", "Treated")
+
+    deprecation <- "'thresh' and 'lfc' arguments"
+    expect_warning(
+        find_camera_hit(object, matrix, contrast = "Treated", thresh = 0.05),
+        deprecation
+    )
+    expect_warning(
+        find_camera_hit(object, matrix, contrast = "Treated", lfc = 2),
+        deprecation
+    )
+
+    # Without thresh and lfc there is no deprecation warning
+    messages <- character()
+    withCallingHandlers(
+        find_camera_hit(object, matrix, contrast = "Treated"),
+        warning = function(w) {
+            messages <<- c(messages, conditionMessage(w))
+            invokeRestart("muffleWarning")
+        }
+    )
+    expect_false(any(grepl(deprecation, messages)))
+})
+
+test_that("plot_barcode_hit errors for a gene without enough barcodes", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    matrix_model <- model.matrix(~ slot(object, "groups"))
+    colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
+    contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+
+    expect_error(
+        plot_barcode_hit(object, matrix_model,
+            contrast = contrast,
+            gene = "Not_a_gene"
+        ),
+        "Not_a_gene"
+    )
+})

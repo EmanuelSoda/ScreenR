@@ -14,9 +14,9 @@
 #' @param contrast A vector or a single value indicating the index or the name
 #'                 of the column the model_matrix with which perform the
 #'                 analysis
-#' @param thresh The threshold for the False Discovery Rate (FDR) that has to be
-#'               used to select the statistically significant hits.
-#' @param lfc The Log2FC threshold.
+#' @param thresh Deprecated and ignored: it never had an effect on the
+#'               result. Filter the returned table on the FDR column instead.
+#' @param lfc Deprecated and ignored: it never had an effect on the result.
 #' @param number_barcode Number of barcode that as to be differentially
 #'                       expressed (DE)in order to consider the gene associated
 #'                       DE. Example a gene is associated
@@ -45,6 +45,11 @@
 find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
     direction = "Down") {
+    if (!missing(thresh) || !missing(lfc)) {
+        warning("The 'thresh' and 'lfc' arguments of find_camera_hit() are ",
+            "deprecated and ignored. Filter the result on the FDR column ",
+            "instead.", call. = FALSE)
+    }
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- ScreenR::create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
@@ -52,8 +57,7 @@ find_camera_hit <- function(screenR_Object, matrix_model,
     camera_hit <- compute_camera(
         xglm = xglm, DGEList = DGEList,
         matrix_model = matrix_model, contrast = contrast,
-        number_barcode = number_barcode, thresh = thresh,
-        lfc = lfc
+        number_barcode = number_barcode
     )
     camera_hit <- camera_hit %>%
         tibble::rownames_to_column("Gene") %>%
@@ -70,12 +74,11 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #'              camera method.
 #' @param xglm object created with \code{\link[edgeR]{estimateDisp}}
 #' @param DGEList edgeR object
-#' @inheritDotParams find_camera_hit lfc number_barcode thresh
-#'                   contrast matrix_model
+#' @inheritDotParams find_camera_hit number_barcode contrast matrix_model
 #' @return The list of hits found by the camera method
 #' @keywords internal
 compute_camera <- function(xglm, DGEList, matrix_model, contrast,
-    number_barcode = 3, thresh = 1e-04, lfc = 1) {
+    number_barcode = 3) {
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
