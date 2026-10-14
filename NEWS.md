@@ -1,3 +1,45 @@
+# ScreenR 1.15.6
+
+## Bug fixes (found by an independent review of 1.15.4)
+
+* `find_time_hit()` now includes a main effect for the treatment
+  (log(abundance) = a + b * time + d * treated + c * time * treated), so that
+  `c` measures how much the treatment effect changes over time. Previously the
+  model assumed that treated and control samples start from the same level,
+  so a constant treatment effect was reported as a growing one. The control
+  and baseline samples must now cover at least two time points.
+* The documentation of `summarise_hits()` and the vignette no longer claim
+  that the list of genes with `MaxFDR <= alpha` keeps the FDR: `MaxFDR` is a
+  per-gene level-alpha intersection-union test and a ranking score, but the
+  combined list has no guaranteed false discovery rate.
+* The examples of `plot_barcode_hit()` and `filter_by_variance()` (and some
+  tests) combined `model.matrix(~ groups)` with
+  `makeContrasts(Treated - Control)`, which subtracts the intercept; they now
+  use `create_design_matrix()` and `create_contrast()`.
+* Several examples called `compute_metrics()` with treatment and control
+  swapped; they now use `treatment = "TRT"`.
+* `find_camera_hit()` and `find_time_hit()` no longer fail when only one gene
+  can be tested, and give a clear error when no gene has more than
+  `number_barcode` barcodes (also `find_roast_hit()`).
+* `find_roast_hit(seed = )` restores the random number state of the session.
+* `compute_metrics()` warns when the MAD of the log2 fold changes is 0;
+  `find_discordant_barcodes()` reports the barcodes of genes with MAD 0 that
+  differ from the median.
+* `find_time_hit()` returns `Direction` as a factor, like the other methods.
+
+## Changes not listed in 1.15.4
+
+* `find_camera_hit()`, `find_roast_hit()`, `plot_barcode_hit()` and
+  `filter_by_variance()` take the genes from the `Gene` column of the
+  annotation instead of its first column, and check that the contrast matches
+  the design matrix.
+* The hit tables have new columns (`Log2FC`); code that selects their columns
+  by position may need to be updated.
+
+## Vignette
+
+* The new vignette shows the overlap of the methods with `plot_common_hit()`.
+
 # ScreenR 1.15.5
 
 ## More general input
@@ -104,8 +146,9 @@
   is now applied: only genes with more than `number_barcode` barcodes are
   tested. Previously every gene was tested.
 * `compute_metrics()` now computes the standard robust Z-score,
-  `(Log2FC - median(Log2FC)) / mad(Log2FC)`. This affects
-  `find_robust_zscore_hit()`.
+  `(Log2FC - median(Log2FC)) / mad(Log2FC)`. This changes the ZscoreRobust
+  values (and their plots); the hits of `find_robust_zscore_hit()` do not
+  change, since its rule only depends on the order of the scores.
 * `compute_slope()` (used by `filter_by_slope()`) now regresses frequencies on
   the time points, with replicates sharing the same time point, instead of on
   the row number.

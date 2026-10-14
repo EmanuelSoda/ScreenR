@@ -32,7 +32,8 @@
 #'            return all the genes with the given direction.
 #' @param seed An optional random seed. ROAST uses random rotations, so the
 #'             p-values change slightly between runs; setting a seed makes
-#'             the result reproducible.
+#'             the result reproducible. The random number state of the
+#'             session is restored afterwards.
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma mroast
 #' @importFrom tibble tibble
@@ -60,8 +61,13 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
+    if (length(genesymbollist) == 0) {
+        stop("No gene has more than number_barcode barcodes: lower ",
+            "number_barcode.", call. = FALSE)
+    }
 
     if (!is.null(seed)) {
+        restore_random_state()
         set.seed(seed)
     }
     roast_hit <- limma::mroast(xglm,
@@ -78,11 +84,35 @@ find_roast_hit <- function(screenR_Object, matrix_model, contrast,
         dplyr::left_join(effect, by = "Gene") %>%
         dplyr::mutate(Direction = factor(.data$Direction)) %>%
         dplyr::filter(.data$Direction == direction) %>%
-        dplyr::filter(.data$FDR <= fdr) %>%
-        dplyr::filter(.data$NGenes > number_barcode)
+        dplyr::filter(.data$FDR <= fdr)
     if (!is.null(p_val)) {
         roast_hit <- dplyr::filter(roast_hit, .data$PValue < p_val)
     }
 
     return(roast_hit)
+}
+
+#' @title Restore the Random State
+#' @description Internal function that restores the random number state of
+#'              the session when the calling function exits, so that setting
+#'              a seed inside a function does not change the random numbers
+#'              of the user.
+#' @param envir The environment of the calling function.
+#' @return NULL, invisibly.
+#' @keywords internal
+restore_random_state <- function(envir = parent.frame()) {
+    global <- globalenv()
+    if (exists(".Random.seed", envir = global, inherits = FALSE)) {
+        state <- get(".Random.seed", envir = global, inherits = FALSE)
+        do.call(on.exit, list(substitute(
+            assign(".Random.seed", state, envir = globalenv())
+        ), add = TRUE), envir = envir)
+    } else {
+        do.call(on.exit, list(quote(
+            if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
+                rm(".Random.seed", envir = globalenv())
+            }
+        ), add = TRUE), envir = envir)
+    }
+    invisible(NULL)
 }

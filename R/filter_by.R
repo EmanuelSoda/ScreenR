@@ -153,9 +153,10 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #' @concept filter
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~ slot(object, "groups"))
-#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-#' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+#' matrix_model <- create_design_matrix(object)
+#' contrast <- create_contrast(matrix_model,
+#'     treatment = "Treated", control = "Control"
+#' )
 #'
 #' data <- filter_by_variance(
 #'     screenR_Object = object, genes = c("Gene_42"),

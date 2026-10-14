@@ -28,14 +28,15 @@ Finds the barcodes whose log2 fold change is far from the
              the median and the median absolute deviation (MAD) of the
              log2 fold changes of its barcodes; a barcode is discordant
              when its distance from the median is larger than threshold
-             MADs. Discordant barcodes may have off-target effects or a
+             MADs (when the MAD of a gene is 0, every barcode that differs
+             from the median is discordant, with an infinite deviation). Discordant barcodes may have off-target effects or a
              poor knockdown, and can drive a gene to be (or not to be) a
              hit.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 find_discordant_barcodes(table)

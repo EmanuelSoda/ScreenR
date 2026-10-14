@@ -97,10 +97,7 @@ compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
     # Perform the camera test
-    camera.res <- limma::camera(xglm,
-        index = genesymbollist, matrix_model,
-        contrast = contrast
-    )
+    camera.res <- run_camera(xglm, genesymbollist, matrix_model, contrast)
     return(camera.res)
 }
 

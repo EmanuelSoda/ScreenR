@@ -62,7 +62,7 @@ Gene-level test for the Z-score method, with a p-value and a
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 find_gene_zscore_hit(table, fdr = 1)

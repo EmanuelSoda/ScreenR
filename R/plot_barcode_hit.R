@@ -31,9 +31,10 @@
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~ slot(object, "groups"))
-#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-#' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+#' matrix_model <- create_design_matrix(object)
+#' contrast <- create_contrast(matrix_model,
+#'     treatment = "Treated", control = "Control"
+#' )
 #'
 #' plot_barcode_hit(object, matrix_model,
 #'     contrast = contrast,

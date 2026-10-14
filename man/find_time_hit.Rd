@@ -44,8 +44,8 @@ return all the genes with the given direction.}
 }
 \value{
 A tibble with the columns of \code{\link[limma]{camera}} and
-        Log2FC, the median over the barcodes of the gene of the extra
-        log2 fold change per time point in the treated samples.
+        Log2FC, the median over the barcodes of the gene of the change
+        of the treatment log2 fold change per time point (c).
 }
 \description{
 Finds the genes whose depletion (or enrichment) caused by
@@ -53,14 +53,19 @@ Finds the genes whose depletion (or enrichment) caused by
              whole time course instead of a separate analysis for each
              time point.
              The barcode counts are modelled with edgeR as
-             log(abundance) = a + b * time + c * time * treated,
+             log(abundance) = a + b * time + d * treated +
+             c * time * treated,
              where time is the index of the time point (0 for the first
-             element of days, 1 for the second, ...) and treated is 1 for
-             the treated samples and 0 for the control and baseline
-             samples. The coefficient c is the extra change per time
-             point in the treated samples compared with the control
-             samples. The barcodes of each gene are then tested together
-             with \code{\link[limma]{camera}}.
+             element of days, 1 for the second, ...; the time points are
+             treated as equally spaced) and treated is 1 for the treated
+             samples and 0 for the control and baseline samples. The
+             untreated samples and the treated samples each follow their
+             own line; the coefficient c is the difference between the
+             slopes, i.e. how much the treatment effect changes per time
+             point. A constant treatment effect gives c = 0. The barcodes
+             of each gene are then tested together with
+             \code{\link[limma]{camera}}. Both the treated and the
+             untreated samples must cover at least two time points.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

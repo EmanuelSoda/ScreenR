@@ -27,7 +27,12 @@
 #'                    get a finite fold change:
 #'                    Log2FC = log2((Treated + pseudocount) /
 #'                    (Control + pseudocount)). Barcodes with zero reads in
-#'                    both treated and control are removed.
+#'                    both treated and control are removed. The value is on
+#'                    the scale of the normalized count table, which is
+#'                    counts per million of all the reads for the "cpm" and
+#'                    "tmm" methods of \code{\link{normalize_data}}, but
+#'                    per million reads of the control barcodes for the
+#'                    "control" method.
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
@@ -38,8 +43,8 @@
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' metrics <- compute_metrics(object,
-#'     control = "TRT",
-#'     treatment = "Time3", day = "Time3"
+#'     control = "Time3",
+#'     treatment = "TRT", day = "Time3"
 #' )
 #' head(metrics)
 compute_metrics <- function(screenR_Object, control,
@@ -91,5 +96,9 @@ compute_metrics <- function(screenR_Object, control,
             median(.data$Log2FC)) / stats::mad(.data$Log2FC)) %>%
         dplyr::mutate(Day = day, Treatment = treatment)
 
+    if (nrow(data_trt) > 0 && isTRUE(stats::mad(data_trt$Log2FC) == 0)) {
+        warning("The median absolute deviation of the Log2FC is 0: the ",
+            "robust Z-score cannot be computed.", call. = FALSE)
+    }
     return(data_trt)
 }

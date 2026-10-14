@@ -124,6 +124,32 @@ barcode_log2fc <- function(xglm, design, contrast) {
     return(lrt$table$logFC)
 }
 
+#' @title Run CAMERA
+#' @description Internal function that runs \code{\link[limma]{camera}} and
+#'              always returns an FDR column (camera omits it when only one
+#'              gene is tested), with a clear error when no gene can be
+#'              tested.
+#' @param xglm A DGEList with the dispersion estimated.
+#' @param index The list of barcode indices of each gene.
+#' @param design The design matrix.
+#' @param contrast A contrast checked with \code{as_contrast}.
+#' @importFrom limma camera
+#' @return The data frame returned by camera, with an FDR column.
+#' @keywords internal
+run_camera <- function(xglm, index, design, contrast) {
+    if (length(index) == 0) {
+        stop("No gene has more than number_barcode barcodes: lower ",
+            "number_barcode.", call. = FALSE)
+    }
+    result <- limma::camera(xglm,
+        index = index, design = design, contrast = contrast
+    )
+    if (!"FDR" %in% colnames(result)) {
+        result$FDR <- result$PValue
+    }
+    return(result)
+}
+
 #' @title Gene Log2 Fold Change
 #' @description Internal function that summarises the barcode log2 fold
 #'              changes to a gene log2 fold change using the median.

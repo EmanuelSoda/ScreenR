@@ -23,11 +23,11 @@
 #'
 #' metrics <- dplyr::bind_rows(
 #'     compute_metrics(object,
-#'         control = "TRT", treatment = "Time3",
+#'         control = "Time3", treatment = "TRT",
 #'         day = "Time3"
 #'     ),
 #'     compute_metrics(object,
-#'         control = "TRT", treatment = "Time4",
+#'         control = "Time4", treatment = "TRT",
 #'         day = "Time4"
 #'     )
 #' )

@@ -198,8 +198,9 @@ tibble(
 head(camera)
 ```
 
-The treatment effect in this example dataset is weak: no gene reaches an FDR of
-5%, and a few genes reach 25% at Time4.
+The treatment effect in this example dataset is weak: at Time4 no gene reaches
+an FDR of 5%; at an FDR of 25% there are `r sum(camera$FDR <= 0.25)` genes with
+CAMERA and `r sum(roast$FDR <= 0.25)` with ROAST.
 
 # A gene-level test for the Z-score
 
@@ -277,10 +278,15 @@ ggplot(barcode_statistics, aes(x = Log2FC, y = -log10(PValue))) +
 
 Analysing each time point separately answers "is there an effect at Time3?"
 and "is there an effect at Time4?". `find_time_hit()` answers "does the effect
-of the treatment grow over time?" with a single model,
-log(abundance) = a + b * time + c * time * treated, and tests the coefficient
-c for the barcodes of each gene with CAMERA. The early time points can be
-added as untreated baseline samples.
+of the treatment change over time?" with a single model,
+log(abundance) = a + b * time + d * treated + c * time * treated.
+The untreated and the treated samples each follow their own line over the time
+points (treated as equally spaced); c is the difference between the two
+slopes, i.e. how much the treatment effect changes per time point, and is 0
+when the effect is constant. The coefficient c is tested for the barcodes of
+each gene with CAMERA. The early time points can be added as untreated
+baseline samples, so that the untreated line is estimated from four time
+points.
 
 ```{r time-model}
 time_hit <- find_time_hit(object,
@@ -292,8 +298,9 @@ time_hit <- find_time_hit(object,
 head(time_hit)
 ```
 
-The column `Log2FC` is the median extra log2 fold change per time point in the
-treated samples. The top genes can be inspected with `plot_trend()`.
+The column `Log2FC` is the median over the barcodes of the gene of c, the
+change of the treatment log2 fold change per time point. The top genes can be
+inspected with `plot_trend()`.
 
 ```{r time-trend, fig.height = 4}
 plot_trend(object,
@@ -305,13 +312,30 @@ plot_trend(object,
 
 # Combining the methods
 
-`find_common_hit()` intersects the lists of hits of the three methods, but the
-intersection has no stated error rate. `summarise_hits()` puts the FDR of each
-method in one table and adds `MaxFDR`, the largest of them. A gene with
-`MaxFDR <= alpha` is significant at level `alpha` in every method (an
-intersection-union test), whatever the dependence between the methods, so
-`MaxFDR` can be used to rank and select the genes supported by all the
-methods.
+The overlap between the hits of the three methods can be shown with
+`plot_common_hit()`. Here each list contains the genes with an FDR of at most
+25% (for the Z-score, the replicate-aware gene-level test).
+
+```{r venn, fig.height = 5}
+alpha <- 0.25
+plot_common_hit(
+    hit_zscore = filter(gene_zscore_edger, FDR <= alpha),
+    hit_camera = filter(camera, FDR <= alpha),
+    hit_roast = filter(roast, FDR <= alpha),
+    show_elements = TRUE, show_percentage = FALSE
+)
+```
+
+`find_common_hit()` returns the genes in the intersection. `summarise_hits()`
+also shows how strongly each gene is supported: it puts the FDR of each method
+in one table and adds `MaxFDR`, the largest of them, which can be used as a
+conservative score to rank the genes supported by all the methods. Since an
+FDR is never smaller than the corresponding p-value, `MaxFDR <= alpha` means
+that the gene has a p-value of at most `alpha` in every method: for each single
+gene this is a level-`alpha` test, whatever the dependence between the methods.
+The list of genes with `MaxFDR <= alpha` does not, however, have a guaranteed
+false discovery rate, because the false discoveries of the single methods can
+concentrate in their intersection: treat it as a short list to validate.
 
 ```{r summary}
 summary <- summarise_hits(
@@ -319,13 +343,14 @@ summary <- summarise_hits(
         zscore = gene_zscore_edger, camera = camera,
         roast = roast, time = time_hit
     ),
-    fdr = 0.25
+    fdr = alpha
 )
 head(summary, 10)
 ```
 
-In this dataset a single gene, the first of the table, is supported by all the
-methods at an FDR of 25%; it is also the top gene of the time course model.
+In this dataset the genes with `MaxFDR <= 0.25` are
+`r if (any(summary$Hit)) paste(summary$Gene[summary$Hit], collapse = ", ") else "none"`, and the top gene of the
+time course model is `r time_hit$Gene[1]`.
 
 # Discordant barcodes
 

@@ -76,7 +76,7 @@ test_that("find_roast_hit is reproducible with a seed and uses the FDR", {
 test_that("compute_metrics uses a pseudocount", {
     object <- get_object()
     metrics <- compute_metrics(object,
-        control = "TRT", treatment = "Time3",
+        control = "Time3", treatment = "TRT",
         day = "Time3", pseudocount = 0.5
     )
     expect_equal(
@@ -218,4 +218,75 @@ test_that("plot_gini plots the Gini index of each sample", {
 
     palette <- rep("grey50", ncol(object@count_table) - 1)
     expect_true(ggplot2::is_ggplot(plot_gini(object, palette = palette)))
+})
+
+test_that("discordant barcodes are found when the gene MAD is 0", {
+    table <- tibble::tibble(
+        Barcode = paste0("b", 1:6), Gene = "A",
+        Log2FC = c(0, 0, 0, 0, 0, 4)
+    )
+    discordant <- find_discordant_barcodes(table)
+    expect_equal(discordant$Barcode, "b6")
+    expect_equal(discordant$Deviation, Inf)
+})
+
+test_that("find_time_hit does not call a constant effect a growing one", {
+    # 40 genes x 5 barcodes; genes 1-10 have a constant treatment effect
+    # (the same at both time points), so the interaction is 0
+    set.seed(10)
+    n_genes <- 40
+    barcodes <- paste0("b", seq_len(n_genes * 5))
+    genes <- rep(paste0("G", seq_len(n_genes)), each = 5)
+    samples <- c(paste0("D1_CTRL_", 1:3), paste0("D1_TRT_", 1:3),
+        paste0("D2_CTRL_", 1:3), paste0("D2_TRT_", 1:3))
+    base <- rgamma(length(barcodes), shape = 5, rate = 0.01)
+    effect <- ifelse(genes %in% paste0("G", 1:10), 2^-1.5, 1)
+    counts <- sapply(samples, function(sample) {
+        mu <- base * if (grepl("TRT", sample)) effect else 1
+        rnbinom(length(mu), mu = mu, size = 20)
+    })
+    count_table <- data.frame(Barcode = barcodes, counts)
+    annotation <- data.frame(Barcode = barcodes, Gene = genes)
+    object <- suppressMessages(create_screenr_object(
+        table = count_table, annotation = annotation,
+        groups = factor(sub("_[0-9]$", "", samples))
+    ))
+    hits <- find_time_hit(object, treatment = "TRT", control = "CTRL",
+        days = c("D1", "D2"), fdr = 1)
+    expect_false(any(hits$FDR[hits$Gene %in% paste0("G", 1:10)] <= 0.05))
+
+    expect_error(
+        find_time_hit(object, treatment = "TRT", control = "CTRL",
+            days = c("D1", "D2"), number_barcode = 10),
+        "lower number_barcode"
+    )
+})
+
+test_that("find_camera_hit works when a single gene can be tested", {
+    object <- get_object()
+    design <- create_design_matrix(object)
+    contrast <- create_contrast(design, "Treated", "Control")
+    counts <- table(object@annotation_table$Gene)
+    skip_if(sum(counts == max(counts)) != 1, "No gene with a unique maximum")
+    threshold <- max(counts) - 1
+    result <- suppressWarnings(find_camera_hit(object, design, contrast,
+        number_barcode = threshold, fdr = 1, direction = "Down"))
+    expect_true("FDR" %in% colnames(result))
+    expect_error(
+        suppressWarnings(find_camera_hit(object, design, contrast,
+            number_barcode = 1000)),
+        "lower number_barcode"
+    )
+})
+
+test_that("the seed of find_roast_hit does not change the user's random numbers", {
+    object <- get_object()
+    design <- create_design_matrix(object)
+    contrast <- create_contrast(design, "Treated", "Control")
+    set.seed(123)
+    expected <- runif(3)
+    set.seed(123)
+    invisible(suppressWarnings(find_roast_hit(object, design, contrast,
+        nrot = 99, seed = 1, fdr = 1)))
+    expect_equal(runif(3), expected)
 })

@@ -40,7 +40,7 @@
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
-#'     control = "TRT", treatment = "Time3",
+#'     control = "Time3", treatment = "TRT",
 #'     day = "Time3"
 #' )
 #' find_gene_zscore_hit(table, fdr = 1)
@@ -162,14 +162,19 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'              whole time course instead of a separate analysis for each
 #'              time point.
 #'              The barcode counts are modelled with edgeR as
-#'              log(abundance) = a + b * time + c * time * treated,
+#'              log(abundance) = a + b * time + d * treated +
+#'              c * time * treated,
 #'              where time is the index of the time point (0 for the first
-#'              element of days, 1 for the second, ...) and treated is 1 for
-#'              the treated samples and 0 for the control and baseline
-#'              samples. The coefficient c is the extra change per time
-#'              point in the treated samples compared with the control
-#'              samples. The barcodes of each gene are then tested together
-#'              with \code{\link[limma]{camera}}.
+#'              element of days, 1 for the second, ...; the time points are
+#'              treated as equally spaced) and treated is 1 for the treated
+#'              samples and 0 for the control and baseline samples. The
+#'              untreated samples and the treated samples each follow their
+#'              own line; the coefficient c is the difference between the
+#'              slopes, i.e. how much the treatment effect changes per time
+#'              point. A constant treatment effect gives c = 0. The barcodes
+#'              of each gene are then tested together with
+#'              \code{\link[limma]{camera}}. Both the treated and the
+#'              untreated samples must cover at least two time points.
 #' @param screenR_Object The ScreenR object obtained using the
 #'                       \code{\link{create_screenr_object}}
 #' @param treatment The value(s) of the Treatment column of
@@ -191,8 +196,8 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma camera
 #' @return A tibble with the columns of \code{\link[limma]{camera}} and
-#'         Log2FC, the median over the barcodes of the gene of the extra
-#'         log2 fold change per time point in the treated samples.
+#'         Log2FC, the median over the barcodes of the gene of the change
+#'         of the treatment log2 fold change per time point (c).
 #' @concept find
 #' @export
 #' @examples
@@ -224,7 +229,14 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
     if (length(unique(time[treated == 1])) < 2) {
         stop("The treated samples must cover at least two time points.")
     }
-    design <- cbind(Intercept = 1, Time = time, TimeTreated = time * treated)
+    if (length(unique(time[treated == 0])) < 2) {
+        stop("The control and baseline samples must cover at least two ",
+            "time points.")
+    }
+    design <- cbind(
+        Intercept = 1, Time = time, Treated = treated,
+        TimeTreated = time * treated
+    )
 
     DGEList <- create_edger_obj(screenR_Object)
     DGEList <- DGEList[, info$Sample]
@@ -232,10 +244,7 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
-    time_hit <- limma::camera(xglm,
-        index = genesymbollist, design = design,
-        contrast = "TimeTreated"
-    )
+    time_hit <- run_camera(xglm, genesymbollist, design, "TimeTreated")
     effect <- gene_log2fc(
         barcode_log2fc(xglm, design, "TimeTreated"), genesymbols
     )
@@ -243,6 +252,7 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
         tibble::rownames_to_column("Gene") %>%
         dplyr::tibble() %>%
         dplyr::left_join(effect, by = "Gene") %>%
+        dplyr::mutate(Direction = factor(.data$Direction)) %>%
         dplyr::filter(.data$Direction == direction) %>%
         dplyr::filter(.data$FDR <= fdr)
 
@@ -252,12 +262,17 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
 #' @title Summarise Hits
 #' @description Combines the results of several hit-finding methods in one
 #'              table. For each gene it reports the FDR of each method and
-#'              the largest of them (MaxFDR). A gene with MaxFDR <= fdr is
-#'              significant at that FDR level in every method: this is an
-#'              intersection-union test, which is valid whatever the
-#'              dependence between the methods, so MaxFDR can be used as a
-#'              single combined measure to rank and select the genes found
-#'              by all the methods.
+#'              the largest of them (MaxFDR), a conservative score to rank
+#'              the genes supported by all the methods. Since an FDR
+#'              (Benjamini-Hochberg adjusted p-value) is never smaller than
+#'              the p-value, MaxFDR <= alpha implies that the gene has a
+#'              p-value <= alpha in every method: for each single gene this
+#'              is a level-alpha intersection-union test of the hypothesis
+#'              "the gene has no effect in at least one method", valid
+#'              whatever the dependence between the methods. Note however
+#'              that the list of genes with MaxFDR <= alpha does not have a
+#'              guaranteed False Discovery Rate: the false discoveries of
+#'              the single methods can concentrate in their intersection.
 #'              To get a complete picture, compute the tables with fdr = 1
 #'              so that they contain all the tested genes. A gene missing
 #'              from a table gets an NA FDR for that method and a NA MaxFDR.

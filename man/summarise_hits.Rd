@@ -24,12 +24,17 @@ A tibble with one row for each gene and the columns Gene,
 \description{
 Combines the results of several hit-finding methods in one
              table. For each gene it reports the FDR of each method and
-             the largest of them (MaxFDR). A gene with MaxFDR <= fdr is
-             significant at that FDR level in every method: this is an
-             intersection-union test, which is valid whatever the
-             dependence between the methods, so MaxFDR can be used as a
-             single combined measure to rank and select the genes found
-             by all the methods.
+             the largest of them (MaxFDR), a conservative score to rank
+             the genes supported by all the methods. Since an FDR
+             (Benjamini-Hochberg adjusted p-value) is never smaller than
+             the p-value, MaxFDR <= alpha implies that the gene has a
+             p-value <= alpha in every method: for each single gene this
+             is a level-alpha intersection-union test of the hypothesis
+             "the gene has no effect in at least one method", valid
+             whatever the dependence between the methods. Note however
+             that the list of genes with MaxFDR <= alpha does not have a
+             guaranteed False Discovery Rate: the false discoveries of
+             the single methods can concentrate in their intersection.
              To get a complete picture, compute the tables with fdr = 1
              so that they contain all the tested genes. A gene missing
              from a table gets an NA FDR for that method and a NA MaxFDR.

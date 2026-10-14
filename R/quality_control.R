@@ -139,7 +139,8 @@ plot_replicate_correlation <- function(screenR_Object,
 #'              the median and the median absolute deviation (MAD) of the
 #'              log2 fold changes of its barcodes; a barcode is discordant
 #'              when its distance from the median is larger than threshold
-#'              MADs. Discordant barcodes may have off-target effects or a
+#'              MADs (when the MAD of a gene is 0, every barcode that differs
+#'              from the median is discordant, with an infinite deviation). Discordant barcodes may have off-target effects or a
 #'              poor knockdown, and can drive a gene to be (or not to be) a
 #'              hit.
 #' @param table_treate_vs_control A table with one row for each barcode and
@@ -159,7 +160,7 @@ plot_replicate_correlation <- function(screenR_Object,
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
-#'     control = "TRT", treatment = "Time3",
+#'     control = "Time3", treatment = "TRT",
 #'     day = "Time3"
 #' )
 #' find_discordant_barcodes(table)
@@ -178,7 +179,9 @@ find_discordant_barcodes <- function(table_treate_vs_control, threshold = 3) {
                 stats::mad(.data$Log2FC)
         ) %>%
         dplyr::ungroup() %>%
-        dplyr::filter(is.finite(.data$Deviation),
+        # A gene whose barcodes are all equal but one has MAD 0: the
+        # different barcode gets an infinite deviation and is kept
+        dplyr::filter(!is.na(.data$Deviation),
             abs(.data$Deviation) > threshold) %>%
         dplyr::select("Barcode", "Gene", "Log2FC", "GeneLog2FC",
             "Deviation") %>%

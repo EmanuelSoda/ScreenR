@@ -26,12 +26,12 @@ This function plots the Log2FC Z-score distribution of the
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 table1 <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 
 table2 <- compute_metrics(object,
-    control = "TRT", treatment = "Time4",
+    control = "Time4", treatment = "TRT",
     day = "Time4"
 )
 

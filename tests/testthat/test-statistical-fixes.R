@@ -39,8 +39,8 @@ test_that("unique_gene_symbols keeps only genes with enough barcodes", {
 test_that("compute_metrics computes the standard robust Z-score", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     metrics <- compute_metrics(object,
-        control = "TRT",
-        treatment = "Time3", day = "Time3"
+        control = "Time3",
+        treatment = "TRT", day = "Time3"
     )
     x <- metrics$Log2FC
     expect_equal(metrics$ZscoreRobust, (x - median(x)) / stats::mad(x))
@@ -71,8 +71,8 @@ test_that("compute_slope regresses on time points, not row order", {
 test_that("find_zscore_hit checks the metric argument", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     metrics <- compute_metrics(object,
-        control = "TRT",
-        treatment = "Time3", day = "Time3"
+        control = "Time3",
+        treatment = "TRT", day = "Time3"
     )
     expect_error(find_zscore_hit(metrics, metric = "mode"), "should be one of")
     expect_equal(
@@ -85,8 +85,8 @@ test_that("find_zscore_hit checks the metric argument", {
 test_that("find_robust_zscore_hit has a default number_barcode", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     metrics <- compute_metrics(object,
-        control = "TRT",
-        treatment = "Time3", day = "Time3"
+        control = "Time3",
+        treatment = "TRT", day = "Time3"
     )
     expect_equal(
         find_robust_zscore_hit(metrics),
@@ -123,9 +123,10 @@ test_that("find_camera_hit warns only when thresh or lfc are given", {
 
 test_that("plot_barcode_hit errors for a gene without enough barcodes", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    matrix_model <- model.matrix(~ slot(object, "groups"))
-    colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-    contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+    matrix_model <- create_design_matrix(object)
+    contrast <- create_contrast(matrix_model,
+        treatment = "Treated", control = "Control"
+    )
 
     expect_error(
         plot_barcode_hit(object, matrix_model,

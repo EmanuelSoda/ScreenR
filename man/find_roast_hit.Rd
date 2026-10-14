@@ -51,7 +51,8 @@ return all the genes with the given direction.}
 
 \item{seed}{An optional random seed. ROAST uses random rotations, so the
 p-values change slightly between runs; setting a seed makes
-the result reproducible.}
+the result reproducible. The random number state of the
+session is restored afterwards.}
 }
 \value{
 A tibble with the hits found by the ROAST method. Besides the

@@ -31,7 +31,12 @@ the log2 fold change, so that barcodes with zero reads
 get a finite fold change:
 Log2FC = log2((Treated + pseudocount) /
 (Control + pseudocount)). Barcodes with zero reads in
-both treated and control are removed.}
+both treated and control are removed. The value is on
+the scale of the normalized count table, which is
+counts per million of all the reads for the "cpm" and
+"tmm" methods of \code{\link{normalize_data}}, but
+per million reads of the control barcodes for the
+"control" method.}
 }
 \value{
 Return a tibble with all the measure computed.
@@ -48,8 +53,8 @@ This function computes the metrics that will be then used
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 metrics <- compute_metrics(object,
-    control = "TRT",
-    treatment = "Time3", day = "Time3"
+    control = "Time3",
+    treatment = "TRT", day = "Time3"
 )
 head(metrics)
 }

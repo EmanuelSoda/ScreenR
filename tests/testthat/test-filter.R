@@ -97,11 +97,10 @@ test_that("filter_by_variance", {
     library(tibble)
     object <- create_test_object()
 
-    matrix_model <- model.matrix(~ object@groups)
-    colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-
-
-    contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+    matrix_model <- create_design_matrix(object)
+    contrast <- create_contrast(matrix_model,
+        treatment = "Treated", control = "Control"
+    )
     data <- filter_by_variance(
         genes = c("Gene_320"), screenR_Object = object,
         matrix_model = matrix_model, contrast = contrast

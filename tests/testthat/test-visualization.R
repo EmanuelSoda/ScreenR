@@ -116,11 +116,11 @@ test_that("plot_barcode_trend", {
 
     metrics <- dplyr::bind_rows(
         compute_metrics(object,
-            control = "TRT", treatment = "Time3",
+            control = "Time3", treatment = "TRT",
             day = "Time3"
         ),
         compute_metrics(object,
-            control = "TRT", treatment = "Time4",
+            control = "Time4", treatment = "TRT",
             day = "Time4"
         )
     )
@@ -136,11 +136,11 @@ test_that("plot_barcode_trend color", {
 
     metrics <- dplyr::bind_rows(
         compute_metrics(object,
-            control = "TRT", treatment = "Time3",
+            control = "Time3", treatment = "TRT",
             day = "Time3"
         ),
         compute_metrics(object,
-            control = "TRT", treatment = "Time4",
+            control = "Time4", treatment = "TRT",
             day = "Time4"
         )
     )
@@ -166,12 +166,12 @@ test_that("plot_zscore_distribution", {
 
     tables <- list(
         compute_metrics(object,
-            control = "TRT",
-            treatment = "Time3", day = "Time3"
+            control = "Time3",
+            treatment = "TRT", day = "Time3"
         ),
         compute_metrics(object,
-            control = "TRT",
-            treatment = "Time4", day = "Time4"
+            control = "Time4",
+            treatment = "TRT", day = "Time4"
         )
     )
     plot <- plot_zscore_distribution(tables, alpha = 0.5)
@@ -186,9 +186,10 @@ test_that("plot_barcode_hit", {
         object@data_table %>%
         dplyr::filter(Gene %in% paste0("Gene_", seq(1, 20)))
 
-    matrix_model <- model.matrix(~ slot(object, "groups"))
-    colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-    contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+    matrix_model <- create_design_matrix(object)
+    contrast <- create_contrast(matrix_model,
+        treatment = "Treated", control = "Control"
+    )
     expect_null(plot_barcode_hit(object, matrix_model,
         contrast = contrast,
         gene = "Gene_10"
