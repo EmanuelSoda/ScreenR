@@ -23,7 +23,7 @@ for (seed in 1:3) {
   for (k in names(p)) {
     pv <- p[[k]]$PValue
     # camera/roast/fry return only the Down genes: the Up genes have p > 0.5
-    n_missing <- 500 - length(pv); pv <- c(pv, rep(0.75, n_missing))
+    n_missing <- length(unique(sim$annotation$Gene)) - length(pv); pv <- c(pv, rep(0.75, n_missing))
     res[[length(res)+1]] <- data.frame(method = k, p05 = mean(pv < 0.05), p10 = mean(pv < 0.1), p50 = mean(pv < 0.5))
   }
 }
