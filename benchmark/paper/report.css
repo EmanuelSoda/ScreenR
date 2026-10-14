@@ -1,0 +1,6 @@
+body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 11pt; line-height: 1.45; max-width: 900px; margin: auto; }
+h1.title { font-size: 20pt; }
+table { font-size: 9pt; margin: 0.8em 0; }
+table th, table td { padding: 2px 8px; }
+img { max-width: 100%; }
+@media print { #TOC { page-break-after: always; } h1 { page-break-before: auto; } figure, img, table { page-break-inside: avoid; } }
