@@ -6,7 +6,6 @@
 \usage{
 compute_camera(
   xglm,
-  lrt,
   DGEList,
   matrix_model,
   contrast,
@@ -17,8 +16,6 @@ compute_camera(
 }
 \arguments{
 \item{xglm}{object created with \code{\link[edgeR]{estimateDisp}}}
-
-\item{lrt}{object created with \code{\link[edgeR]{glmFit}}}
 
 \item{DGEList}{edgeR object}
 
