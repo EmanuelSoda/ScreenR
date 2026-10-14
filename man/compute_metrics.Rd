@@ -4,7 +4,7 @@
 \alias{compute_metrics}
 \title{Compute Metrics}
 \usage{
-compute_metrics(screenR_Object, control, treatment, day)
+compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using the
@@ -24,6 +24,14 @@ Treatment column of the data_table slot.}
 metrics computation.
 This string has to be equal to the interested sample in the
 Day column of the data_table slot.}
+
+\item{pseudocount}{A small value (in counts per million) added to the
+treated and control mean frequencies before computing
+the log2 fold change, so that barcodes with zero reads
+get a finite fold change:
+Log2FC = log2((Treated + pseudocount) /
+(Control + pseudocount)). Barcodes with zero reads in
+both treated and control are removed.}
 }
 \value{
 Return a tibble with all the measure computed.

@@ -142,8 +142,10 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 #'              Those genes are the result of the three statistical
 #'              methods selection
 #' @param variance The maximum value of variance accepted
-#' @param contrast The variable to use as X for the linear model
-#'                 for the Treatment
+#' @param contrast The comparison used to compute the log2 fold changes:
+#'                 an object created with \code{\link[limma]{makeContrasts}}
+#'                 or \code{\link{create_contrast}}, or the name or index of
+#'                 a column of matrix_model.
 #' @param matrix_model a matrix created using \code{\link[stats]{model.matrix}}
 #' @return A data frame with the variance for the treatment and the control
 #'         for each gene
@@ -167,13 +169,12 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
     data <- screenR_Object@data_table
 
     # Create the edgeR object and computing the LogFC
+    contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
-    fit <- edgeR::glmFit(xglm, matrix_model)
-    lrt <- edgeR::glmLRT(fit, contrast = contrast)
 
-    lrt <- data.frame(lrt$table)
-    lrt$Gene <- fit$genes$Gene
+    lrt <- data.frame(logFC = barcode_log2fc(xglm, matrix_model, contrast))
+    lrt$Gene <- DGEList$genes$Gene
     lrt <- dplyr::filter(lrt, .data$Gene %in% genes)
     lrt <- dplyr::group_by(lrt, .data$Gene)
     lrt <- dplyr::mutate(lrt, variance = stats::var(.data$logFC))

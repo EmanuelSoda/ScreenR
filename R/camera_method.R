@@ -11,9 +11,11 @@
 #' @param matrix_model The matrix that will be used to perform the
 #'                     linear model analysis created using
 #'                     \code{\link[stats]{model.matrix}}
-#' @param contrast A vector or a single value indicating the index or the name
-#'                 of the column the model_matrix with which perform the
-#'                 analysis
+#' @param contrast The comparison to test: the name or index of a column of
+#'                 matrix_model, a numeric contrast vector (for example
+#'                 created with \code{\link{create_contrast}}) or a
+#'                 one-column matrix created with
+#'                 \code{\link[limma]{makeContrasts}}.
 #' @param thresh Deprecated and ignored: it never had an effect on the
 #'               result. Filter the returned table on the FDR column instead.
 #' @param lfc Deprecated and ignored: it never had an effect on the result.
@@ -24,32 +26,39 @@
 #'                       number_barcode = 5 shRNA DE.
 #' @param direction String containing the direction of the variation,
 #'                  "Down" for the down regulation "Up" for the up regulation.
+#' @param fdr The False Discovery Rate threshold: only genes with an FDR
+#'            lower or equal to this value are returned. Use fdr = 1 to
+#'            return all the genes with the given direction.
 #' @importFrom edgeR estimateDisp
 #' @importFrom tibble rownames_to_column
 #' @importFrom limma camera
 #' @importFrom purrr map_lgl
-#' @return The data frame containing the hit found using the camera method
+#' @return A tibble with the hits found using the camera method. Besides
+#'         the columns returned by \code{\link[limma]{camera}} it contains
+#'         Log2FC, the median log2 fold change of the barcodes of the gene.
 #' @export
 #' @concept find
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
-#' matrix <- model.matrix(~ slot(object, "groups"))
-#' colnames(matrix) <- c("Control", "T1/T2", "Treated")
+#' matrix <- create_design_matrix(object)
+#' contrast <- create_contrast(matrix, treatment = "Treated",
+#'     control = "Control")
 #'
 #' result <- find_camera_hit(
 #'     screenR_Object = object,
-#'     matrix_model = matrix, contrast = "Treated"
+#'     matrix_model = matrix, contrast = contrast
 #' )
 #' head(result)
 find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
-    direction = "Down") {
+    direction = "Down", fdr = 0.05) {
     if (!missing(thresh) || !missing(lfc)) {
         warning("The 'thresh' and 'lfc' arguments of find_camera_hit() are ",
             "deprecated and ignored. Filter the result on the FDR column ",
             "instead.", call. = FALSE)
     }
+    contrast <- as_contrast(contrast, matrix_model)
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- ScreenR::create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
@@ -59,11 +68,16 @@ find_camera_hit <- function(screenR_Object, matrix_model,
         matrix_model = matrix_model, contrast = contrast,
         number_barcode = number_barcode
     )
+    effect <- gene_log2fc(
+        barcode_log2fc(xglm, matrix_model, contrast), DGEList$genes$Gene
+    )
     camera_hit <- camera_hit %>%
         tibble::rownames_to_column("Gene") %>%
         dplyr::tibble() %>%
+        dplyr::left_join(effect, by = "Gene") %>%
         dplyr::mutate(Direction = factor(.data$Direction)) %>%
-        dplyr::filter(.data$Direction == direction)
+        dplyr::filter(.data$Direction == direction) %>%
+        dplyr::filter(.data$FDR <= fdr)
 
 
     return(camera_hit)

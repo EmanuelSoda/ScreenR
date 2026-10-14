@@ -10,8 +10,10 @@
 #'                     linear model analysis. It is created using
 #'                     model.matrix.
 
-#' @param contrast An object created with \code{\link[limma]{makeContrasts}}
-#'                 function.
+#' @param contrast The comparison to plot: an object created with
+#'                 \code{\link[limma]{makeContrasts}} or
+#'                 \code{\link{create_contrast}}, or the name or index of a
+#'                 column of matrix_model.
 #' @param number_barcode Number of barcode that as to be differentially
 #'                       expressed (DE) in order to consider the associated gene
 #'                       DE. Example a gene is associated with 10 shRNA we
@@ -40,11 +42,10 @@
 plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
     quantile = c(-0.5, 0.5), labels = c("Negative logFC", "Positive logFC")) {
+    contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, design = matrix_model)
-    fit <- edgeR::glmFit(xglm, matrix_model)
-
-    lrt <- edgeR::glmLRT(fit, contrast = contrast)
+    log2fc <- barcode_log2fc(xglm, matrix_model, contrast)
 
     genesymbollist <- unique_gene_symbols(DGEList$genes$Gene, number_barcode)
     if (is.null(genesymbollist[[gene]])) {
@@ -52,7 +53,7 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
             "more than number_barcode = ", number_barcode, " barcodes.")
     }
 
-    plot <- limma::barcodeplot(lrt$table$logFC,
+    plot <- limma::barcodeplot(log2fc,
         index = genesymbollist[[gene]],
         main = paste("Barcode plot for Gene", gene), labels = labels,
         quantile = quantile

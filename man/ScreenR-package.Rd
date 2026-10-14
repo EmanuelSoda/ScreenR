@@ -30,6 +30,14 @@ it is able to find new candidate hits. Moreover in order to improve the
 quality of the hit found it is also possible to further filter the list of
 hit using other filter like the variance and the slope filters.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://emanuelsoda.github.io/ScreenR/}
+  \item Report bugs at \url{https://github.com/EmanuelSoda/ScreenR/issues}
+}
+
+}
 \author{
 Emanuel Michele Soda \email{emanuelsoda@gmail.com}
 }

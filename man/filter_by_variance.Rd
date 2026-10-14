@@ -24,8 +24,10 @@ methods selection}
 
 \item{variance}{The maximum value of variance accepted}
 
-\item{contrast}{The variable to use as X for the linear model
-for the Treatment}
+\item{contrast}{The comparison used to compute the log2 fold changes:
+an object created with \code{\link[limma]{makeContrasts}}
+or \code{\link{create_contrast}}, or the name or index of
+a column of matrix_model.}
 }
 \value{
 A data frame with the variance for the treatment and the control

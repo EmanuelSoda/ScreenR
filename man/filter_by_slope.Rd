@@ -9,8 +9,8 @@ filter_by_slope(
   genes,
   group_var_treatment,
   group_var_control,
-  slope_control,
-  slope_treatment
+  slope_control = NULL,
+  slope_treatment = NULL
 )
 }
 \arguments{

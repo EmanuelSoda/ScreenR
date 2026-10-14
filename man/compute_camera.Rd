@@ -4,13 +4,7 @@
 \alias{compute_camera}
 \title{Compute Camera}
 \usage{
-compute_camera(
-  xglm,
-  DGEList,
-  matrix_model,
-  contrast,
-  number_barcode = 3
-)
+compute_camera(xglm, DGEList, matrix_model, contrast, number_barcode = 3)
 }
 \arguments{
 \item{xglm}{object created with \code{\link[edgeR]{estimateDisp}}}
@@ -23,6 +17,11 @@ compute_camera(
     \item{\code{matrix_model}}{The matrix that will be used to perform the
 linear model analysis created using
 \code{\link[stats]{model.matrix}}}
+    \item{\code{contrast}}{The comparison to test: the name or index of a column of
+matrix_model, a numeric contrast vector (for example
+created with \code{\link{create_contrast}}) or a
+one-column matrix created with
+\code{\link[limma]{makeContrasts}}.}
     \item{\code{number_barcode}}{Number of barcode that as to be differentially
 expressed (DE)in order to consider the gene associated
 DE. Example a gene is associated

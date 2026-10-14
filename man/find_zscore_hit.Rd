@@ -30,6 +30,7 @@ Return a tibble containing the hit for the Z-score
 Title Find Z-score Hit
 }
 \examples{
+\dontrun{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
     control = "TRT", treatment = "Time3",
@@ -43,5 +44,6 @@ head(result)
 # For the mean
 result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 head(result)
+}
 }
 \concept{find}

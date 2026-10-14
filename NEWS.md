@@ -1,3 +1,52 @@
+# ScreenR 1.15.4
+
+## Bug fixes in the vignette
+
+* The design matrix of the example analysis was built with
+  `model.matrix(~ groups)` and its columns renamed with `unique(groups)`,
+  which does not match the column order: the contrast "Time3_TRT" actually
+  compared the Time3 control samples with the baseline. The vignette now uses
+  `create_design_matrix()` and `create_contrast()` to compare treated and
+  control samples of the same time point.
+* The "at least 2 methods" common hits used `roast_hit_TRT$Day3` and `$Day6`,
+  which do not exist, so ROAST was ignored.
+
+## Changes that affect the results
+
+* `find_camera_hit()` gains `fdr = 0.05` and returns only the genes with
+  FDR <= fdr (previously all the genes with the requested direction). Use
+  `fdr = 1` for the previous behaviour.
+* `find_roast_hit()` gains `fdr = 0.05` and filters on the FDR; the raw p-value
+  cut off `p_val` is now optional (default `NULL`, previously 0.05).
+* `compute_metrics()` gains `pseudocount = 0.5`: the log2 fold change is
+  `log2((Treated + pseudocount) / (Control + pseudocount))` instead of
+  `log2(Treated / Control + 1e-7)`, and only barcodes with zero reads in both
+  treated and control are removed (previously all barcodes with zero control
+  reads).
+
+## New features
+
+* `create_design_matrix()` and `create_contrast()` build the design matrix and
+  the contrasts by group name. `find_camera_hit()`, `find_roast_hit()`,
+  `plot_barcode_hit()` and `filter_by_variance()` accept a column name, a
+  contrast vector or a `limma::makeContrasts()` matrix.
+* `find_camera_hit()` and `find_roast_hit()` report `Log2FC`, the median log2
+  fold change of the barcodes of each gene; `find_roast_hit()` gains `seed`.
+* `normalize_data()` gains `method = "tmm"` (edgeR TMM factors) and
+  `method = "control"` (normalization to control barcodes).
+* `find_gene_zscore_hit()`: gene-level binomial test with FDR for the Z-score
+  method.
+* `compute_barcode_statistics()`: replicate-aware barcode statistics with the
+  edgeR quasi-likelihood F-test.
+* `find_time_hit()`: one model for the whole time course, testing whether the
+  treatment effect changes over time.
+* `summarise_hits()`: combines the FDR of several methods (MaxFDR,
+  intersection-union test).
+* Quality control: `plot_replicate_correlation()`, `compute_gini()` and
+  `find_discordant_barcodes()`.
+* New vignette "Improved statistical analysis with ScreenR".
+* edgeR >= 4.0.0 is now required.
+
 # ScreenR 1.15.3
 
 ## Changes

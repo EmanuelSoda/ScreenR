@@ -370,23 +370,46 @@ zscore_hit_TRT <- list(
 zscore_hit_TRT
 ```
 
+### Design matrix and contrasts
+
+CAMERA and ROAST are based on a linear model, which needs a *design matrix*
+(which sample belongs to which group) and a *contrast* (which groups to
+compare). The function *create_design_matrix* creates a design matrix with one
+column for each group, and *create_contrast* creates the contrast comparing
+the treated and the control samples of the same time point.
+
+```{r  Design, message=TRUE, warning=TRUE}
+matrix_model <- create_design_matrix(object)
+colnames(matrix_model)
+
+contrast_TRT <- list(
+    Time3 = create_contrast(matrix_model,
+        treatment = "Time3_TRT", control = "Time3_CTRL"
+    ),
+    Time4 = create_contrast(matrix_model,
+        treatment = "Time4_TRT", control = "Time4_CTRL"
+    )
+)
+contrast_TRT$Time3
+```
+
 ### CAMERA
 
 The same can be done with the CAMERA hit using the function *find_camera_hit*.
+Only the genes with a False Discovery Rate (FDR) lower or equal to the *fdr*
+argument are returned (default 0.05). In this example dataset the effect of the
+treatment is weak, so for illustration we use a lenient FDR of 25%. The column
+*Log2FC* is the median log2 fold change of the barcodes of each gene.
 
 ```{r  CAMERA, message=TRUE, warning=TRUE}
-matrix_model <- model.matrix(~ groups)
-colnames(matrix_model) <- unique(groups)
-
-
 camera_hit_TRT <- list(
     Time3 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time3_TRT",
+        contrast = contrast_TRT$Time3, fdr = 0.25
     ),
     Time4 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time4_TRT"
+        contrast = contrast_TRT$Time4, fdr = 0.25
     )
 )
 
@@ -396,17 +419,18 @@ camera_hit_TRT
 ### ROAST
 
 Last but not least this is done also for the ROAST hit using the function\
-*find_roast_hit*.
+*find_roast_hit*. ROAST uses random rotations, so the *seed* argument is set
+to make the result reproducible.
 
 ```{r ROAST, message=TRUE, warning=TRUE}
 roast_hit_TRT <- list(
     Time3 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time3_TRT", 
+        contrast = contrast_TRT$Time3, fdr = 0.25, seed = 42
     ),
     Time4 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time4_TRT"
+        contrast = contrast_TRT$Time4, fdr = 0.25, seed = 42
     )
 )
 
@@ -431,11 +455,11 @@ computed with the function::
 ```{r Common_Hit,  message=TRUE, warning=TRUE}
 common_hit_TRT_at_least_2 <- list(
     Time3 = find_common_hit(
-        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Day3,
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Time3,
         common_in = 2
     ),
     Time4 = find_common_hit(
-        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Day6,
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Time4,
         common_in = 2
     )
 )
@@ -470,7 +494,7 @@ visualize the results obtained. This can be done by visualizing the trend of the
 candidate hits obtained using the function **plot_trend**.
 
 ```{r plot_trend,  message=TRUE, warning=TRUE}
-candidate_hits <- common_hit_TRT_at_least_2$Time3
+candidate_hits <- common_hit_TRT_at_least_2$Time4
 
 plot_trend(screenR_Object = object, 
            genes = candidate_hits[1], 
@@ -482,6 +506,13 @@ plot_trend(screenR_Object = object,
            nrow = 2, ncol = 2, 
            group_var = c("Time1", "Time2", "TRT"))
 ```
+
+## More statistical methods
+
+The vignette *Improved statistical analysis with ScreenR* shows further
+methods: a gene-level Z-score test with p-values and FDR, replicate-aware
+barcode statistics, a single model for the whole time course, the combination
+of the results of several methods and additional quality controls.
 
 ```{r,  message=TRUE, warning=TRUE}
 sessionInfo()

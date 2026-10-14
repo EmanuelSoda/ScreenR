@@ -11,8 +11,11 @@
 #' @param matrix_model The matrix that will be used to perform the
 #'                     linear model analysis. Created using
 #'                     \code{\link[stats]{model.matrix}}
-#' @param contrast A vector or a single value indicating the index or the name
-#'                 of the column the model_matrix to which perform the analysis
+#' @param contrast The comparison to test: the name or index of a column of
+#'                 matrix_model, a numeric contrast vector (for example
+#'                 created with \code{\link{create_contrast}}) or a
+#'                 one-column matrix created with
+#'                 \code{\link[limma]{makeContrasts}}.
 #' @param nrot Number of rotation to perform the test.
 #'             Higher number of rotation leads to more statistically significant
 #'             result.
@@ -22,43 +25,64 @@
 #'                       with 10 shRNA we consider a gene DE if it has at least
 #'                       number_barcode = 5 shRNA DE.
 #' @param direction Direction of variation
-#' @param p_val The value that as to be used as p-value cut off
+#' @param p_val An optional cut off on the raw (not adjusted) p-value. By
+#'              default (NULL) only the FDR cut off is used.
+#' @param fdr The False Discovery Rate threshold: only genes with an FDR
+#'            lower or equal to this value are returned. Use fdr = 1 to
+#'            return all the genes with the given direction.
+#' @param seed An optional random seed. ROAST uses random rotations, so the
+#'             p-values change slightly between runs; setting a seed makes
+#'             the result reproducible.
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma mroast
 #' @importFrom tibble tibble
-#' @return The hits found by ROAST method
+#' @return A tibble with the hits found by the ROAST method. Besides the
+#'         columns returned by \code{\link[limma]{mroast}} it contains
+#'         Log2FC, the median log2 fold change of the barcodes of the gene.
 #' @concept find
 #' @export
 #' @examples
-#' set.seed(42)
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~ slot(object, "groups"))
-#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
+#' matrix_model <- create_design_matrix(object)
+#' contrast <- create_contrast(matrix_model, treatment = "Treated",
+#'     control = "Control")
 #'
 #' result <- find_roast_hit(object,
 #'     matrix_model = matrix_model,
-#'     contrast = "Treated", nrot = 100
+#'     contrast = contrast, nrot = 100, seed = 42
 #' )
 #' head(result)
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
-    nrot = 9999, number_barcode = 3, direction = "Down", p_val = 0.05) {
+    nrot = 9999, number_barcode = 3, direction = "Down", p_val = NULL,
+    fdr = 0.05, seed = NULL) {
+    contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 
+    if (!is.null(seed)) {
+        set.seed(seed)
+    }
     roast_hit <- limma::mroast(xglm,
         index = genesymbollist,
         design = matrix_model, contrast = contrast, nrot = nrot
+    )
+    effect <- gene_log2fc(
+        barcode_log2fc(xglm, matrix_model, contrast), genesymbols
     )
 
     roast_hit <- roast_hit %>%
         tibble::rownames_to_column("Gene") %>%
         dplyr::tibble() %>%
+        dplyr::left_join(effect, by = "Gene") %>%
         dplyr::mutate(Direction = factor(.data$Direction)) %>%
         dplyr::filter(.data$Direction == direction) %>%
-        dplyr::filter(.data$PValue < p_val) %>%
+        dplyr::filter(.data$FDR <= fdr) %>%
         dplyr::filter(.data$NGenes > number_barcode)
+    if (!is.null(p_val)) {
+        roast_hit <- dplyr::filter(roast_hit, .data$PValue < p_val)
+    }
 
     return(roast_hit)
 }

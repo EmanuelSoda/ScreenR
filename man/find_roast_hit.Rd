@@ -11,7 +11,9 @@ find_roast_hit(
   nrot = 9999,
   number_barcode = 3,
   direction = "Down",
-  p_val = 0.05
+  p_val = NULL,
+  fdr = 0.05,
+  seed = NULL
 )
 }
 \arguments{
@@ -22,8 +24,11 @@ find_roast_hit(
 linear model analysis. Created using
 \code{\link[stats]{model.matrix}}}
 
-\item{contrast}{A vector or a single value indicating the index or the name
-of the column the model_matrix to which perform the analysis}
+\item{contrast}{The comparison to test: the name or index of a column of
+matrix_model, a numeric contrast vector (for example
+created with \code{\link{create_contrast}}) or a
+one-column matrix created with
+\code{\link[limma]{makeContrasts}}.}
 
 \item{nrot}{Number of rotation to perform the test.
 Higher number of rotation leads to more statistically significant
@@ -37,10 +42,21 @@ number_barcode = 5 shRNA DE.}
 
 \item{direction}{Direction of variation}
 
-\item{p_val}{The value that as to be used as p-value cut off}
+\item{p_val}{An optional cut off on the raw (not adjusted) p-value. By
+default (NULL) only the FDR cut off is used.}
+
+\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
+lower or equal to this value are returned. Use fdr = 1 to
+return all the genes with the given direction.}
+
+\item{seed}{An optional random seed. ROAST uses random rotations, so the
+p-values change slightly between runs; setting a seed makes
+the result reproducible.}
 }
 \value{
-The hits found by ROAST method
+A tibble with the hits found by the ROAST method. Besides the
+        columns returned by \code{\link[limma]{mroast}} it contains
+        Log2FC, the median log2 fold change of the barcodes of the gene.
 }
 \description{
 Find the hit using the roast method. Roast is a competitive gene
@@ -52,14 +68,14 @@ Find the hit using the roast method. Roast is a competitive gene
           \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
 }
 \examples{
-set.seed(42)
 object <- get0("object", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~ slot(object, "groups"))
-colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
+matrix_model <- create_design_matrix(object)
+contrast <- create_contrast(matrix_model, treatment = "Treated",
+    control = "Control")
 
 result <- find_roast_hit(object,
     matrix_model = matrix_model,
-    contrast = "Treated", nrot = 100
+    contrast = contrast, nrot = 100, seed = 42
 )
 head(result)
 }

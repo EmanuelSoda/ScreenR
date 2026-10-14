@@ -22,8 +22,10 @@ plot_barcode_hit(
 linear model analysis. It is created using
 model.matrix.}
 
-\item{contrast}{An object created with \code{\link[limma]{makeContrasts}}
-function.}
+\item{contrast}{The comparison to plot: an object created with
+\code{\link[limma]{makeContrasts}} or
+\code{\link{create_contrast}}, or the name or index of a
+column of matrix_model.}
 
 \item{number_barcode}{Number of barcode that as to be differentially
 expressed (DE) in order to consider the associated gene

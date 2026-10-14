@@ -21,6 +21,13 @@
 #'            metrics computation.
 #'            This string has to be equal to the interested sample in the
 #'            Day column of the data_table slot.
+#' @param pseudocount A small value (in counts per million) added to the
+#'                    treated and control mean frequencies before computing
+#'                    the log2 fold change, so that barcodes with zero reads
+#'                    get a finite fold change:
+#'                    Log2FC = log2((Treated + pseudocount) /
+#'                    (Control + pseudocount)). Barcodes with zero reads in
+#'                    both treated and control are removed.
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
@@ -36,7 +43,11 @@
 #' )
 #' head(metrics)
 compute_metrics <- function(screenR_Object, control,
-    treatment, day) {
+    treatment, day, pseudocount = 0.5) {
+    if (!is.numeric(pseudocount) || length(pseudocount) != 1 ||
+        pseudocount <= 0) {
+        stop("pseudocount must be a single positive number.")
+    }
     control <- screenR_Object@data_table %>%
         filter(.data$Treatment %in% control) %>%
         dplyr::pull(.data$Sample) %>%
@@ -69,9 +80,9 @@ compute_metrics <- function(screenR_Object, control,
             names_from = .data$Group,
             values_from = .data$Mean
         ) %>%
-        dplyr::filter(.data$Control > 0) %>%
-        dplyr::mutate(Log2FC = log2(.data$Treated / .data$Control +
-            1e-07)) %>%
+        dplyr::filter(.data$Control > 0 | .data$Treated > 0) %>%
+        dplyr::mutate(Log2FC = log2((.data$Treated + pseudocount) /
+            (.data$Control + pseudocount))) %>%
         dplyr::mutate(Zscore = (.data$Log2FC -
             mean(.data$Log2FC)) / sd(.data$Log2FC)) %>%
         # Robust Z-score: (x - median) / MAD, where stats::mad() already

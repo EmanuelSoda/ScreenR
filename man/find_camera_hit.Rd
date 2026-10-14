@@ -11,7 +11,8 @@ find_camera_hit(
   number_barcode = 3,
   thresh = 1e-04,
   lfc = 1,
-  direction = "Down"
+  direction = "Down",
+  fdr = 0.05
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ find_camera_hit(
 linear model analysis created using
 \code{\link[stats]{model.matrix}}}
 
-\item{contrast}{A vector or a single value indicating the index or the name
-of the column the model_matrix with which perform the
-analysis}
+\item{contrast}{The comparison to test: the name or index of a column of
+matrix_model, a numeric contrast vector (for example
+created with \code{\link{create_contrast}}) or a
+one-column matrix created with
+\code{\link[limma]{makeContrasts}}.}
 
 \item{number_barcode}{Number of barcode that as to be differentially
 expressed (DE)in order to consider the gene associated
@@ -39,9 +42,15 @@ result. Filter the returned table on the FDR column instead.}
 
 \item{direction}{String containing the direction of the variation,
 "Down" for the down regulation "Up" for the up regulation.}
+
+\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
+lower or equal to this value are returned. Use fdr = 1 to
+return all the genes with the given direction.}
 }
 \value{
-The data frame containing the hit found using the camera method
+A tibble with the hits found using the camera method. Besides
+        the columns returned by \code{\link[limma]{camera}} it contains
+        Log2FC, the median log2 fold change of the barcodes of the gene.
 }
 \description{
 This function implements the method by proposed by Wu and
@@ -55,12 +64,13 @@ This function implements the method by proposed by Wu and
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
-matrix <- model.matrix(~ slot(object, "groups"))
-colnames(matrix) <- c("Control", "T1/T2", "Treated")
+matrix <- create_design_matrix(object)
+contrast <- create_contrast(matrix, treatment = "Treated",
+    control = "Control")
 
 result <- find_camera_hit(
     screenR_Object = object,
-    matrix_model = matrix, contrast = "Treated"
+    matrix_model = matrix, contrast = contrast
 )
 head(result)
 }

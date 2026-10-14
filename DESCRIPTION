@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.15.3
+Version: 1.15.4
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
@@ -21,7 +21,7 @@ Description: ScreenR is a package suitable to perform hit identification in loss
             visualization modes for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.1
 Imports:
     methods (>= 4.0),
     rlang (>= 0.4),
@@ -37,7 +37,7 @@ Imports:
     tidyr (>= 1.2),
     magrittr (>= 1.0),
     dplyr (>= 1.1.0),
-    edgeR (>= 3.32),
+    edgeR (>= 4.0.0),
     tidyselect (>= 1.1.2)
 Suggests: 
     rmarkdown (>= 2.11),
@@ -63,12 +63,14 @@ Collate:
     'count_mapped_reads.R'
     'count_table.R'
     'create_object.R'
+    'design.R'
     'distribution_mapped_reads.R'
     'filter_by.R'
     'find_common_hit.R'
     'find_roast_hit.R'
     'find_robust_zscore_hit.R'
     'find_zscore_hit.R'
+    'gene_level_statistics.R'
     'generics.R'
     'mapped_reads.R'
     'normalize_data.R'
@@ -79,5 +81,6 @@ Collate:
     'plot_mds.R'
     'plot_trend.R'
     'plot_zscore_distribution.R'
+    'quality_control.R'
     'screenr-class.R'
     'zzz.R'
