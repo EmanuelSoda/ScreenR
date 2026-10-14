@@ -217,7 +217,8 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #' counts <- get_count_table(object)
 #' nrow(counts)
 remove_all_zero_row <- function(screenR_Object) {
-    counts <- screenR_Object@count_table
+    screenR_Object <- update_screenr_object(screenR_Object)
+    counts <- count_table_of(screenR_Object)
 
     # First of all all the row with zero counts are founded
     counts_zeros <- filter(
@@ -228,16 +229,17 @@ remove_all_zero_row <- function(screenR_Object) {
         )
     )
 
-    # Then there are filtered
-    counts <- filter(counts, !.data$Barcode %in% counts_zeros$Barcode)
-
-    screenR_Object@count_table <- counts
+    # Then there are filtered (with the normalized counts and the data
+    # table, which are subset together with the object)
+    screenR_Object <- screenR_Object[
+        !counts$Barcode %in% counts_zeros$Barcode,
+    ]
 
 
     # The same procedure as to be done for the annotation_table table
     # in order to keep thigs working
 
-    anno_table <- screenR_Object@annotation_table
+    anno_table <- annotation_of(screenR_Object)
 
     anno_table <-
         filter(

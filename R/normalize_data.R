@@ -36,14 +36,15 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' object <- normalize_data(object)
 #'
-#' slot(object, "normalized_count_table")
+#' get_normalized_count_table(object)
 #'
 #' # TMM normalization
 #' object <- normalize_data(object, method = "tmm")
 normalize_data <- function(screenR_Object, method = c("cpm", "tmm", "control"),
     control_barcodes = NULL) {
     method <- match.arg(method)
-    count_table <- screenR_Object@count_table
+    screenR_Object <- update_screenr_object(screenR_Object)
+    count_table <- count_table_of(screenR_Object)
     numeric_columns <- vapply(count_table, is.numeric, logical(1))
     counts <- as.matrix(count_table[, numeric_columns])
 
@@ -70,7 +71,8 @@ normalize_data <- function(screenR_Object, method = c("cpm", "tmm", "control"),
     normalized <- count_table
     normalized[, numeric_columns] <- sweep(counts, 2, library_size, "/") *
         1e+06
-    screenR_Object@normalized_count_table <- dplyr::as_tibble(normalized)
+    screenR_Object <- set_normalized_count_table(screenR_Object,
+        dplyr::as_tibble(normalized))
 
     return(screenR_Object)
 }

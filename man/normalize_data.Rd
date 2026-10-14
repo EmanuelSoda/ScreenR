@@ -49,7 +49,7 @@ This function normalizes the counts to Counts Per Million
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- normalize_data(object)
 
-slot(object, "normalized_count_table")
+get_normalized_count_table(object)
 
 # TMM normalization
 object <- normalize_data(object, method = "tmm")

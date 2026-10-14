@@ -1,3 +1,26 @@
+# ScreenR 1.15.8
+
+## The ScreenR object is now a SummarizedExperiment
+
+* The `screenr_object` class now extends `SummarizedExperiment`: the raw and
+  normalized counts are the assays `counts` and `normalized`, the barcode
+  annotation is in `rowData()` and Sample, Day, Treatment and Group are in
+  `colData()`. The object can be used with the Bioconductor tools that accept
+  a `SummarizedExperiment` and subset like one (`object[barcodes, samples]`),
+  keeping counts, normalized counts and data table consistent.
+* All the ScreenR functions, including the `get_` and `set_` functions,
+  return the same results as before: every exported function was run on the
+  example data with the previous and the new class and gave identical
+  outputs.
+* Objects saved with older versions are converted automatically;
+  `update_screenr_object()` converts them explicitly.
+* Code that reads the old slots directly needs to use the `get_` functions:
+  `object@count_table` -> `get_count_table(object)`,
+  `object@normalized_count_table` -> `get_normalized_count_table(object)`,
+  `object@groups` -> `get_groups(object)`. The slots `data_table` and
+  `annotation_table` are unchanged.
+* New dependencies: SummarizedExperiment and S4Vectors.
+
 # ScreenR 1.15.7
 
 ## Documentation

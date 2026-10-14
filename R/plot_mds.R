@@ -133,7 +133,7 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
 #'
 #' compute_explained_variance(object)
 compute_explained_variance <- function(screenR_Object) {
-    data <- screenR_Object@count_table
+    data <- count_table_of(screenR_Object)
     # Get only the numeric columns
     numeric_col <- unlist(lapply(data, is.numeric))
 

@@ -17,11 +17,12 @@
 #' head(count_mapped_reads(object))
 count_mapped_reads <- function(screenR_Object) {
     # Get only the numeric column (so the sample)
-    numericColumn <- screenR_Object@count_table %>%
+    count_table <- count_table_of(screenR_Object)
+    numericColumn <- count_table %>%
         dplyr::select_if(is.numeric) %>%
         colnames()
 
-    table <- screenR_Object@count_table %>%
+    table <- count_table %>%
         tidyr::gather("Sample", "Mapped", all_of(numericColumn)) %>%
         dplyr::mutate(Sample = factor(.data$Sample, levels = numericColumn))
     return(table)

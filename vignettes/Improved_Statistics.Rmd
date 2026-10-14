@@ -129,8 +129,8 @@ example non-targeting shRNAs), when the library has them.
 object_tmm <- normalize_data(object, method = "tmm")
 
 # Ratio between the TMM and the total-count normalized values of each sample
-ratio <- colMeans(as.matrix(object_tmm@normalized_count_table[, -1])) /
-    colMeans(as.matrix(object@normalized_count_table[, -1]))
+ratio <- colMeans(SummarizedExperiment::assay(object_tmm, "normalized")) /
+    colMeans(SummarizedExperiment::assay(object, "normalized"))
 tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 ```
 

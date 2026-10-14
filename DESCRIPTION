@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.15.7
+Version: 1.15.8
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
@@ -38,7 +38,9 @@ Imports:
     magrittr (>= 1.0),
     dplyr (>= 1.1.0),
     edgeR (>= 4.0.0),
-    tidyselect (>= 1.1.2)
+    tidyselect (>= 1.1.2),
+    SummarizedExperiment,
+    S4Vectors
 Suggests: 
     rmarkdown (>= 2.11),
     markdown,

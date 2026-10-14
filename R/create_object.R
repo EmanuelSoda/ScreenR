@@ -159,15 +159,13 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
         )
     }
 
-    object <- methods::new("screenr_object",
-                           count_table = tibble(table),
-                           annotation_table = tibble(annotation),
-                           groups = as.factor(groups),
-                           replicates = replicates,
-                           normalized_count_table = tibble(),
-                           data_table = tibble(),
-                           sample_table = tibble(sample_table),
-                           column_names = column_names
+    object <- build_screenr_object(
+        count_table = table,
+        annotation_table = annotation,
+        groups = groups,
+        replicates = replicates,
+        sample_table = sample_table,
+        column_names = column_names
     )
     return(object)
 }
@@ -189,14 +187,7 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' get_sample_table(object)
 get_sample_table <- function(screenR_Object) {
-    if (methods::.hasSlot(screenR_Object, "sample_table") &&
-        nrow(screenR_Object@sample_table) > 0) {
-        return(tibble::as_tibble(screenR_Object@sample_table))
-    }
-    count_table <- screenR_Object@count_table
-    samples <- setdiff(colnames(count_table), "Barcode")
-    samples <- samples[vapply(count_table[samples], is.numeric, logical(1))]
-    parse_sample_names(samples)
+    sample_table_of(screenR_Object)
 }
 
 #' @title Get Column Names
@@ -214,9 +205,9 @@ get_sample_table <- function(screenR_Object) {
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' get_column_names(object)
 get_column_names <- function(screenR_Object) {
-    if (methods::.hasSlot(screenR_Object, "column_names") &&
-        length(screenR_Object@column_names) > 0) {
-        return(unlist(screenR_Object@column_names))
+    column_names <- update_screenr_object(screenR_Object)@column_names
+    if (length(column_names) > 0) {
+        return(unlist(column_names))
     }
     c(Barcode = "Barcode", Gene = "Gene")
 }
@@ -515,15 +506,15 @@ check_sample_table <- function(sample_table, sample_columns, samples) {
 #' create_edger_obj(object)
 create_edger_obj <- function(screenR_Object) {
     # edgeR models raw counts, so the count table (not the CPM) is used
-    count_table <- screenR_Object@count_table
+    count_table <- count_table_of(screenR_Object)
     counts <- as.matrix(dplyr::select_if(count_table, is.numeric))
     barcodes <- as.character(count_table$Barcode)
     rownames(counts) <- barcodes
     # The group for the treatment
-    groups <- screenR_Object@groups
+    groups <- groups_of(screenR_Object)
 
     # The annotation, in the same order as the counts
-    genes <- screenR_Object@annotation_table
+    genes <- annotation_of(screenR_Object)
     genes <- genes[match(barcodes, as.character(genes$Barcode)), ]
     if (anyNA(genes$Barcode)) {
         stop("Some barcodes of the count table are not in the annotation ",

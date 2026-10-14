@@ -114,15 +114,16 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     samples) {
-    numericColumn <- screenR_Object@count_table %>%
+    count_table <- count_table_of(screenR_Object)
+    numericColumn <- count_table %>%
         dplyr::select_if(is.numeric) %>%
         colnames()
 
     table <- tidyr::pivot_longer(
-        data = screenR_Object@count_table,
+        data = count_table,
         cols = all_of(numericColumn), names_to = "Sample", values_to = "Mapped"
     )
-    table <- dplyr::left_join(table, screenR_Object@annotation_table,
+    table <- dplyr::left_join(table, annotation_of(screenR_Object),
         by = "Barcode"
     )
     table <- dplyr::group_by(table, .data$Sample, .data$Gene)

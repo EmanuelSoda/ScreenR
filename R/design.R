@@ -20,7 +20,7 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' create_design_matrix(object)
 create_design_matrix <- function(screenR_Object) {
-    groups <- screenR_Object@groups
+    groups <- groups_of(screenR_Object)
     if (length(groups) == 0) {
         stop("The ScreenR object has no groups.")
     }

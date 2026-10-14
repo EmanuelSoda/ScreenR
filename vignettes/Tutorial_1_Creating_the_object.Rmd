@@ -295,6 +295,37 @@ head(get_count_table(object)[, 1:4])
 get_groups(object)
 ```
 
+## The object is a SummarizedExperiment
+
+The ScreenR object is also a
+[SummarizedExperiment](https://bioconductor.org/packages/SummarizedExperiment),
+the standard Bioconductor container for this kind of data, so it can be used
+directly with the Bioconductor tools that accept one:
+
+| Part | Content |
+|------|---------|
+| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample |
+| `assay(object, "normalized")` | The normalized counts, after `normalize_data()` |
+| `rowData(object)` | The barcode and its annotation (Gene, ...) |
+| `colData(object)` | Sample, Day, Treatment and Group of each sample |
+
+```{r summarized-experiment}
+object
+head(SummarizedExperiment::rowData(object))
+SummarizedExperiment::colData(object)
+```
+
+Like any SummarizedExperiment, the object can be subset by barcode (rows) and
+by sample (columns), and all its parts stay consistent:
+
+```{r subset}
+treated <- object[, object$Treatment == "TRT"]
+treated
+```
+
+Objects saved with older versions of ScreenR are converted automatically by
+all the functions; `update_screenr_object()` converts them explicitly.
+
 # Preparing the data for the analysis
 
 Three steps prepare the data for all the following analyses.

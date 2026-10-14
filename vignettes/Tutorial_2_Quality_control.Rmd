@@ -228,8 +228,8 @@ agree, the default is fine.
 
 ```{r normalization}
 object_tmm <- normalize_data(object, method = "tmm")
-ratio <- colMeans(as.matrix(object_tmm@normalized_count_table[, -1])) /
-    colMeans(as.matrix(object@normalized_count_table[, -1]))
+ratio <- colMeans(SummarizedExperiment::assay(object_tmm, "normalized")) /
+    colMeans(SummarizedExperiment::assay(object, "normalized"))
 tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 ```
 

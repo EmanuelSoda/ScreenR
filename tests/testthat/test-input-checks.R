@@ -190,8 +190,8 @@ test_that("text counts are converted and other text columns removed", {
         object <- create_screenr_object(table = counts, groups = input_groups),
         "converted to numbers"
     )
-    expect_true(is.numeric(object@count_table$Time1))
-    expect_false("Gene" %in% colnames(object@count_table))
+    expect_true(is.numeric(ScreenR:::count_table_of(object)$Time1))
+    expect_false("Gene" %in% colnames(ScreenR:::count_table_of(object)))
 })
 
 test_that("unmapped and duplicated barcodes give warnings", {
@@ -212,10 +212,77 @@ test_that("unmapped and duplicated barcodes give warnings", {
 test_that("objects created before the new slots still work", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     expect_false(methods::.hasSlot(object, "sample_table"))
-    expect_output(show(object), "count_table")
+    expect_output(show(object), "screenr_object")
     object <- set_annotation_table(object, object@annotation_table)
     expect_equal(get_column_names(object), c(Barcode = "Barcode",
         Gene = "Gene"))
-    expect_equal(nrow(get_sample_table(object)), ncol(object@count_table) - 1)
+    expect_equal(nrow(get_sample_table(object)), ncol(ScreenR:::count_table_of(object)) - 1)
     expect_s3_class(compute_data_table(object)@data_table, "tbl_df")
+})
+
+test_that("the object is a SummarizedExperiment with consistent parts", {
+    object <- suppressMessages(create_screenr_object(
+        table = clean_counts(), annotation = annotation_table,
+        groups = input_groups
+    ))
+    expect_s4_class(object, "SummarizedExperiment")
+    expect_s4_class(object, "screenr_object")
+    expect_equal(dim(object), c(nrow(clean_counts()), length(sample_names)))
+    expect_equal(SummarizedExperiment::assayNames(object), "counts")
+    expect_equal(colnames(object), sample_names)
+    expect_equal(as.character(SummarizedExperiment::rowData(object)$Gene),
+        annotation_table$Gene[match(
+            as.character(clean_counts()$Barcode),
+            as.character(annotation_table$Barcode)
+        )])
+    expect_equal(object$Treatment[3], "TRT")
+    expect_equal(object$Group, input_groups)
+
+    object <- compute_data_table(normalize_data(object))
+    expect_equal(SummarizedExperiment::assayNames(object),
+        c("counts", "normalized"))
+
+    # Subsetting keeps counts, normalized counts and data table together
+    treated <- object[1:50, object$Treatment == "TRT"]
+    expect_equal(dim(treated), c(50L, 6L))
+    expect_true(all(get_data_table(treated)$Treatment == "TRT"))
+    expect_equal(nrow(get_data_table(treated)), 50L * 6L)
+    expect_equal(nrow(get_normalized_count_table(treated)), 50L)
+    expect_equal(
+        as.character(get_groups(treated)),
+        rep(c("Time3_TRT", "Time4_TRT"), each = 3)
+    )
+})
+
+test_that("old objects are converted with the same content", {
+    legacy <- get0("object", envir = asNamespace("ScreenR"))
+    object <- update_screenr_object(legacy)
+    expect_s4_class(object, "SummarizedExperiment")
+    expect_identical(update_screenr_object(object), object)
+    expect_equal(
+        ScreenR:::count_table_of(object),
+        tibble::as_tibble(attr(legacy, "count_table"))
+    )
+    expect_equal(get_groups(object), attr(legacy, "groups"))
+    expect_equal(get_data_table(object), attr(legacy, "data_table"))
+})
+
+test_that("the setters keep working", {
+    object <- suppressMessages(create_screenr_object(
+        table = clean_counts(), annotation = annotation_table,
+        groups = input_groups
+    ))
+    counts <- ScreenR:::count_table_of(object)[1:10, ]
+    object <- set_count_table(object, counts)
+    expect_equal(nrow(object), 10L)
+    expect_equal(ScreenR:::count_table_of(object), counts)
+
+    object <- set_groups(object, rev(input_groups))
+    expect_equal(get_groups(object), as.factor(rev(input_groups)))
+
+    normalized <- counts
+    normalized[, -1] <- 1
+    object <- set_normalized_count_table(object, normalized)
+    expect_equal(ScreenR:::normalized_table_of(object), normalized,
+        ignore_attr = TRUE)
 })

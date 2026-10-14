@@ -22,28 +22,35 @@ The count table of the ScreenR object
 }
 \description{
 Get function for the count table of the ScreenR object
+
+The screenr_object class is the main object of the package,
+it is passed to a series of function to perform the analysis.
+
+It extends \code{\link[SummarizedExperiment]{SummarizedExperiment}}, so
+it can be used with all the Bioconductor tools that work with that class:
+\itemize{
+  \item \code{assay(object, "counts")}: the raw counts, one row for each
+        barcode and one column for each sample;
+  \item \code{assay(object, "normalized")}: the normalized counts, after
+        \code{\link{normalize_data}};
+  \item \code{rowData(object)}: the barcode identifier (Barcode) and its
+        annotation (Gene, ...);
+  \item \code{colData(object)}: the Sample, Day and Treatment of each
+        sample (see \code{\link{get_sample_table}}) and its Group.
+}
+The ScreenR functions to read and change the object
+(\code{\link{get_count_table}}, \code{\link{set_count_table}}, ...) work
+as in the previous versions of the package.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{count_table}}{It is used to store the count table to perform the
-analysis}
-
-\item{\code{annotation_table}}{It is used to store the annotation of the shRNA}
-
-\item{\code{groups}}{It is used to store the vector of treated and untreated}
+\item{\code{annotation_table}}{The annotation table as given by the user (it can
+contain barcodes that are not in the count table)}
 
 \item{\code{replicates}}{It is used to store information about the replicates}
 
-\item{\code{normalized_count_table}}{It is used to store a normalized version of
-the count table}
-
 \item{\code{data_table}}{It is used to store a tidy format of the count table}
-
-\item{\code{sample_table}}{It is used to store the Day and Treatment of each
-sample when they are given explicitly (see
-\code{\link{create_screenr_object}}); when it is
-empty they are taken from the sample names}
 
 \item{\code{column_names}}{It is used to store the names that the columns had in
 the tables given by the user (see

@@ -15,7 +15,7 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' compute_gini(object)
 compute_gini <- function(screenR_Object) {
-    count_table <- screenR_Object@count_table
+    count_table <- count_table_of(screenR_Object)
     numeric_columns <- vapply(count_table, is.numeric, logical(1))
     counts <- as.matrix(count_table[, numeric_columns])
     gini <- apply(counts, 2, function(x) {
@@ -99,7 +99,7 @@ plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
 plot_replicate_correlation <- function(screenR_Object,
     method = c("pearson", "spearman"), label = TRUE) {
     method <- match.arg(method)
-    count_table <- screenR_Object@count_table
+    count_table <- count_table_of(screenR_Object)
     numeric_columns <- vapply(count_table, is.numeric, logical(1))
     counts <- as.matrix(count_table[, numeric_columns])
     log_cpm <- log2(sweep(counts, 2, colSums(counts), "/") * 1e6 + 1)

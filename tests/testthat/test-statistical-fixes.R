@@ -1,6 +1,6 @@
 test_that("create_edger_obj uses raw counts aligned to the annotation", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    counts <- object@count_table
+    counts <- ScreenR:::count_table_of(object)
 
     # Shuffle the annotation: genes must still be matched by Barcode
     set.seed(1)

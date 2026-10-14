@@ -35,11 +35,10 @@ create_test_object <- function() {
     obj@data_table <- obj@data_table %>%
         dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
 
-    obj@normalized_count_table <- obj@normalized_count_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
-
-    obj@count_table <- obj@count_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the data table (counts and normalized
+    # counts are subset together)
+    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
+        obj@data_table$Barcode, ]
 
     obj@annotation_table <- obj@annotation_table %>%
         dplyr::filter(Barcode %in% obj@data_table$Barcode)

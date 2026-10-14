@@ -3,9 +3,9 @@ get_object <- function() get0("object", envir = asNamespace("ScreenR"))
 test_that("create_design_matrix has one column per group and no intercept", {
     object <- get_object()
     design <- create_design_matrix(object)
-    expect_equal(colnames(design), make.names(levels(object@groups)))
+    expect_equal(colnames(design), make.names(levels(get_groups(object))))
     expect_true(all(rowSums(design) == 1))
-    expect_equal(nrow(design), length(object@groups))
+    expect_equal(nrow(design), length(get_groups(object)))
 })
 
 test_that("create_contrast compares groups by name", {
@@ -91,18 +91,18 @@ test_that("compute_metrics uses a pseudocount", {
 
 test_that("normalize_data supports cpm, tmm and control barcodes", {
     object <- get_object()
-    counts <- as.matrix(object@count_table[, -1])
+    counts <- as.matrix(ScreenR:::count_table_of(object)[, -1])
 
-    cpm <- normalize_data(object)@normalized_count_table
+    cpm <- ScreenR:::normalized_table_of(normalize_data(object))
     expect_equal(unname(colSums(as.matrix(cpm[, -1]))), rep(1e6, ncol(counts)))
 
-    tmm <- normalize_data(object, method = "tmm")@normalized_count_table
+    tmm <- suppressMessages(ScreenR:::normalized_table_of(normalize_data(object, method = "tmm")))
     expect_equal(dim(tmm), dim(cpm))
     expect_equal(tmm$Barcode, cpm$Barcode)
 
-    controls <- object@count_table$Barcode[1:20]
+    controls <- ScreenR:::count_table_of(object)$Barcode[1:20]
     control <- normalize_data(object, method = "control",
-        control_barcodes = controls)@normalized_count_table
+        control_barcodes = controls) |> ScreenR:::normalized_table_of()
     expect_equal(
         unname(colSums(as.matrix(control[1:20, -1]))),
         rep(1e6, ncol(counts))
@@ -145,8 +145,8 @@ test_that("compute_barcode_statistics returns one row per barcode", {
     contrast <- create_contrast(design, "Treated", "Control")
     statistics <- compute_barcode_statistics(object, design, contrast)
 
-    expect_equal(nrow(statistics), nrow(object@count_table))
-    expect_equal(statistics$Barcode, as.character(object@count_table$Barcode))
+    expect_equal(nrow(statistics), nrow(ScreenR:::count_table_of(object)))
+    expect_equal(statistics$Barcode, as.character(ScreenR:::count_table_of(object)$Barcode))
     expect_equal(sign(statistics$Zscore), sign(statistics$Log2FC))
     expect_true(all(statistics$PValue >= 0 & statistics$PValue <= 1))
 })
@@ -186,10 +186,10 @@ test_that("compute_gini is 0 for an even library and handles big counts", {
     gini <- compute_gini(object)
     expect_true(all(gini$Gini > 0 & gini$Gini < 1))
 
-    object@count_table <- tibble::tibble(
+    object <- create_screenr_object(table = tibble::tibble(
         Barcode = c("a", "b", "c", "d"),
         even = rep(1e9, 4), uneven = c(0, 0, 0, 1e9)
-    )
+    ))
     gini <- compute_gini(object)
     expect_equal(gini$Gini, c(0, 0.75))
 })
@@ -216,7 +216,7 @@ test_that("plot_gini plots the Gini index of each sample", {
     expect_true(ggplot2::is_ggplot(plot))
     expect_equal(plot$data$Gini, compute_gini(object)$Gini)
 
-    palette <- rep("grey50", ncol(object@count_table) - 1)
+    palette <- rep("grey50", ncol(ScreenR:::count_table_of(object)) - 1)
     expect_true(ggplot2::is_ggplot(plot_gini(object, palette = palette)))
 })
 

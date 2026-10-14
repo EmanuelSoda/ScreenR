@@ -20,7 +20,8 @@
 compute_data_table <- function(screenR_Object) {
     # First the table is created with the join of the annotation and the count
     # table
-    data <- screenR_Object@normalized_count_table
+    screenR_Object <- update_screenr_object(screenR_Object)
+    data <- normalized_table_of(screenR_Object)
     # The Day and Treatment of each sample, given by the user or taken from
     # the sample names
     sample_table <- get_sample_table(screenR_Object)
@@ -31,7 +32,7 @@ compute_data_table <- function(screenR_Object) {
             values_to = "Frequency"
         ) %>%
         dplyr::mutate(Barcode = as.factor(.data$Barcode)) %>%
-        dplyr::left_join(screenR_Object@annotation_table, by = "Barcode") %>%
+        dplyr::left_join(annotation_of(screenR_Object), by = "Barcode") %>%
         # Sequence, Library and Gene_ID are kept when the annotation has them
         dplyr::select(
             "Barcode", "Gene", "Sample", "Frequency",

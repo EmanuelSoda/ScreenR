@@ -13,10 +13,10 @@
 NULL, invisibly.
 }
 \description{
-Prints the slots of a ScreenR object. Objects created with
-             older versions of ScreenR can lack some of the slots added
-             later (sample_table, column_names); only the slots present
-             in the object are printed.
+Prints a summary of a ScreenR object: the
+             SummarizedExperiment summary and the size of the data table.
+             Objects created with older versions of ScreenR are converted
+             first (see \code{\link{update_screenr_object}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
