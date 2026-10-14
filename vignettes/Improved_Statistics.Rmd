@@ -133,7 +133,7 @@ object_tmm <- normalize_data(object, method = "tmm")
 # Ratio between the TMM and the total-count normalized values of each sample
 ratio <- colMeans(as.matrix(object_tmm@normalized_count_table[, -1])) /
     colMeans(as.matrix(object@normalized_count_table[, -1]))
-round(ratio, 3)
+tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 ```
 
 In this dataset the two methods agree within a few percent, so we keep the
@@ -297,11 +297,12 @@ head(time_hit)
 The column `Log2FC` is the median extra log2 fold change per time point in the
 treated samples. The top genes can be inspected with `plot_trend()`.
 
-```{r time-trend, fig.height = 3.5}
+```{r time-trend, fig.height = 4}
 plot_trend(object,
     genes = time_hit$Gene[1:2], group_var = c("Time1", "Time2", "TRT"),
     nrow = 1, ncol = 2
-)
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 # Combining the methods
@@ -324,6 +325,9 @@ summary <- summarise_hits(
 )
 head(summary, 10)
 ```
+
+In this dataset a single gene, the first of the table, is supported by all the
+methods at an FDR of 25%; it is also the top gene of the time course model.
 
 # Discordant barcodes
 
