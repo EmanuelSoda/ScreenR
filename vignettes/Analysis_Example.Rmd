@@ -77,7 +77,7 @@ devtools::install_github("EmanuelSoda/ScreenR")
 # Analysis
 
 Here is reported the ScreenR pipeline
-<img src="/Users/ieo5571/Documents/IEO/Stage/ScreenR/man/figures/Pipeline.png" align="top"/>
+<img src="../man/figures/Pipeline.png" align="top"/>
 
 ## Loading the package
 
