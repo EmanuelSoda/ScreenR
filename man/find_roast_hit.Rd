@@ -13,7 +13,9 @@ find_roast_hit(
   direction = "Down",
   p_val = NULL,
   fdr = 0.05,
-  seed = NULL
+  seed = NULL,
+  method = c("roast", "fry"),
+  fdr_method = c("BH", "storey")
 )
 }
 \arguments{
@@ -52,20 +54,35 @@ return all the genes with the given direction.}
 \item{seed}{An optional random seed. ROAST uses random rotations, so the
 p-values change slightly between runs; setting a seed makes
 the result reproducible. The random number state of the
-session is restored afterwards.}
+session is restored afterwards. Not used by method = "fry".}
+
+\item{method}{"roast" (default, random rotations) or "fry" (fast exact
+approximation, recommended for large screens).}
+
+\item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
+default) or "storey" (Benjamini-Hochberg multiplied by
+the estimated proportion of genes without effect, less
+conservative when many genes have an effect).}
 }
 \value{
-A tibble with the hits found by the ROAST method. Besides the
-        columns returned by \code{\link[limma]{mroast}} it contains
-        Log2FC, the median log2 fold change of the barcodes of the gene.
+A tibble with the hits found by the ROAST method, with the
+        columns returned by \code{\link[limma]{mroast}} (or
+        \code{\link[limma]{fry}}) and Log2FC, the median log2 fold change
+        of the barcodes of the gene. PValue is the one-sided p-value for
+        the requested direction (roast and fry report two-sided p-values)
+        and FDR is computed from it over all the genes.
 }
 \description{
-Find the hit using the roast method. Roast is a competitive gene
-             set test which uses rotation instead of permutation. Here is
-             applied in a contest of a genetic screening so it perform a
-             barcode competitive test testing for barcode which are
-             differentially expressed within a gene. More information can be
-             found in
+Find the hit using the roast method. Roast is a
+             self-contained gene set test: it tests whether the barcodes
+             of a gene change, without comparing them with the other
+             barcodes, so it is not affected by the number of genes with
+             an effect. The p-values are computed with random rotations
+             (method = "roast", whose smallest possible p-value is
+             1 / (nrot + 1)) or with \code{\link[limma]{fry}}
+             (method = "fry"), a fast and exact approximation of roast
+             with an unlimited number of rotations, which is faster and
+             gives continuous p-values. More information can be found in
           \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
 }
 \examples{

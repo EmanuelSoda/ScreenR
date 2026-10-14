@@ -76,7 +76,7 @@ object <- compute_data_table(object)
 
 | Method | Function | Unit | Gives an FDR | Uses replicates |
 |--------|----------|------|--------------|-----------------|
-| Gene-level Z-score test | `find_gene_zscore_hit()` | Counts the strongly changed barcodes of each gene | Yes | With `compute_barcode_statistics()` |
+| Gene-level Z-score test | `find_gene_zscore_hit()` | Compares the mean Z-score of the barcodes of each gene with random sets of barcodes | Yes | With `compute_barcode_statistics()` |
 | CAMERA | `find_camera_hit()` | Tests whether the barcodes of a gene change more than the others | Yes | Yes |
 | ROAST | `find_roast_hit()` | Tests whether the barcodes of a gene change | Yes | Yes |
 | Time course | `find_time_hit()` | Tests whether the treatment effect changes over time | Yes | Yes |
@@ -170,21 +170,29 @@ plot_zscore_distribution(
 
 ## Gene-level test
 
-`find_gene_zscore_hit()` counts for each gene how many of its barcodes have a
-Z-score below -2 (`zscore_threshold`, `direction = "Down"`) and computes how
-unlikely that number is if the gene had no effect, given how common such
-barcodes are in the whole library. The p-values are corrected for testing
-many genes (FDR).
+`find_gene_zscore_hit()` computes for each gene the mean Z-score of its
+barcodes and asks how often a random set of barcodes of the same size has a
+score at least as low (`direction = "Down"`). The random sets are drawn many
+times (`n_permutations`), so the p-value needs no assumption on the
+distribution of the Z-scores; `seed` makes it reproducible. The p-values are
+then corrected for testing many genes (FDR).
+
+If the library has non-targeting controls, give their gene name with
+`control_genes` (for example `control_genes = "non-targeting"`): the random
+sets are then drawn from the controls, which is the best reference because
+they cannot contain true hits. `statistic = "median"` uses the median instead
+of the mean, which is less affected by a single barcode with a strong
+(possibly off-target) effect.
 
 ```{r gene-zscore}
-gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1)
+gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1, seed = 1)
 head(gene_zscore)
 ```
 
 | Column | Meaning |
 |--------|---------|
 | `NBarcodes` | Number of barcodes of the gene |
-| `NBarcodesHit` | Barcodes beyond the threshold |
+| `Score` | Mean Z-score of the barcodes |
 | `Log2FC` | Median log2 fold change of the barcodes |
 | `PValue`, `FDR` | Significance |
 
@@ -202,7 +210,8 @@ barcode_statistics <- compute_barcode_statistics(
 )
 head(barcode_statistics)
 
-gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1)
+gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1,
+    seed = 1)
 head(gene_zscore_edger)
 ```
 
@@ -228,7 +237,14 @@ Both test the barcodes of each gene as a set, using edgeR on the raw counts.
 * **ROAST** asks whether the barcodes of a gene **change at all** (a
   self-contained test). It uses random rotations: set `seed` to get the same
   result every time, and use many rotations (`nrot`, default 9999) for a real
-  analysis; here 999 keep the tutorial fast.
+  analysis; here 999 keep the tutorial fast. With `method = "fry"` the same
+  test is computed exactly, without rotations: it is faster and its p-values
+  are not limited by the number of rotations.
+
+CAMERA becomes conservative when many genes have an effect, because the other
+barcodes it compares with then include true hits; ROAST and fry do not have
+this limitation. The p-values of all three are one-sided, for the requested
+direction.
 
 `number_barcode` sets the minimum number of barcodes (more than
 `number_barcode`) a gene needs to be tested, and `direction` chooses depleted

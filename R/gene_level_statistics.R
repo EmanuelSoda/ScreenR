@@ -1,15 +1,22 @@
 #' @title Find Gene-level Z-score Hit
 #' @description Gene-level test for the Z-score method, with a p-value and a
 #'              False Discovery Rate (FDR) for each gene.
-#'              For each gene it counts how many of its barcodes have a
-#'              score beyond the threshold (below -zscore_threshold for
-#'              direction "Down", above zscore_threshold for direction
-#'              "Up"). Under the null hypothesis that the gene has no effect
-#'              its barcodes behave like all the other barcodes, so the
-#'              number of barcodes beyond the threshold follows a binomial
-#'              distribution with the proportion observed over all the
-#'              barcodes. The one-sided binomial p-values are corrected
-#'              with the Benjamini-Hochberg method.
+#'              For each gene it computes a score, the mean (or the median)
+#'              of the scores of its barcodes. Under the null hypothesis that
+#'              the gene has no effect, its barcodes behave like barcodes
+#'              taken at random, so the p-value is computed by permutation:
+#'              the gene score is compared with the scores of n_permutations
+#'              random sets of barcodes of the same size. The p-values are
+#'              continuous (the smallest is 1 / (n_permutations + 1)) and do
+#'              not depend on the distribution of the barcode scores.
+#'
+#'              The random barcodes are drawn from all the barcodes or, when
+#'              control_genes is given, only from the barcodes of the
+#'              control genes (for example the non-targeting shRNAs). The
+#'              controls are the best reference: with all the barcodes, the
+#'              barcodes of the true hits are part of the reference, which
+#'              makes the test conservative when many genes have an effect.
+#'
 #'              This replaces the rule of \code{\link{find_zscore_hit}}
 #'              ("more than number_barcode barcodes below the median"),
 #'              which flags about 17\% of the genes without any effect when
@@ -21,20 +28,34 @@
 #'                                \code{\link{compute_barcode_statistics}}.
 #' @param score The column to use as score: "Zscore" (default) or
 #'              "ZscoreRobust".
-#' @param zscore_threshold A positive number: a barcode counts as depleted
-#'                         (enriched) when its score is below (above)
-#'                         -zscore_threshold (zscore_threshold).
 #' @param direction "Down" (default) for depleted genes or "Up" for
 #'                  enriched genes.
+#' @param statistic The gene score: "mean" (default) or "median" of the
+#'                  barcode scores. The median is less affected by single
+#'                  barcodes with a strong effect (for example off-target
+#'                  effects) but has less power.
+#' @param control_genes Optional names of control genes (as in the Gene
+#'                      column), for example "non-targeting". When given,
+#'                      the random barcodes of the permutations are drawn
+#'                      from their barcodes, and they are not tested.
+#' @param n_permutations The number of random barcode sets used to compute
+#'                       the p-values.
 #' @param min_barcodes Genes with fewer barcodes than this are not tested.
 #' @param fdr The False Discovery Rate threshold: only genes with an FDR
 #'            lower or equal to this value are returned. Use fdr = 1 to
 #'            return all the tested genes.
-#' @importFrom stats pbinom p.adjust median
+#' @param fdr_method How the FDR is computed: "BH" (Benjamini-Hochberg, the
+#'                   default) or "storey" (Benjamini-Hochberg multiplied by
+#'                   the estimated proportion of genes without effect, less
+#'                   conservative when many genes have an effect).
+#' @param seed An optional random seed, to make the permutations
+#'             reproducible. The random number state of the session is
+#'             restored afterwards.
+#' @importFrom stats median
 #' @return A tibble with one row for each hit and the columns Gene,
-#'         NBarcodes (number of barcodes), NBarcodesHit (number of barcodes
-#'         beyond the threshold), Log2FC (median log2 fold change of the
-#'         barcodes), PValue and FDR, ordered by p-value.
+#'         NBarcodes (number of barcodes), Score (mean or median score of the
+#'         barcodes), Log2FC (median log2 fold change of the barcodes),
+#'         PValue and FDR, ordered by p-value.
 #' @concept find
 #' @export
 #' @examples
@@ -43,54 +64,98 @@
 #'     control = "Time3", treatment = "TRT",
 #'     day = "Time3"
 #' )
-#' find_gene_zscore_hit(table, fdr = 1)
+#' find_gene_zscore_hit(table, fdr = 1, n_permutations = 1000, seed = 1)
 find_gene_zscore_hit <- function(table_treate_vs_control,
-    score = c("Zscore", "ZscoreRobust"), zscore_threshold = 2,
-    direction = c("Down", "Up"), min_barcodes = 3, fdr = 0.05) {
+    score = c("Zscore", "ZscoreRobust"), direction = c("Down", "Up"),
+    statistic = c("mean", "median"), control_genes = NULL,
+    n_permutations = 1e5, min_barcodes = 3, fdr = 0.05,
+    fdr_method = c("BH", "storey"), seed = NULL) {
     score <- match.arg(score)
     direction <- match.arg(direction)
+    statistic <- match.arg(statistic)
+    fdr_method <- match.arg(fdr_method)
     table <- table_treate_vs_control
     missing_columns <- setdiff(c("Gene", "Log2FC", score), colnames(table))
     if (length(missing_columns) > 0) {
         stop("Missing column(s): ", paste(missing_columns, collapse = ", "))
     }
-    if (!is.numeric(zscore_threshold) || length(zscore_threshold) != 1 ||
-        zscore_threshold <= 0) {
-        stop("zscore_threshold must be a single positive number.")
+    if (!is.numeric(n_permutations) || length(n_permutations) != 1 ||
+        n_permutations < 100) {
+        stop("n_permutations must be a single number of at least 100.")
     }
 
     table <- dplyr::ungroup(table)
     table <- dplyr::filter(table, !is.na(.data$Gene), !is.na(.data[[score]]))
-    values <- table[[score]]
-    if (direction == "Down") {
-        table$is_hit <- values < -zscore_threshold
+    table$Gene <- as.character(table$Gene)
+    if (is.null(control_genes)) {
+        reference <- table[[score]]
     } else {
-        table$is_hit <- values > zscore_threshold
+        is_control <- table$Gene %in% control_genes
+        reference <- table[[score]][is_control]
+        if (length(reference) < 20) {
+            stop("The control genes have fewer than 20 barcodes.")
+        }
+        table <- table[!is_control, ]
     }
-    # The proportion of barcodes beyond the threshold over all the barcodes
-    # is the probability of a barcode being beyond it under the null
-    proportion <- mean(table$is_hit)
 
-    hit_table <- table %>%
+    summarise_score <- if (statistic == "mean") mean else stats::median
+    gene_table <- table %>%
         dplyr::group_by(.data$Gene) %>%
         dplyr::summarise(
             NBarcodes = dplyr::n(),
-            NBarcodesHit = sum(.data$is_hit),
+            Score = summarise_score(.data[[score]]),
             Log2FC = stats::median(.data$Log2FC),
             .groups = "drop"
         ) %>%
-        dplyr::filter(.data$NBarcodes >= min_barcodes) %>%
-        dplyr::mutate(
-            PValue = stats::pbinom(.data$NBarcodesHit - 1, .data$NBarcodes,
-                proportion,
-                lower.tail = FALSE
-            ),
-            FDR = stats::p.adjust(.data$PValue, method = "BH")
-        ) %>%
+        dplyr::filter(.data$NBarcodes >= min_barcodes)
+
+    if (!is.null(seed)) {
+        restore_random_state()
+        set.seed(seed)
+    }
+    gene_table$PValue <- NA_real_
+    for (size in unique(gene_table$NBarcodes)) {
+        null_scores <- sort(random_set_scores(reference, size,
+            n_permutations, statistic))
+        genes <- gene_table$NBarcodes == size
+        scores <- gene_table$Score[genes]
+        if (direction == "Down") {
+            # number of random sets with a score lower or equal
+            extreme <- findInterval(scores, null_scores)
+        } else {
+            # number of random sets with a score higher or equal
+            extreme <- n_permutations -
+                findInterval(scores, null_scores, left.open = TRUE)
+        }
+        gene_table$PValue[genes] <- (extreme + 1) / (n_permutations + 1)
+    }
+    gene_table$FDR <- adjust_p(gene_table$PValue, fdr_method)
+
+    gene_table %>%
         dplyr::arrange(.data$PValue) %>%
         dplyr::filter(.data$FDR <= fdr)
+}
 
-    return(hit_table)
+#' @title Scores of Random Barcode Sets
+#' @description Internal function that computes the mean or the median of
+#'              n random sets of size barcodes drawn from the reference
+#'              scores.
+#' @param reference The scores of the reference barcodes.
+#' @param size The number of barcodes of each set.
+#' @param n The number of random sets.
+#' @param statistic "mean" or "median".
+#' @return A numeric vector of length n.
+#' @keywords internal
+random_set_scores <- function(reference, size, n, statistic) {
+    draws <- matrix(sample(reference, size * n, replace = TRUE), nrow = n)
+    if (statistic == "mean") {
+        return(rowMeans(draws))
+    }
+    # Row medians without a loop: sort the values of each row together
+    values <- as.vector(draws)
+    sorted <- matrix(values[order(rep(seq_len(n), times = size), values)],
+        nrow = size)
+    (sorted[floor((size + 1) / 2), ] + sorted[ceiling((size + 1) / 2), ]) / 2
 }
 
 #' @title Compute Barcode Statistics
@@ -193,10 +258,14 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #' @param fdr The False Discovery Rate threshold: only genes with an FDR
 #'            lower or equal to this value are returned. Use fdr = 1 to
 #'            return all the genes with the given direction.
+#' @param fdr_method How the FDR is computed: "BH" (Benjamini-Hochberg, the
+#'                   default) or "storey" (Benjamini-Hochberg multiplied by
+#'                   the estimated proportion of genes without effect).
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma camera
-#' @return A tibble with the columns of \code{\link[limma]{camera}} and
-#'         Log2FC, the median over the barcodes of the gene of the change
+#' @return A tibble with the columns of \code{\link[limma]{camera}} (with
+#'         one-sided PValue for the requested direction and FDR computed
+#'         from it) and Log2FC, the median over the barcodes of the gene of the change
 #'         of the treatment log2 fold change per time point (c).
 #' @concept find
 #' @export
@@ -209,8 +278,9 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #' )
 find_time_hit <- function(screenR_Object, treatment, control, days,
     baseline = NULL, number_barcode = 3, direction = c("Down", "Up"),
-    fdr = 0.05) {
+    fdr = 0.05, fdr_method = c("BH", "storey")) {
     direction <- match.arg(direction)
+    fdr_method <- match.arg(fdr_method)
     if (length(days) < 2) {
         stop("At least two time points are needed.")
     }
@@ -253,7 +323,7 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
         dplyr::tibble() %>%
         dplyr::left_join(effect, by = "Gene") %>%
         dplyr::mutate(Direction = factor(.data$Direction)) %>%
-        dplyr::filter(.data$Direction == direction) %>%
+        one_direction(direction, fdr_method) %>%
         dplyr::filter(.data$FDR <= fdr)
 
     return(time_hit)

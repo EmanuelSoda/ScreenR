@@ -177,14 +177,28 @@ contrasts$Time4
 FDR lower or equal to `fdr` (default 0.05) and report `Log2FC`, the median log2
 fold change of the barcodes of each gene. Previously CAMERA returned all the
 genes with the requested direction (about half of the genes) and ROAST used the
-raw p-value. ROAST uses random rotations: the `seed` argument makes the result
-reproducible. Here we use 999 rotations to keep the vignette fast; use more
-(the default is 9999) for a real analysis.
+raw p-value.
+
+The p-values are **one-sided** for the requested direction: camera and roast
+report two-sided p-values, which are twice too large for a test of depletion
+only. The FDR is computed from the one-sided p-values over all the genes, with
+the Benjamini-Hochberg method or, with `fdr_method = "storey"`, with the less
+conservative Storey method when many genes have an effect.
+
+ROAST uses random rotations: the `seed` argument makes the result
+reproducible, and its smallest p-value is 1 / (`nrot` + 1). `method = "fry"`
+uses `limma::fry()`, an exact and fast approximation of ROAST with continuous
+p-values. ROAST and fry are self-contained tests (does the gene change?),
+while CAMERA is competitive (does the gene change more than the others?) and
+becomes conservative when many genes have an effect.
 
 ```{r camera-roast}
 camera <- find_camera_hit(object, design, contrasts$Time4, fdr = 1)
 roast <- find_roast_hit(object, design, contrasts$Time4,
     nrot = 999, seed = 42, fdr = 1
+)
+fry <- find_roast_hit(object, design, contrasts$Time4,
+    method = "fry", fdr = 1
 )
 
 # Number of genes at different FDR levels
@@ -192,15 +206,18 @@ fdr_levels <- c(0.05, 0.1, 0.25)
 tibble(
     FDR = fdr_levels,
     CAMERA = vapply(fdr_levels, function(x) sum(camera$FDR <= x), 1L),
-    ROAST = vapply(fdr_levels, function(x) sum(roast$FDR <= x), 1L)
+    ROAST = vapply(fdr_levels, function(x) sum(roast$FDR <= x), 1L),
+    fry = vapply(fdr_levels, function(x) sum(fry$FDR <= x), 1L)
 )
 
 head(camera)
 ```
 
-The treatment effect in this example dataset is weak: at Time4 no gene reaches
-an FDR of 5%; at an FDR of 25% there are `r sum(camera$FDR <= 0.25)` genes with
-CAMERA and `r sum(roast$FDR <= 0.25)` with ROAST.
+The treatment effect in this example dataset is weak: at Time4 there are
+`r sum(camera$FDR <= 0.05)` genes at an FDR of 5% with CAMERA,
+`r sum(roast$FDR <= 0.05)` with ROAST and `r sum(fry$FDR <= 0.05)` with fry; at
+an FDR of 25% there are `r sum(camera$FDR <= 0.25)`, `r sum(roast$FDR <= 0.25)`
+and `r sum(fry$FDR <= 0.25)`.
 
 # A gene-level test for the Z-score
 
@@ -220,11 +237,17 @@ so about 17% of the genes without any effect are called hits.
 
 ## The test
 
-`find_gene_zscore_hit()` counts for each gene the barcodes with a Z-score below
-`-zscore_threshold` (default 2) and computes the probability of observing at
-least that many under the null hypothesis, using the proportion of such
-barcodes over the whole library. The p-values are corrected with the
-Benjamini-Hochberg method.
+`find_gene_zscore_hit()` computes for each gene a score, the mean (or, with
+`statistic = "median"`, the median) of the Z-scores of its barcodes, and
+compares it with the scores of many random sets of barcodes of the same size
+(`n_permutations`, default 100000). The p-value is the proportion of random
+sets with a score at least as extreme. This permutation test makes no
+assumption on the distribution of the Z-scores and gives continuous,
+well-calibrated p-values. The random barcodes are drawn from the whole library
+or, when the library has them, only from non-targeting controls
+(`control_genes`), which is the best reference because it does not contain the
+barcodes of the true hits. The p-values are corrected with the
+Benjamini-Hochberg (or Storey) method.
 
 The log2 fold changes are now computed with a pseudocount
 (`compute_metrics(pseudocount = 0.5)`, in counts per million), so barcodes
@@ -237,7 +260,7 @@ metrics <- compute_metrics(object,
 )
 range(metrics$Log2FC)
 
-gene_zscore <- find_gene_zscore_hit(metrics, fdr = 1)
+gene_zscore <- find_gene_zscore_hit(metrics, fdr = 1, seed = 1)
 head(gene_zscore)
 
 c(
@@ -260,7 +283,8 @@ barcode_statistics <- compute_barcode_statistics(
 )
 head(barcode_statistics)
 
-gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1)
+gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1,
+    seed = 1)
 head(gene_zscore_edger)
 ```
 

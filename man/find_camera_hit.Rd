@@ -12,7 +12,8 @@ find_camera_hit(
   thresh = 1e-04,
   lfc = 1,
   direction = "Down",
-  fdr = 0.05
+  fdr = 0.05,
+  fdr_method = c("BH", "storey")
 )
 }
 \arguments{
@@ -46,11 +47,24 @@ result. Filter the returned table on the FDR column instead.}
 \item{fdr}{The False Discovery Rate threshold: only genes with an FDR
 lower or equal to this value are returned. Use fdr = 1 to
 return all the genes with the given direction.}
+
+\item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
+default) or "storey" (Benjamini-Hochberg multiplied by
+the estimated proportion of genes without effect, less
+conservative when many genes have an effect).}
 }
 \value{
-A tibble with the hits found using the camera method. Besides
-        the columns returned by \code{\link[limma]{camera}} it contains
-        Log2FC, the median log2 fold change of the barcodes of the gene.
+A tibble with the hits found using the camera method, with the
+        columns of \code{\link[limma]{camera}} and Log2FC, the median log2
+        fold change of the barcodes of the gene. PValue is the one-sided
+        p-value for the requested direction (camera reports two-sided
+        p-values) and FDR is computed from it over all the genes.
+        CAMERA is a competitive test: it compares the barcodes of each
+        gene with all the other barcodes, so when many genes have an
+        effect it becomes conservative. \code{\link{find_roast_hit}} with
+        method = "fry" (self-contained) and
+        \code{\link{find_gene_zscore_hit}} with non-targeting controls
+        as reference do not have this limitation.
 }
 \description{
 This function implements the method by proposed by Wu and

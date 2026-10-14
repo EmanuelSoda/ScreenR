@@ -1,3 +1,32 @@
+# ScreenR 1.15.10
+
+## Calibrated p-values
+
+A benchmark on simulated screens showed that the p-values of some methods were
+too conservative (with no true hits, fewer than 5% of the genes had p < 0.05).
+
+* `find_camera_hit()`, `find_roast_hit()` and `find_time_hit()` now report
+  one-sided p-values for the requested direction. camera and roast report
+  two-sided p-values, which ScreenR used as they were: they were twice too
+  large. The FDR is computed from the one-sided p-values over all the genes.
+* `find_gene_zscore_hit()` is now a permutation test: the mean (or median,
+  `statistic`) Z-score of the barcodes of each gene is compared with random
+  sets of barcodes of the same size. The previous binomial test on the number
+  of barcodes below a threshold had only a few possible p-values and was very
+  conservative. The arguments `zscore_threshold` and the column `NBarcodesHit`
+  are replaced by `statistic`, `n_permutations`, `seed` and the column `Score`.
+* `find_gene_zscore_hit(control_genes = )` draws the random barcodes from
+  control genes (for example non-targeting shRNAs), the best reference since
+  it cannot contain true hits.
+* `find_roast_hit(method = "fry")` uses `limma::fry()`, an exact and fast
+  version of ROAST without the limit of 1 / (nrot + 1) on the p-values.
+* `fdr_method = "storey"` in `find_camera_hit()`, `find_roast_hit()`,
+  `find_time_hit()` and `find_gene_zscore_hit()` estimates the proportion of
+  genes without effect and is less conservative than Benjamini-Hochberg when
+  many genes have an effect.
+* The description of ROAST is corrected: it is a self-contained test, not a
+  competitive one.
+
 # ScreenR 1.15.9
 
 ## New dataset

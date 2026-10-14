@@ -163,3 +163,59 @@ gene_log2fc <- function(log2fc, genes) {
     medians <- tapply(log2fc[keep], genes[keep], stats::median)
     tibble::tibble(Gene = names(medians), Log2FC = as.numeric(medians))
 }
+
+#' @title One-sided P-values
+#' @description Internal function that converts the two-sided p-values of
+#'              \code{\link[limma]{camera}}, \code{\link[limma]{mroast}} and
+#'              \code{\link[limma]{fry}} (which come with the direction of
+#'              the change) into one-sided p-values for the requested
+#'              direction: p / 2 for the genes changing in that direction
+#'              and 1 - p / 2 for the others.
+#' @param p The two-sided p-values.
+#' @param observed The direction of each gene ("Up" or "Down").
+#' @param direction The requested direction.
+#' @return The one-sided p-values.
+#' @keywords internal
+one_sided_p <- function(p, observed, direction) {
+    ifelse(as.character(observed) == direction, p / 2, 1 - p / 2)
+}
+
+#' @title Adjust P-values
+#' @description Internal function that computes the False Discovery Rate
+#'              from the p-values, with the Benjamini-Hochberg method or with
+#'              the Storey method, which multiplies the Benjamini-Hochberg
+#'              values by the estimated proportion of genes without effect
+#'              (pi0, estimated as the proportion of p-values above 0.5
+#'              divided by 0.5). The Storey method is less conservative when
+#'              many genes have an effect.
+#' @param p The p-values.
+#' @param method "BH" or "storey".
+#' @return The adjusted p-values.
+#' @keywords internal
+adjust_p <- function(p, method = c("BH", "storey")) {
+    method <- match.arg(method)
+    adjusted <- stats::p.adjust(p, method = "BH")
+    if (method == "storey") {
+        pi0 <- min(1, mean(p > 0.5, na.rm = TRUE) / 0.5)
+        adjusted <- pmin(1, pi0 * adjusted)
+    }
+    adjusted
+}
+
+#' @title Gene Set Test Result in One Direction
+#' @description Internal function that turns the result of a gene set test
+#'              (camera, mroast or fry) into one-sided p-values for the
+#'              requested direction, computes the FDR over all the genes and
+#'              keeps the genes changing in that direction.
+#' @param result The data frame of the test, with the columns Gene,
+#'               Direction and PValue.
+#' @param direction The requested direction ("Down" or "Up").
+#' @param fdr_method "BH" or "storey".
+#' @return The result with one-sided PValue and FDR, only for the genes in
+#'         the requested direction.
+#' @keywords internal
+one_direction <- function(result, direction, fdr_method) {
+    result$PValue <- one_sided_p(result$PValue, result$Direction, direction)
+    result$FDR <- adjust_p(result$PValue, fdr_method)
+    result[as.character(result$Direction) == direction, ]
+}

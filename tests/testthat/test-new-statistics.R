@@ -112,31 +112,103 @@ test_that("normalize_data supports cpm, tmm and control barcodes", {
         control_barcodes = "nope"), "None")
 })
 
-test_that("find_gene_zscore_hit computes binomial p-values and FDR", {
-    # Gene A: 8 of 10 barcodes strongly depleted; genes B-J: no effect
+test_that("find_gene_zscore_hit computes permutation p-values and FDR", {
+    # Gene A: 8 of 10 barcodes strongly depleted; genes B-T: no effect
     set.seed(1)
     table <- tibble::tibble(
-        Gene = rep(LETTERS[1:10], each = 10),
-        Barcode = paste0("b", 1:100),
-        Zscore = c(rep(-3, 8), rep(0, 2), rnorm(90, sd = 0.5)),
-        Log2FC = c(rep(-2, 8), rep(0, 2), rnorm(90, sd = 0.2))
+        Gene = rep(LETTERS[1:20], each = 10),
+        Barcode = paste0("b", 1:200),
+        Zscore = c(rep(-3, 8), rep(0, 2), rnorm(190)),
+        Log2FC = c(rep(-2, 8), rep(0, 2), rnorm(190, sd = 0.2))
     )
-    result <- find_gene_zscore_hit(table, fdr = 1)
+    result <- find_gene_zscore_hit(table, fdr = 1, seed = 1,
+        n_permutations = 2000)
     expect_equal(result$Gene[1], "A")
-    expect_equal(result$NBarcodesHit[1], 8L)
-
-    proportion <- mean(table$Zscore < -2)
-    expect_equal(result$PValue[1],
-        pbinom(7, 10, proportion, lower.tail = FALSE))
+    expect_equal(result$Score[1], mean(c(rep(-3, 8), 0, 0)))
+    expect_equal(result$NBarcodes[1], 10L)
+    expect_true(all(result$PValue > 0 & result$PValue <= 1))
     expect_equal(result$FDR, p.adjust(result$PValue, "BH"))
+    # The smallest p-value is 1 / (n_permutations + 1)
+    expect_equal(result$PValue[1], 1 / 2001)
 
-    hits <- find_gene_zscore_hit(table, fdr = 0.05)
+    # Reproducible with a seed
+    expect_equal(
+        find_gene_zscore_hit(table, fdr = 1, seed = 1, n_permutations = 2000),
+        result
+    )
+
+    hits <- find_gene_zscore_hit(table, fdr = 0.05, seed = 1,
+        n_permutations = 2000)
     expect_equal(hits$Gene, "A")
+
+    # Enriched direction and median statistic
+    up <- find_gene_zscore_hit(table, direction = "Up", fdr = 1, seed = 1,
+        n_permutations = 2000)
+    expect_equal(up$Gene[nrow(up)], "A")
+    median_result <- find_gene_zscore_hit(table, statistic = "median",
+        fdr = 1, seed = 1, n_permutations = 2000)
+    expect_equal(median_result$Score[median_result$Gene == "A"], -3)
 
     expect_error(find_gene_zscore_hit(table, score = "ZscoreRobust"),
         "Missing")
-    expect_error(find_gene_zscore_hit(table, zscore_threshold = -2),
-        "positive")
+    expect_error(find_gene_zscore_hit(table, n_permutations = 10),
+        "at least 100")
+})
+
+test_that("find_gene_zscore_hit uses control genes as reference", {
+    set.seed(2)
+    table <- tibble::tibble(
+        Gene = c(rep(LETTERS[1:10], each = 10), rep("non-targeting", 200)),
+        Barcode = paste0("b", 1:300),
+        Zscore = c(rep(-3, 10), rnorm(290)),
+        Log2FC = 0
+    )
+    result <- find_gene_zscore_hit(table, control_genes = "non-targeting",
+        fdr = 1, seed = 1, n_permutations = 2000)
+    expect_false("non-targeting" %in% result$Gene)
+    expect_equal(result$Gene[1], "A")
+    expect_error(find_gene_zscore_hit(table, control_genes = "nope"),
+        "fewer than 20")
+})
+
+test_that("p-values are calibrated when no gene has an effect", {
+    set.seed(3)
+    table <- tibble::tibble(
+        Gene = rep(sprintf("G%03d", 1:400), each = 10),
+        Barcode = paste0("b", 1:4000),
+        Zscore = rnorm(4000),
+        Log2FC = 0
+    )
+    result <- find_gene_zscore_hit(table, fdr = 1, seed = 1,
+        n_permutations = 5000)
+    expect_lt(abs(mean(result$PValue < 0.1) - 0.1), 0.04)
+    expect_lt(abs(mean(result$PValue < 0.5) - 0.5), 0.08)
+})
+
+test_that("one-sided p-values and Storey FDR", {
+    expect_equal(ScreenR:::one_sided_p(c(0.2, 0.2), c("Down", "Up"), "Down"),
+        c(0.1, 0.9))
+    p <- c(0.001, 0.01, 0.02, 0.6, 0.7, 0.8, 0.9, 0.95)
+    expect_equal(ScreenR:::adjust_p(p, "BH"), p.adjust(p, "BH"))
+    pi0 <- mean(p > 0.5) / 0.5
+    expect_equal(ScreenR:::adjust_p(p, "storey"),
+        pmin(1, min(1, pi0) * p.adjust(p, "BH")))
+})
+
+test_that("find_roast_hit with fry gives continuous one-sided p-values", {
+    object <- get_object()
+    design <- create_design_matrix(object)
+    contrast <- create_contrast(design, "Treated", "Control")
+    fry <- suppressWarnings(find_roast_hit(object, design, contrast,
+        method = "fry", fdr = 1))
+    expect_true(all(fry$Direction == "Down"))
+    expect_true(all(fry$PValue <= 0.5))
+    camera <- suppressWarnings(find_camera_hit(object, design, contrast,
+        fdr = 1))
+    expect_true(all(camera$PValue <= 0.5))
+    storey <- suppressWarnings(find_camera_hit(object, design, contrast,
+        fdr = 1, fdr_method = "storey"))
+    expect_true(all(storey$FDR <= camera$FDR + 1e-12))
 })
 
 test_that("compute_barcode_statistics returns one row per barcode", {

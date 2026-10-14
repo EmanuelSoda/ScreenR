@@ -12,7 +12,8 @@ find_time_hit(
   baseline = NULL,
   number_barcode = 3,
   direction = c("Down", "Up"),
-  fdr = 0.05
+  fdr = 0.05,
+  fdr_method = c("BH", "storey")
 )
 }
 \arguments{
@@ -41,10 +42,15 @@ treated samples or "Up" for enriched genes.}
 \item{fdr}{The False Discovery Rate threshold: only genes with an FDR
 lower or equal to this value are returned. Use fdr = 1 to
 return all the genes with the given direction.}
+
+\item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
+default) or "storey" (Benjamini-Hochberg multiplied by
+the estimated proportion of genes without effect).}
 }
 \value{
-A tibble with the columns of \code{\link[limma]{camera}} and
-        Log2FC, the median over the barcodes of the gene of the change
+A tibble with the columns of \code{\link[limma]{camera}} (with
+        one-sided PValue for the requested direction and FDR computed
+        from it) and Log2FC, the median over the barcodes of the gene of the change
         of the treatment log2 fold change per time point (c).
 }
 \description{

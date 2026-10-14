@@ -7,10 +7,14 @@
 find_gene_zscore_hit(
   table_treate_vs_control,
   score = c("Zscore", "ZscoreRobust"),
-  zscore_threshold = 2,
   direction = c("Down", "Up"),
+  statistic = c("mean", "median"),
+  control_genes = NULL,
+  n_permutations = 1e+05,
   min_barcodes = 3,
-  fdr = 0.05
+  fdr = 0.05,
+  fdr_method = c("BH", "storey"),
+  seed = NULL
 )
 }
 \arguments{
@@ -23,37 +27,62 @@ score column, as returned by
 \item{score}{The column to use as score: "Zscore" (default) or
 "ZscoreRobust".}
 
-\item{zscore_threshold}{A positive number: a barcode counts as depleted
-(enriched) when its score is below (above)
--zscore_threshold (zscore_threshold).}
-
 \item{direction}{"Down" (default) for depleted genes or "Up" for
 enriched genes.}
+
+\item{statistic}{The gene score: "mean" (default) or "median" of the
+barcode scores. The median is less affected by single
+barcodes with a strong effect (for example off-target
+effects) but has less power.}
+
+\item{control_genes}{Optional names of control genes (as in the Gene
+column), for example "non-targeting". When given,
+the random barcodes of the permutations are drawn
+from their barcodes, and they are not tested.}
+
+\item{n_permutations}{The number of random barcode sets used to compute
+the p-values.}
 
 \item{min_barcodes}{Genes with fewer barcodes than this are not tested.}
 
 \item{fdr}{The False Discovery Rate threshold: only genes with an FDR
 lower or equal to this value are returned. Use fdr = 1 to
 return all the tested genes.}
+
+\item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
+default) or "storey" (Benjamini-Hochberg multiplied by
+the estimated proportion of genes without effect, less
+conservative when many genes have an effect).}
+
+\item{seed}{An optional random seed, to make the permutations
+reproducible. The random number state of the session is
+restored afterwards.}
 }
 \value{
 A tibble with one row for each hit and the columns Gene,
-        NBarcodes (number of barcodes), NBarcodesHit (number of barcodes
-        beyond the threshold), Log2FC (median log2 fold change of the
-        barcodes), PValue and FDR, ordered by p-value.
+        NBarcodes (number of barcodes), Score (mean or median score of the
+        barcodes), Log2FC (median log2 fold change of the barcodes),
+        PValue and FDR, ordered by p-value.
 }
 \description{
 Gene-level test for the Z-score method, with a p-value and a
              False Discovery Rate (FDR) for each gene.
-             For each gene it counts how many of its barcodes have a
-             score beyond the threshold (below -zscore_threshold for
-             direction "Down", above zscore_threshold for direction
-             "Up"). Under the null hypothesis that the gene has no effect
-             its barcodes behave like all the other barcodes, so the
-             number of barcodes beyond the threshold follows a binomial
-             distribution with the proportion observed over all the
-             barcodes. The one-sided binomial p-values are corrected
-             with the Benjamini-Hochberg method.
+             For each gene it computes a score, the mean (or the median)
+             of the scores of its barcodes. Under the null hypothesis that
+             the gene has no effect, its barcodes behave like barcodes
+             taken at random, so the p-value is computed by permutation:
+             the gene score is compared with the scores of n_permutations
+             random sets of barcodes of the same size. The p-values are
+             continuous (the smallest is 1 / (n_permutations + 1)) and do
+             not depend on the distribution of the barcode scores.
+
+             The random barcodes are drawn from all the barcodes or, when
+             control_genes is given, only from the barcodes of the
+             control genes (for example the non-targeting shRNAs). The
+             controls are the best reference: with all the barcodes, the
+             barcodes of the true hits are part of the reference, which
+             makes the test conservative when many genes have an effect.
+
              This replaces the rule of \code{\link{find_zscore_hit}}
              ("more than number_barcode barcodes below the median"),
              which flags about 17\% of the genes without any effect when
@@ -65,6 +94,6 @@ table <- compute_metrics(object,
     control = "Time3", treatment = "TRT",
     day = "Time3"
 )
-find_gene_zscore_hit(table, fdr = 1)
+find_gene_zscore_hit(table, fdr = 1, n_permutations = 1000, seed = 1)
 }
 \concept{find}
