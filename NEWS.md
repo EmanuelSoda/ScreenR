@@ -1,3 +1,15 @@
+# ScreenR 1.15.9
+
+## New dataset
+
+* `k562_count_table`, `k562_annotation_table` and `k562_reference_genes`: a
+  subset of a published genome-wide shRNA essentiality screen in K562 cells
+  (Morgens et al. 2016, Nat Biotechnol) with the reference core essential and
+  non-essential genes of Hart et al. Since the true hits (the essential genes)
+  are known, the dataset can be used to evaluate methods. The script that
+  builds it is in `inst/scripts` and the licenses of the original data in
+  `inst/LICENSES_data.txt`.
+
 # ScreenR 1.15.8
 
 ## The ScreenR object is now a SummarizedExperiment
