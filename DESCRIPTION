@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.13.1
+Version: 1.15.1
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
@@ -21,7 +21,7 @@ Description: ScreenR is a package suitable to perform hit identification in loss
             visualization modes for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Imports:
     methods (>= 4.0),
     rlang (>= 0.4),
@@ -32,11 +32,11 @@ Imports:
     scales (>= 1.1.1),
     ggvenn (>= 0.1.9),
     purrr (>= 0.3.4),
-    ggplot2 (>= 3.3),
+    ggplot2 (>= 3.5.2),
     stats,
     tidyr (>= 1.2),
     magrittr (>= 1.0),
-    dplyr (>= 1.0),
+    dplyr (>= 1.1.0),
     edgeR (>= 3.32),
     tidyselect (>= 1.1.2)
 Suggests: 
