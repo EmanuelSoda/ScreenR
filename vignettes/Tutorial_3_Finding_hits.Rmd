@@ -1,0 +1,467 @@
+---
+title: "Tutorial 3: Finding and validating hits"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Tutorial 3: Finding and validating hits}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5
+)
+```
+
+# About this tutorial
+
+A **hit** is a gene whose barcodes change consistently in the treated samples
+compared with the control samples. In a dropout (loss of function) screen the
+interesting hits are usually depleted: their knockdown kills the cells only in
+the presence of the treatment.
+
+This tutorial explains, step by step:
+
+1. how to tell ScreenR which samples to compare;
+2. the statistical methods to find hits and how to read their results;
+3. how to combine the methods;
+4. how to check the candidate hits before trusting them.
+
+It continues from the object of the previous tutorials:
+
+```{r object, message=FALSE}
+library(ScreenR)
+library(dplyr)
+library(ggplot2)
+
+data(count_table)
+data(annotation_table)
+
+counts <- count_table
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+counts <- filter(counts, Barcode != "*")
+groups <- factor(c(
+    "T1/T2", "T1/T2",
+    rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+object <- remove_all_zero_row(object)
+object <- normalize_data(object)
+object <- compute_data_table(object)
+```
+
+# Overview of the methods
+
+| Method | Function | Unit | Gives an FDR | Uses replicates |
+|--------|----------|------|--------------|-----------------|
+| Gene-level Z-score test | `find_gene_zscore_hit()` | Counts the strongly changed barcodes of each gene | Yes | With `compute_barcode_statistics()` |
+| CAMERA | `find_camera_hit()` | Tests whether the barcodes of a gene change more than the others | Yes | Yes |
+| ROAST | `find_roast_hit()` | Tests whether the barcodes of a gene change | Yes | Yes |
+| Time course | `find_time_hit()` | Tests whether the treatment effect changes over time | Yes | Yes |
+| Legacy Z-score rules | `find_zscore_hit()`, `find_robust_zscore_hit()` | Counts barcodes below the median Z-score | No | No |
+
+The **FDR** (false discovery rate) is the expected proportion of false hits
+among the genes you call hits: with an FDR cut off of 5%, about 1 in 20 of the
+reported genes is expected to be a false positive. Each method returns only the
+genes with `FDR <= fdr` (default 0.05); use `fdr = 1` to get all the genes and
+rank them yourself.
+
+# Step 1: which samples to compare
+
+CAMERA, ROAST and the replicate-aware statistics use a linear model, which
+needs two things:
+
+* a **design matrix**, which says which group each sample belongs to;
+* a **contrast**, which says which groups to compare.
+
+`create_design_matrix()` builds the design matrix from the groups of the
+object: one column per group, and a 1 in the column of the group of each
+sample. Group names that are not valid R names are changed (`T1/T2` becomes
+`T1.T2`).
+
+```{r design}
+design <- create_design_matrix(object)
+design
+```
+
+`create_contrast()` builds the comparison between groups by name: here
+treated against control at each time point.
+
+```{r contrasts}
+contrast_time3 <- create_contrast(design,
+    treatment = "Time3_TRT", control = "Time3_CTRL"
+)
+contrast_time4 <- create_contrast(design,
+    treatment = "Time4_TRT", control = "Time4_CTRL"
+)
+contrast_time4
+```
+
+The contrast gives +1 to the treated group and -1 to the control group: the
+result is the treated minus the control. With several groups on one side
+(for example `treatment = c("Time3_TRT", "Time4_TRT")`) their average is used.
+
+**Common mistake.** Do not build the design with `model.matrix(~ groups)` and
+rename its columns: the first group becomes the intercept and the columns are
+in alphabetical order, so the names end up on the wrong columns and the wrong
+samples are compared. `create_design_matrix()` and `create_contrast()` avoid
+this.
+
+The examples below compare treated and control samples at Time4.
+
+# Step 2: the Z-score method
+
+## Fold changes and Z-scores
+
+`compute_metrics()` averages the replicates of the treated and of the control
+samples of one time point and computes for each barcode:
+
+| Column | Meaning |
+|--------|---------|
+| `Treated`, `Control` | Mean normalized count |
+| `Log2FC` | log2((Treated + 0.5) / (Control + 0.5)): negative means depleted in the treated samples |
+| `Zscore` | Log2FC standardized with the mean and standard deviation of all barcodes |
+| `ZscoreRobust` | Log2FC standardized with the median and MAD, less sensitive to outliers |
+
+The `treatment` and `control` arguments are values of the Treatment column of
+`get_sample_table()`, and `day` a value of its Day column.
+
+```{r metrics}
+metrics_time4 <- compute_metrics(object,
+    control = "CTRL", treatment = "TRT", day = "Time4"
+)
+head(metrics_time4)
+```
+
+`plot_zscore_distribution()` compares the Z-scores of several time points: a
+treatment with an effect gives a longer left tail at the later time point.
+
+```{r zscore-distribution}
+metrics_time3 <- compute_metrics(object,
+    control = "CTRL", treatment = "TRT", day = "Time3"
+)
+plot_zscore_distribution(
+    list(Time3 = metrics_time3, Time4 = metrics_time4),
+    alpha = 0.6
+)
+```
+
+## Gene-level test
+
+`find_gene_zscore_hit()` counts for each gene how many of its barcodes have a
+Z-score below -2 (`zscore_threshold`, `direction = "Down"`) and computes how
+unlikely that number is if the gene had no effect, given how common such
+barcodes are in the whole library. The p-values are corrected for testing
+many genes (FDR).
+
+```{r gene-zscore}
+gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1)
+head(gene_zscore)
+```
+
+| Column | Meaning |
+|--------|---------|
+| `NBarcodes` | Number of barcodes of the gene |
+| `NBarcodesHit` | Barcodes beyond the threshold |
+| `Log2FC` | Median log2 fold change of the barcodes |
+| `PValue`, `FDR` | Significance |
+
+## Using the replicates
+
+`compute_metrics()` averages the replicates, so it cannot tell a consistent
+barcode from a noisy one. `compute_barcode_statistics()` tests each barcode
+with edgeR, using the variability between replicates, and returns a Z-score
+that can be used by `find_gene_zscore_hit()` in the same way. This is the
+recommended input.
+
+```{r barcode-statistics}
+barcode_statistics <- compute_barcode_statistics(
+    object, design, contrast_time4
+)
+head(barcode_statistics)
+
+gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1)
+head(gene_zscore_edger)
+```
+
+## Legacy rules
+
+`find_zscore_hit()` and `find_robust_zscore_hit()` call a gene a hit when more
+than `number_barcode` of its barcodes are below the median Z-score. They are
+kept for compatibility, but they do not give a p-value and many genes without
+an effect pass them by chance (about 17% with 10 barcodes and
+`number_barcode = 6`): prefer `find_gene_zscore_hit()`.
+
+```{r legacy}
+nrow(find_zscore_hit(metrics_time4, number_barcode = 6))
+```
+
+# Step 3: CAMERA and ROAST
+
+Both test the barcodes of each gene as a set, using edgeR on the raw counts.
+
+* **CAMERA** asks whether the barcodes of a gene change **more than the other
+  barcodes** (a competitive test), taking into account the correlation between
+  barcodes.
+* **ROAST** asks whether the barcodes of a gene **change at all** (a
+  self-contained test). It uses random rotations: set `seed` to get the same
+  result every time, and use many rotations (`nrot`, default 9999) for a real
+  analysis; here 999 keep the tutorial fast.
+
+`number_barcode` sets the minimum number of barcodes (more than
+`number_barcode`) a gene needs to be tested, and `direction` chooses depleted
+(`"Down"`) or enriched (`"Up"`) genes.
+
+```{r camera-roast}
+camera <- find_camera_hit(object, design, contrast_time4, fdr = 1)
+head(camera)
+
+roast <- find_roast_hit(object, design, contrast_time4,
+    nrot = 999, seed = 42, fdr = 1
+)
+head(select(roast, Gene, NGenes, PropDown, PropUp, Direction, PValue, FDR,
+    Log2FC))
+```
+
+| Column | Meaning |
+|--------|---------|
+| `NGenes` | Number of barcodes of the gene |
+| `Direction` | Down or Up |
+| `PValue`, `FDR` | Significance |
+| `PropDown`, `PropUp` (ROAST) | Proportion of barcodes going down or up |
+| `Log2FC` | Median log2 fold change of the barcodes |
+
+How many genes pass different FDR cut offs:
+
+```{r fdr-levels}
+fdr_levels <- c(0.05, 0.1, 0.25)
+tibble(
+    FDR = fdr_levels,
+    zscore = vapply(fdr_levels, function(x) sum(gene_zscore_edger$FDR <= x),
+        1L),
+    CAMERA = vapply(fdr_levels, function(x) sum(camera$FDR <= x), 1L),
+    ROAST = vapply(fdr_levels, function(x) sum(roast$FDR <= x), 1L)
+)
+```
+
+The effect of the treatment in this example is weak: no gene reaches an FDR of
+5%. In the rest of the tutorial we use 25% to illustrate the steps; in your
+own analysis, choose the cut off before looking at the results and report it.
+
+```{r alpha}
+alpha <- 0.25
+```
+
+# Step 4: the time course
+
+When the screen has several time points, `find_time_hit()` asks whether the
+treatment effect **changes over time**, with one model for all the time points
+instead of one analysis per time point. Untreated and treated samples each
+follow a line over time; the method tests the difference between the slopes.
+Early samples taken before the treatment can be added as `baseline`. The time
+points are given in order with `days` and are treated as equally spaced.
+
+```{r time}
+time_hit <- find_time_hit(object,
+    treatment = "TRT", control = "CTRL",
+    baseline = c("Time1", "Time2"),
+    days = c("Time1", "Time2", "Time3", "Time4"),
+    fdr = 1
+)
+head(time_hit)
+```
+
+Here `Log2FC` is the change of the treatment log2 fold change per time point:
+a negative value means that the depletion grows over time. In this dataset
+`r sum(time_hit$FDR <= 0.05)` genes have an FDR below 5%
+(`r paste(time_hit$Gene[time_hit$FDR <= 0.05], collapse = ", ")`): the time
+course model is more powerful here than the comparison at a single time
+point, because it uses all the samples.
+
+# Step 5: combining the methods
+
+The methods look at the data in different ways, so genes found by several of
+them are the most convincing. `plot_common_hit()` shows the overlap between
+the hits of three methods:
+
+```{r venn, fig.height = 5}
+plot_common_hit(
+    hit_zscore = filter(gene_zscore_edger, FDR <= alpha),
+    hit_camera = filter(camera, FDR <= alpha),
+    hit_roast = filter(roast, FDR <= alpha),
+    show_elements = FALSE, show_percentage = FALSE
+)
+```
+
+`find_common_hit()` returns the genes found by at least `common_in` methods:
+
+```{r common}
+common <- find_common_hit(
+    filter(gene_zscore_edger, FDR <= alpha),
+    filter(camera, FDR <= alpha),
+    filter(roast, FDR <= alpha),
+    common_in = 2
+)
+common
+```
+
+`summarise_hits()` puts the FDR of every method in one table. `NMethods` counts
+the methods in which the gene passes the cut off, and `MaxFDR` (the largest
+FDR) is a conservative score to rank the genes supported by all the methods.
+Pass the tables computed with `fdr = 1`, so that every gene has a value.
+
+```{r summary}
+summary <- summarise_hits(
+    list(
+        zscore = gene_zscore_edger, camera = camera,
+        roast = roast, time = time_hit
+    ),
+    fdr = alpha
+)
+head(summary, 10)
+```
+
+The column `Hit` is `TRUE` when the gene passes the cut off in every method
+(`MaxFDR <= alpha`). A note on interpretation: the combined list does not have
+a guaranteed false discovery rate, so treat it as a short list of candidates
+to validate. In this dataset `r sum(summary$Hit)` gene(s) pass all four
+methods at 25%, so below we check the genes found by at least two of the
+three methods of the Venn diagram.
+
+# Step 6: checking the candidates
+
+Statistics can produce false positives, so look at the data of each candidate.
+
+```{r candidates}
+candidates <- head(common, 2)
+candidates
+```
+
+## Trend over time
+
+`plot_trend()` shows the mean frequency of the barcodes of a gene in the chosen
+samples (`group_var` takes values of the Treatment column). A depleted hit goes
+down in the treated samples but not in the controls.
+
+```{r trend, fig.height = 4}
+plot_trend(object,
+    genes = candidates, group_var = c("Time1", "Time2", "TRT"),
+    nrow = 1, ncol = 2
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Treated samples")
+
+plot_trend(object,
+    genes = candidates, group_var = c("Time1", "Time2", "CTRL"),
+    nrow = 1, ncol = 2
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle("Control samples")
+```
+
+## Distribution of the barcodes
+
+`plot_boxplot()` shows the frequencies of all the barcodes of a gene in each
+sample:
+
+```{r boxplot, fig.height = 4}
+plot_boxplot(object,
+    genes = candidates[1], group_var = c("TRT", "CTRL"),
+    fill_var = "Treatment"
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Barcode by barcode
+
+A real hit should be supported by most of its barcodes, not by one or two.
+`plot_barcode_trend()` shows the log2 fold change of each barcode over the
+time points:
+
+```{r barcode-trend, fig.height = 4}
+plot_barcode_trend(
+    list(Time3 = metrics_time3, Time4 = metrics_time4),
+    genes = candidates[1]
+)
+```
+
+`plot_barcode_hit()` places the barcodes of a gene (vertical lines) on the
+log2 fold changes of all the barcodes: most lines on the left side means that
+the gene is depleted.
+
+```{r barcode-hit}
+invisible(plot_barcode_hit(object, design,
+    contrast = contrast_time4, gene = candidates[1]
+))
+```
+
+`find_discordant_barcodes()` lists the barcodes that behave very differently
+from the other barcodes of their gene, which may have off-target effects:
+
+```{r discordant}
+discordant <- find_discordant_barcodes(metrics_time4, threshold = 3)
+filter(discordant, Gene %in% candidates)
+```
+
+## Additional filters
+
+Two filters can remove candidates that are not convincing:
+
+* `filter_by_slope()` keeps the genes whose frequency decreases more over time
+  in the treated samples than in the control samples;
+* `filter_by_variance()` removes the genes whose barcodes disagree too much
+  (variance of the barcode log2 fold changes above `variance`).
+
+```{r filters}
+filter_by_slope(object,
+    genes = candidates,
+    group_var_treatment = c("Time1", "Time2", "TRT"),
+    group_var_control = c("Time1", "Time2", "CTRL")
+)
+
+filter_by_variance(object,
+    genes = candidates, matrix_model = design,
+    contrast = contrast_time4, variance = 0.5
+) %>%
+    distinct(Gene, Variance)
+```
+
+# Summary
+
+| Step | What to do |
+|------|------------|
+| 1 | `create_design_matrix()` and `create_contrast()` for the comparison |
+| 2 | `compute_barcode_statistics()` + `find_gene_zscore_hit()` |
+| 3 | `find_camera_hit()` and `find_roast_hit()` (with `seed`) |
+| 4 | `find_time_hit()` if there are several time points |
+| 5 | `plot_common_hit()` and `summarise_hits()` |
+| 6 | `plot_trend()`, `plot_boxplot()`, `plot_barcode_trend()`, `plot_barcode_hit()`, `find_discordant_barcodes()` |
+
+Choose the FDR cut off before the analysis, report it, and validate the
+candidates experimentally.
+
+```{r session}
+sessionInfo()
+```

@@ -47,6 +47,15 @@ Here, ScreenR allows the user to carry out a preliminary quality check of the
 experiment, visually inspect the data and finally identify the most significant
 hits of the experiment through a series of plots and cross-statistical analyses.
 
+This vignette gives an overview of the whole analysis. Each step is explained
+in detail in three tutorials:
+
+1. **Getting your data into ScreenR**: the input tables, the creation of the
+   ScreenR object and the preparation of the data.
+2. **Quality control**: how to check that the screen worked.
+3. **Finding and validating hits**: the statistical methods, how to combine
+   them and how to check the candidate genes.
+
 # Installation {#installation}
 
 ## Bioconductor

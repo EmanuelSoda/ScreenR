@@ -1,0 +1,259 @@
+---
+title: "Tutorial 2: Quality control"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Tutorial 2: Quality control}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5
+)
+```
+
+# About this tutorial
+
+Before looking for hits, check that the screen worked: that every sample was
+sequenced deeply enough, that the library was not lost, and that replicates
+agree. A problem found here (a failed replicate, a bottleneck) would otherwise
+produce false hits later.
+
+This is the second of three tutorials. It starts from the object built in
+**1. Getting your data into ScreenR**:
+
+```{r object, message=FALSE}
+library(ScreenR)
+library(dplyr)
+library(ggplot2)
+
+data(count_table)
+data(annotation_table)
+
+counts <- count_table
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+counts <- filter(counts, Barcode != "*")
+groups <- factor(c(
+    "T1/T2", "T1/T2",
+    rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+object <- remove_all_zero_row(object)
+object <- normalize_data(object)
+object <- compute_data_table(object)
+```
+
+Many plots accept a `palette`, one color per sample. Here replicates of the
+same condition share a color:
+
+```{r palette}
+palette <- c(
+    "#66c2a5", "#fc8d62", rep("#8da0cb", 3), rep("#e78ac3", 3),
+    rep("#a6d854", 3), rep("#ffd92f", 3)
+)
+```
+
+| Step | Question | Functions |
+|------|----------|-----------|
+| 1 | Was each sample sequenced deeply enough? | `mapped_reads()`, `plot_mapped_reads()` |
+| 2 | Are the counts distributed similarly in all samples? | `plot_mapped_reads_distribution()` |
+| 3 | How many barcodes were lost? | `barcode_lost()`, `plot_barcode_lost()`, `plot_barcode_lost_for_gene()` |
+| 4 | Do replicates agree? | `plot_replicate_correlation()` |
+| 5 | Is the library still evenly represented? | `compute_gini()`, `plot_gini()` |
+| 6 | Do samples cluster by condition? | `plot_mds()`, `plot_explained_variance()` |
+| 7 | Which normalization should I use? | `normalize_data()` |
+
+# Step 1: sequencing depth
+
+The number of reads assigned to barcodes in each sample.
+
+```{r mapped-reads}
+mapped_reads(object)
+plot_mapped_reads(object, palette = palette) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**What to look for.** All samples should have a similar number of reads, and
+enough for the size of the library: a common rule of thumb is at least a few
+hundred reads per barcode on average (here about 5300 barcodes, so about
+1.5 million reads or more). A sample with far fewer reads than its replicates
+is less reliable. Different depths are corrected by the normalization; very low
+depth is not. Here every sample has between about 7 and 12 million reads;
+`Time3_TRT_A` has fewer reads than its replicates but still more than 1000 per
+barcode, which is enough.
+
+# Step 2: distribution of the counts
+
+```{r distribution}
+plot_mapped_reads_distribution(object, palette = palette,
+    alpha = 0.8, type = "boxplot"
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+plot_mapped_reads_distribution(object, palette = palette,
+    alpha = 0.4, type = "density"
+)
+```
+
+**What to look for.** The distributions should have a similar shape. A sample
+whose distribution is much wider or shifted may have had a technical problem
+(for example during PCR amplification).
+
+# Step 3: lost barcodes
+
+A barcode is lost in a sample when it has zero reads. Some loss over time is
+expected in a dropout screen; a large loss means that the library was not
+represented well enough (too few cells per barcode).
+
+```{r barcode-lost}
+barcode_lost(object)
+plot_barcode_lost(object, palette = palette) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+To see which genes lost barcodes in some samples:
+
+```{r barcode-lost-gene, fig.height = 6}
+plot_barcode_lost_for_gene(object, samples = c("Time3_TRT_A", "Time4_TRT_A"))
+```
+
+**What to look for.** A few lost barcodes per sample are normal. A gene that
+lost most of its barcodes in all samples, including the controls, was not
+represented well and its results are unreliable.
+
+# Step 4: agreement between replicates
+
+`plot_replicate_correlation()` shows the correlation of the log2 counts per
+million between every pair of samples.
+
+```{r correlation, fig.height = 6}
+plot_replicate_correlation(object)
+```
+
+**What to look for.** Replicates of the same condition (the blocks along the
+diagonal) should be the most correlated samples. A replicate with a low
+correlation to its partners may be an outlier: check it in the next plots
+before deciding whether to remove it.
+
+# Step 5: evenness of the library
+
+The Gini index measures how unevenly the reads are spread over the barcodes:
+0 means that every barcode has the same number of reads, 1 that a single
+barcode has all of them.
+
+```{r gini}
+compute_gini(object)
+plot_gini(object, palette = palette)
+```
+
+**What to look for.** In a dropout screen the Gini index usually increases
+slowly over time, as some barcodes are depleted. A sudden jump, or a large
+difference between replicates, suggests a bottleneck (too few cells were kept
+at some step). Here it increases from about 0.42 to 0.48: a normal trend.
+
+# Step 6: overall structure of the samples
+
+The multidimensional scaling (MDS) plot places similar samples close to each
+other. By default the points are labelled by sample:
+
+```{r mds}
+plot_mds(object)
+```
+
+The `groups` argument colors the samples by any variable, for example by
+treatment or by time point:
+
+```{r mds-groups}
+samples <- get_sample_table(object)
+
+plot_mds(object, groups = factor(samples$Treatment))
+plot_mds(object, groups = factor(samples$Day))
+```
+
+`plot_explained_variance()` shows how much of the variability each dimension
+explains (`cumulative = TRUE` for the cumulative proportion).
+
+```{r explained-variance}
+plot_explained_variance(object)
+plot_explained_variance(object, cumulative = TRUE)
+```
+
+**What to look for.** Replicates should be close to each other. Samples usually
+separate first by time point (cells change as they grow) and then by
+treatment. A replicate far from its group is a candidate outlier.
+
+In this dataset the samples separate by time point along the first dimension,
+as expected. Two treated replicates at Time4, `Time4_TRT_B` and
+`Time4_TRT_C`, are far from the other samples along the second dimension;
+`Time4_TRT_B` also has the most lost barcodes and the lowest correlations with
+the other samples. They are worth a closer look. Removing a replicate should
+be justified by a technical reason; otherwise keep it, and use the
+replicate-aware methods of tutorial 3, which take this variability into
+account.
+
+# Step 7: choosing the normalization
+
+`normalize_data()` offers three methods:
+
+| Method | Divides the counts of each sample by | Use it when |
+|--------|--------------------------------------|-------------|
+| `"cpm"` (default) | Its total number of reads | Most screens |
+| `"tmm"` | Its total number of reads, corrected with the edgeR TMM factors | Strong hits deplete a large part of the library, so the total is biased |
+| `"control"` | The reads of control barcodes (e.g. non-targeting shRNAs) | The library has control barcodes that are not affected by the treatment |
+
+A quick way to decide between `"cpm"` and `"tmm"` is to compare them: if they
+agree, the default is fine.
+
+```{r normalization}
+object_tmm <- normalize_data(object, method = "tmm")
+ratio <- colMeans(as.matrix(object_tmm@normalized_count_table[, -1])) /
+    colMeans(as.matrix(object@normalized_count_table[, -1]))
+tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
+```
+
+Here the two methods differ by at most about 2%, so we keep the default. With
+control barcodes the call would be
+`normalize_data(object, method = "control", control_barcodes = my_controls)`,
+where `my_controls` is the vector of their identifiers.
+
+The normalization affects the frequencies, the Z-scores and the plots. The
+edgeR-based methods of tutorial 3 (CAMERA, ROAST) always model the raw counts
+and do their own normalization. After changing the normalization, run
+`compute_data_table()` again.
+
+# Checklist
+
+* [ ] Every sample has enough reads, and replicates have similar depths.
+* [ ] Few barcodes were lost, especially in the control samples.
+* [ ] Replicates are highly correlated and close in the MDS plot.
+* [ ] The Gini index increases smoothly, with similar values for replicates.
+* [ ] You chose a normalization and re-computed the data table if you changed
+  it.
+
+The next tutorial, **3. Finding and validating hits**, uses this object.
+
+```{r session}
+sessionInfo()
+```

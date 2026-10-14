@@ -1,3 +1,10 @@
+# ScreenR 1.15.7
+
+## Documentation
+
+* Three new step-by-step tutorials: "1. Getting your data into ScreenR",
+  "2. Quality control" and "3. Finding and validating hits".
+
 # ScreenR 1.15.6
 
 ## Bug fixes (found by an independent review of 1.15.4)

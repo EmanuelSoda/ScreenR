@@ -322,7 +322,7 @@ plot_common_hit(
     hit_zscore = filter(gene_zscore_edger, FDR <= alpha),
     hit_camera = filter(camera, FDR <= alpha),
     hit_roast = filter(roast, FDR <= alpha),
-    show_elements = TRUE, show_percentage = FALSE
+    show_elements = FALSE, show_percentage = FALSE
 )
 ```
 
@@ -348,9 +348,9 @@ summary <- summarise_hits(
 head(summary, 10)
 ```
 
-In this dataset the genes with `MaxFDR <= 0.25` are
-`r if (any(summary$Hit)) paste(summary$Gene[summary$Hit], collapse = ", ") else "none"`, and the top gene of the
-time course model is `r time_hit$Gene[1]`.
+In this dataset the genes with `MaxFDR <= 0.25` are:
+`r if (any(summary$Hit)) paste(summary$Gene[summary$Hit], collapse = ", ") else "none"`.
+The top gene of the time course model is `r time_hit$Gene[1]`.
 
 # Discordant barcodes
 
