@@ -15,8 +15,8 @@ package: ScreenR
 vignette: >
   %\VignetteIndexEntry{ScreenR Example Analysis}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::knitr}
   
+  %\VignetteEngine{knitr::knitr}
 date: "`r Sys.Date()`"
 editor_options: 
   chunk_output_type: console
