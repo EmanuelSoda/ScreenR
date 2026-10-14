@@ -1,8 +1,8 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 0.99.55
-Date: 2023-09-05 
+Version: 1.15.1
+Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
                   comment = c(ORICD = "0000-0002-2301-6465")),
@@ -32,20 +32,20 @@ Imports:
     scales (>= 1.1.1),
     ggvenn (>= 0.1.9),
     purrr (>= 0.3.4),
-    ggplot2 (>= 3.3),
+    ggplot2 (>= 3.5.2),
     stats,
     tidyr (>= 1.2),
     magrittr (>= 1.0),
-    dplyr (>= 1.0),
+    dplyr (>= 1.1.0),
     edgeR (>= 3.32),
     tidyselect (>= 1.1.2)
 Suggests: 
     rmarkdown (>= 2.11),
+    markdown,
     knitr (>= 1.37),
     testthat (>= 3.0.0),
     BiocStyle (>= 2.22.0),
-    covr (>= 3.5),
-    tibble
+    covr (>= 3.5)
 Config/testthat/edition: 3
 Depends: 
     R (>= 4.3)

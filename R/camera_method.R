@@ -25,8 +25,6 @@
 #' @param direction String containing the direction of the variation,
 #'                  "Down" for the down regulation "Up" for the up regulation.
 #' @importFrom edgeR estimateDisp
-#' @importFrom edgeR glmFit
-#' @importFrom edgeR glmLRT
 #' @importFrom tibble rownames_to_column
 #' @importFrom limma camera
 #' @importFrom purrr map_lgl
@@ -50,11 +48,9 @@ find_camera_hit <- function(screenR_Object, matrix_model,
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- ScreenR::create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
-    fit <- edgeR::glmFit(xglm, matrix_model)
-    lrt <- edgeR::glmLRT(fit, coef = seq(1, length(colnames(matrix_model))))
 
     camera_hit <- compute_camera(
-        xglm = xglm, lrt = lrt, DGEList = DGEList,
+        xglm = xglm, DGEList = DGEList,
         matrix_model = matrix_model, contrast = contrast,
         number_barcode = number_barcode, thresh = thresh,
         lfc = lfc
@@ -73,19 +69,13 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @description This internal function computes the actual hits using  the
 #'              camera method.
 #' @param xglm object created with \code{\link[edgeR]{estimateDisp}}
-#' @param lrt object created with \code{\link[edgeR]{glmFit}}
 #' @param DGEList edgeR object
 #' @inheritDotParams find_camera_hit lfc number_barcode thresh
 #'                   contrast matrix_model
-#' @importFrom edgeR topTags
 #' @return The list of hits found by the camera method
 #' @keywords internal
-compute_camera <- function(xglm, lrt, DGEList, matrix_model, contrast,
+compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     number_barcode = 3, thresh = 1e-04, lfc = 1) {
-    # Take all the Tags in descending order
-    top <- edgeR::topTags(lrt, n = Inf)
-    topids <- top$table[top$table$FDR < thresh & top$table$logFC <= lfc, 1]
-
     # Select only the first column
     genesymbols <- DGEList$genes[, 1]
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)

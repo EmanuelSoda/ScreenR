@@ -12,12 +12,13 @@
 #' @export
 #' @concept find
 #' @examples
+#' \dontrun{
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
 #'     control = "TRT", treatment = "Time3",
 #'     day = "Time3"
 #' )
-#'
+#' 
 #' # For the the median
 #' result <- find_zscore_hit(table, number_barcode = 6)
 #' head(result)
@@ -25,6 +26,7 @@
 #' # For the mean
 #' result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 #' head(result)
+#' }
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
     metric = "median") {
     if (metric == "median") {
@@ -33,7 +35,8 @@ find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
             # the Z-scores
             dplyr::filter(.data$Zscore < median(.data$Zscore)) %>%
             dplyr::group_by(.data$Gene) %>%
-            dplyr::summarise(numberOfBarcode = n()) %>%
+            #dplyr::summarise(numberOfBarcode = n()) %>%
+            dplyr::reframe(numberOfBarcode = n()) %>% 
             # Take only the gene that have 6 barcode under the median of the
             # Z-scores
             dplyr::filter(.data$numberOfBarcode > number_barcode)
@@ -44,7 +47,8 @@ find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
             dplyr::filter(.data$Zscore < mean(.data$Zscore)) %>%
             dplyr::group_by(.data$Gene) %>%
             dplyr::mutate(numberOfBarcode = n()) %>%
-            dplyr::summarise(.data$numberOfBarcode) %>%
+            #dplyr::summarise(.data$numberOfBarcode) %>%
+            dplyr::reframe(numberOfBarcode = n()) %>% 
             # Take only the gene that have 6 barcode under the median of the
             # Z-scores
             dplyr::filter(.data$numberOfBarcode > number_barcode)

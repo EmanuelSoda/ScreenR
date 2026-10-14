@@ -49,7 +49,7 @@ create_test_object <- function() {
 test_that("plot_mds NULL", {
     object <- create_test_object()
     plot <- suppressWarnings(plot_mds(screenR_Object = object))
-    expect_equal(class(plot)[1], "gg")
+    expect_true(ggplot2::is_ggplot(plot))
 })
 
 test_that("plot_mds", {
@@ -58,7 +58,7 @@ test_that("plot_mds", {
         screenR_Object = object,
         groups = c(rep("T1/T2", 2), rep("Time3", 6), rep("Time4", 6))
     ))
-    expect_equal(class(plot)[1], "gg")
+    expect_true(ggplot2::is_ggplot(plot))
 })
 
 
@@ -67,7 +67,7 @@ test_that("plot_explained_variance", {
     object <- create_test_object()
 
     plot <- plot_explained_variance(object, cumulative = FALSE)
-    expect_equal(class(plot)[[1]], "gg")
+    expect_true(ggplot2::is_ggplot(plot))
 })
 
 test_that("plot_explained_variance CUM", {
@@ -78,5 +78,5 @@ test_that("plot_explained_variance CUM", {
         screenR_Object = object,
         cumulative = TRUE
     )
-    expect_equal(class(plot)[[1]], "gg")
+    expect_true(ggplot2::is_ggplot(plot))
 })
