@@ -33,6 +33,8 @@
   are colored by their log2 fold change, and a new panel (`show_log2fc`,
   TRUE by default) shows the log2 fold change of all the barcodes with those
   of the gene.
+* `plot_reference_separation()` no longer applies `theme_bw()`: set the
+  theme with `ggplot2::theme_set()` or by adding it to the plot.
 
 # ScreenR 1.15.14
 
