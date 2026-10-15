@@ -91,6 +91,8 @@ After installation, loading the package is simple as :
 ``` r
 
 library(ScreenR)
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 #> 
 #> Welcome to ScreenR
 #> --------------------------
@@ -697,7 +699,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ScreenR_1.15.14  tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
+#> [1] ScreenR_1.15.15  tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
 #> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):

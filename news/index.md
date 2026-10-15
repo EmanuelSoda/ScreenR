@@ -1,5 +1,21 @@
 # Changelog
 
+## ScreenR 1.15.15
+
+- New tutorial “Tutorial 4: CRISPR-Cas9 screens”: installing
+  CRISPRcleanR, describing a time-course dropout screen, choosing the
+  sgRNA thresholds, checking the screen with reference genes, correcting
+  copy-number bias with
+  [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md),
+  finding the hits with the non-essential genes as reference, and
+  positive-selection screens.
+- New datasets `hap1_count_table` and `hap1_annotation_table`: a subset
+  of the HAP1 TKOv3 CRISPR-Cas9 knockout screen of Hart et al. (2017),
+  with the genomic position of each sgRNA.
+- [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md)
+  documents that CRISPRcleanR must be run on the complete genome-wide
+  library: on a subset of genes enriched in hits it removes real signal.
+
 ## ScreenR 1.15.14
 
 ### CRISPR screens

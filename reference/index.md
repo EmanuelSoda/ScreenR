@@ -179,7 +179,8 @@ not control the false discovery rate; use the tests above to call hits.
 
 ## Datasets
 
-Example screen and a published K562 screen with known essential genes.
+Example screen, a published K562 shRNA screen and a HAP1 CRISPR-Cas9
+screen with known essential genes.
 
 - [`count_table`](https://emanuelsoda.github.io/ScreenR/reference/count_table.md)
   : Example count table
@@ -192,6 +193,10 @@ Example screen and a published K562 screen with known essential genes.
 - [`k562_reference_genes`](https://emanuelsoda.github.io/ScreenR/reference/k562_reference_genes.md)
   : K562 shRNA essentiality screen: reference essential and
   non-essential genes
+- [`hap1_count_table`](https://emanuelsoda.github.io/ScreenR/reference/hap1_count_table.md)
+  : HAP1 CRISPR-Cas9 knockout screen: count table
+- [`hap1_annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/hap1_annotation_table.md)
+  : HAP1 CRISPR-Cas9 knockout screen: annotation table
 
 ## Package
 

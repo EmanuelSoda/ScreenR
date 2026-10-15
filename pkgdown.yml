@@ -8,7 +8,8 @@ articles:
   Tutorial_1_Creating_the_object: Tutorial_1_Creating_the_object.html
   Tutorial_2_Quality_control: Tutorial_2_Quality_control.html
   Tutorial_3_Finding_hits: Tutorial_3_Finding_hits.html
-last_built: 2026-10-15T09:59Z
+  Tutorial_4_CRISPR_screens: Tutorial_4_CRISPR_screens.html
+last_built: 2026-10-15T12:30Z
 urls:
   reference: https://emanuelsoda.github.io/ScreenR/reference
   article: https://emanuelsoda.github.io/ScreenR/articles

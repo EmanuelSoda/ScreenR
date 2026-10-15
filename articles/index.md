@@ -10,6 +10,8 @@ Step-by-step guides, from the count table to the list of hits.
   control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.md):
 - [Tutorial 3: Finding and validating
   hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.md):
+- [Tutorial 4: CRISPR-Cas9
+  screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.md):
 
 ### Articles
 

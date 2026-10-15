@@ -8,6 +8,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/index.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/authors.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/index.html</loc></url>
@@ -63,6 +64,8 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_replicates.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/hap1_annotation_table.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/hap1_count_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/hart_reference_genes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/index.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/internal_accessors.html</loc></url>

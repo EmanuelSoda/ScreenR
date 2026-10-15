@@ -16,13 +16,13 @@ Source:
 [`DESCRIPTION`](https://github.com/EmanuelSoda/ScreenR/blob/master/DESCRIPTION)
 
 Soda E, Ceccacci E (2026). *ScreenR: Package to Perform High Throughput
-Biological Screening*. R package version 1.15.14,
+Biological Screening*. R package version 1.15.15,
 <https://emanuelsoda.github.io/ScreenR/>.
 
     @Manual{,
       title = {ScreenR: Package to Perform High Throughput Biological Screening},
       author = {Emanuel Michele Soda and Elena Ceccacci},
       year = {2026},
-      note = {R package version 1.15.14},
+      note = {R package version 1.15.15},
       url = {https://emanuelsoda.github.io/ScreenR/},
     }

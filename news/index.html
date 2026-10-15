@@ -14,7 +14,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/Tutorial_1_Creating_the_object.html">1. Getting your data into ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Tutorial_2_Quality_control.html">2. Quality control</a></li>
     <li><a class="dropdown-item" href="../articles/Tutorial_3_Finding_hits.html">3. Finding and validating hits</a></li>
+    <li><a class="dropdown-item" href="../articles/Tutorial_4_CRISPR_screens.html">4. CRISPR-Cas9 screens</a></li>
   </ul></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -51,6 +52,13 @@
       <small>Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.15.15" id="screenr-11515">ScreenR 1.15.15<a class="anchor" aria-label="anchor" href="#screenr-11515"></a></h2>
+<ul><li>New tutorial “Tutorial 4: CRISPR-Cas9 screens”: installing CRISPRcleanR, describing a time-course dropout screen, choosing the sgRNA thresholds, checking the screen with reference genes, correcting copy-number bias with <code><a href="../reference/correct_crispr_bias.html">correct_crispr_bias()</a></code>, finding the hits with the non-essential genes as reference, and positive-selection screens.</li>
+<li>New datasets <code>hap1_count_table</code> and <code>hap1_annotation_table</code>: a subset of the HAP1 TKOv3 CRISPR-Cas9 knockout screen of Hart et al. (2017), with the genomic position of each sgRNA.</li>
+<li>
+<code><a href="../reference/correct_crispr_bias.html">correct_crispr_bias()</a></code> documents that CRISPRcleanR must be run on the complete genome-wide library: on a subset of genes enriched in hits it removes real signal.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.15.14" id="screenr-11514">ScreenR 1.15.14<a class="anchor" aria-label="anchor" href="#screenr-11514"></a></h2>
 <div class="section level3">
