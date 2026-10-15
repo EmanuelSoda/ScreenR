@@ -32,6 +32,8 @@
 find_robust_zscore_hit <- function(table_treate_vs_control,
     number_barcode = 6, direction = c("Down", "Up")) {
     direction <- match.arg(direction)
+    check_barcode_threshold(table(table_treate_vs_control$Gene),
+        number_barcode, strict = TRUE, argument = "number_barcode")
     zscore <- table_treate_vs_control$ZscoreRobust
     keep <- if (direction == "Down") {
         zscore < median(zscore)

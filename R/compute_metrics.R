@@ -88,8 +88,8 @@ compute_metrics <- function(screenR_Object, control,
             .groups = "drop"
         ) %>%
         tidyr::pivot_wider(
-            names_from = .data$Group,
-            values_from = .data$Mean
+            names_from = "Group",
+            values_from = "Mean"
         ) %>%
         dplyr::filter(.data$Control > 0 | .data$Treated > 0) %>%
         dplyr::mutate(Log2FC = log2((.data$Treated + pseudocount) /

@@ -33,7 +33,7 @@ compute_data_table <- function(screenR_Object) {
     sample_table <- get_sample_table(screenR_Object)
     sample_table <- sample_table[, c("Sample", "Day", "Treatment")]
     table <- data %>%
-        tidyr::pivot_longer(!.data$Barcode,
+        tidyr::pivot_longer(!"Barcode",
             names_to = "Sample",
             values_to = "Frequency"
         ) %>%

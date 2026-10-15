@@ -122,7 +122,10 @@ find_gene_zscore_hit <- function(table_treate_vs_control,
             Score = summarise_score(.data[[score]]),
             Log2FC = stats::median(.data$Log2FC),
             .groups = "drop"
-        ) %>%
+        )
+    check_barcode_threshold(gene_table$NBarcodes, min_barcodes,
+        strict = FALSE, argument = "min_barcodes")
+    gene_table <- gene_table %>%
         dplyr::filter(.data$NBarcodes >= min_barcodes)
 
     if (!is.null(seed)) {

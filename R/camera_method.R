@@ -137,6 +137,8 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
     gene_symbols <- as.character(gene_symbols)
     un_genesymbols <- unique(gene_symbols)
     un_genesymbols <- un_genesymbols[!is.na(un_genesymbols)]
+    check_barcode_threshold(table(gene_symbols[!is.na(gene_symbols)]),
+        number_barcode, strict = TRUE, argument = "number_barcode")
 
     gene_symbol_list <- lapply(
         X = un_genesymbols, FUN = select_number_barcode,

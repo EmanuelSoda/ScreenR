@@ -60,7 +60,7 @@ navbar:
         href: articles/Analysis_Example.html
       - text: Statistics in ScreenR
         href: articles/Improved_Statistics.html
-      - text: Benchmark against MAGeCK
+      - text: Benchmark against MAGeCK and other tools
         href: articles/Benchmark_MAGeCK.html
     github:
       icon: fab fa-github fa-lg
@@ -152,6 +152,20 @@ reference:
   - filter_by_slope
   - filter_by_variance
   - compute_slope
+
+- title: CRISPR screens and reference genes
+  desc: >
+    Choose the barcode thresholds for the library, check the screen with
+    essential and non-essential reference genes, and correct CRISPR-Cas9
+    copy-number bias with CRISPRcleanR.
+  contents:
+  - barcodes_per_gene
+  - compute_screen_quality
+  - plot_reference_separation
+  - scale_by_reference
+  - correct_crispr_bias
+  - crisprcleanr_available
+  - hart_reference_genes
 
 - title: Legacy hit rules
   desc: >

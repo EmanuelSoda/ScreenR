@@ -33,10 +33,11 @@ Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 - **Every hit comes with a p-value and a false discovery rate.** The
   gene-level tests are calibrated: in screens without any real effect
   about 5% of the genes have p \< 0.05, as they should.
-- **As accurate as MAGeCK, and faster.** On simulated screens and on a
-  published K562 essentiality screen, ScreenR ranks the true hits as
-  well as or better than MAGeCK, keeps the FDR at the nominal level and
-  runs in seconds, about 200 times faster than MAGeCK MLE
+- **Benchmarked against the main tools.** On simulated screens and on
+  published shRNA (K562) and CRISPR-Cas9 (HAP1) essentiality screens,
+  ScreenR ranks the true hits as well as the best of MAGeCK, BAGEL2,
+  gscreend and plain edgeR/limma workflows, keeps the FDR below the
+  nominal level and runs in seconds
   ([benchmark](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)).
 - **Several complementary methods, one table.** A permutation test on
   the barcode Z-scores, limma CAMERA, ROAST and FRY, and an edgeR model
@@ -50,6 +51,11 @@ Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 - **Works with your files as they are.** Any column names, sample
   descriptions from a table, helpful messages when something does not
   match.
+- **shRNA and CRISPR.** Works with shRNA and CRISPR-Cas9 libraries,
+  checks the screen with essential and non-essential reference genes
+  (`compute_screen_quality()`), and corrects CRISPR copy-number bias
+  through [CRISPRcleanR](https://github.com/francescojm/CRISPRcleanR)
+  (`correct_crispr_bias()`).
 - **Bioconductor native.** The ScreenR object is a
   `SummarizedExperiment`, so it works with the rest of the Bioconductor
   ecosystem.
@@ -168,8 +174,8 @@ plot_boxplot(object,
 ## Which method should I use?
 
 Every method looks for **depleted** genes by default; set
-`direction = "Up"` to find **enriched** genes (for example in a resistance
-screen).
+`direction = "Up"` to find **enriched** genes (for example in a
+resistance screen).
 
 | Question                                               | Function                                | Notes                                                                                                          |
 |--------------------------------------------------------|-----------------------------------------|----------------------------------------------------------------------------------------------------------------|
@@ -179,28 +185,29 @@ screen).
 | Does the effect change over time?                      | `find_time_hit()`                       | edgeR model of the whole time course.                                                                          |
 | Which genes are supported by several methods?          | `summarise_hits()`, `plot_common_hit()` | One table with the FDR of every method.                                                                        |
 
-## ScreenR and MAGeCK
+## How ScreenR compares
 
 <img src="man/figures/README-benchmark-1.png" width="100%" />
 
-ScreenR ranks the true hits as well as or better than MAGeCK in most
-scenarios and keeps the false discovery rate below the nominal level. On
-the published K562 essentiality screen included in the package
-(`k562_count_table`) the ScreenR Z-score test finds as many essential
-genes as MAGeCK RRA with fewer false calls. The [benchmark
+In the simulations ScreenR ranks the true hits as well as the best tools
+and keeps the false discovery rate below the nominal level; at a fixed
+FDR it is more conservative than MAGeCK MLE and BAGEL2, which find more
+hits but exceed the nominal FDR in some scenarios. On the published K562
+shRNA screen included in the package (`k562_count_table`) the ScreenR
+Z-score test is comparable to MAGeCK RRA and BAGEL2. The [benchmark
 article](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)
 has all the details and reruns the ScreenR side of the comparison.
 
 ## Learn more
 
-|                                                                                                                                  |                                                                       |
-|----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object |
-| [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html)                    | Sequencing depth, library evenness, replicates, normalization         |
-| [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html)           | All the hit-finding methods, combining them and checking the hits     |
-| [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html)                                 | How the tests work and why                                            |
-| [Benchmark against MAGeCK](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)                                 | Simulations and a real screen with known hits                         |
-| [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html)                                                 | Every function, grouped by analysis step                              |
+|                                                                                                                                  |                                                                                                                   |
+|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object                                             |
+| [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html)                    | Sequencing depth, library evenness, replicates, normalization                                                     |
+| [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html)           | All the hit-finding methods, combining them and checking the hits                                                 |
+| [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html)                                 | How the tests work and why                                                                                        |
+| [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)                 | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
+| [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html)                                                 | Every function, grouped by analysis step                                                                          |
 
 ## Getting help
 
@@ -216,7 +223,7 @@ print(citation("ScreenR"), bibtex = FALSE)
 To cite package 'ScreenR' in publications use:
 
   Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
-  Throughput Biological Screening_. R package version 1.15.11,
+  Throughput Biological Screening_. R package version 1.15.14,
   <https://emanuelsoda.github.io/ScreenR/>.
 ```
 

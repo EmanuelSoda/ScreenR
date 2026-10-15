@@ -12,3 +12,9 @@ simulation_before_1.15.10.csv: the same for the first benchmark
 mageck_k562.csv: MAGeCK RRA and MLE gene p-values and FDR (depletion)
   for k562_count_table (Plasmid vs T14).
 mageck_screenr_dataset.csv: the same for count_table (Time4 TRT vs CTRL).
+simulation_competitors.csv: as simulation.csv for BAGEL2, gscreend and
+  two plain edgeR/limma workflows (benchmark/competitors).
+competitors_k562.csv: their gene results on k562_count_table.
+crispr_hap1.csv: gene results of every method on the HAP1 TKOv3
+  CRISPR-Cas9 screen (Hart et al. 2017, T18 vs T0), restricted to the
+  CEGv2/NEGv1 reference genes (benchmark/crispr/hap1_crispr.R).

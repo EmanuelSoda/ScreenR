@@ -43,6 +43,8 @@ find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
     metric = c("median", "mean"), direction = c("Down", "Up")) {
     metric <- match.arg(metric)
     direction <- match.arg(direction)
+    check_barcode_threshold(table(table_treate_vs_control$Gene),
+        number_barcode, strict = TRUE, argument = "number_barcode")
     zscore <- table_treate_vs_control$Zscore
     threshold <- if (metric == "median") median(zscore) else mean(zscore)
     # Keep the barcodes on the requested side of the threshold, then the genes

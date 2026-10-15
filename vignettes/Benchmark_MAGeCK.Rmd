@@ -1,5 +1,5 @@
 ---
-title: "Benchmark against MAGeCK"
+title: "Benchmark against MAGeCK and other tools"
 output:
     BiocStyle::html_document:
         toc_float: true
@@ -14,7 +14,7 @@ author:
   email: elena.ceccacci@ieo.it
 package: ScreenR
 vignette: >
-  %\VignetteIndexEntry{Benchmark against MAGeCK}
+  %\VignetteIndexEntry{Benchmark against MAGeCK and other tools}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::knitr}
 date: "`r Sys.Date()`"
@@ -28,23 +28,48 @@ knitr::opts_chunk$set(
 
 # About this vignette
 
-MAGeCK (Li et al. 2014, 2015) is the most used tool to find hits in pooled
-screens. This vignette compares the hit-finding methods of ScreenR with MAGeCK
-RRA and MAGeCK MLE on
+This vignette compares the hit-finding methods of ScreenR with other tools
+for pooled screens:
+
+* MAGeCK RRA and MAGeCK MLE (Li et al. 2014, 2015), the most used tools;
+* BAGEL2 (Kim and Hart 2021), a supervised classifier of essential genes;
+* gscreend (Imkeller et al. 2020), a Bioconductor package for CRISPR screens;
+* two plain edgeR/limma workflows: edgeR quasi-likelihood test on the counts
+  summed by gene, and limma-voom with camera on the barcodes of each gene (as
+  proposed for shRNA and CRISPR screens by Dai et al. 2014).
+
+The comparisons use
 
 1. simulated screens, where the true hits are known exactly;
 2. a published K562 shRNA essentiality screen (`k562_count_table`), where
    the core essential genes are the true hits and the non-essential genes the
    true negatives;
-3. the ScreenR example dataset (`count_table`), which has no ground truth.
+3. a published HAP1 CRISPR-Cas9 essentiality screen, evaluated in the same
+   way;
+4. the ScreenR example dataset (`count_table`), which has no ground truth.
 
-MAGeCK is a Python program and cannot run while this vignette is built, so its
-results (MAGeCK 0.5.9.5) and the simulation results are precomputed and
-distributed in `inst/extdata/benchmark`. The ScreenR methods on the K562
-screen are run here, so this vignette also shows how to compare ScreenR with
-MAGeCK on your own data. The scripts that produced the precomputed results
-are in the `benchmark` folder of the
+The other tools are Python programs or packages that are not dependencies of
+ScreenR, so their results (MAGeCK 0.5.9.5, BAGEL2, gscreend 1.17.2, edgeR
+4.0, limma 3.58) and the simulation results are precomputed and distributed
+in `inst/extdata/benchmark`. The ScreenR methods on the K562 screen are run
+here, so this vignette also shows how to compare ScreenR with other tools on
+your own data. The scripts that produced the precomputed results are in the
+`benchmark` folder of the
 [GitHub repository](https://github.com/EmanuelSoda/ScreenR).
+
+Some differences in how the tools were run matter for the interpretation:
+
+* **BAGEL2 is supervised**: it needs genes known to be essential and
+  non-essential to train its classifier. In the simulations it was trained
+  on half of the true hits and half of the genes without effect, and on the
+  real screens on the reference genes used for the evaluation (with 10-fold
+  cross-validation, its standard use). It reports Bayes factors, not
+  p-values, so it has no null calibration and its calls use its own FDR
+  estimate.
+* **MAGeCK MLE** p-values were computed from its Wald statistic
+  (`pnorm(z)`, Benjamini-Hochberg), not from its permutation FDR.
+* **gscreend** accepts a single reference sample, so the control replicates
+  were summed. It is deprecated in Bioconductor 3.19.
 
 ```{r packages, message=FALSE}
 library(ScreenR)
@@ -56,27 +81,37 @@ benchmark_dir <- system.file("extdata", "benchmark", package = "ScreenR")
 
 ```{r labels}
 labels <- c(
+    ScreenR_Zscore_mean = "ScreenR Z-score (mean)",
+    ScreenR_Zscore_edgeR = "ScreenR Z-score (edgeR)",
+    ScreenR_CAMERA = "ScreenR CAMERA",
+    ScreenR_FRY = "ScreenR FRY",
+    ScreenR_ROAST = "ScreenR ROAST",
+    ScreenR_Zscore_median = "ScreenR Z-score (median)",
+    ScreenR_Zscore_controls = "ScreenR Z-score (controls)",
+    ScreenR_CAMERA_storey = "ScreenR CAMERA (Storey)",
+    ScreenR_legacy_rule = "ScreenR legacy rule",
     MAGeCK_RRA = "MAGeCK RRA",
     MAGeCK_RRA_controls = "MAGeCK RRA (controls)",
     MAGeCK_MLE = "MAGeCK MLE",
-    ScreenR_CAMERA = "CAMERA",
-    ScreenR_CAMERA_storey = "CAMERA (Storey)",
-    ScreenR_ROAST = "ROAST",
-    ScreenR_FRY = "FRY",
-    ScreenR_Zscore_mean = "Z-score (mean)",
-    ScreenR_Zscore_median = "Z-score (median)",
-    ScreenR_Zscore_controls = "Z-score (controls)",
-    ScreenR_Zscore_edgeR = "Z-score (edgeR)",
-    ScreenR_legacy_rule = "Legacy rule"
+    BAGEL2 = "BAGEL2",
+    gscreend = "gscreend",
+    edgeR_gene_QL = "edgeR gene-level QL",
+    limma_voom_camera = "limma-voom + camera"
 )
 colours <- c(
-    "MAGeCK RRA" = "#B2182B", "MAGeCK RRA (controls)" = "#EF8A62",
-    "MAGeCK MLE" = "#67001F", "CAMERA" = "#2166AC",
-    "CAMERA (Storey)" = "#67A9CF", "ROAST" = "#1B7837", "FRY" = "#7FBF7B",
-    "Z-score (mean)" = "#762A83", "Z-score (median)" = "#C2A5CF",
-    "Z-score (controls)" = "#DE77AE", "Z-score (edgeR)" = "#8C510A",
-    "Legacy rule" = "grey50"
+    "ScreenR Z-score (mean)" = "#1F5F55", "ScreenR Z-score (edgeR)" = "#93B5A3",
+    "ScreenR CAMERA" = "#2E8B7A", "ScreenR FRY" = "#C8DCD0",
+    "ScreenR ROAST" = "#7FBF7B", "ScreenR Z-score (median)" = "#4D9078",
+    "ScreenR Z-score (controls)" = "#B8E0D2",
+    "ScreenR CAMERA (Storey)" = "#5FA89A", "ScreenR legacy rule" = "grey50",
+    "MAGeCK RRA" = "#E3A894", "MAGeCK RRA (controls)" = "#F2CDBF",
+    "MAGeCK MLE" = "#B5523A", "BAGEL2" = "#5B4E9E", "gscreend" = "#D4A72C",
+    "edgeR gene-level QL" = "#4C78A8", "limma-voom + camera" = "#9ECAE9"
 )
+# The methods shown in the figures (all methods are in the tables)
+main <- c("ScreenR_Zscore_mean", "ScreenR_Zscore_edgeR", "ScreenR_CAMERA",
+    "ScreenR_FRY", "MAGeCK_RRA", "MAGeCK_MLE", "BAGEL2", "gscreend",
+    "edgeR_gene_QL", "limma_voom_camera")
 scenarios <- c(
     S0_null = "No hits", S1_baseline = "Baseline",
     S2_weak_effect = "Weak effect", S3_two_replicates = "2 replicates",
@@ -104,15 +139,19 @@ scenarios were simulated, each with 5 random seeds:
 | Noisy | dispersion 0.2 (four times more biological variability) |
 | Off-target | 3% of the shRNAs depleted whatever gene they target |
 
-The methods compared are MAGeCK RRA, MAGeCK RRA with the non-targeting
-shRNAs as controls (`--control-sgrna`), MAGeCK MLE and the ScreenR methods:
-`find_camera_hit()` (with Benjamini-Hochberg or Storey FDR),
-`find_roast_hit()` (ROAST and FRY), `find_gene_zscore_hit()` (mean, median,
-with the non-targeting shRNAs as reference and on the statistics of
-`compute_barcode_statistics()`) and the legacy rule of `find_zscore_hit()`.
+The ScreenR methods are `find_camera_hit()` (with Benjamini-Hochberg or
+Storey FDR), `find_roast_hit()` (ROAST and FRY), `find_gene_zscore_hit()`
+(mean, median, with the non-targeting shRNAs as reference and on the
+statistics of `compute_barcode_statistics()`) and the legacy rule of
+`find_zscore_hit()`. The other tools are MAGeCK RRA (also with the
+non-targeting shRNAs as controls, `--control-sgrna`), MAGeCK MLE, BAGEL2,
+gscreend, the edgeR gene-level test and limma-voom with camera.
 
 ```{r load-simulation}
-simulation <- read.csv(file.path(benchmark_dir, "simulation.csv")) %>%
+simulation <- bind_rows(
+    read.csv(file.path(benchmark_dir, "simulation.csv")),
+    read.csv(file.path(benchmark_dir, "simulation_competitors.csv"))
+) %>%
     mutate(
         Method = factor(labels[method], levels = labels),
         Scenario = factor(scenarios[scenario], levels = scenarios)
@@ -134,7 +173,8 @@ p < 0.05.
 
 ```{r null-calibration, fig.height = 4}
 simulation %>%
-    filter(scenario == "S0_null", alpha == 0.05, method != "ScreenR_legacy_rule") %>%
+    filter(scenario == "S0_null", alpha == 0.05, !is.na(null_p_below),
+        method != "ScreenR_legacy_rule") %>%
     group_by(Method) %>%
     summarise(fraction = mean(null_p_below), se = sd(null_p_below) / sqrt(n())) %>%
     ggplot(aes(fraction, Method, colour = Method)) +
@@ -146,7 +186,7 @@ simulation %>%
     theme_bw()
 ```
 
-All the methods are close to 5%. The legacy rule, which has no p-value,
+All the methods are close to 5% (BAGEL2 has no p-values). The legacy rule, which has no p-value,
 called on average
 `r round(mean(filter(simulation, scenario == "S0_null", method == "ScreenR_legacy_rule", alpha == 0.05)$n_called))`
 genes in these screens, all of them false.
@@ -158,7 +198,7 @@ proportion) is at or below the nominal level, the dashed line.
 
 ```{r fdr-control, fig.height = 5}
 simulation %>%
-    filter(scenario != "S0_null", method != "ScreenR_legacy_rule") %>%
+    filter(scenario != "S0_null", method %in% main) %>%
     group_by(Method, Scenario, alpha) %>%
     summarise(FDR = mean(FDP), .groups = "drop") %>%
     ggplot(aes(alpha, FDR, colour = Method)) +
@@ -183,18 +223,20 @@ knitr::kable(fdr_table, digits = 3,
     caption = "Observed FDR at a nominal FDR of 5% (mean over 5 seeds).")
 ```
 
-CAMERA and the Z-score tests stay well below the nominal FDR in every
-scenario. MAGeCK MLE exceeds it with off-target effects, MAGeCK RRA with the
-non-targeting controls in every scenario, and the legacy rule has about 50%
-false hits.
+The ScreenR CAMERA and Z-score tests, limma-voom with camera and MAGeCK RRA
+stay below the nominal FDR in every scenario. BAGEL2 is slightly above it in
+most scenarios; MAGeCK MLE, gscreend and the edgeR gene-level test exceed it
+with off-target effects (gscreend up to about 20%); MAGeCK RRA with the
+non-targeting controls exceeds it in every scenario, and the legacy rule has
+about 50% false hits.
 
 ## How many hits are found?
 
 ```{r power, fig.height = 5}
 simulation %>%
-    filter(scenario != "S0_null", alpha == 0.05) %>%
+    filter(scenario != "S0_null", alpha == 0.05, method %in% main) %>%
     group_by(Method, Scenario) %>%
-    summarise(TPR = mean(TPR), se = sd(TPR) / sqrt(n()), .groups = "drop") %>%
+    summarise(TPR = mean(TPR), .groups = "drop") %>%
     ggplot(aes(Scenario, TPR, fill = Method)) +
     geom_col(position = position_dodge(0.9)) +
     scale_fill_manual(values = colours) +
@@ -210,10 +252,14 @@ measures how well the true hits are ranked first, whatever the threshold:
 
 ```{r auprc, fig.height = 5}
 simulation %>%
-    filter(scenario != "S0_null", alpha == 0.05, !is.na(AUPRC)) %>%
+    filter(scenario != "S0_null", alpha == 0.05, !is.na(AUPRC),
+        method %in% main) %>%
+    group_by(Method, Scenario) %>%
+    summarise(se = sd(AUPRC) / sqrt(n()), AUPRC = mean(AUPRC),
+        .groups = "drop") %>%
     ggplot(aes(Scenario, AUPRC, colour = Method)) +
-    geom_boxplot(position = position_dodge(0.85), width = 0.75,
-        outlier.size = 0.5) +
+    geom_pointrange(aes(ymin = AUPRC - se, ymax = AUPRC + se),
+        position = position_dodge(0.7), size = 0.3) +
     scale_colour_manual(values = colours) +
     labs(x = NULL, y = "Area under the precision-recall curve",
         colour = NULL) +
@@ -231,12 +277,20 @@ simulation %>%
         caption = "Mean over the five scenarios with hits, at 5% FDR.")
 ```
 
-CAMERA and the Z-score tests rank the hits as well as or better than MAGeCK
-MLE in most scenarios and are about 200 times faster. At the same nominal
-FDR they are more conservative: MAGeCK MLE finds more hits when the effects
-are weak or the data noisy, but it does not control the FDR with off-target
-effects. ROAST and FRY test each gene on its own barcodes, so they have
-little power with two replicates or noisy data.
+In these simulations the ScreenR CAMERA and Z-score tests rank the hits as
+well as the best tools (limma-voom with camera, BAGEL2 and MAGeCK MLE) and
+better than MAGeCK RRA, gscreend and the edgeR gene-level test, which lose
+most with weak effects or noisy data. At the same nominal FDR they are more
+conservative: BAGEL2 and MAGeCK MLE find more hits, but BAGEL2 is trained on
+known hits and both exceed the nominal FDR in some scenarios. ROAST and FRY
+test each gene on its own barcodes, so they have little power with two
+replicates or noisy data. limma-voom with camera behaves almost exactly like
+the ScreenR CAMERA test: they are the same kind of test, which ScreenR
+wraps in a complete workflow.
+
+The simulations use a simple model (independent barcodes, the same number of
+barcodes for every gene, depletion only), so they show how the methods
+behave rather than how they rank on every real screen.
 
 ## Before and after the calibration of ScreenR 1.15.10
 
@@ -320,15 +374,18 @@ results <- list(
 results <- lapply(results, function(x) select(x, Gene, PValue, FDR))
 ```
 
-## Adding the MAGeCK results
+## Adding the results of the other tools
 
-MAGeCK was run on the same counts (`mageck test` for RRA and `mageck mle`
-with a design with intercept and treatment); for MAGeCK MLE the depletion
-p-value is computed from the Wald statistic.
+The other tools were run on the same counts: `mageck test` for RRA, `mageck
+mle` with a design with intercept and treatment, BAGEL2 trained on the
+reference genes, gscreend and the two edgeR/limma workflows.
 
-```{r k562-mageck}
-mageck <- read.csv(file.path(benchmark_dir, "mageck_k562.csv"))
-results <- c(split(select(mageck, -method), mageck$method), results)
+```{r k562-others}
+others <- bind_rows(
+    read.csv(file.path(benchmark_dir, "mageck_k562.csv")),
+    read.csv(file.path(benchmark_dir, "competitors_k562.csv"))
+)
+results <- c(split(select(others, -method), others$method), results)
 names(results)
 ```
 
@@ -355,7 +412,8 @@ evaluate <- function(result, alpha = 0.05) {
 }
 k562_evaluation <- bind_rows(lapply(results, evaluate), .id = "method") %>%
     mutate(Method = labels[method]) %>%
-    select(Method, everything(), -method)
+    select(Method, everything(), -method) %>%
+    arrange(desc(AUPRC))
 knitr::kable(k562_evaluation, digits = 3,
     caption = "K562: reference genes called at 5% FDR.")
 ```
@@ -369,6 +427,7 @@ precision_recall <- bind_rows(lapply(results, function(result) {
     tibble(recall = cumsum(hit) / sum(hit),
         precision = cumsum(hit) / seq_along(hit))
 }), .id = "method") %>%
+    filter(method %in% main) %>%
     mutate(Method = factor(labels[method], levels = labels))
 ggplot(precision_recall, aes(recall, precision, colour = Method)) +
     geom_line() +
@@ -378,11 +437,13 @@ ggplot(precision_recall, aes(recall, precision, colour = Method)) +
     theme_bw()
 ```
 
-The Z-score test (mean) and CAMERA call about as many essential genes as
-MAGeCK RRA with few non-essential genes, and the Z-score test ranks the genes
-as well as MAGeCK RRA and better than MAGeCK MLE. MAGeCK MLE finds more
-essential genes but also many non-essential ones (MAGeCK MLE skipped the
-genes with more than about 40 shRNAs, which count as not called here).
+The tools that control the FDR call between 310 and 350 of the 681 essential
+genes with few non-essential genes, and their rankings are close (AUPRC 0.82
+to 0.86, gscreend best): on this screen the ScreenR Z-score test is
+comparable to MAGeCK RRA and BAGEL2. MAGeCK MLE and the edgeR gene-level test
+find more essential genes but also many non-essential ones (MAGeCK MLE
+skipped the genes with more than about 40 shRNAs, which count as not called
+here).
 
 Two ScreenR results show the limits of some methods:
 
@@ -407,6 +468,83 @@ metrics %>%
 
 The non-targeting shRNAs (the reference) are shifted to the right of the
 non-essential genes, so they are not a good model of a gene without effect.
+
+## Checking the quality of the screen
+
+The same reference genes measure the quality of a dropout screen before
+looking at any hit. `compute_screen_quality()` reports how well the essential
+genes are separated from the non-essential ones, and
+`plot_reference_separation()` shows it; `hart_reference_genes` has the full
+lists of Hart et al., usable with any human screen.
+
+```{r k562-quality, fig.height = 3.5}
+data(hart_reference_genes)
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+compute_screen_quality(metrics, essential, nonessential)
+plot_reference_separation(metrics, essential, nonessential)
+```
+
+`scale_by_reference()` rescales the fold changes so that the non-essential
+genes are at 0 and the essential genes at -1, which makes screens of
+different strength comparable.
+
+# CRISPR-Cas9 screen
+
+ScreenR also works with CRISPR-Cas9 screens: sgRNAs play the role of the
+shRNAs. As a test we used the HAP1 screen with the TKOv3 library (Hart et al.
+2017; the example data of BAGEL2): about 71,000 sgRNAs, 4 for each of 18,000
+genes, a T0 sample and three replicates after 18 days. The analysis compares
+day 18 with T0 and is evaluated on the core essential and non-essential genes
+of `hart_reference_genes`. The results of every method, restricted to the
+reference genes, are precomputed.
+
+```{r crispr}
+hap1 <- read.csv(file.path(benchmark_dir, "crispr_hap1.csv"))
+hap1_results <- split(select(hap1, -method), hap1$method)
+evaluate_crispr <- function(result, alpha = 0.05) {
+    merged <- left_join(hart_reference_genes, result, by = "Gene") %>%
+        filter(!is.na(PValue)) %>%
+        arrange(Gene)
+    essential <- merged$Class == "core essential"
+    called <- merged$FDR <= alpha
+    hit <- essential[order(merged$PValue)]
+    precision <- cumsum(hit) / seq_along(hit)
+    tibble(
+        `Essential called` = sum(called & essential),
+        `Non-essential called` = sum(called & !essential),
+        Recall = mean(called[essential]),
+        AUPRC = sum(precision[hit]) / sum(hit)
+    )
+}
+bind_rows(lapply(hap1_results, evaluate_crispr), .id = "method") %>%
+    mutate(Method = labels[method]) %>%
+    select(Method, everything(), -method) %>%
+    arrange(desc(AUPRC)) %>%
+    knitr::kable(digits = 3,
+        caption = "HAP1 CRISPR screen: reference genes called at 5% FDR.")
+```
+
+This screen has strong effects and every method ranks the essential genes
+almost perfectly. The ScreenR tests make no false calls but, with only 4
+sgRNAs per gene, are more conservative at 5% FDR than gscreend and BAGEL2
+(which is trained on the reference genes). As with the K562 plasmid, FRY
+finds nothing with a single T0 sample.
+
+Three functions help with CRISPR screens:
+
+* `barcodes_per_gene()` counts the sgRNAs of each gene. The hit-finding
+  functions warn when their threshold on the number of barcodes
+  (`number_barcode`, `min_barcodes`) excludes many genes, which happens with
+  the shRNA-oriented defaults and 4 sgRNAs per gene, and suggest a value.
+* `compute_screen_quality()` and `scale_by_reference()`, shown above.
+* `correct_crispr_bias()` corrects the copy-number and proximity bias of
+  CRISPR-Cas9 screens (sgRNAs cutting amplified regions deplete the cells
+  whatever their target) by calling the CRISPRcleanR package (Iorio et al.
+  2018), which must be installed separately because it is not on CRAN or
+  Bioconductor (`BiocManager::install("francescojm/CRISPRcleanR")`).
 
 # ScreenR example dataset
 
@@ -478,13 +616,18 @@ with MAGeCK RRA.
 # Recommendations
 
 * Use `find_gene_zscore_hit()` or `find_camera_hit()` to call hits: they
-  control the FDR, rank the hits as well as MAGeCK and run in seconds. Use
-  `statistic = "median"` when off-target effects are a concern.
+  controlled the FDR in every scenario, ranked the hits as well as the best
+  tools and run in seconds. They are conservative at a fixed FDR, so look at
+  the ranking (and validate the top genes) when few genes pass the cut-off.
+  Use `statistic = "median"` when off-target effects are a concern.
 * Use `find_roast_hit()` (ROAST or FRY) only with replicates in both groups.
 * Keep the default reference of `find_gene_zscore_hit()` unless the control
   genes are shown to behave like genes without effect.
 * Do not use the legacy rule of `find_zscore_hit()` to call hits: about half
   of its hits are false.
+* For dropout screens, check the screen with `compute_screen_quality()`
+  first; for CRISPR-Cas9 screens, consider correcting copy-number bias with
+  `correct_crispr_bias()`.
 
 # Literature
 
@@ -499,6 +642,20 @@ with MAGeCK RRA.
 * Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014). Measuring
   error rates in genomic perturbation screens: gold standards for human
   functional genomics. Mol Syst Biol 10:733.
+* Hart T, Tong AHY, Chan K et al. (2017). Evaluation and design of
+  genome-wide CRISPR/SpCas9 knockout screens. G3 7:2719-2727.
+* Kim E, Hart T (2021). Improved analysis of CRISPR fitness screens and
+  reduced off-target effects with the BAGEL2 gene essentiality classifier.
+  Genome Med 13:2.
+* Imkeller K, Ambrosi G, Boutros M, Huber W (2020). gscreend: modelling
+  asymmetric count ratios in CRISPR screens to decrease experiment size and
+  improve phenotype detection. Genome Biol 21:53.
+* Dai Z, Sheridan JM, Gearing LJ et al. (2014). edgeR: a versatile tool for
+  the analysis of shRNA-seq and CRISPR-Cas9 genetic screens. F1000Research
+  3:95.
+* Iorio F, Behan FM, Goncalves E et al. (2018). Unsupervised correction of
+  gene-independent cell responses to CRISPR-Cas9 targeting. BMC Genomics
+  19:604.
 
 # Session info
 

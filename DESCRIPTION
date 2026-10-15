@@ -1,7 +1,7 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.15.13
+Version: 1.15.14
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
@@ -65,6 +65,7 @@ Collate:
     'count_mapped_reads.R'
     'count_table.R'
     'create_object.R'
+    'crisprcleanr.R'
     'design.R'
     'distribution_mapped_reads.R'
     'filter_by.R'
@@ -75,6 +76,7 @@ Collate:
     'gene_level_statistics.R'
     'generics.R'
     'k562_data.R'
+    'library_checks.R'
     'mapped_reads.R'
     'normalize_data.R'
     'plot_barcode_hit.R'
@@ -85,5 +87,7 @@ Collate:
     'plot_trend.R'
     'plot_zscore_distribution.R'
     'quality_control.R'
+    'reference_data.R'
+    'reference_genes.R'
     'screenr-class.R'
     'zzz.R'

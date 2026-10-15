@@ -29,8 +29,8 @@ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-k562_reference_genes
---------------------
+k562_reference_genes and hart_reference_genes
+---------------------------------------------
 Derived from CEGv2.txt and NEGv1.txt of BAGEL (https://github.com/hart-lab/bagel).
 
 MIT License

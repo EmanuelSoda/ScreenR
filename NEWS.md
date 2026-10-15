@@ -1,3 +1,45 @@
+# ScreenR 1.15.14
+
+## CRISPR screens
+
+ScreenR works with CRISPR-Cas9 screens (tested on the HAP1 TKOv3 screen of
+Hart et al. 2017, see the benchmark folder of the repository). New
+functions make it easier:
+
+* `barcodes_per_gene()` counts the barcodes (shRNAs or sgRNAs) of each gene.
+  `find_camera_hit()`, `find_roast_hit()`, `find_time_hit()`,
+  `plot_barcode_hit()`, `find_gene_zscore_hit()`, `find_zscore_hit()` and
+  `find_robust_zscore_hit()` now warn when their threshold on the number of
+  barcodes per gene (`number_barcode` or `min_barcodes`) excludes more than
+  20% of the genes, and suggest a value that fits the library (for example
+  with 4 sgRNAs per gene). The defaults and the results do not change.
+* `compute_screen_quality()` measures how well a screen separates essential
+  from non-essential reference genes (NNMD, Cohen's d, ROC AUC);
+  `plot_reference_separation()` plots it; `scale_by_reference()` scales the
+  fold changes so that non-essential genes are at 0 and essential genes at
+  -1. New dataset `hart_reference_genes`: the CEGv2 core essential and NEGv1
+  non-essential genes of Hart et al.
+* `correct_crispr_bias()` corrects copy-number and proximity bias of
+  CRISPR-Cas9 screens with the CRISPRcleanR package (Iorio et al. 2018),
+  which must be installed separately (it is not on CRAN or Bioconductor:
+  `BiocManager::install("francescojm/CRISPRcleanR")`); ScreenR only wraps
+  it. `crisprcleanr_available()` tells whether it is installed.
+
+## Documentation
+
+* The vignette "Benchmark against MAGeCK and other tools" adds BAGEL2,
+  gscreend and two plain edgeR/limma workflows to the comparison, a
+  CRISPR-Cas9 screen (HAP1, TKOv3) and the quality check of the K562 screen
+  with the reference genes. Its claims are toned down to match the results:
+  ScreenR controls the FDR and ranks the hits as well as the best tools,
+  but is more conservative at a fixed FDR.
+
+## Other changes
+
+* Removed the use of `.data` in tidyselect arguments of
+  `compute_data_table()` and `compute_metrics()` (deprecated in tidyselect
+  1.2.0); results unchanged.
+
 # ScreenR 1.15.13
 
 * Enriched genes: every hit-finding method accepts `direction = "Up"`.

@@ -45,3 +45,37 @@ writeLines(c(
     "mageck_screenr_dataset.csv: the same for count_table (Time4 TRT vs CTRL)."
 ), file.path(out, "README.txt"))
 print(file.info(list.files(out, full.names = TRUE))["size"])
+
+# ------------------------------------------- other tools (competitors/) ---
+files <- list.files("results/competitors_simulation", "\\.rds$",
+    full.names = TRUE)
+competitors <- bind_rows(lapply(files, function(f) readRDS(f)$evaluation))
+write.csv(round_numeric(competitors),
+    file.path(out, "simulation_competitors.csv"), row.names = FALSE)
+real <- readRDS("results/realdata_competitors.rds")
+k562_competitors <- bind_rows(lapply(names(real$k562), function(m)
+    data.frame(method = m, real$k562[[m]][, c("Gene", "PValue", "FDR")])))
+write.csv(round_numeric(k562_competitors),
+    file.path(out, "competitors_k562.csv"), row.names = FALSE)
+
+# ------------------------------------------ CRISPR screen (crispr/) ---
+# HAP1 TKOv3 screen: gene-level results of every method, restricted to the
+# reference genes (the only ones used in the evaluation)
+hap1 <- readRDS("results/hap1_crispr.rds")
+reference <- hap1$reference$Gene
+hap1_results <- bind_rows(lapply(names(hap1$res), function(m) {
+    r <- hap1$res[[m]]
+    r <- r[r$Gene %in% reference, c("Gene", "PValue", "FDR")]
+    data.frame(method = m, r)
+}))
+write.csv(round_numeric(hap1_results), file.path(out, "crispr_hap1.csv"),
+    row.names = FALSE)
+writeLines(c(readLines(file.path(out, "README.txt")),
+    "simulation_competitors.csv: as simulation.csv for BAGEL2, gscreend and",
+    "  two plain edgeR/limma workflows (benchmark/competitors).",
+    "competitors_k562.csv: their gene results on k562_count_table.",
+    "crispr_hap1.csv: gene results of every method on the HAP1 TKOv3",
+    "  CRISPR-Cas9 screen (Hart et al. 2017, T18 vs T0), restricted to the",
+    "  CEGv2/NEGv1 reference genes (benchmark/crispr/hap1_crispr.R)."),
+    file.path(out, "README.txt"))
+print(file.info(list.files(out, full.names = TRUE))["size"])
