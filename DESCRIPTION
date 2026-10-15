@@ -5,13 +5,13 @@ Version: 1.15.11
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
-                  comment = c(ORICD = "0000-0002-2301-6465")),
+                  comment = c(ORCID = "0000-0002-2301-6465")),
             person("Elena", "Ceccacci", role = c("aut"),
                    email = "elena.ceccacci@ieo.it", 
-                   comment = c(ORICD = "0000-0002-2285-8994")),
+                   comment = c(ORCID = "0000-0002-2285-8994")),
             person("Saverio", "Minucci", role = c("fnd", "ths"),
                    email = "saverio.minucci@ieo.it", 
-                   comment = c(ORICD = "0000-0001-5678-536X")))
+                   comment = c(ORCID = "0000-0001-5678-536X")))
 Description: ScreenR is a package suitable to perform hit identification in loss 
             of function High Throughput Biological Screenings performed using 
             barcoded shRNA-based  libraries. ScreenR combines the computing 
