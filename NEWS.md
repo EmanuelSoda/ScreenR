@@ -35,6 +35,17 @@
   of the gene.
 * `plot_reference_separation()` no longer applies `theme_bw()`: set the
   theme with `ggplot2::theme_set()` or by adding it to the plot.
+* Clearer axis labels: "Explained variance" and "Principal component" in
+  `plot_explained_variance()` (it said "Expressed Variance"), the dimensions
+  of `plot_mds()` with the share of variance they explain, "Mapped reads" in
+  `plot_mapped_reads()`, "Reads per barcode" in
+  `plot_mapped_reads_distribution()`, "Lost barcodes" in
+  `plot_barcode_lost()` and `plot_barcode_lost_for_gene()`, "Normalized
+  counts" in `plot_boxplot()` and "Mean normalized counts" in `plot_trend()`
+  (they said "Frequency").
+* `plot_trend()` and `plot_barcode_trend()` use `linewidth` instead of the
+  `size` aesthetic deprecated in ggplot2 3.4.0, so they no longer give a
+  deprecation warning.
 
 # ScreenR 1.15.14
 

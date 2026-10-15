@@ -60,6 +60,8 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
         stop("The only available type of plot are boxplot and violinplot")
     }
 
+    plot <- plot + ggplot2::labs(y = "Normalized counts")
+
     if (length(genes) > 1) {
         plot <- plot + facet_wrap("Gene",
             nrow = nrow,

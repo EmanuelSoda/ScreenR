@@ -43,6 +43,11 @@ plot_mapped_reads_distribution <- function(screenR_Object,
             ggplot2::geom_density(alpha = alpha)
     }
 
+    if (type == "boxplot") {
+        plot <- plot + ggplot2::labs(y = "Reads per barcode")
+    } else if (type == "density") {
+        plot <- plot + ggplot2::labs(x = "Reads per barcode", y = "Density")
+    }
     if (!is.null(palette)) {
         plot <- plot + scale_fill_manual(values = palette)
     }

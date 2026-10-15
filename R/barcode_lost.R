@@ -70,7 +70,8 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
         geom_text(aes(label = .data$LostBarcode),
             position = position_stack(vjust = 0.8), color = "black",
             size = 5
-        )
+        ) +
+        ggplot2::labs(y = "Lost barcodes")
 
     if (!is.null(palette)) {
         plot <- plot + scale_fill_manual(values = palette)
@@ -145,7 +146,8 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
         color = .data$Sample
     )) +
         geom_point(show.legend = FALSE) +
-        scale_x_continuous(breaks = seq(0, max(table$barcode_lost), 1))
+        scale_x_continuous(breaks = seq(0, max(table$barcode_lost), 1)) +
+        ggplot2::labs(x = "Lost barcodes")
 
     if (facet) {
         plot <- plot + ggplot2::facet_wrap(vars(.data$Sample), scales = "free")

@@ -49,9 +49,29 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
         ggplot2::geom_label(aes(label = .data$Sample),
             color = color, size = size, alpha = alpha
         ) +
-        ggplot2::labs(x = "First Dimension", y = "Second Dimension")
+        ggplot2::labs(
+            x = mds_axis_label(plotMDS, 1), y = mds_axis_label(plotMDS, 2)
+        )
 
     return(plot)
+}
+
+#' @title Axis label of an MDS plot
+#' @description Internal function that returns the label of a dimension of
+#'     the MDS plot: limma computes the distances from the leading log2 fold
+#'     changes, and the label gives the proportion of the variance explained
+#'     by the dimension when limma returns it.
+#' @param mds The result of \code{\link[limma]{plotMDS}}.
+#' @param dimension The dimension (1 or 2).
+#' @return A character string.
+#' @keywords internal
+mds_axis_label <- function(mds, dimension) {
+    label <- paste("Leading log2FC dimension", dimension)
+    if (!is.null(mds$var.explained)) {
+        label <- sprintf("%s (%.0f%%)", label,
+            100 * mds$var.explained[dimension])
+    }
+    label
 }
 
 #' @title Plot the variance explained by the principal components
@@ -107,8 +127,8 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
             geom_line(aes(group = .data$Name)) +
             scale_y_continuous(labels = scales::percent) +
             labs(
-                x = NULL,
-                y = "Cumulative Expressed Variance (%)"
+                x = "Principal component",
+                y = "Cumulative explained variance"
             )
     } else {
         # Select only the Proportion of Variance
@@ -119,7 +139,7 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
             geom_point() +
             geom_line(aes(group = .data$Name)) +
             scale_y_continuous(labels = percent) +
-            labs(x = NULL, y = "Expressed Variance (%)")
+            labs(x = "Principal component", y = "Explained variance")
     }
 
     return(plot)
