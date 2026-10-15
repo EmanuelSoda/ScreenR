@@ -1,35 +1,174 @@
 url: https://emanuelsoda.github.io/ScreenR/
+
 template:
   bootstrap: 5
+  bslib:
+    primary: "#1F5F55"
+    secondary: "#C9836A"
+    link-color: "#1F5F55"
+    base_font: {google: "Inter"}
+    heading_font: {google: "Inter"}
+    code_font: {google: "JetBrains Mono"}
+    border-radius: 0.5rem
+  includes:
+    in_header: |
+      <style>
+        .navbar-dark .navbar-nav .nav-link, .navbar-dark .navbar-brand { color: rgba(255,255,255,.88); }
+        .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link.active { color: #fff; }
+        .navbar-dark .nav-text.text-muted { color: rgba(255,255,255,.65) !important; }
+        h1, h2, h3 { color: #1F5F55; }
+        .ref-index h3 { margin-top: 2rem; border-bottom: 2px solid #93B5A3; padding-bottom: .3rem; }
+        pre { border-left: 4px solid #93B5A3; }
+      </style>
+
+home:
+  title: "ScreenR: hit identification in pooled shRNA screens"
+  description: >
+    Find the genes that matter in pooled shRNA screens with calibrated
+    statistics, quality control and publication-ready plots.
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+  links:
+  - text: Bioconductor page
+    href: https://bioconductor.org/packages/ScreenR
+  - text: Ask a question (Bioconductor support)
+    href: https://support.bioconductor.org/tag/ScreenR
+
+navbar:
+  bg: primary
+  type: dark
+  structure:
+    left:  [intro, tutorials, articles, reference, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/Tutorial_1_Creating_the_object.html
+    tutorials:
+      text: Tutorials
+      menu:
+      - text: "1. Getting your data into ScreenR"
+        href: articles/Tutorial_1_Creating_the_object.html
+      - text: "2. Quality control"
+        href: articles/Tutorial_2_Quality_control.html
+      - text: "3. Finding and validating hits"
+        href: articles/Tutorial_3_Finding_hits.html
+    articles:
+      text: Articles
+      menu:
+      - text: Complete analysis example
+        href: articles/Analysis_Example.html
+      - text: Statistics in ScreenR
+        href: articles/Improved_Statistics.html
+      - text: Benchmark against MAGeCK
+        href: articles/Benchmark_MAGeCK.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/EmanuelSoda/ScreenR
+      aria-label: GitHub
+
+articles:
+- title: Tutorials
+  desc: Step-by-step guides, from the count table to the list of hits.
+  contents:
+  - Tutorial_1_Creating_the_object
+  - Tutorial_2_Quality_control
+  - Tutorial_3_Finding_hits
+- title: Articles
+  contents:
+  - Analysis_Example
+  - Improved_Statistics
+  - Benchmark_MAGeCK
 
 reference:
-- title: Object
-  desc:  Function for the ScreenR Object
+- title: Create the ScreenR object
+  desc: >
+    Build the object from a count table and a barcode annotation, and update
+    objects saved with older versions of ScreenR.
   contents:
-  - has_concept("objects")
+  - create_screenr_object
+  - update_screenr_object
+  - remove_all_zero_row
+  - '`show,screenr_object-method`'
+  - '`[,screenr_object,ANY,ANY,ANY-method`'
 
-- title: Computation
-  desc:  Function used to perform computations
+- title: Access and modify the object
+  desc: Getter and setter functions for the content of the ScreenR object.
   contents:
-  - has_concept("compute")
+  - starts_with("get_")
+  - starts_with("set_")
 
-- title: Find Hit
-  desc:  Function used to find hits
+- title: Quality control
+  desc: Check the sequencing depth, the library representation and the replicates.
   contents:
-  - has_concept("find")
+  - count_mapped_reads
+  - mapped_reads
+  - plot_mapped_reads
+  - plot_mapped_reads_distribution
+  - barcode_lost
+  - plot_barcode_lost
+  - plot_barcode_lost_for_gene
+  - compute_gini
+  - plot_gini
+  - plot_replicate_correlation
+  - plot_mds
+  - compute_explained_variance
+  - plot_explained_variance
+  - plot_boxplot
 
-- title: Further Optimization
-  desc:  Function to further optimize the hit found
+- title: Normalization and barcode statistics
+  desc: Normalize the counts and compute barcode-level fold changes and scores.
   contents:
-  - has_concept("filter")
+  - normalize_data
+  - compute_data_table
+  - compute_metrics
+  - compute_barcode_statistics
+  - create_design_matrix
+  - create_contrast
+  - create_edger_obj
 
-- title: Plot
-  desc:  Functions used to visualize the data
+- title: Find hits
+  desc: >
+    Gene-level tests that return a p-value and a false discovery rate for
+    every gene.
   contents:
-  - starts_with("plot_")
-  - has_concept("plot")
+  - find_gene_zscore_hit
+  - find_camera_hit
+  - find_roast_hit
+  - find_time_hit
 
-- title: Data
-  desc:  Example of data used in the ScreenR pipeline
+- title: Combine and validate hits
+  desc: Compare the methods and check the hits at the barcode level.
   contents:
-  - has_concept("data")
+  - summarise_hits
+  - find_common_hit
+  - plot_common_hit
+  - find_discordant_barcodes
+  - plot_barcode_hit
+  - plot_barcode_trend
+  - plot_trend
+  - plot_zscore_distribution
+  - filter_by_slope
+  - filter_by_variance
+  - compute_slope
+
+- title: Legacy hit rules
+  desc: >
+    Rules of earlier versions of ScreenR, kept for compatibility. They do not
+    control the false discovery rate; use the tests above to call hits.
+  contents:
+  - find_zscore_hit
+  - find_robust_zscore_hit
+
+- title: Datasets
+  desc: Example screen and a published K562 screen with known essential genes.
+  contents:
+  - count_table
+  - annotation_table
+  - k562_count_table
+  - k562_annotation_table
+  - k562_reference_genes
+
+- title: Package
+  contents:
+  - '`ScreenR-package`'
