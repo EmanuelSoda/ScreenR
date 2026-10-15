@@ -98,9 +98,10 @@
 #' )
 #' head(result)
 find_roast_hit <- function(screenR_Object, matrix_model, contrast,
-    nrot = 9999, number_barcode = 3, direction = "Down", p_val = NULL,
-    fdr = 0.05, seed = NULL, method = c("roast", "fry"),
+    nrot = 9999, number_barcode = 3, direction = c("Down", "Up"),
+    p_val = NULL, fdr = 0.05, seed = NULL, method = c("roast", "fry"),
     fdr_method = c("BH", "storey")) {
+    direction <- match.arg(direction)
     method <- match.arg(method)
     fdr_method <- match.arg(fdr_method)
     contrast <- as_contrast(contrast, matrix_model)

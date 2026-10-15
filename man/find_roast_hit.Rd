@@ -10,7 +10,7 @@ find_roast_hit(
   contrast,
   nrot = 9999,
   number_barcode = 3,
-  direction = "Down",
+  direction = c("Down", "Up"),
   p_val = NULL,
   fdr = 0.05,
   seed = NULL,

@@ -75,7 +75,9 @@
 #' head(result)
 find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
-    direction = "Down", fdr = 0.05, fdr_method = c("BH", "storey")) {
+    direction = c("Down", "Up"), fdr = 0.05,
+    fdr_method = c("BH", "storey")) {
+    direction <- match.arg(direction)
     fdr_method <- match.arg(fdr_method)
     if (!missing(thresh) || !missing(lfc)) {
         warning("The 'thresh' and 'lfc' arguments of find_camera_hit() are ",

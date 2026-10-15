@@ -4,7 +4,11 @@
 \alias{find_robust_zscore_hit}
 \title{Find hits with the robust Z-score threshold rule}
 \usage{
-find_robust_zscore_hit(table_treate_vs_control, number_barcode = 6)
+find_robust_zscore_hit(
+  table_treate_vs_control,
+  number_barcode = 6,
+  direction = c("Down", "Up")
+)
 }
 \arguments{
 \item{table_treate_vs_control}{The table of barcode metrics returned by
@@ -12,16 +16,20 @@ find_robust_zscore_hit(table_treate_vs_control, number_barcode = 6)
 columns Gene and ZscoreRobust.}
 
 \item{number_barcode}{A gene is a hit when more than number_barcode of its
-barcodes have a robust Z-score below the median (default 6).}
+barcodes have a robust Z-score below (or above) the median (default 6).}
+
+\item{direction}{"Down" (default) to find depleted genes (barcodes below
+the median) or "Up" to find enriched genes (barcodes above it).}
 }
 \value{
 An ungrouped tibble with the columns Gene and numberOfBarcode (the
-    number of barcodes of the gene below the median), with one row for each
-    hit.
+    number of barcodes of the gene below, or above, the median), with one
+    row for each hit.
 }
 \description{
 Finds the genes with more than number_barcode barcodes whose
-    robust Z-score is below the median of the robust Z-scores of all the
+    robust Z-score is below (direction = "Down", the default) or above
+    (direction = "Up") the median of the robust Z-scores of all the
     barcodes. It is the same rule as \code{\link{find_zscore_hit}}, applied
     to the ZscoreRobust column; like that rule it gives no p-value: use
     \code{\link{find_gene_zscore_hit}} with score = "ZscoreRobust" for a

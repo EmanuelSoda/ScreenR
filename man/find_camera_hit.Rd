@@ -11,7 +11,7 @@ find_camera_hit(
   number_barcode = 3,
   thresh = 1e-04,
   lfc = 1,
-  direction = "Down",
+  direction = c("Down", "Up"),
   fdr = 0.05,
   fdr_method = c("BH", "storey")
 )

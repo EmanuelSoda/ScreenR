@@ -7,7 +7,8 @@
 find_zscore_hit(
   table_treate_vs_control,
   number_barcode = 6,
-  metric = c("median", "mean")
+  metric = c("median", "mean"),
+  direction = c("Down", "Up")
 )
 }
 \arguments{
@@ -22,14 +23,19 @@ them are below the threshold.}
 
 \item{metric}{The threshold on the Z-score: "median" (the default) or
 "mean" of the Z-scores of all the barcodes.}
+
+\item{direction}{"Down" (default) to find depleted genes (barcodes below
+the threshold) or "Up" to find enriched genes (barcodes above it).}
 }
 \value{
 A tibble with the columns Gene and numberOfBarcode (the number of
-    barcodes of the gene below the threshold), with one row for each hit.
+    barcodes of the gene below, or above, the threshold), with one row for
+    each hit.
 }
 \description{
 Finds the genes with more than number_barcode barcodes whose
-    Z-score is below the median (or the mean) of the Z-scores of all the
+    Z-score is below (direction = "Down", the default) or above
+    (direction = "Up") the median (or the mean) of the Z-scores of all the
     barcodes. This simple rule gives no p-value and flags many genes
     without any effect (with the median, about 17\% of them when genes
     have 10 barcodes and number_barcode = 6): use \code{\link{find_gene_zscore_hit}}, which

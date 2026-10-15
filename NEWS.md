@@ -1,3 +1,14 @@
+# ScreenR 1.15.13
+
+* Enriched genes: every hit-finding method accepts `direction = "Up"`.
+  `find_zscore_hit()` and `find_robust_zscore_hit()` gain a `direction`
+  argument (default `"Down"`, same results as before); `find_camera_hit()`
+  and `find_roast_hit()` now check `direction` and give an error for a value
+  other than `"Down"` or `"Up"` (a typo such as `"up"` used to return no
+  genes silently).
+* New tests check that every method finds enriched and depleted genes
+  without mixing them.
+
 # ScreenR 1.15.12
 
 ## Documentation

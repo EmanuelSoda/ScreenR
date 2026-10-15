@@ -167,6 +167,10 @@ plot_boxplot(object,
 
 ## Which method should I use?
 
+Every method looks for **depleted** genes by default; set
+`direction = "Up"` to find **enriched** genes (for example in a resistance
+screen).
+
 | Question                                               | Function                                | Notes                                                                                                          |
 |--------------------------------------------------------|-----------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | Which genes are depleted or enriched?                  | `find_gene_zscore_hit()`                | Permutation test on the barcode scores; robust default. Use `statistic = "median"` against off-target effects. |
