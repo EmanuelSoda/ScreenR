@@ -15,6 +15,28 @@
 - [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md)
   documents that CRISPRcleanR must be run on the complete genome-wide
   library: on a subset of genes enriched in hits it removes real signal.
+- Tutorial 4 adds FRY
+  ([`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md))
+  to the comparison of the methods (with a single T0 sample it works, as
+  the variability is estimated from the replicates of the other time
+  points), shows how conservative the methods without reference are on
+  this subset enriched in essential genes, and explains the positive
+  fold change of the non-essential genes after CPM normalization
+  (normalizing to their sgRNAs puts them back at 0).
+- [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
+  documents that it is for inspecting the hits, not for filtering the
+  barcodes before finding them: the filter is circular and, in the K562
+  screen, finds fewer essential and more non-essential genes.
+- Tutorial 4 shows the general quality control plots on the HAP1 screen
+  ([`plot_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md),
+  [`plot_mapped_reads_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md),
+  [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
+  [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+  and
+  [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)).
+- [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
+  orders the fill legend as the samples (T0, T3, T18), not
+  alphabetically (T0, T18, T3).
 
 ## ScreenR 1.15.14
 

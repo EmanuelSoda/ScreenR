@@ -40,6 +40,20 @@ when its distance from the median is larger than threshold MADs. When
 the MAD of a gene is 0, every barcode that differs from the median is
 discordant, with an infinite deviation.
 
+Use it to inspect the hits, not to filter the barcodes before finding
+them. The discordant barcodes are found with the same fold changes that
+the tests use, so removing them is circular: it makes the genes look
+more consistent than they are and the p-values too small. In shRNA
+screens it also removes the hairpins that work, when most of the
+hairpins of an essential gene do not. In the K562 screen
+([`k562_count_table`](https://emanuelsoda.github.io/ScreenR/reference/k562_count_table.md))
+removing them before
+[`find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
+found fewer essential genes and more non-essential ones. To exclude bad
+barcodes, use information that does not come from the comparison, for
+example barcodes that are discordant in several independent screens with
+the same library.
+
 ## See also
 
 [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),

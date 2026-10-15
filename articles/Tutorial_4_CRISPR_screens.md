@@ -183,8 +183,51 @@ least 3 sgRNAs) keeps almost every gene.
 
 The general quality control of [Tutorial
 2](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.md)
-applies to CRISPR screens. For example, the library should be evenly
-represented at T0 (low Gini index) and the replicates should agree:
+applies to CRISPR screens, with any sample names and time points.
+
+### Sequencing depth
+
+[`plot_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md)
+shows the number of reads of each sample. Samples with far fewer reads
+than the others are less reliable:
+
+``` r
+
+plot_mapped_reads(object)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/mapped-reads-1.png)
+
+The T0 sample was sequenced about twice as deeply as the others, which
+is common: it is the reference of every comparison. Every sample has at
+least 1.6 million reads, more than 100 for each sgRNA of this subset.
+
+[`plot_mapped_reads_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md)
+shows the distribution of the reads of the sgRNAs in each sample:
+
+``` r
+
+plot_mapped_reads_distribution(object)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/mapped-reads-distribution-1.png)
+
+``` r
+
+plot_mapped_reads_distribution(object, type = "density", alpha = 0.3)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/mapped-reads-distribution-2.png)
+
+The counts are raw, so the T0 sample, sequenced more deeply, is shifted
+to the right. At day 18 the distribution is wider than at day 3, with
+more sgRNAs close to 0: the sgRNAs of the essential genes are dropping
+out.
+
+### Library representation and replicates
+
+The library should be evenly represented at T0 (low Gini index) and the
+replicates should agree:
 
 ``` r
 
@@ -199,6 +242,43 @@ plot_replicate_correlation(object)
 ```
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/replicates-1.png)
+
+### Clustering of the samples
+
+[`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md)
+places the samples so that similar samples are close, and
+[`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+shows how much of the differences between the samples each principal
+component explains:
+
+``` r
+
+plot_mds(object)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/mds-1.png)
+
+``` r
+
+plot_explained_variance(object)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/explained-variance-1.png)
+
+``` r
+
+plot_explained_variance(object, cumulative = TRUE)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/explained-variance-2.png)
+
+The first dimension of the MDS plot orders the samples by time point
+(T0, then day 3, then day 18): the main difference between the samples
+is the growth of the cells, as expected in a dropout screen. The day 3
+replicates are very close; the day 18 replicates differ more, because
+the depletion has had more time to diverge. One principal component
+explains about 70% of the variability, so the samples differ mainly
+along a single direction.
 
 ### Quality with reference genes
 
@@ -257,6 +337,49 @@ plot_reference_separation(day18, essential, nonessential) +
 ```
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/separation-1.png)
+
+[`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
+shows the normalized counts of the sgRNAs of single genes in each
+sample, for example two core essential genes and the EGFP control
+(sgRNAs that target a gene not present in the cells):
+
+``` r
+
+plot_boxplot(object,
+    genes = c("POLR2L", "RPL14", "EGFP"),
+    group_var = c("T0", "T3", "T18"), fill_var = "Treatment", ncol = 3
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/boxplot-1.png)
+
+The sgRNAs of the essential genes are depleted at day 3 and almost gone
+at day 18; those of EGFP are stable (slightly higher, because of the CPM
+normalization described below).
+
+The non-essential genes have a positive mean log2 fold change (0.36 at
+day 18) although they have no effect. This is a side effect of the CPM
+normalization: when many sgRNAs drop out, the reads of the sample go to
+the others, which look enriched. The ranking of the genes does not
+change, but the baseline is not 0. Normalizing to the sgRNAs of the
+non-essential genes (`method = "control"`) puts it back at 0:
+
+``` r
+
+nonessential_sgrnas <- hap1_annotation_table$Barcode[
+    hap1_annotation_table$Gene %in% nonessential]
+day18_control <- compute_data_table(normalize_data(object,
+    method = "control", control_barcodes = nonessential_sgrnas
+)) %>%
+    compute_metrics(control = "T0", treatment = "T18", day = "Screen")
+knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
+    digits = 3)
+```
+
+| NEssential | NNonessential | MeanEssential | MeanNonessential |   NNMD | CohenD |   AUC |
+|-----------:|--------------:|--------------:|-----------------:|-------:|-------:|------:|
+|        646 |           797 |        -2.782 |            0.027 | -7.184 | -3.688 | 0.997 |
 
 ## Copy-number bias and CRISPRcleanR
 
@@ -417,8 +540,8 @@ almost every cell line.
 
 ### Other methods and their consensus
 
-Without reference genes, use the default reference of the Z-score test
-and CAMERA. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
+Without reference genes, use the default reference of the Z-score test,
+CAMERA and FRY. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
 
 ``` r
 
@@ -426,37 +549,68 @@ zscore_default <- find_gene_zscore_hit(statistics, fdr = 1, seed = 1)
 camera <- find_camera_hit(object, design, contrast,
     number_barcode = 2, fdr = 1
 )
-hits <- summarise_hits(
-    list(zscore_reference = zscore, zscore = zscore_default,
-        camera = camera),
-    fdr = 0.05
+fry <- find_roast_hit(object, design, contrast,
+    method = "fry", number_barcode = 2, fdr = 1
 )
+hit_list <- list(zscore_reference = zscore, zscore = zscore_default,
+    camera = camera, fry = fry)
+hits <- summarise_hits(hit_list, fdr = 0.05)
 head(hits)
-#> # A tibble: 6 × 7
-#>   Gene    FDR_zscore_reference FDR_zscore FDR_camera NMethods  MaxFDR Hit  
-#>   <chr>                  <dbl>      <dbl>      <dbl>    <dbl>   <dbl> <lgl>
-#> 1 ATP6V1F            0.0000476    0.00419 0.0000143         3 0.00419 TRUE 
-#> 2 BUB3               0.0000476    0.00419 0.00000454        3 0.00419 TRUE 
-#> 3 CPSF1              0.0000476    0.00419 0.000930          3 0.00419 TRUE 
-#> 4 DHX15              0.0000476    0.00419 0.000290          3 0.00419 TRUE 
-#> 5 DPAGT1             0.0000476    0.00419 0.000183          3 0.00419 TRUE 
-#> 6 EIF3A              0.0000476    0.00419 0.000252          3 0.00419 TRUE
+#> # A tibble: 6 × 8
+#>   Gene    FDR_zscore_reference FDR_zscore FDR_camera FDR_fry NMethods  MaxFDR
+#>   <chr>                  <dbl>      <dbl>      <dbl>   <dbl>    <dbl>   <dbl>
+#> 1 ATP6V1F            0.0000476    0.00419 0.0000143  0.00117        4 0.00419
+#> 2 BUB3               0.0000476    0.00419 0.00000454 0.00104        4 0.00419
+#> 3 CPSF1              0.0000476    0.00419 0.000930   0.00214        4 0.00419
+#> 4 DHX15              0.0000476    0.00419 0.000290   0.00117        4 0.00419
+#> 5 DPAGT1             0.0000476    0.00419 0.000183   0.00311        4 0.00419
+#> 6 EIF3A              0.0000476    0.00419 0.000252   0.00214        4 0.00419
+#> # ℹ 1 more variable: Hit <lgl>
 table(hits$NMethods)
 #> 
-#>    0    1    2    3 
-#> 2440  510   69  332
+#>    0    1    2    3    4 
+#> 2434  203  313   69  332
 ```
 
-The two tests that compare each gene with all the others call fewer
-genes than the test with the non-essential reference: with many
-essential genes in the library they are conservative. They need no
-reference genes, and their rankings are very close.
+``` r
 
-ROAST and FRY
+evaluate_hits <- function(result) {
+    called <- result$Gene[result$FDR <= 0.05]
+    data.frame(
+        `Genes called` = length(called),
+        `Core essential` = sum(called %in% essential),
+        `Held-out non-essential` = sum(called %in% held_out),
+        check.names = FALSE
+    )
+}
+knitr::kable(bind_rows(lapply(hit_list, evaluate_hits), .id = "Method"))
+```
+
+| Method           | Genes called | Core essential | Held-out non-essential |
+|:-----------------|-------------:|---------------:|-----------------------:|
+| zscore_reference |          911 |            619 |                      5 |
+| zscore           |          352 |            305 |                      0 |
+| camera           |          381 |            326 |                      0 |
+| fry              |          720 |            552 |                      1 |
+
+The two tests that compare each gene with all the others (the default
+Z-score test and CAMERA) are much more conservative than the test with
+the non-essential reference: they find less than half of the core
+essential genes, and the default Z-score test does not give a p-value
+below 0.05 to any of the held-out non-essential genes. Their reference
+is all the genes of the library, and here it is full of hits. This is
+partly an effect of the dataset: the subset keeps all the reference
+genes, so 19% of its genes are core essential, against about 4% in the
+complete TKOv3 library. On a genome-wide screen they should be less
+conservative. They need no reference genes, and their rankings are very
+close (Spearman correlation of the p-values above 0.99).
+
+FRY
 ([`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md))
-test each gene on its own sgRNAs and rely on the variability between
-replicates: with a single T0 sample, as here, they find almost nothing.
-Use them when both groups have replicates.
+tests each gene on its own sgRNAs. It estimates the variability from the
+replicates of the model, so a single T0 sample is enough when the other
+time points have replicates, as here. It finds more essential genes than
+the tests without reference, with very few held-out non-essential genes.
 
 ### Comparable fold changes
 
@@ -509,7 +663,7 @@ or control genes known to have no effect on the selection.
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md) |
 | Quality control | check the separation of essential and non-essential genes | [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md) |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md) |
-| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
+| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
 | Compare screens | scale to the reference genes | [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md) |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 

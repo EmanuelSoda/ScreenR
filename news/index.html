@@ -58,6 +58,12 @@
 <li>New datasets <code>hap1_count_table</code> and <code>hap1_annotation_table</code>: a subset of the HAP1 TKOv3 CRISPR-Cas9 knockout screen of Hart et al. (2017), with the genomic position of each sgRNA.</li>
 <li>
 <code><a href="../reference/correct_crispr_bias.html">correct_crispr_bias()</a></code> documents that CRISPRcleanR must be run on the complete genome-wide library: on a subset of genes enriched in hits it removes real signal.</li>
+<li>Tutorial 4 adds FRY (<code><a href="../reference/find_roast_hit.html">find_roast_hit()</a></code>) to the comparison of the methods (with a single T0 sample it works, as the variability is estimated from the replicates of the other time points), shows how conservative the methods without reference are on this subset enriched in essential genes, and explains the positive fold change of the non-essential genes after CPM normalization (normalizing to their sgRNAs puts them back at 0).</li>
+<li>
+<code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code> documents that it is for inspecting the hits, not for filtering the barcodes before finding them: the filter is circular and, in the K562 screen, finds fewer essential and more non-essential genes.</li>
+<li>Tutorial 4 shows the general quality control plots on the HAP1 screen (<code><a href="../reference/plot_mapped_reads.html">plot_mapped_reads()</a></code>, <code><a href="../reference/plot_mapped_reads_distribution.html">plot_mapped_reads_distribution()</a></code>, <code><a href="../reference/plot_mds.html">plot_mds()</a></code>, <code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code> and <code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code>).</li>
+<li>
+<code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code> orders the fill legend as the samples (T0, T3, T18), not alphabetically (T0, T18, T3).</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.15.14" id="screenr-11514">ScreenR 1.15.14<a class="anchor" aria-label="anchor" href="#screenr-11514"></a></h2>
