@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_mapped_reads.R
 \name{plot_mapped_reads}
 \alias{plot_mapped_reads}
-\title{Plot mapped reads}
+\title{Plot the number of mapped reads of each sample}
 \usage{
 plot_mapped_reads(
   screenR_Object,
@@ -12,27 +12,33 @@ plot_mapped_reads(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{palette}{A vector of color that as to be used to fill the barplot.}
+\item{palette}{An optional vector of colors, one for each sample, used to
+fill the bars. By default the ggplot2 colors are used.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the bars, between 0 and 1. Default 1. It is
+used only when palette is given.}
 
-\item{legende_position}{Where to positioning the legend of the plot
-("none", "left", "right", "bottom", "top")}
+\item{legende_position}{The position of the legend: "none" (default),
+"top", "bottom", "right" or "left".}
 }
 \value{
-return a ggplot object
+A ggplot object.
 }
 \description{
-This function plots the number of reads mapped for each
-             sample. It internally call the \code{\link{count_mapped_reads}}
-             function, to compute the number of mapped reads.
+Draws a bar plot of the total number of reads mapped to the
+    barcodes in each sample, computed with \code{\link{mapped_reads}}.
+    Samples with far fewer reads than the others may have a lower quality.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_mapped_reads(object)
+}
+\seealso{
+\code{\link{mapped_reads}},
+    \code{\link{plot_mapped_reads_distribution}},
+    \code{\link{plot_barcode_lost}}
 }

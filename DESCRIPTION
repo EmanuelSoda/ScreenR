@@ -1,17 +1,17 @@
 Package: ScreenR
 Type: Package
 Title: Package to Perform High Throughput Biological Screening
-Version: 1.15.1
+Version: 1.15.14
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
                   email = "emanuelsoda@gmail.com", 
-                  comment = c(ORICD = "0000-0002-2301-6465")),
+                  comment = c(ORCID = "0000-0002-2301-6465")),
             person("Elena", "Ceccacci", role = c("aut"),
                    email = "elena.ceccacci@ieo.it", 
-                   comment = c(ORICD = "0000-0002-2285-8994")),
+                   comment = c(ORCID = "0000-0002-2285-8994")),
             person("Saverio", "Minucci", role = c("fnd", "ths"),
                    email = "saverio.minucci@ieo.it", 
-                   comment = c(ORICD = "0000-0001-5678-536X")))
+                   comment = c(ORCID = "0000-0001-5678-536X")))
 Description: ScreenR is a package suitable to perform hit identification in loss 
             of function High Throughput Biological Screenings performed using 
             barcoded shRNA-based  libraries. ScreenR combines the computing 
@@ -21,7 +21,7 @@ Description: ScreenR is a package suitable to perform hit identification in loss
             visualization modes for each step of the analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.1
 Imports:
     methods (>= 4.0),
     rlang (>= 0.4),
@@ -37,8 +37,10 @@ Imports:
     tidyr (>= 1.2),
     magrittr (>= 1.0),
     dplyr (>= 1.1.0),
-    edgeR (>= 3.32),
-    tidyselect (>= 1.1.2)
+    edgeR (>= 4.0.0),
+    tidyselect (>= 1.1.2),
+    SummarizedExperiment,
+    S4Vectors
 Suggests: 
     rmarkdown (>= 2.11),
     markdown,
@@ -63,13 +65,18 @@ Collate:
     'count_mapped_reads.R'
     'count_table.R'
     'create_object.R'
+    'crisprcleanr.R'
+    'design.R'
     'distribution_mapped_reads.R'
     'filter_by.R'
     'find_common_hit.R'
     'find_roast_hit.R'
     'find_robust_zscore_hit.R'
     'find_zscore_hit.R'
+    'gene_level_statistics.R'
     'generics.R'
+    'k562_data.R'
+    'library_checks.R'
     'mapped_reads.R'
     'normalize_data.R'
     'plot_barcode_hit.R'
@@ -79,5 +86,8 @@ Collate:
     'plot_mds.R'
     'plot_trend.R'
     'plot_zscore_distribution.R'
+    'quality_control.R'
+    'reference_data.R'
+    'reference_genes.R'
     'screenr-class.R'
     'zzz.R'

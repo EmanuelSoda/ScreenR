@@ -1,11 +1,10 @@
-#' @title Count number of barcode lost
-#' @description This function counts the number of barcodes lost during the
-#'              sequencing. A barcode is lost if its associated shRNA has zero
-#'              mapped read in a sample.
-#'
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#'
+#' @title Compute the number of barcodes lost in each sample
+#' @description Counts, for each sample, the barcodes lost during the screen
+#'     or the sequencing, that is the barcodes with zero mapped reads. Many
+#'     lost barcodes may indicate a sample of low quality or a bottleneck in
+#'     the screen. Use \code{\link{plot_barcode_lost}} to plot the result.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @importFrom  dplyr group_by
 #' @importFrom  dplyr filter
 #' @importFrom  dplyr summarise
@@ -14,13 +13,14 @@
 #' @importFrom dplyr vars
 #' @importFrom tidyr drop_na
 #' @concept compute
-#' @return Return a tibble containing the number of barcode lost for each
-#'         sample
+#' @return A tibble with the columns Sample and LostBarcode (the number of
+#'     barcodes with zero reads). Samples without lost barcodes are not
+#'     reported.
+#' @seealso \code{\link{plot_barcode_lost}},
+#'     \code{\link{plot_barcode_lost_for_gene}},
+#'     \code{\link{count_mapped_reads}}
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#'
-#' # In order to count the number of barcodes lost just the ScreenR object is
-#' # needed
 #' head(barcode_lost(object))
 #'
 #' @export
@@ -34,28 +34,26 @@ barcode_lost <- function(screenR_Object) {
     return(table)
 }
 
-#' @title Plot number of barcode lost
-#' @description This function plots the number of barcode lost in each sample.
-#'              Usually lots of barcodes lost mean that the sample has low
-#'              quality.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param palette A vector of colors to be used to fill the barplot.
-#' @param alpha A value for the opacity of the plot.
-#'              Allowed values are in the range 0 to 1
-#' @param legende_position Where to positioning the legend of the plot.
-#'                         Allowed values are in the "top", "bottom", "right",
-#'                         "left", "none".
+#' @title Plot the number of barcodes lost in each sample
+#' @description Draws a bar plot of the number of barcodes with zero reads in
+#'     each sample, as computed by \code{\link{barcode_lost}}. A sample that
+#'     lost many more barcodes than the others usually has a low quality.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param palette An optional vector of colors, one for each sample, used to
+#'     fill the bars. By default the ggplot2 colors are used.
+#' @param alpha The opacity of the bars, between 0 and 1. Default 1.
+#' @param legende_position The position of the legend: "none" (default),
+#'     "top", "bottom", "right" or "left".
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot aes geom_bar theme geom_text scale_fill_manual
 #' @importFrom ggplot2 position_stack
 #' @concept plot
-#' @return Returns the plot displaying the number of barcode lost in each
-#'         sample
+#' @return A ggplot object.
+#' @seealso \code{\link{barcode_lost}}, \code{\link{plot_barcode_lost_for_gene}}
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#'
 #' plot_barcode_lost(object)
 #' @export
 plot_barcode_lost <- function(screenR_Object, palette = NULL,
@@ -80,27 +78,26 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
     return(plot)
 }
 
-#' @title Plot number of barcode lost for  gene
-#' @description This function plots the number of barcodes lost in each sample
-#'              for each gene. Usually in a genetic screening each gene is
-#'              is associated with multiple shRNAs and so barcodes. For this
-#'              reason a reasonable number of barcodes associated with the
-#'              gene has to be retrieved in order to have a robust result.
-#'              Visualizing the number of genes that have lost lot's of barcode
-#'              is a Quality Check procedure in order to be aware of the number
-#'              of barcode for the hit identified.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param facet A boolean to use the facet.
-#' @param samples A vector of samples that as to be visualize
+#' @title Plot the number of barcodes lost for each gene
+#' @description Plots, for each gene and sample, the number of barcodes of the
+#'     gene with zero reads. Each gene is targeted by several shRNAs
+#'     (barcodes), and a gene needs enough barcodes left to give a robust
+#'     result: this quality control plot shows which genes lost many of their
+#'     barcodes. Only the genes that lost at least one barcode are shown.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param facet Whether to draw a separate panel for each sample (TRUE,
+#'     default) or a single panel.
+#' @param samples The names of the samples to plot (required).
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom dplyr select_if
 #' @importFrom tidyselect all_of
 #' @importFrom ggplot2 scale_x_continuous
 #' @concept plot
-#' @return Return the plot displaying the number of barcode lost for each gene
-#'         in each sample.
+#' @return A ggplot object with the number of lost barcodes on the x axis and
+#'     the genes on the y axis.
+#' @seealso \code{\link{barcode_lost}}, \code{\link{plot_barcode_lost}}
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
@@ -114,15 +111,16 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     samples) {
-    numericColumn <- screenR_Object@count_table %>%
+    count_table <- count_table_of(screenR_Object)
+    numericColumn <- count_table %>%
         dplyr::select_if(is.numeric) %>%
         colnames()
 
     table <- tidyr::pivot_longer(
-        data = screenR_Object@count_table,
+        data = count_table,
         cols = all_of(numericColumn), names_to = "Sample", values_to = "Mapped"
     )
-    table <- dplyr::left_join(table, screenR_Object@annotation_table,
+    table <- dplyr::left_join(table, annotation_of(screenR_Object),
         by = "Barcode"
     )
     table <- dplyr::group_by(table, .data$Sample, .data$Gene)

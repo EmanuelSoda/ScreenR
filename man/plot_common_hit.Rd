@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_common_hit.R
 \name{plot_common_hit}
 \alias{plot_common_hit}
-\title{Plot common hit}
+\title{Plot the hits in common between methods}
 \usage{
 plot_common_hit(
   hit_zscore,
@@ -20,37 +20,42 @@ plot_common_hit(
 )
 }
 \arguments{
-\item{hit_zscore}{The list of hits of the \code{\link{find_zscore_hit}}}
+\item{hit_zscore}{The hits of the Z-score method, a table with a Gene
+column (for example from \code{\link{find_gene_zscore_hit}}).}
 
-\item{hit_camera}{The list of hits of the \code{\link{find_camera_hit}}}
+\item{hit_camera}{The hits of \code{\link{find_camera_hit}}, a table with a
+Gene column.}
 
-\item{hit_roast}{The list of hits of the \code{\link{find_roast_hit}}}
+\item{hit_roast}{The hits of \code{\link{find_roast_hit}}, a table with a
+Gene column.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the circles, between 0 and 1. Default 0.5.}
 
-\item{stroke_size}{Stroke size for drawing circles}
+\item{stroke_size}{The width of the circle borders.}
 
-\item{set_name_size}{Text size for set names}
+\item{set_name_size}{The text size of the set names.}
 
-\item{text_color}{Text color for intersect contents}
+\item{text_color}{The text color of the contents of the intersections.}
 
-\item{text_size}{Text size for intersect contents}
+\item{text_size}{The text size of the contents of the intersections.}
 
-\item{show_percentage}{Show percentage for each set}
+\item{show_percentage}{Whether to show the percentage of each set (used
+when show_elements is FALSE).}
 
-\item{title}{The title to display above the plot}
+\item{title}{The title displayed above the plot.}
 
-\item{color}{The three vector color for the venn}
+\item{color}{The three colors used to fill the circles.}
 
-\item{show_elements}{Show set elements instead of count/percentage.}
+\item{show_elements}{Whether to show the gene names instead of the
+counts (default TRUE).}
 }
 \value{
-A vector containing the common hit
+A ggplot object.
 }
 \description{
-This method plot the hits in common among the three methods is
-             a wrapper for the \code{\link[ggvenn]{ggvenn}} function.
+Draws a Venn diagram of the hits of the three methods
+    (Z-score, CAMERA and ROAST), to see how many hits they have in common.
+    It is a wrapper around \code{\link[ggvenn]{ggvenn}}.
 }
 \examples{
 hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -58,4 +63,9 @@ hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
 hit_roast <- data.frame(Gene = c("A", "L", "N"))
 plot_common_hit(hit_zscore, hit_camera, hit_roast)
 
+# Number of genes instead of their names
+plot_common_hit(hit_zscore, hit_camera, hit_roast, show_elements = FALSE)
+}
+\seealso{
+\code{\link{find_common_hit}}, \code{\link{summarise_hits}}
 }

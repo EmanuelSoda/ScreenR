@@ -2,37 +2,50 @@
 % Please edit documentation in R/find_robust_zscore_hit.R
 \name{find_robust_zscore_hit}
 \alias{find_robust_zscore_hit}
-\title{Title Find robust Z-score Hit}
+\title{Find hits with the robust Z-score threshold rule}
 \usage{
-find_robust_zscore_hit(table_treate_vs_control, number_barcode)
+find_robust_zscore_hit(
+  table_treate_vs_control,
+  number_barcode = 6,
+  direction = c("Down", "Up")
+)
 }
 \arguments{
-\item{table_treate_vs_control}{A table computed with the function
-\code{compute_data_table}.
-It contain for each barcode the associated
-Gene the counts in the treated and control
-and the value for the Log2FC, Zscore,
-ZscoreRobust in each day.}
+\item{table_treate_vs_control}{The table of barcode metrics returned by
+\code{\link{compute_metrics}}, with one row for each barcode and the
+columns Gene and ZscoreRobust.}
 
-\item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+\item{number_barcode}{A gene is a hit when more than number_barcode of its
+barcodes have a robust Z-score below (or above) the median (default 6).}
+
+\item{direction}{"Down" (default) to find depleted genes (barcodes below
+the median) or "Up" to find enriched genes (barcodes above it).}
 }
 \value{
-Return a tibble containing the hit for the robust Z-score
+An ungrouped tibble with the columns Gene and numberOfBarcode (the
+    number of barcodes of the gene below, or above, the median), with one
+    row for each hit.
 }
 \description{
-Title Find robust Z-score Hit
+Finds the genes with more than number_barcode barcodes whose
+    robust Z-score is below (direction = "Down", the default) or above
+    (direction = "Up") the median of the robust Z-scores of all the
+    barcodes. It is the same rule as \code{\link{find_zscore_hit}}, applied
+    to the ZscoreRobust column; like that rule it gives no p-value: use
+    \code{\link{find_gene_zscore_hit}} with score = "ZscoreRobust" for a
+    gene-level test with an FDR.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 result <- find_robust_zscore_hit(table, number_barcode = 6)
 head(result)
+}
+\seealso{
+\code{\link{find_zscore_hit}}, \code{\link{find_gene_zscore_hit}},
+    \code{\link{compute_metrics}}
 }
 \concept{find}

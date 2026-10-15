@@ -35,11 +35,10 @@ create_test_object <- function() {
     obj@data_table <- obj@data_table %>%
         dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
 
-    obj@normalized_count_table <- obj@normalized_count_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
-
-    obj@count_table <- obj@count_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the data table (counts and normalized
+    # counts are subset together)
+    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
+        obj@data_table$Barcode, ]
 
     obj@annotation_table <- obj@annotation_table %>%
         dplyr::filter(Barcode %in% obj@data_table$Barcode)
@@ -48,7 +47,7 @@ create_test_object <- function() {
 }
 test_that("ROAST", {
     object <- create_test_object()
-    matrix <- model.matrix(~ object@groups)
+    matrix <- model.matrix(~ get_groups(object))
     colnames(matrix) <- c("Control", "T1/T2", "Treated")
 
     roast_hit <- suppressWarnings(find_roast_hit(
@@ -62,7 +61,7 @@ test_that("ROAST", {
 test_that("Camera", {
     object <- create_test_object()
 
-    matrix <- model.matrix(~ object@groups)
+    matrix <- model.matrix(~ get_groups(object))
     colnames(matrix) <- c("Control", "T1/T2", "Treated")
     camera_hit <- suppressWarnings(find_camera_hit(
         screenR_Object = object,
@@ -133,5 +132,6 @@ test_that("find_robust_zscore_hit median ", {
         day = c("Time3")
     )
     hit_zscore_R <- find_robust_zscore_hit(table, number_barcode = 2)
-    expect_equal(class(hit_zscore_R)[[1]], "grouped_df")
+    expect_equal(class(hit_zscore_R)[[1]], "tbl_df")
+    expect_false(dplyr::is_grouped_df(hit_zscore_R))
 })

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_trend.R
 \name{plot_trend}
 \alias{plot_trend}
-\title{Plot the trend hit gene}
+\title{Plot the trend of genes over the samples}
 \usage{
 plot_trend(
   screenR_Object,
@@ -18,34 +18,41 @@ plot_trend(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{genes}{The vector of genes to use}
+\item{genes}{The names of the genes to plot.}
 
-\item{group_var}{The variable that as to be used to filter the data, for
-example the different treatment}
+\item{group_var}{The values of the Treatment column of the data table (see
+\code{\link{get_sample_table}}) of the samples to plot, for example the
+early time points and the treated samples.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the confidence band, between 0 and 1. Default
+0.5.}
 
-\item{se}{A boolean to indicate where or not to plot the standard error}
+\item{se}{Whether to draw the confidence band of the regression line.
+Default FALSE.}
 
-\item{point_size}{The dimension of each dot}
+\item{point_size}{The size of the points. Default 1.}
 
-\item{line_size}{The dimension of the line}
+\item{line_size}{The width of the regression line. Default 1.}
 
-\item{nrow}{The number of rows in case multiple genes are plotted}
+\item{nrow}{The number of rows of panels, when several genes are plotted.}
 
-\item{ncol}{The number of columns in case multiple genes are plotted}
+\item{ncol}{The number of columns of panels, when several genes are
+plotted.}
 
-\item{scales}{The scales to be used in the facette}
+\item{scales}{The scales of the panels: "free" (default), "fixed",
+"free_x" or "free_y".}
 }
 \value{
-The plot of the trend over time for a specific treatment.
+A ggplot object.
 }
 \description{
-This function plot the trend of a gene resulted as hit
+Plots, for the given genes, the mean normalized count of their
+    barcodes in each sample (taken from the data table), with a regression
+    line. It shows whether a hit decreases (or increases) over time in the
+    selected samples.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -57,4 +64,8 @@ plot_trend(object,
     group_var = c("T1", "T2", "TRT"),
     nrow = 2
 )
+}
+\seealso{
+\code{\link{compute_slope}}, \code{\link{filter_by_slope}},
+    \code{\link{plot_boxplot}}
 }

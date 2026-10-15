@@ -2,31 +2,29 @@
 % Please edit documentation in R/barcode_lost.R
 \name{plot_barcode_lost_for_gene}
 \alias{plot_barcode_lost_for_gene}
-\title{Plot number of barcode lost for  gene}
+\title{Plot the number of barcodes lost for each gene}
 \usage{
 plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{facet}{A boolean to use the facet.}
+\item{facet}{Whether to draw a separate panel for each sample (TRUE,
+default) or a single panel.}
 
-\item{samples}{A vector of samples that as to be visualize}
+\item{samples}{The names of the samples to plot (required).}
 }
 \value{
-Return the plot displaying the number of barcode lost for each gene
-        in each sample.
+A ggplot object with the number of lost barcodes on the x axis and
+    the genes on the y axis.
 }
 \description{
-This function plots the number of barcodes lost in each sample
-             for each gene. Usually in a genetic screening each gene is
-             is associated with multiple shRNAs and so barcodes. For this
-             reason a reasonable number of barcodes associated with the
-             gene has to be retrieved in order to have a robust result.
-             Visualizing the number of genes that have lost lot's of barcode
-             is a Quality Check procedure in order to be aware of the number
-             of barcode for the hit identified.
+Plots, for each gene and sample, the number of barcodes of the
+    gene with zero reads. Each gene is targeted by several shRNAs
+    (barcodes), and a gene needs enough barcodes left to give a robust
+    result: this quality control plot shows which genes lost many of their
+    barcodes. Only the genes that lost at least one barcode are shown.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -38,5 +36,8 @@ plot_barcode_lost_for_gene(object,
     samples = c("Time3_A", "Time3_B"),
     facet = FALSE
 )
+}
+\seealso{
+\code{\link{barcode_lost}}, \code{\link{plot_barcode_lost}}
 }
 \concept{plot}

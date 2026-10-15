@@ -1,7 +1,8 @@
-#' @title Plot the trend over time of the barcodes
-#' @description Plot the log2FC over time of the barcodes in the different
-#'              time point. This plot is useful to check we efficacy of each
-#'              shRNA. Good shRNAs should have consistent trend trend over time.
+#' @title Plot the trend of the barcodes of genes over time
+#' @description Plots the log2 fold change of each barcode of the given genes
+#'     at the different time points, one line for each barcode. It is useful
+#'     to check the efficacy of each shRNA: good shRNAs of a hit should have a
+#'     consistent trend over time.
 #' @importFrom rlang .data
 #' @importFrom dplyr bind_rows
 #' @importFrom patchwork wrap_plots
@@ -9,34 +10,40 @@
 #' @importFrom rlang .data
 #' @importFrom purrr map reduce
 #' @importFrom ggplot2 geom_line geom_point facet_wrap scale_color_manual
-#' @param list_data_measure A list containing the measure table of the
-#'                          different time point. Generated using the
-#'                          compute_metrics function.
-#' @param n_col The number of column to use in the facet wrap.
-#' @param size_line The thickness of the line.
-#' @param genes The vector of genes name.
-#' @param color The vector of colors. One color for each barcode.
-#' @return The trend plot for the genes in input.
+#' @param list_data_measure The tables of \code{\link{compute_metrics}} for the
+#'     different time points, as a list or already combined with
+#'     \code{\link[dplyr]{bind_rows}}. The time points are shown in the order
+#'     in which they appear.
+#' @param n_col The number of columns used to arrange the plots of the genes
+#'     (default 1). When larger than 1 the plots are combined with
+#'     \code{\link[patchwork]{wrap_plots}}.
+#' @param size_line The width of the lines. Default 1.
+#' @param genes The names of the genes to plot.
+#' @param color An optional vector of colors, one for each barcode.
+#' @return With n_col = 1, a list with one ggplot object for each gene; with
+#'     n_col > 1, a single patchwork object combining them.
+#' @seealso \code{\link{compute_metrics}}, \code{\link{plot_barcode_hit}},
+#'     \code{\link{find_discordant_barcodes}}
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' metrics <- dplyr::bind_rows(
 #'     compute_metrics(object,
-#'         control = "TRT", treatment = "Time3",
+#'         control = "Time3", treatment = "TRT",
 #'         day = "Time3"
 #'     ),
 #'     compute_metrics(object,
-#'         control = "TRT", treatment = "Time4",
+#'         control = "Time4", treatment = "TRT",
 #'         day = "Time4"
 #'     )
 #' )
-#' # Multiple Genes
+#' # Multiple genes
 #' plot_barcode_trend(metrics,
 #'     genes = c("Gene_1", "Gene_50"),
 #'     n_col = 2
 #' )
-#' # Single Gene
+#' # Single gene
 #' plot_barcode_trend(metrics, genes = "Gene_300")
 plot_barcode_trend <- function(list_data_measure, genes,
     n_col = 1, size_line = 1, color = NULL) {

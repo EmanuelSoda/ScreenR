@@ -4,15 +4,7 @@
 \alias{compute_camera}
 \title{Compute Camera}
 \usage{
-compute_camera(
-  xglm,
-  DGEList,
-  matrix_model,
-  contrast,
-  number_barcode = 3,
-  thresh = 1e-04,
-  lfc = 1
-)
+compute_camera(xglm, DGEList, matrix_model, contrast, number_barcode = 3)
 }
 \arguments{
 \item{xglm}{object created with \code{\link[edgeR]{estimateDisp}}}
@@ -22,17 +14,17 @@ compute_camera(
 \item{...}{
   Arguments passed on to \code{\link[=find_camera_hit]{find_camera_hit}}
   \describe{
-    \item{\code{matrix_model}}{The matrix that will be used to perform the
-linear model analysis created using
-\code{\link[stats]{model.matrix}}}
-    \item{\code{thresh}}{The threshold for the False Discovery Rate (FDR) that has to be
-used to select the statistically significant hits.}
-    \item{\code{lfc}}{The Log2FC threshold.}
-    \item{\code{number_barcode}}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+    \item{\code{matrix_model}}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
+    \item{\code{contrast}}{The comparison to test: the name or index of a column of
+matrix_model, a numeric contrast vector (for example created with
+\code{\link{create_contrast}}) or a one-column matrix created with
+\code{\link[limma]{makeContrasts}}.}
+    \item{\code{number_barcode}}{Only genes with more than number_barcode barcodes
+are tested (default 3, so a gene needs at least 4 barcodes). The
+barcodes of a gene are tested together as a set, so this is not a
+number of barcodes that must change.}
   }}
 }
 \value{

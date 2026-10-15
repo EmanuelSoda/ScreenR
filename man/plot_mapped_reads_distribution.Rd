@@ -12,37 +12,38 @@ plot_mapped_reads_distribution(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
+\item{screenR_Object}{The ScreenR object obtained using
 \code{\link{create_screenr_object}}.}
 
-\item{palette}{The color vector that as to be used for the plot.}
+\item{palette}{An optional vector of colors, one for each sample. By default
+the ggplot2 colors are used.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the boxes or densities, between 0 and 1.
+Default 1.}
 
-\item{type}{The type of plot. The default is "boxplot" the other option is
-"density."}
+\item{type}{The type of plot: "boxplot" (default) or "density".}
 }
 \value{
-Return a tibble containing the number of mapped read for each sample
+A ggplot object.
 }
 \description{
-This function creates a boxplot or a densityplot to show the
-             distribution of the mapped reads in different samples. This
-             function can be used to assess the quality of the samples.
-             Samples which show roughly the same distribution have
-             good quality.
+Draws a box plot or a density plot of the number of reads of
+    the barcodes in each sample. It is a quality control plot: samples of
+    good quality have roughly the same distribution.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
-# Boxplot
+# Box plot
 plot_mapped_reads_distribution(object)
 
 # Density
 plot_mapped_reads_distribution(object, type = "density")
 
+# Density with transparency
 plot_mapped_reads_distribution(object, type = "density", alpha = 0.2)
-
+}
+\seealso{
+\code{\link{count_mapped_reads}}, \code{\link{plot_mapped_reads}}
 }
 \concept{plot}

@@ -2,27 +2,27 @@
 % Please edit documentation in R/camera_method.R
 \name{unique_gene_symbols}
 \alias{unique_gene_symbols}
-\title{Unique gene Symbols}
+\title{Barcodes of each gene}
 \usage{
 unique_gene_symbols(gene_symbols, number_barcode = 3)
 }
 \arguments{
-\item{gene_symbols}{The gene symbols list}
+\item{gene_symbols}{The gene of each barcode.}
 
 \item{...}{
   Arguments passed on to \code{\link[=find_camera_hit]{find_camera_hit}}
   \describe{
-    \item{\code{number_barcode}}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+    \item{\code{number_barcode}}{Only genes with more than number_barcode barcodes
+are tested (default 3, so a gene needs at least 4 barcodes). The
+barcodes of a gene are tested together as a set, so this is not a
+number of barcodes that must change.}
   }}
 }
 \value{
-A list of unique gene symbols
+A named list with the indices of the barcodes of each gene.
 }
 \description{
-Compute a unique gene symbol for gene
+Internal function that returns, for each gene with more than
+    number_barcode barcodes, the indices of its barcodes.
 }
 \keyword{internal}

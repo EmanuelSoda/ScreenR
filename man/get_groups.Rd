@@ -4,25 +4,31 @@
 \alias{get_groups}
 \alias{get_groups,screenr_object-method}
 \alias{get_groups,screenr_object}
-\title{Get ScreenR groups}
+\title{Get the groups}
 \usage{
 get_groups(object)
 
 \S4method{get_groups}{screenr_object}(object)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The groups of the ScreenR object
+A factor with one value for each sample.
 }
 \description{
-Get function for the groups of the ScreenR object
+Returns the experimental group of each sample of a ScreenR
+    object, as given to \code{\link{create_screenr_object}}. The groups
+    define the columns of the design matrix
+    (\code{\link{create_design_matrix}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 groups <- get_groups(object)
 groups
+}
+\seealso{
+\code{\link{set_groups}}, \code{\link{create_screenr_object}}
 }
 \concept{objects}

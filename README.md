@@ -1,119 +1,234 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ScreenR <a href='https://emanuelsoda.github.io/ScreenR/'><img src='man/figures/logo.png' align="right" height="120" /></a>
+# ScreenR <a href="https://emanuelsoda.github.io/ScreenR/"><img src="man/figures/logo.png" align="right" height="139" alt="ScreenR logo" /></a>
 
 <!-- badges: start -->
 
-[![codecov](https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0)](https://codecov.io/gh/EmanuelSoda/ScreenR)
-[![GitHub
-issues](https://img.shields.io/github/issues/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/issues)
-[![GitHub
-pulls](https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR)](https://github.com/EmanuelSoda/ScreenR/pulls)
-[![GitHub
-forks](https://img.shields.io/github/forks/EmanuelSoda/ScreenR?style=social)](https://github.com/EmanuelSoda/ScreenR/network/members)
-[![GitHub
-downloads](https://img.shields.io/github/downloads/EmanuelSoda/ScreenR/total)]()
-[![last
-commit](https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR)]()
-[![Version](https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master)]()
-[![Language](https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR)]()
-
+[![Bioconductor
+release](https://bioconductor.org/shields/years-in-bioc/ScreenR.svg)](https://bioconductor.org/packages/ScreenR)
+[![Bioc release
+build](https://bioconductor.org/shields/build/release/bioc/ScreenR.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/ScreenR/)
+[![Bioc devel
+build](https://bioconductor.org/shields/build/devel/bioc/ScreenR.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/ScreenR/)
 [![R-CMD-check](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml)
+[![codecov](https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0)](https://codecov.io/gh/EmanuelSoda/ScreenR)
 <!-- badges: end -->
 
-ScreenR is an easy and effective package to perform hits identification
-in loss of function High Throughput Biological Screening performed with
-shRNAs library. ScreenR combines the power of software like edgeR with
-the simplicity of the Tidyverse metapackage. ScreenR executes a pipeline
-able to find candidate hits from barcode counts data and integrates a
-wide range of visualization for each step of the analysis
+**Find the genes that matter in pooled shRNA screens — with p-values you
+can trust, quality control built in and publication-ready plots.**
 
-## Installation instructions
+ScreenR takes the barcode counts of a pooled shRNA screen and tells you
+which genes are depleted or enriched by your treatment, how confident
+you can be in each of them, and whether the result holds up at the level
+of the single barcodes. It is built on the statistics of
+[edgeR](https://bioconductor.org/packages/edgeR) and
+[limma](https://bioconductor.org/packages/limma), stores the data in a
+Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 
-Get the latest stable `R` release from
-[CRAN](http://cran.r-project.org/) note that you need to have `R 4.3` or
-greater to use `ScreenR`. Then install `ScreenR` from
-[Bioconductor](http://bioconductor.org/) using the following code:
+<img src="man/figures/workflow.svg" alt="The ScreenR workflow" width="100%"/>
+
+## Why ScreenR?
+
+- **Every hit comes with a p-value and a false discovery rate.** The
+  gene-level tests are calibrated: in screens without any real effect
+  about 5% of the genes have p \< 0.05, as they should.
+- **Benchmarked against the main tools.** On simulated screens and on
+  published shRNA (K562) and CRISPR-Cas9 (HAP1) essentiality screens,
+  ScreenR ranks the true hits as well as the best of MAGeCK, BAGEL2,
+  gscreend and plain edgeR/limma workflows, keeps the FDR below the
+  nominal level and runs in seconds
+  ([benchmark](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)).
+- **Several complementary methods, one table.** A permutation test on
+  the barcode Z-scores, limma CAMERA, ROAST and FRY, and an edgeR model
+  for time courses; `summarise_hits()` combines them and
+  `plot_common_hit()` shows how they agree.
+- **Uses your replicates.** Barcode statistics come from the edgeR
+  quasi-likelihood model, so replicate variability is part of the test.
+- **Quality control included.** Mapped reads, library evenness (Gini
+  index), lost barcodes, replicate correlation and MDS plots, before you
+  look at a single hit.
+- **Works with your files as they are.** Any column names, sample
+  descriptions from a table, helpful messages when something does not
+  match.
+- **shRNA and CRISPR.** Works with shRNA and CRISPR-Cas9 libraries,
+  checks the screen with essential and non-essential reference genes
+  (`compute_screen_quality()`), and corrects CRISPR copy-number bias
+  through [CRISPRcleanR](https://github.com/francescojm/CRISPRcleanR)
+  (`correct_crispr_bias()`).
+- **Bioconductor native.** The ScreenR object is a
+  `SummarizedExperiment`, so it works with the rest of the Bioconductor
+  ecosystem.
+
+## Installation
+
+ScreenR requires R 4.3 or later. Install the release version from
+[Bioconductor](https://bioconductor.org/packages/ScreenR):
 
 ``` r
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
-
 BiocManager::install("ScreenR")
 ```
 
-And the development version from
-[GitHub](https://github.com/EmanuelSoda/ScreenR) with:
+or the development version from GitHub:
 
 ``` r
-devtools::install_github("EmanuelSoda/ScreenR")
+BiocManager::install("EmanuelSoda/ScreenR")
 ```
 
-## ScreenR overall workflow
+## Quick start
 
-<img src="man/figures/Pipeline.png" align="top">
+The package includes an example screen: shRNA counts for treated (`TRT`)
+and control (`CTRL`) cells at several time points, with three
+replicates.
 
-Please note that the `ScreenR` was only made possible thanks to many
-other R and bioinformatics software authors, which are cited either in
-the vignettes and/or the paper(s) describing this package.
+``` r
+library(ScreenR)
+
+data(count_table)
+data(annotation_table)
+counts <- count_table[count_table$Barcode != "*", ]
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+groups <- factor(c(
+    "T1/T2", "T1/T2", rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+
+# 1. Create the object and normalize the counts
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+object <- compute_data_table(normalize_data(remove_all_zero_row(object)))
+object
+#> class: screenr_object 
+#> dim: 5317 14 
+#> metadata(0):
+#> assays(2): counts normalized
+#> rownames(5317): 10208 10502 ... 13876 13995
+#> rowData names(5): Barcode Gene Gene_ID Sequence Library
+#> colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C
+#> colData names(4): Sample Day Treatment Group
+#> data table: 74438 rows, 9 columns
+```
+
+Check the samples before looking for hits: replicates should cluster
+together.
+
+``` r
+plot_mds(object) + ggplot2::theme_bw()
+```
+
+<img src="man/figures/README-qc-1.png" width="100%" />
+
+Compare treated and control cells at the last time point with two
+independent tests, and combine them:
+
+``` r
+# 2. Define the comparison
+design <- create_design_matrix(object)
+contrast <- create_contrast(design, treatment = "Time4_TRT", control = "Time4_CTRL")
+
+# 3. Gene-level permutation test on replicate-aware barcode statistics
+barcode_statistics <- compute_barcode_statistics(object, design, contrast)
+zscore <- find_gene_zscore_hit(barcode_statistics, fdr = 1, seed = 1)
+
+# 4. limma CAMERA on the barcodes of each gene
+camera <- find_camera_hit(object, design, contrast, fdr = 1)
+
+# 5. One table with the FDR of both methods, best supported genes first
+#    (the example screen has a weak effect, so we use a lenient FDR of 25%)
+hits <- summarise_hits(list(zscore = zscore, camera = camera), fdr = 0.25)
+head(hits)
+#> # A tibble: 6 x 6
+#>   Gene     FDR_zscore FDR_camera NMethods MaxFDR Hit  
+#>   <chr>         <dbl>      <dbl>    <dbl>  <dbl> <lgl>
+#> 1 Gene_173      0.128     0.0882        2  0.128 TRUE 
+#> 2 Gene_422      0.187     0.0882        2  0.187 TRUE 
+#> 3 Gene_15       0.233     0.232         2  0.233 TRUE 
+#> 4 Gene_296      0.250     0.0882        2  0.250 TRUE 
+#> 5 Gene_370      0.280     0.232         1  0.280 FALSE
+#> 6 Gene_352      0.280     0.232         1  0.280 FALSE
+```
+
+Look at the barcodes of the top candidate before trusting it:
+
+``` r
+top_gene <- as.character(hits$Gene[1])
+plot_boxplot(object,
+    genes = top_gene, group_var = c("TRT", "CTRL"), fill_var = "Treatment"
+) +
+    ggplot2::scale_fill_manual(values = c(CTRL = "#93B5A3", TRT = "#C9836A")) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+```
+
+<img src="man/figures/README-top-gene-1.png" width="100%" />
+
+## Which method should I use?
+
+Every method looks for **depleted** genes by default; set
+`direction = "Up"` to find **enriched** genes (for example in a
+resistance screen).
+
+| Question                                               | Function                                | Notes                                                                                                          |
+|--------------------------------------------------------|-----------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Which genes are depleted or enriched?                  | `find_gene_zscore_hit()`                | Permutation test on the barcode scores; robust default. Use `statistic = "median"` against off-target effects. |
+| Do the barcodes of a gene change more than the others? | `find_camera_hit()`                     | limma CAMERA, competitive test; works with a single control sample.                                            |
+| Do the barcodes of a gene change at all?               | `find_roast_hit()`                      | limma ROAST or FRY (`method = "fry"`), self-contained; needs replicates in both groups.                        |
+| Does the effect change over time?                      | `find_time_hit()`                       | edgeR model of the whole time course.                                                                          |
+| Which genes are supported by several methods?          | `summarise_hits()`, `plot_common_hit()` | One table with the FDR of every method.                                                                        |
+
+## How ScreenR compares
+
+<img src="man/figures/README-benchmark-1.png" width="100%" />
+
+In the simulations ScreenR ranks the true hits as well as the best tools
+and keeps the false discovery rate below the nominal level; at a fixed
+FDR it is more conservative than MAGeCK MLE and BAGEL2, which find more
+hits but exceed the nominal FDR in some scenarios. On the published K562
+shRNA screen included in the package (`k562_count_table`) the ScreenR
+Z-score test is comparable to MAGeCK RRA and BAGEL2. The [benchmark
+article](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)
+has all the details and reruns the ScreenR side of the comparison.
+
+## Learn more
+
+|                                                                                                                                  |                                                                                                                   |
+|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object                                             |
+| [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html)                    | Sequencing depth, library evenness, replicates, normalization                                                     |
+| [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html)           | All the hit-finding methods, combining them and checking the hits                                                 |
+| [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html)                                 | How the tests work and why                                                                                        |
+| [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)                 | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
+| [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html)                                                 | Every function, grouped by analysis step                                                                          |
+
+## Getting help
+
+- Questions about using ScreenR: the [Bioconductor support
+  site](https://support.bioconductor.org/tag/ScreenR) (tag `ScreenR`).
+- Bugs and feature requests: [GitHub
+  issues](https://github.com/EmanuelSoda/ScreenR/issues).
 
 ## Citation
 
-Below is the citation output from using `citation('ScreenR')` in `R`.
-Please run this yourself to check for any updates on how to cite
-**ScreenR**.
-
 ``` r
-print(citation('ScreenR'))
-#> 
-#> To cite package 'ScreenR' in publications use:
-#> 
-#>   Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
-#>   Throughput Biological Screening_. R package version 0.99.53,
-#>   <https://emanuelsoda.github.io/ScreenR/>.
-#> 
-#> A BibTeX entry for LaTeX users is
-#> 
-#>   @Manual{,
-#>     title = {ScreenR: Package to Perform High Throughput Biological Screening},
-#>     author = {Emanuel Michele Soda and Elena Ceccacci},
-#>     year = {2022},
-#>     note = {R package version 0.99.53},
-#>     url = {https://emanuelsoda.github.io/ScreenR/},
-#>   }
+print(citation("ScreenR"), bibtex = FALSE)
+To cite package 'ScreenR' in publications use:
+
+  Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
+  Throughput Biological Screening_. R package version 1.15.14,
+  <https://emanuelsoda.github.io/ScreenR/>.
 ```
 
 ## Code of Conduct
 
-Please note that the `ScreenR` project is released with a [Contributor
-Code of Conduct](http://bioconductor.org/about/code-of-conduct/). By
+The ScreenR project is released with the [Bioconductor Code of
+Conduct](https://bioconductor.org/about/code-of-conduct/). By
 contributing to this project, you agree to abide by its terms.
-
-## Development tools
-
--   Continuous code testing is possible thanks to [GitHub
-    actions](https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/)
-    through *[usethis](https://CRAN.R-project.org/package=usethis)*,
-    *[remotes](https://CRAN.R-project.org/package=remotes)*, and
-    *[rcmdcheck](https://CRAN.R-project.org/package=rcmdcheck)*
-    customized to use [Bioconductor’s docker
-    containers](https://www.bioconductor.org/help/docker/) and
-    *[BiocCheck](https://bioconductor.org/packages/3.15/BiocCheck)*.
--   Code coverage assessment is possible thanks to
-    [codecov](https://codecov.io/gh) and
-    *[covr](https://CRAN.R-project.org/package=covr)*.
--   The [documentation website](http://EmanuelSoda.github.io/ScreenR) is
-    automatically updated thanks to
-    *[pkgdown](https://CRAN.R-project.org/package=pkgdown)*.
--   The code is styled automatically thanks to
-    *[styler](https://CRAN.R-project.org/package=styler)*.
--   The documentation is formatted thanks to
-    *[devtools](https://CRAN.R-project.org/package=devtools)* and
-    *[roxygen2](https://CRAN.R-project.org/package=roxygen2)*.
-
-For more details, check the `dev` directory.
-
-This package was developed using
-*[biocthis](https://bioconductor.org/packages/3.15/biocthis)*.

@@ -2,23 +2,30 @@
 % Please edit documentation in R/mapped_reads.R
 \name{mapped_reads}
 \alias{mapped_reads}
-\title{Mapped Reads}
+\title{Compute the number of mapped reads of each sample}
 \usage{
 mapped_reads(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-Return a tibble containing the number of mapped read for sample
+A tibble with one row for each sample and the columns Sample and
+    Mapped (the total number of mapped reads).
 }
 \description{
-This function returns the number of mapped reads inside the
-             ScreenR object
+Computes the total number of reads mapped to the barcodes in
+    each sample (the library size). Samples with far fewer mapped reads
+    than the others may have a lower quality. Use
+    \code{\link{plot_mapped_reads}} to plot the result.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 mapped_reads(object)
+}
+\seealso{
+\code{\link{count_mapped_reads}}, \code{\link{plot_mapped_reads}},
+    \code{\link{barcode_lost}}
 }
 \concept{compute}

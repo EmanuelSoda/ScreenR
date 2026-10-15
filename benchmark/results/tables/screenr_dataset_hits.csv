@@ -1,0 +1,9 @@
+"method","n_hits","overlap_with_MAGeCK_RRA","overlap_with_MAGeCK_MLE"
+"MAGeCK_RRA",0,0,0
+"MAGeCK_MLE",4,0,4
+"CAMERA",0,0,0
+"ROAST",9,0,4
+"FRY",9,0,4
+"Zscore_mean",1,0,0
+"Zscore_edgeR",0,0,0
+"legacy_rule",97,0,4

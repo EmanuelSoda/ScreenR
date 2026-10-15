@@ -1,21 +1,39 @@
-#' @title Filter using the slope filter
-#' @description This function is used to improve the quality of the hits found.
-#'              It computes a regression line in the different samples ad uses
-#'              the slope of this line to see the trend
+#' @title Filter hits by the slope of their trend
+#' @description Refines a list of candidate hits (for example found by the
+#'     statistical methods) by their trend over time. For each gene it fits a
+#'     regression line of the normalized counts of its barcodes over the time
+#'     points, separately in the treated and in the control samples (see
+#'     \code{\link{compute_slope}}), and keeps the genes that decrease more in
+#'     the treated samples than in the controls.
+#' @details A gene is kept when both slopes are negative and the treatment
+#'     slope is lower than the control slope, or when the control slope is
+#'     zero or positive and the treatment slope negative. Before
+#'     this, the optional thresholds remove the genes whose control slope is
+#'     larger in absolute value than slope_control and those whose treatment
+#'     slope is smaller in absolute value than slope_treatment.
 #' @importFrom stats lm
 #' @importFrom dplyr rename
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param genes The genes for which the slope as to be computed. Those genes
-#'              are the result of the three statistical methods selection
-#' @param slope_treatment A value used as threshold for the treatment slope
-#' @param slope_control A value used as threshold for the control slope
-#' @param group_var_treatment The variable to use as independent variable (x)
-#'                            for the linear model of the treatment
-#' @param group_var_control The variable to use as independent variable (x)
-#'                          for the linear model of the the control
-#' @return A data frame with the slope for the treatment and the control
-#'         for each gene
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param genes The genes to filter, for example the hits found by
+#'     \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
+#'     \code{\link{find_roast_hit}}.
+#' @param slope_treatment An optional threshold: genes whose treatment slope
+#'     is smaller than this in absolute value are removed. Default NULL (no
+#'     threshold).
+#' @param slope_control An optional threshold: genes whose control slope is
+#'     larger than this in absolute value are removed. Default NULL (no
+#'     threshold).
+#' @param group_var_treatment The values of the Treatment column of the data
+#'     table (see \code{\link{get_sample_table}}) of the samples used for the
+#'     treatment trend, for example the early time points and the treated
+#'     samples.
+#' @param group_var_control The values of the Treatment column of the data
+#'     table of the samples used for the control trend.
+#' @return A tibble with the columns Gene, slope_control and slope_treatment,
+#'     with one row for each gene that passes the filter.
+#' @seealso \code{\link{compute_slope}}, \code{\link{filter_by_variance}},
+#'     \code{\link{plot_trend}}
 #' @concept filter
 #' @export
 #' @examples
@@ -27,7 +45,6 @@
 #'     group_var_control = c("T1", "T2", "Time3", "Time4"),
 #'     slope_control = 0.5, slope_treatment = 1
 #' )
-#'
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     group_var_control, slope_control = NULL, slope_treatment = NULL) {
 
@@ -51,7 +68,6 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     data <- dplyr::rename(data, slope_control = .data$Slope)
 
     if(!is.null(slope_control)){
-        print(unique(data$slope_control))
         data <- dplyr::filter(data, abs(.data$slope_control)  <=
                                   abs(slope_control))
     }
@@ -74,7 +90,9 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
         .data$slope_control >= 0 & .data$slope_treatment >= 0 & 
             .data$slope_treatment >= .data$slope_control ~ FALSE,
         
-        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE)
+        .data$slope_control >= 0 & .data$slope_treatment <= 0 ~ TRUE,
+
+        TRUE ~ FALSE)
         )
     
     data <- dplyr::filter(data, .data$keep)
@@ -82,18 +100,24 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
     return(data)
 }
 
-#' @title Compute Slope of a Gene
-#' @description This function is used to compute the slope of the gene passed
-#'              as input
+#' @title Compute the slope of the trend of genes
+#' @description Computes, for each gene, the slope of a regression line of the
+#'     normalized counts (Frequency column of the data table) of its barcodes
+#'     over the time points. The time points (Day column of the data table)
+#'     are numbered 1, 2, ... in the order of the samples, so they are treated
+#'     as equally spaced, and replicates of the same time point share the same
+#'     number. Only the samples whose Treatment is in group_var are used. It
+#'     is used by \code{\link{filter_by_slope}}.
 #' @importFrom rlang .data
 #' @importFrom dplyr ungroup
-#' @param group_var The variable to use  as independent variable (x)
-#'                  for the linear model
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param genes The genes for which the slope as to be computed. Those genes
-#'              are the result of the three statistical methods selection
-#' @return A tibble containing in each row the gene and the corresponding Slope
+#' @param group_var The values of the Treatment column of the data table (see
+#'     \code{\link{get_sample_table}}) of the samples to use.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param genes The genes for which the slope is computed.
+#' @return A row-wise tibble with the columns Gene and Slope, with one row for
+#'     each gene.
+#' @seealso \code{\link{filter_by_slope}}, \code{\link{plot_trend}}
 #' @export
 #' @concept compute
 #' @examples
@@ -108,11 +132,16 @@ compute_slope <- function(screenR_Object, genes, group_var) {
     data <- dplyr::filter(data, .data$Gene %in% genes)
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
-    # in order to perform the linear regression as samples are a time series
-    # the ordered Sample are encoded as number
-    data <- dplyr::group_by(data, .data$Gene)
-    data <- dplyr::mutate(data, encode = seq(1, n(), 1))
-    data <- dplyr::ungroup(data)
+    # In order to perform the linear regression as samples are a time series
+    # each time point (Day) is encoded as a number, following the order of
+    # the samples. Replicates of the same time point share the same number.
+    sample_rank <- if (is.factor(data$Sample)) {
+        as.integer(data$Sample)
+    } else {
+        match(data$Sample, unique(data$Sample))
+    }
+    days <- unique(as.character(data$Day[order(sample_rank)]))
+    data <- dplyr::mutate(data, encode = match(.data$Day, days))
 
     data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
         Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"]
@@ -123,49 +152,57 @@ compute_slope <- function(screenR_Object, genes, group_var) {
 }
 
 
-#' @title Filter using the variance filter
-#' @description This function is used to improve the quality of the hits.
-#'              It compute the variance among the hits and filter the one with
-#'              a value greater than the threshold set
-#'
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param genes The genes for which the variance as to be computed.
-#'              Those genes are the result of the three statistical
-#'              methods selection
-#' @param variance The maximum value of variance accepted
-#' @param contrast The variable to use as X for the linear model
-#'                 for the Treatment
-#' @param matrix_model a matrix created using \code{\link[stats]{model.matrix}}
-#' @return A data frame with the variance for the treatment and the control
-#'         for each gene
+#' @title Filter hits by the variance of their barcodes
+#' @description Refines a list of candidate hits by the consistency of their
+#'     barcodes. For each gene it computes the variance of the log2 fold
+#'     changes of its barcodes (estimated with edgeR for the given contrast)
+#'     and keeps the genes whose variance is at most the given threshold:
+#'     a gene whose barcodes disagree is a less reliable hit.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param genes The genes to filter, for example the hits found by
+#'     \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
+#'     \code{\link{find_roast_hit}}.
+#' @param variance The maximum variance of the barcode log2 fold changes
+#'     accepted (default 0.5).
+#' @param contrast The comparison used to compute the log2 fold changes: the
+#'     name or index of a column of matrix_model, a numeric contrast vector
+#'     (for example created with \code{\link{create_contrast}}) or a
+#'     one-column matrix created with \code{\link[limma]{makeContrasts}}.
+#' @param matrix_model The design matrix of the linear model, for example
+#'     created with \code{\link{create_design_matrix}} (or with
+#'     \code{\link[stats]{model.matrix}}).
+#' @return The rows of the data table (see \code{\link{get_data_table}}) of
+#'     the genes that pass the filter, with an additional Variance column (the
+#'     variance of the barcode log2 fold changes of the gene).
+#' @seealso \code{\link{filter_by_slope}},
+#'     \code{\link{find_discordant_barcodes}}
 #' @export
 #' @concept filter
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' matrix_model <- model.matrix(~ slot(object, "groups"))
-#' colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-#' contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+#' matrix_model <- create_design_matrix(object)
+#' contrast <- create_contrast(matrix_model,
+#'     treatment = "Treated", control = "Control"
+#' )
 #'
 #' data <- filter_by_variance(
 #'     screenR_Object = object, genes = c("Gene_42"),
 #'     matrix_model = matrix_model, contrast = contrast
 #' )
 #' head(data)
-#'
 filter_by_variance <- function(screenR_Object, genes, matrix_model,
     variance = 0.5, contrast) {
     # Save the data_table in a temporary variable
     data <- screenR_Object@data_table
 
     # Create the edgeR object and computing the LogFC
+    contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
-    fit <- edgeR::glmFit(xglm, matrix_model)
-    lrt <- edgeR::glmLRT(fit, contrast = contrast)
 
-    lrt <- data.frame(lrt$table)
-    lrt$Gene <- fit$genes$Gene
+    lrt <- data.frame(logFC = barcode_log2fc(xglm, matrix_model, contrast))
+    lrt$Gene <- DGEList$genes$Gene
     lrt <- dplyr::filter(lrt, .data$Gene %in% genes)
     lrt <- dplyr::group_by(lrt, .data$Gene)
     lrt <- dplyr::mutate(lrt, variance = stats::var(.data$logFC))
@@ -184,19 +221,18 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 
 
 
-#' @title Remove rows that have zero count in all samples
-#' @description This function removes the rows that have zero count in
-#'              all samples. It takes care of updating both count_table and
-#'              annotation_table.
-#'              Very_Important: It has to be performed before the
-#'                              data normalization.
-#'
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Remove the barcodes with zero counts in all samples
+#' @description Removes the barcodes (rows) with zero counts in all the
+#'     samples from the count table, the annotation table and, when present,
+#'     the normalized count table and the data table. Run it before
+#'     \code{\link{normalize_data}}.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @importFrom dplyr if_all
 #' @importFrom tidyselect vars_select_helpers
-#' @return The ScreenR object with the count_table and the annotation_table
-#'         filtered.
+#' @return The ScreenR object without the barcodes with zero counts in all
+#'     samples.
+#' @seealso \code{\link{normalize_data}}, \code{\link{barcode_lost}}
 #' @export
 #' @concept compute
 #' @examples
@@ -207,7 +243,8 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #' counts <- get_count_table(object)
 #' nrow(counts)
 remove_all_zero_row <- function(screenR_Object) {
-    counts <- screenR_Object@count_table
+    screenR_Object <- update_screenr_object(screenR_Object)
+    counts <- count_table_of(screenR_Object)
 
     # First of all all the row with zero counts are founded
     counts_zeros <- filter(
@@ -218,16 +255,17 @@ remove_all_zero_row <- function(screenR_Object) {
         )
     )
 
-    # Then there are filtered
-    counts <- filter(counts, !.data$Barcode %in% counts_zeros$Barcode)
-
-    screenR_Object@count_table <- counts
+    # Then there are filtered (with the normalized counts and the data
+    # table, which are subset together with the object)
+    screenR_Object <- screenR_Object[
+        !counts$Barcode %in% counts_zeros$Barcode,
+    ]
 
 
     # The same procedure as to be done for the annotation_table table
     # in order to keep thigs working
 
-    anno_table <- screenR_Object@annotation_table
+    anno_table <- annotation_of(screenR_Object)
 
     anno_table <-
         filter(

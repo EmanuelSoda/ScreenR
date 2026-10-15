@@ -4,29 +4,36 @@
 \alias{set_normalized_count_table}
 \alias{set_normalized_count_table,screenr_object-method}
 \alias{set_normalized_count_table,screenr_object}
-\title{Set ScreenR normalized_count_table}
+\title{Set the normalized count table}
 \usage{
 set_normalized_count_table(object, normalized_count_table)
 
 \S4method{set_normalized_count_table}{screenr_object}(object, normalized_count_table)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{normalized_count_table}{A table of the normalized count table}
+\item{normalized_count_table}{A table with a Barcode column and one column
+of normalized counts for each sample.}
 }
 \value{
-The ScreenR object with the set normalized_count_table
+The ScreenR object with the new normalized count table.
 }
 \description{
-Set function for the normalized_count_table of
-             the ScreenR object
+Replaces the normalized count table of a ScreenR object, for
+    example with counts normalized outside ScreenR. The table is matched to
+    the count table by barcode and sample; an empty table removes the
+    normalized counts. Usually the normalized counts are computed with
+    \code{\link{normalize_data}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 normalized_count_table <- get_normalized_count_table(object)
-normalized_count_table
 set_normalized_count_table(object, normalized_count_table)
+}
+\seealso{
+\code{\link{normalize_data}},
+    \code{\link{get_normalized_count_table}}
 }
 \concept{objects}

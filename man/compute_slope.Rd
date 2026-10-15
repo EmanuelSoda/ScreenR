@@ -2,26 +2,31 @@
 % Please edit documentation in R/filter_by.R
 \name{compute_slope}
 \alias{compute_slope}
-\title{Compute Slope of a Gene}
+\title{Compute the slope of the trend of genes}
 \usage{
 compute_slope(screenR_Object, genes, group_var)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{genes}{The genes for which the slope as to be computed. Those genes
-are the result of the three statistical methods selection}
+\item{genes}{The genes for which the slope is computed.}
 
-\item{group_var}{The variable to use  as independent variable (x)
-for the linear model}
+\item{group_var}{The values of the Treatment column of the data table (see
+\code{\link{get_sample_table}}) of the samples to use.}
 }
 \value{
-A tibble containing in each row the gene and the corresponding Slope
+A row-wise tibble with the columns Gene and Slope, with one row for
+    each gene.
 }
 \description{
-This function is used to compute the slope of the gene passed
-             as input
+Computes, for each gene, the slope of a regression line of the
+    normalized counts (Frequency column of the data table) of its barcodes
+    over the time points. The time points (Day column of the data table)
+    are numbered 1, 2, ... in the order of the samples, so they are treated
+    as equally spaced, and replicates of the same time point share the same
+    number. Only the samples whose Treatment is in group_var are used. It
+    is used by \code{\link{filter_by_slope}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -30,5 +35,8 @@ compute_slope(object,
     genes = c("Gene_42", "Gene_24"),
     group_var = c("T1", "T2", "TRT")
 )
+}
+\seealso{
+\code{\link{filter_by_slope}}, \code{\link{plot_trend}}
 }
 \concept{compute}

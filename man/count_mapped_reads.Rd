@@ -2,26 +2,32 @@
 % Please edit documentation in R/count_mapped_reads.R
 \name{count_mapped_reads}
 \alias{count_mapped_reads}
-\title{Count the number of mapped read}
+\title{Get the mapped reads of each barcode in each sample}
 \usage{
 count_mapped_reads(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-Return a tibble containing the number of mapped read for sample
+A tibble with one row for each barcode and sample and the columns
+    Barcode, Sample (a factor in the order of the samples of the count
+    table) and Mapped (the number of reads).
 }
 \description{
-This function counts the number of reads for each barcode
-             in each sample. It is a quality control function (QC) to see if
-             the biological protocol went as planned.
-             If a sample has very low mapped compared to the other means
-             that is has a lower quality.
+Returns the count table in long format, with the number of
+    reads mapped to each barcode in each sample. It is the starting point
+    of the quality control functions, such as \code{\link{mapped_reads}},
+    \code{\link{barcode_lost}} and
+    \code{\link{plot_mapped_reads_distribution}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 head(count_mapped_reads(object))
+}
+\seealso{
+\code{\link{mapped_reads}}, \code{\link{barcode_lost}},
+    \code{\link{plot_mapped_reads_distribution}}
 }
 \concept{compute}

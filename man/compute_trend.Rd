@@ -2,22 +2,23 @@
 % Please edit documentation in R/plot_trend.R
 \name{compute_trend}
 \alias{compute_trend}
-\title{Compute trend}
+\title{Compute the trend of genes}
 \usage{
 compute_trend(screenR_Object, genes, group_var)
 }
 \arguments{
-\item{screenR_Object}{object created with \code{\link[edgeR]{estimateDisp}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{genes}{a list of genes}
+\item{genes}{The names of the genes.}
 
-\item{group_var}{the variable that as to be used as grouping variable}
+\item{group_var}{The values of the Treatment column of the samples to use.}
 }
 \value{
-A table with the trend of the genes passed as input
+A tibble with the columns Sample, Gene and Frequency.
 }
 \description{
-This is an internal function  used to computes the trend of
-             a gene
+Internal function that computes, for each gene and sample, the
+    mean normalized count of the barcodes of the gene.
 }
 \keyword{internal}

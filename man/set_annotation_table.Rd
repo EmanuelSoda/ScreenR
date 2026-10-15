@@ -4,27 +4,34 @@
 \alias{set_annotation_table}
 \alias{set_annotation_table,screenr_object-method}
 \alias{set_annotation_table,screenr_object}
-\title{Set ScreenR annotation table}
+\title{Set the annotation table}
 \usage{
 set_annotation_table(object, annotation_table)
 
 \S4method{set_annotation_table}{screenr_object}(object, annotation_table)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{annotation_table}{a table containing the annotation for each shRNA}
+\item{annotation_table}{A data frame with the annotation of each barcode,
+with at least the columns Barcode and Gene.}
 }
 \value{
-The ScreenR object with the annotation table
+The ScreenR object with the new annotation table.
 }
 \description{
-Set function for the annotation table of the ScreenR object
+Replaces the annotation table of a ScreenR object. The
+    annotation of the barcodes of the count table (the rowData of the
+    object) is updated by matching the Barcode column.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 annotation <- get_annotation_table(object)
 set_annotation_table(object, annotation)
+}
+\seealso{
+\code{\link{get_annotation_table}},
+    \code{\link{create_screenr_object}}
 }
 \concept{objects}

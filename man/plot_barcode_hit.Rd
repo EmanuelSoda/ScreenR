@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_barcode_hit.R
 \name{plot_barcode_hit}
 \alias{plot_barcode_hit}
-\title{Plot barcode hit}
+\title{Plot the barcodes of a gene (barcode plot)}
 \usage{
 plot_barcode_hit(
   screenR_Object,
@@ -15,47 +15,54 @@ plot_barcode_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{matrix_model}{The matrix that will be used to perform the
-linear model analysis. It is created using
-model.matrix.}
+\item{matrix_model}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
 
-\item{contrast}{An object created with \code{\link[limma]{makeContrasts}}
-function.}
+\item{contrast}{The comparison to plot: the name or index of a column of
+matrix_model, a numeric contrast vector (for example created with
+\code{\link{create_contrast}}) or a one-column matrix created with
+\code{\link[limma]{makeContrasts}}.}
 
-\item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE) in order to consider the associated gene
-DE. Example a gene is associated with 10 shRNA we
-consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+\item{number_barcode}{The gene must have more than number_barcode barcodes
+(default 3), as in \code{\link{find_camera_hit}}.}
 
-\item{gene}{The name of the gene that has to be plot}
+\item{gene}{The name of the gene to plot.}
 
-\item{quantile}{Quantile to display on the plot}
+\item{quantile}{The two log2 fold change values that delimit the central
+(shaded) region of the plot. Default c(-0.5, 0.5).}
 
-\item{labels}{The label to be displayed on the quantile side}
+\item{labels}{The labels of the left and right ends of the plot.}
 }
 \value{
-The barcode plot
+Draws the plot with base graphics and returns NULL invisibly.
 }
 \description{
-Create a barcode plot for a hit.
-             A barcode plot displays if the hit is differentially up or
-             down regulated. If most of the vertical line are on the left
-             side the gene associated to the barcodes is down regulated
-             otherwise is up regulated.
+Draws a \code{\link[limma]{barcodeplot}} for a gene: all the
+    barcodes are ranked by their log2 fold change (computed with edgeR for
+    the given contrast) and the barcodes of the gene are shown as vertical
+    bars. If most of the bars are on the left (negative log2 fold change)
+    the gene is depleted, if they are on the right it is enriched. It is
+    useful to check the hits of \code{\link{find_camera_hit}} and
+    \code{\link{find_roast_hit}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~ slot(object, "groups"))
-colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+matrix_model <- create_design_matrix(object)
+contrast <- create_contrast(matrix_model,
+    treatment = "Treated", control = "Control"
+)
 
 plot_barcode_hit(object, matrix_model,
     contrast = contrast,
     gene = "Gene_300"
 )
+}
+\seealso{
+\code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+    \code{\link{plot_barcode_trend}}
 }
 \concept{plot}

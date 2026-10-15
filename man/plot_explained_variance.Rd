@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_mds.R
 \name{plot_explained_variance}
 \alias{plot_explained_variance}
-\title{Plot the explained variance by the PC}
+\title{Plot the variance explained by the principal components}
 \usage{
 plot_explained_variance(
   screenR_Object,
@@ -11,26 +11,32 @@ plot_explained_variance(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{cumulative}{A boolean value which indicates whether or not to plot
-the cumulative variance. The default value is FALSE.}
+\item{cumulative}{Whether to plot the cumulative proportion of variance
+instead of the proportion of each component. Default FALSE.}
 
-\item{color}{The color to fill the barplot the default value is steelblue}
+\item{color}{The fill color of the bars. Default "steelblue".}
 }
 \value{
-The explained variance plot
+A ggplot object.
 }
 \description{
-This function plot the explained variance by the
-             Principal Component analysis.
+Plots the proportion of the variance explained by each
+    principal component of a principal component analysis (PCA) of the
+    samples, computed on the raw counts with
+    \code{\link{compute_explained_variance}}. It shows how many components
+    are needed to describe the differences between the samples.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_explained_variance(object)
 
-# For the cumulative plot
+# Cumulative variance
 plot_explained_variance(object, cumulative = TRUE)
+}
+\seealso{
+\code{\link{plot_mds}}, \code{\link{plot_replicate_correlation}}
 }

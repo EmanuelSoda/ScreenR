@@ -2,38 +2,42 @@
 % Please edit documentation in R/plot_zscore_distribution.R
 \name{plot_zscore_distribution}
 \alias{plot_zscore_distribution}
-\title{Plot distribution Z-score}
+\title{Plot the distribution of the barcode log2 fold changes}
 \usage{
 plot_zscore_distribution(time_point_measure, alpha = 1)
 }
 \arguments{
-\item{time_point_measure}{A list containing the table for each time
-point. Each table contains for each barcode
-the counts for the treated and control the Log2FC,
-Zscore, ZscoreRobust, Day.}
+\item{time_point_measure}{A list with the tables of
+\code{\link{compute_metrics}} for the different time points (or a
+single table). Each table contains, for each barcode, the columns
+Log2FC and Day.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the densities, between 0 and 1. Default 1.}
 }
 \value{
-return the density plot of the distribution of the Z-score
+A ggplot object.
 }
 \description{
-This function plots the Log2FC Z-score distribution of the
-             treated vs control in the different time points.
+Draws the density of the log2 fold changes of the barcodes
+    (treated versus control), with one curve for each time point. It is
+    useful to compare the strength of the effect of the treatment at the
+    different time points.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 table1 <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 
 table2 <- compute_metrics(object,
-    control = "TRT", treatment = "Time4",
+    control = "Time4", treatment = "TRT",
     day = "Time4"
 )
 
 plot_zscore_distribution(list(table1, table2), alpha = 0.5)
+}
+\seealso{
+\code{\link{compute_metrics}}, \code{\link{plot_barcode_trend}}
 }

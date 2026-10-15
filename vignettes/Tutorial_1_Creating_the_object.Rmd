@@ -1,0 +1,386 @@
+---
+title: "Tutorial 1: Getting your data into ScreenR"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Tutorial 1: Getting your data into ScreenR}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# About this tutorial
+
+This is the first of three tutorials that explain step by step how to use
+ScreenR:
+
+1. **Getting your data into ScreenR** (this tutorial): which tables you need,
+   how to create the ScreenR object and how to check that ScreenR understood
+   your data correctly.
+2. **Quality control**: how to check that the screen worked before looking for
+   hits.
+3. **Finding and validating hits**: how to compare treated and control
+   samples, how to combine the statistical methods and how to check the
+   candidate genes.
+
+Everything in ScreenR starts from a **ScreenR object**, which keeps all the
+tables of your experiment together. At the end of this tutorial you will know
+how to build it from your own data.
+
+```{r packages, message=FALSE}
+library(ScreenR)
+library(dplyr)
+```
+
+# What ScreenR needs
+
+ScreenR analyses pooled screens with barcoded shRNA (or sgRNA) libraries: each
+gene is targeted by several barcodes, the barcodes are counted by sequencing in
+each sample, and a gene whose barcodes disappear (or increase) in the treated
+samples is a candidate hit. You need three pieces of information.
+
+| What | Content | Required |
+|------|---------|----------|
+| **Count table** | One row per barcode, one column with the barcode identifier and one column per sample with the number of reads | Yes |
+| **Annotation table** | One row per barcode, with the barcode identifier and the gene it targets | Yes |
+| **Groups** | The experimental group of each sample (for example `Time3_TRT`), in the same order as the sample columns | Yes, for the statistical analysis |
+| **Sample table** | The time point (Day) and the Treatment of each sample | Only when the sample names do not follow the `Day_Treatment_Replicate` convention (see below) |
+
+## A minimal example
+
+The smallest possible input: two genes with three barcodes each, two control
+and two treated samples at one time point.
+
+```{r toy-tables}
+toy_counts <- data.frame(
+    Barcode = paste0("bc", 1:6),
+    Day3_CTRL_A = c(520, 610, 480, 300, 350, 410),
+    Day3_CTRL_B = c(500, 590, 505, 320, 330, 395),
+    Day3_TRT_A = c(130, 160, 120, 310, 345, 400),
+    Day3_TRT_B = c(150, 140, 110, 290, 360, 420)
+)
+toy_counts
+
+toy_annotation <- data.frame(
+    Barcode = paste0("bc", 1:6),
+    Gene = rep(c("GeneA", "GeneB"), each = 3)
+)
+toy_annotation
+```
+
+The groups say which samples are replicates of the same condition. They must
+be in the **same order as the sample columns** of the count table.
+
+```{r toy-groups}
+toy_groups <- factor(c("Day3_CTRL", "Day3_CTRL", "Day3_TRT", "Day3_TRT"))
+```
+
+Now the object can be created:
+
+```{r toy-object}
+toy <- create_screenr_object(
+    table = toy_counts,
+    annotation = toy_annotation,
+    groups = toy_groups
+)
+```
+
+# Telling ScreenR what each sample is
+
+Several functions need to know the **time point** (Day) and the **treatment**
+of each sample, for example to compare treated and control samples at Day 3.
+
+## The naming convention
+
+By default ScreenR reads them from the sample names, which should have the form
+
+**`Day_Treatment_Replicate`**, for example `Day3_TRT_A`: time point `Day3`,
+treatment `TRT`, replicate `A`.
+
+Always check how the samples were interpreted with `get_sample_table()`:
+
+```{r toy-sample-table}
+get_sample_table(toy)
+```
+
+## When the names have another form: the sample table
+
+If your samples are called, for example, `S1`, `S2`, ... or `ctrl_rep1`, the
+convention does not apply. ScreenR then gives a message, and you should
+describe the samples with a **sample table**. It can have any column names:
+tell ScreenR which column is which with `sample_columns`.
+
+```{r sample-table}
+counts_other_names <- toy_counts
+colnames(counts_other_names) <- c("Barcode", "S1", "S2", "S3", "S4")
+
+my_samples <- data.frame(
+    sample_id = c("S1", "S2", "S3", "S4"),
+    time = "Day3",
+    condition = c("CTRL", "CTRL", "TRT", "TRT")
+)
+my_samples
+
+toy2 <- create_screenr_object(
+    table = counts_other_names,
+    annotation = toy_annotation,
+    groups = toy_groups,
+    sample_table = my_samples,
+    sample_columns = c(
+        Sample = "sample_id", Day = "time", Treatment = "condition"
+    )
+)
+get_sample_table(toy2)
+```
+
+The rows of the sample table can be in any order: ScreenR matches them to the
+columns of the count table by name. Every sample of the count table must be in
+the sample table.
+
+# Using your own column names
+
+Your tables do not need columns called `Barcode` and `Gene`. Give their names
+with `barcode_column` and `gene_column`; ScreenR renames them internally and
+remembers the original names.
+
+```{r column-names}
+my_counts <- toy_counts
+colnames(my_counts)[1] <- "shRNA_id"
+
+my_annotation <- data.frame(
+    shRNA_id = paste0("bc", 1:6),
+    symbol = rep(c("GeneA", "GeneB"), each = 3)
+)
+
+toy3 <- create_screenr_object(
+    table = my_counts, annotation = my_annotation, groups = toy_groups,
+    barcode_column = "shRNA_id", gene_column = "symbol"
+)
+get_column_names(toy3)
+```
+
+If you forget to give the name, the error tells you what to do:
+
+```{r column-error, error=TRUE}
+create_screenr_object(
+    table = my_counts, annotation = my_annotation, groups = toy_groups,
+    barcode_column = "shRNA_id"
+)
+```
+
+# Automatic checks
+
+When the object is created ScreenR checks the input and either fixes small
+problems (telling you what it did) or stops with a message explaining what is
+wrong:
+
+| Situation | What ScreenR does |
+|-----------|-------------------|
+| Counts stored as text (e.g. `"520"`) | Converts them to numbers, with a message |
+| Non-numeric columns in the count table (e.g. a gene column) | Removes them, with a message: gene information belongs in the annotation |
+| `groups` with a different length than the number of samples | Error |
+| Duplicated barcodes | Warning |
+| Barcodes of the count table missing from the annotation (e.g. unmapped reads `*`) | Warning |
+| Duplicated barcodes in the annotation | Warning; only the first row is kept |
+| A column name that does not exist | Error suggesting the most similar column |
+
+For example, a count table read from a file with the counts as text and an
+extra gene column:
+
+```{r checks}
+messy_counts <- toy_counts
+messy_counts$Day3_CTRL_A <- as.character(messy_counts$Day3_CTRL_A)
+messy_counts$Gene <- toy_annotation$Gene
+
+clean <- create_screenr_object(
+    table = messy_counts, annotation = toy_annotation, groups = toy_groups
+)
+get_count_table(clean)
+```
+
+And a `groups` vector that does not match the samples:
+
+```{r groups-error, error=TRUE}
+create_screenr_object(
+    table = toy_counts, annotation = toy_annotation,
+    groups = factor(c("CTRL", "TRT"))
+)
+```
+
+# A real dataset
+
+ScreenR includes the data of a real shRNA chemical lethality screen: about 530
+genes with 10 barcodes each, two early time points (`Time1`, `Time2`) and
+treated (`TRT`) and control (`CTRL`) samples in triplicate at two later time
+points (`Time3`, `Time4`).
+
+```{r real-data}
+data(count_table)
+data(annotation_table)
+
+dim(count_table)
+head(count_table[, 1:5])
+head(annotation_table)
+```
+
+The original sample names do not follow the convention, so we rename the
+columns. The rows with barcode `*` count the reads that did not match any
+barcode: they are not barcodes and are removed.
+
+```{r real-prepare}
+counts <- count_table
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+counts <- filter(counts, Barcode != "*")
+```
+
+The groups: one value per sample, in the order of the columns. The two early
+time points are grouped together as the starting point of the screen.
+
+```{r real-groups}
+groups <- factor(c(
+    "T1/T2", "T1/T2",
+    rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+```
+
+Create the object and check the samples. `Time1` and `Time2` have no treatment
+part in their name: ScreenR tells us, and uses the whole name as both Day and
+Treatment, which is what we want for these early samples.
+
+```{r real-object}
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+get_sample_table(object)
+```
+
+# Looking inside the object
+
+The object has a slot for each table. Use the `get_` functions to read them
+and the `set_` functions to replace them.
+
+| Function | Returns |
+|----------|---------|
+| `get_count_table()` | The raw counts |
+| `get_annotation_table()` | The annotation |
+| `get_groups()` | The groups |
+| `get_sample_table()` | Day and Treatment of each sample |
+| `get_column_names()` | The original column names |
+| `get_normalized_count_table()` | The normalized counts (after `normalize_data()`) |
+| `get_data_table()` | The tidy table used by most functions (after `compute_data_table()`) |
+
+```{r getters}
+head(get_count_table(object)[, 1:4])
+get_groups(object)
+```
+
+## The object is a SummarizedExperiment
+
+The ScreenR object is also a
+[SummarizedExperiment](https://bioconductor.org/packages/SummarizedExperiment),
+the standard Bioconductor container for this kind of data, so it can be used
+directly with the Bioconductor tools that accept one:
+
+| Part | Content |
+|------|---------|
+| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample |
+| `assay(object, "normalized")` | The normalized counts, after `normalize_data()` |
+| `rowData(object)` | The barcode and its annotation (Gene, ...) |
+| `colData(object)` | Sample, Day, Treatment and Group of each sample |
+
+```{r summarized-experiment}
+object
+head(SummarizedExperiment::rowData(object))
+SummarizedExperiment::colData(object)
+```
+
+Like any SummarizedExperiment, the object can be subset by barcode (rows) and
+by sample (columns), and all its parts stay consistent:
+
+```{r subset}
+treated <- object[, object$Treatment == "TRT"]
+treated
+```
+
+Objects saved with older versions of ScreenR are converted automatically by
+all the functions; `update_screenr_object()` converts them explicitly.
+
+# Preparing the data for the analysis
+
+Three steps prepare the data for all the following analyses.
+
+**1. Remove the barcodes with zero reads in every sample.** They carry no
+information.
+
+```{r remove-zero}
+object <- remove_all_zero_row(object)
+```
+
+**2. Normalize the counts.** Samples are sequenced at different depths, so the
+counts are converted to counts per million (CPM). The default divides by the
+total number of reads of each sample; `method = "tmm"` and
+`method = "control"` are discussed in tutorial 2.
+
+```{r normalize}
+object <- normalize_data(object)
+head(get_normalized_count_table(object)[, 1:4])
+```
+
+**3. Build the data table.** This is a long ("tidy") table with one row per
+barcode and sample, and it is used by most of the plotting and analysis
+functions.
+
+```{r data-table}
+object <- compute_data_table(object)
+data_table <- get_data_table(object)
+head(select(data_table, Barcode, Gene, Sample, Frequency, Day, Treatment))
+```
+
+| Column | Meaning |
+|--------|---------|
+| `Barcode`, `Gene` | The barcode and its gene |
+| `Sample` | The sample |
+| `Frequency` | The normalized count (CPM) |
+| `Day`, `Treatment` | From the sample table |
+| `Sequence`, `Library`, `Gene_ID` | Copied from the annotation, when present |
+
+# Checklist
+
+Before moving on to the quality control:
+
+* [ ] The count table has one row per barcode and one numeric column per
+  sample, plus the barcode column.
+* [ ] The annotation links every barcode to its gene (`barcode_column`,
+  `gene_column` if the names are different).
+* [ ] `groups` has one value per sample, in the order of the columns.
+* [ ] `get_sample_table()` shows the right Day and Treatment for every sample
+  (otherwise use `sample_table`).
+* [ ] You ran `remove_all_zero_row()`, `normalize_data()` and
+  `compute_data_table()`.
+
+The next tutorial, **2. Quality control**, continues from this object.
+
+```{r session}
+sessionInfo()
+```

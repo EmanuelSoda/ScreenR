@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_mds.R
 \name{plot_mds}
 \alias{plot_mds}
-\title{Multidimensional Scaling Plot}
+\title{Plot a multidimensional scaling of the samples}
 \usage{
 plot_mds(
   screenR_Object,
@@ -13,30 +13,34 @@ plot_mds(
 )
 }
 \arguments{
-\item{screenR_Object}{The Object of the package
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{groups}{The vector that has to be used to fill the plot if NULL the
-function will use the default groups slot in the object passed
-as input.}
+\item{groups}{An optional vector, with one value for each sample, used to
+fill the labels. By default the groups of the ScreenR object are used.}
 
-\item{alpha}{The opacity of the labels.
-Possible value are in a range from 0 to 1.}
+\item{alpha}{The opacity of the labels, between 0 and 1. Default 0.8.}
 
-\item{size}{The dimension of the labels. The default value is 2.5}
+\item{size}{The size of the labels. Default 2.5.}
 
-\item{color}{The color of the labels. The default value is black}
+\item{color}{The color of the label text. Default "black".}
 }
 \value{
-The MDS Plot
+A ggplot object.
 }
 \description{
-Plot samples on a two-dimensional scatterplot so that
-             distances on the plot approximate the typical log2 fold
-             changes between the samples.
+Plots the samples on a two-dimensional scatter plot so that
+    the distances on the plot approximate the typical log2 fold changes
+    between the samples (\code{\link[limma]{plotMDS}} on the log2
+    counts per million of the raw counts).
+    Replicates should cluster together and the groups should separate.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 plot_mds(object)
+}
+\seealso{
+\code{\link{plot_replicate_correlation}},
+    \code{\link{plot_explained_variance}}
 }

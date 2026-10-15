@@ -2,28 +2,60 @@
 % Please edit documentation in R/normalize_data.R
 \name{normalize_data}
 \alias{normalize_data}
-\title{Normalize data}
+\title{Normalize the counts}
 \usage{
-normalize_data(screenR_Object)
+normalize_data(
+  screenR_Object,
+  method = c("cpm", "tmm", "control"),
+  control_barcodes = NULL
+)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
+
+\item{method}{The normalization method: "cpm" (default), "tmm" or
+"control".}
+
+\item{control_barcodes}{The barcodes to use for the "control" method
+(required by that method, ignored by the others).}
 }
 \value{
-Return the ScreenR object with the normalize data
+The ScreenR object with the normalized count table (see
+    \code{\link{get_normalized_count_table}}).
 }
 \description{
-This function perform a normalization on the data considering
-             the fact that each shRNA has a defined length so this will not
-             influence the data. Basically is computed the sum for
-             each row and then multiply by 1e6. At the end the data obtained
-             will be Count Per Million.
+Normalizes the counts to counts per million (CPM), so that
+    samples sequenced at different depths can be compared. Run it before
+    \code{\link{compute_data_table}}. Three methods are available:
+    \itemize{
+      \item "cpm" (default): each count is divided by the total number of
+            reads of its sample and multiplied by 1e6.
+      \item "tmm": as "cpm", but the library sizes are corrected with the
+            trimmed mean of M-values (TMM) normalization factors of edgeR
+            (\code{\link[edgeR]{normLibSizes}}). This is more robust when
+            strong hits deplete a large part of the library.
+      \item "control": each count is divided by the number of reads of the
+            control barcodes (for example non-targeting shRNAs) of its
+            sample and multiplied by 1e6. This assumes that the control
+            barcodes are not affected by the treatment.
+    }
+    The normalization only affects the normalized count table (and so the
+    data table, the Z-score and the plots). The edgeR based methods
+    (CAMERA, ROAST) always model the raw counts.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- normalize_data(object)
 
-slot(object, "normalized_count_table")
+get_normalized_count_table(object)
+
+# TMM normalization
+object <- normalize_data(object, method = "tmm")
+}
+\seealso{
+\code{\link{compute_data_table}},
+    \code{\link{get_normalized_count_table}},
+    \code{\link{remove_all_zero_row}}
 }
 \concept{compute}

@@ -1,17 +1,21 @@
-#' @title Find common hit
-#' @description This method find the hit in common between the three methods
-#' @param hit_zscore The matrix obtained by the \code{\link{find_zscore_hit}}
-#'                   method
-#' @param hit_camera The matrix obtained by the \code{\link{find_camera_hit}}
-#'                   method
-#' @param hit_roast The matrix obtained by the \code{\link{find_roast_hit}}
-#'                  method
-#' @param common_in Number of methods in which the hit has to be in common
-#'                  in order to be considered a candidate hit.
-#'                  The default value is 3, which means that has to be present
-#'                  in the result of all the three methods.
-#' @return A vector containing the common hit
+#' @title Find the hits in common between methods
+#' @description Returns the genes found as hits by at least common_in of the
+#'     three methods (Z-score, CAMERA and ROAST). Only the gene names are
+#'     used, so the tables can come from any method. To combine the methods
+#'     using their FDR, see \code{\link{summarise_hits}}.
+#' @param hit_zscore The hits of the Z-score method, a table with a Gene
+#'     column (for example from \code{\link{find_gene_zscore_hit}} or
+#'     \code{\link{find_zscore_hit}}).
+#' @param hit_camera The hits of \code{\link{find_camera_hit}}, a table with a
+#'     Gene column.
+#' @param hit_roast The hits of \code{\link{find_roast_hit}}, a table with a
+#'     Gene column.
+#' @param common_in The minimum number of methods in which a gene has to be
+#'     found to be returned. The default, 3, returns the genes found by all
+#'     three methods.
+#' @return A character vector with the names of the common hits.
 #' @importFrom tibble tibble
+#' @seealso \code{\link{plot_common_hit}}, \code{\link{summarise_hits}}
 #' @export
 #' @concept find
 #' @examples
@@ -19,10 +23,10 @@
 #' hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
 #' hit_roast <- data.frame(Gene = c("A", "L", "N"))
 #'
-#' # common among all the three methods
+#' # Common to all the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast)
 #'
-#' # common among at least two of the three methods
+#' # Common to at least two of the three methods
 #' find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
 find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     # First we gets all the Gene name of the different table
@@ -51,24 +55,30 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
     return(hit_common)
 }
 
-#' @title Plot common hit
-#' @description This method plot the hits in common among the three methods is
-#'              a wrapper for the \code{\link[ggvenn]{ggvenn}} function.
-#' @param hit_zscore The list of hits of the \code{\link{find_zscore_hit}}
-#' @param hit_camera The list of hits of the \code{\link{find_camera_hit}}
-#' @param hit_roast The list of hits of the \code{\link{find_roast_hit}}
-#' @param alpha A value for the opacity of the plot.
-#'              Allowed values are in the range 0 to 1
-#' @param stroke_size Stroke size for drawing circles
-#' @param set_name_size Text size for set names
-#' @param text_size Text size for intersect contents
-#' @param text_color Text color for intersect contents
-#' @param show_percentage Show percentage for each set
-#' @param show_elements Show set elements instead of count/percentage.
-#' @param title The title to display above the plot
-#' @return A vector containing the common hit
-#' @param color The three vector color for the venn
+#' @title Plot the hits in common between methods
+#' @description Draws a Venn diagram of the hits of the three methods
+#'     (Z-score, CAMERA and ROAST), to see how many hits they have in common.
+#'     It is a wrapper around \code{\link[ggvenn]{ggvenn}}.
+#' @param hit_zscore The hits of the Z-score method, a table with a Gene
+#'     column (for example from \code{\link{find_gene_zscore_hit}}).
+#' @param hit_camera The hits of \code{\link{find_camera_hit}}, a table with a
+#'     Gene column.
+#' @param hit_roast The hits of \code{\link{find_roast_hit}}, a table with a
+#'     Gene column.
+#' @param alpha The opacity of the circles, between 0 and 1. Default 0.5.
+#' @param stroke_size The width of the circle borders.
+#' @param set_name_size The text size of the set names.
+#' @param text_size The text size of the contents of the intersections.
+#' @param text_color The text color of the contents of the intersections.
+#' @param show_percentage Whether to show the percentage of each set (used
+#'     when show_elements is FALSE).
+#' @param show_elements Whether to show the gene names instead of the
+#'     counts (default TRUE).
+#' @param title The title displayed above the plot.
+#' @param color The three colors used to fill the circles.
+#' @return A ggplot object.
 #' @importFrom ggplot2 ggtitle
+#' @seealso \code{\link{find_common_hit}}, \code{\link{summarise_hits}}
 #' @export
 #' @examples
 #' hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -76,6 +86,8 @@ find_common_hit <- function(hit_zscore, hit_camera, hit_roast, common_in = 3) {
 #' hit_roast <- data.frame(Gene = c("A", "L", "N"))
 #' plot_common_hit(hit_zscore, hit_camera, hit_roast)
 #'
+#' # Number of genes instead of their names
+#' plot_common_hit(hit_zscore, hit_camera, hit_roast, show_elements = FALSE)
 plot_common_hit <- function(hit_zscore, hit_camera,
     hit_roast, alpha = 0.5, stroke_size = 0.5, set_name_size = 4,
     text_color = "black", text_size = 4, show_percentage = TRUE,
