@@ -161,3 +161,16 @@ test_that("correct_crispr_bias corrects the counts with CRISPRcleanR", {
     expect_error(correct_crispr_bias(object, library_annotation,
         control = "Plasmid", treatment = "R9"), "not found")
 })
+
+test_that("the HAP1 CRISPR datasets are consistent", {
+    data(hap1_count_table, package = "ScreenR", envir = environment())
+    data(hap1_annotation_table, package = "ScreenR", envir = environment())
+    expect_identical(hap1_count_table$Barcode, hap1_annotation_table$Barcode)
+    expect_equal(colnames(hap1_count_table), c("Barcode", "T0", "T3_A",
+        "T3_B", "T3_C", "T18_A", "T18_B", "T18_C"))
+    expect_setequal(unique(hap1_annotation_table$Class),
+        c("control", "core essential", "non-essential", "other"))
+    controls <- hap1_annotation_table$Class == "control"
+    expect_true(all(is.na(hap1_annotation_table$Chromosome[controls])))
+    expect_false(anyNA(hap1_annotation_table$Start[!controls]))
+})

@@ -72,7 +72,13 @@ In CRISPR-Cas9 screens, sgRNAs that cut in amplified regions
 
     Use it for CRISPR-Cas9 knockout screens only (not for shRNA, CRISPRi
     or CRISPRa screens), with a library annotation that gives the genomic
-    position of each sgRNA.
+    position of each sgRNA, and on the complete genome-wide library:
+    CRISPRcleanR estimates the bias from runs of neighbouring sgRNAs that
+    target different genes, assuming that most of them have no effect. On
+    a subset of genes enriched in hits (for example only the reference
+    genes, or the \code{\link{hap1_count_table}} example), whole
+    segments of essential genes look biased and their real signal is
+    removed.
 }
 \details{
 CRISPRcleanR is not on CRAN or Bioconductor, so it is not
