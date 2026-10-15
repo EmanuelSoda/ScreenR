@@ -261,3 +261,20 @@ test_that("Plot common Hit", {
     ))
     expect_true(ggplot2::is_ggplot(plot))
 })
+
+test_that("plot_boxplot orders the fill legend as the samples", {
+    data(hap1_count_table, package = "ScreenR", envir = environment())
+    data(hap1_annotation_table, package = "ScreenR", envir = environment())
+    object <- create_screenr_object(
+        table = hap1_count_table, annotation = hap1_annotation_table,
+        groups = factor(c("T0", "T3", "T3", "T3", "T18", "T18", "T18")),
+        sample_table = data.frame(
+            Sample = colnames(hap1_count_table)[-1], Day = "Screen",
+            Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+        )
+    )
+    object <- compute_data_table(normalize_data(object))
+    plot <- plot_boxplot(object, genes = "RPL14",
+        group_var = c("T0", "T3", "T18"), fill_var = "Treatment")
+    expect_equal(levels(plot$data$Treatment), c("T0", "T3", "T18"))
+})

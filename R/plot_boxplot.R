@@ -42,6 +42,13 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     # Select only the sample of interest
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
 
+    # Order the fill legend as the samples, not alphabetically (T0, T3, T18
+    # and not T0, T18, T3)
+    if (is.character(data[[fill_var]])) {
+        data[[fill_var]] <- factor(data[[fill_var]],
+            levels = unique(data[[fill_var]][order(data$Sample)]))
+    }
+
     plot <- ggplot2::ggplot(data, aes(.data$Sample, .data$Frequency,
         fill = !!sym(fill_var)
     ))

@@ -161,8 +161,37 @@ sgRNAs) keeps almost every gene.
 # Quality control
 
 The general quality control of [Tutorial 2](Tutorial_2_Quality_control.html)
-applies to CRISPR screens. For example, the library should be evenly
-represented at T0 (low Gini index) and the replicates should agree:
+applies to CRISPR screens, with any sample names and time points.
+
+## Sequencing depth
+
+`plot_mapped_reads()` shows the number of reads of each sample. Samples with
+far fewer reads than the others are less reliable:
+
+```{r mapped-reads, fig.height = 3.5}
+plot_mapped_reads(object)
+```
+
+The T0 sample was sequenced about twice as deeply as the others, which is
+common: it is the reference of every comparison. Every sample has at least
+1.6 million reads, more than 100 for each sgRNA of this subset.
+
+`plot_mapped_reads_distribution()` shows the distribution of the reads of the
+sgRNAs in each sample:
+
+```{r mapped-reads-distribution, fig.height = 3.5}
+plot_mapped_reads_distribution(object)
+plot_mapped_reads_distribution(object, type = "density", alpha = 0.3)
+```
+
+The counts are raw, so the T0 sample, sequenced more deeply, is shifted to
+the right. At day 18 the distribution is wider than at day 3, with more
+sgRNAs close to 0: the sgRNAs of the essential genes are dropping out.
+
+## Library representation and replicates
+
+The library should be evenly represented at T0 (low Gini index) and the
+replicates should agree:
 
 ```{r gini, fig.height = 3.5}
 plot_gini(object)
@@ -171,6 +200,28 @@ plot_gini(object)
 ```{r replicates, fig.height = 5, fig.width = 6}
 plot_replicate_correlation(object)
 ```
+
+## Clustering of the samples
+
+`plot_mds()` places the samples so that similar samples are close, and
+`plot_explained_variance()` shows how much of the differences between the
+samples each principal component explains:
+
+```{r mds, fig.height = 3.5}
+plot_mds(object)
+```
+
+```{r explained-variance, fig.height = 3.5}
+plot_explained_variance(object)
+plot_explained_variance(object, cumulative = TRUE)
+```
+
+The first dimension of the MDS plot orders the samples by time point (T0,
+then day 3, then day 18): the main difference between the samples is the
+growth of the cells, as expected in a dropout screen. The day 3 replicates
+are very close; the day 18 replicates differ more, because the depletion has
+had more time to diverge. One principal component explains about 70% of the
+variability, so the samples differ mainly along a single direction.
 
 ## Quality with reference genes
 
@@ -212,6 +263,27 @@ knitr::kable(quality, digits = 3)
 After 3 days the essential genes are only starting to drop out; after 18
 days the separation is almost perfect.
 
+```{r separation, fig.height = 3.5}
+plot_reference_separation(day18, essential, nonessential) +
+    ggtitle("Day 18 vs T0")
+```
+
+`plot_boxplot()` shows the normalized counts of the sgRNAs of single genes in
+each sample, for example two core essential genes and the EGFP control
+(sgRNAs that target a gene not present in the cells):
+
+```{r boxplot, fig.height = 3.5}
+plot_boxplot(object,
+    genes = c("POLR2L", "RPL14", "EGFP"),
+    group_var = c("T0", "T3", "T18"), fill_var = "Treatment", ncol = 3
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The sgRNAs of the essential genes are depleted at day 3 and almost gone at
+day 18; those of EGFP are stable (slightly higher, because of the CPM
+normalization described below).
+
 The non-essential genes have a positive mean log2 fold change
 (`r round(quality$MeanNonessential[2], 2)` at day 18) although they have no
 effect. This is a side effect of the CPM normalization: when many sgRNAs drop
@@ -229,11 +301,6 @@ day18_control <- compute_data_table(normalize_data(object,
     compute_metrics(control = "T0", treatment = "T18", day = "Screen")
 knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
     digits = 3)
-```
-
-```{r separation, fig.height = 3.5}
-plot_reference_separation(day18, essential, nonessential) +
-    ggtitle("Day 18 vs T0")
 ```
 
 # Copy-number bias and CRISPRcleanR

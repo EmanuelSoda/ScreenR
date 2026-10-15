@@ -21,6 +21,11 @@
   not for filtering the barcodes before finding them: the filter is circular
   and, in the K562 screen, finds fewer essential and more non-essential
   genes.
+* Tutorial 4 shows the general quality control plots on the HAP1 screen
+  (`plot_mapped_reads()`, `plot_mapped_reads_distribution()`, `plot_mds()`,
+  `plot_explained_variance()` and `plot_boxplot()`).
+* `plot_boxplot()` orders the fill legend as the samples (T0, T3, T18), not
+  alphabetically (T0, T18, T3).
 
 # ScreenR 1.15.14
 
