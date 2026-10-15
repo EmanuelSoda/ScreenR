@@ -6,6 +6,10 @@ part of the package (the folder is in `.Rbuildignore`).
 
 ## Requirements
 
+`bash benchmark/setup_environment.sh [tools directory]` (from the repository
+root) installs everything below: the R packages, CRISPRcleanR, gscreend,
+BiocCheck, pkgdown, MAGeCK and BAGEL2.
+
 * R with ScreenR (>= 1.15.10), dplyr and parallel.
 * MAGeCK 0.5.9.5: `bash install_mageck.sh mageck` installs it in a Python
   virtual environment; the executable is then `mageck/env/bin/mageck`.

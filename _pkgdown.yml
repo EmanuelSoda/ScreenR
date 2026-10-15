@@ -53,6 +53,8 @@ navbar:
         href: articles/Tutorial_2_Quality_control.html
       - text: "3. Finding and validating hits"
         href: articles/Tutorial_3_Finding_hits.html
+      - text: "4. CRISPR-Cas9 screens"
+        href: articles/Tutorial_4_CRISPR_screens.html
     articles:
       text: Articles
       menu:
@@ -74,6 +76,7 @@ articles:
   - Tutorial_1_Creating_the_object
   - Tutorial_2_Quality_control
   - Tutorial_3_Finding_hits
+  - Tutorial_4_CRISPR_screens
 - title: Articles
   contents:
   - Analysis_Example
@@ -176,13 +179,17 @@ reference:
   - find_robust_zscore_hit
 
 - title: Datasets
-  desc: Example screen and a published K562 screen with known essential genes.
+  desc: >
+    Example screen, a published K562 shRNA screen and a HAP1 CRISPR-Cas9
+    screen with known essential genes.
   contents:
   - count_table
   - annotation_table
   - k562_count_table
   - k562_annotation_table
   - k562_reference_genes
+  - hap1_count_table
+  - hap1_annotation_table
 
 - title: Package
   contents:

@@ -219,6 +219,7 @@ has all the details and reruns the ScreenR side of the comparison.
 | [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object |
 | [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html) | Sequencing depth, library evenness, replicates, normalization |
 | [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html) | All the hit-finding methods, combining them and checking the hits |
+| [Tutorial 4: CRISPR-Cas9 screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html) | sgRNA thresholds, quality with reference genes, copy-number correction with CRISPRcleanR, hits |
 | [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html) | How the tests work and why |
 | [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html) | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
 | [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html) | Every function, grouped by analysis step |

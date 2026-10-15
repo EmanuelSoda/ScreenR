@@ -29,9 +29,14 @@ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF 
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-k562_reference_genes and hart_reference_genes
----------------------------------------------
-Derived from CEGv2.txt and NEGv1.txt of BAGEL (https://github.com/hart-lab/bagel).
+k562_reference_genes, hart_reference_genes, hap1_count_table and
+hap1_annotation_table
+-------------------------------------------------------------------
+The reference genes are derived from CEGv2.txt and NEGv1.txt of BAGEL (https://github.com/hart-lab/bagel).
+hap1_count_table and hap1_annotation_table are derived from the example data
+of BAGEL2 (pipeline-script-example/HAP1-TKOv3-EXAMPLE.txt and
+TKOv3_library_forCRISPRcleanR_REAGENT_ID.txt), from the screen of
+Hart T et al. (2017) G3 7:2719-2727.
 
 MIT License
 

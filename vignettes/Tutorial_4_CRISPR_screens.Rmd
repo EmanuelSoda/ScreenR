@@ -1,0 +1,434 @@
+---
+title: "Tutorial 4: CRISPR-Cas9 screens"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Tutorial 4: CRISPR-Cas9 screens}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4
+)
+crisprcleanr <- ScreenR::crisprcleanr_available()
+```
+
+# About this tutorial
+
+ScreenR was written for shRNA screens, but CRISPR-Cas9 knockout screens
+produce the same kind of data: a table of read counts, one row for each guide
+RNA (sgRNA) and one column for each sample. In ScreenR an sgRNA is simply a
+"barcode", and everything in the other tutorials applies. This tutorial goes
+through a CRISPR dropout screen step by step and shows what is specific to
+CRISPR:
+
+1. installing ScreenR and, optionally, CRISPRcleanR;
+2. describing a time-course dropout screen (T0 and later time points);
+3. choosing the thresholds on the number of sgRNAs per gene;
+4. checking the quality of the screen with essential and non-essential
+   reference genes;
+5. correcting the copy-number bias of CRISPR-Cas9 with CRISPRcleanR;
+6. finding the hits, using the non-essential genes as reference;
+7. positive-selection screens.
+
+| | shRNA screen | CRISPR-Cas9 knockout screen |
+|---|---|---|
+| Reagent (a "barcode" in ScreenR) | shRNA | sgRNA |
+| Reagents per gene | often 5 to 25 | usually 3 to 6 (4 in TKOv3 and Brunello) |
+| Typical design | treated vs control at each time point | late time point vs T0 or plasmid |
+| Gene-independent effects | seed (off-target) effects | DNA cutting: copy-number and proximity bias |
+| Good null reference | non-essential genes | non-essential genes (non-targeting sgRNAs do not cut, so they are not a good null) |
+
+# Installation
+
+ScreenR is on Bioconductor:
+
+```{r install-screenr, eval = FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+BiocManager::install("ScreenR")
+```
+
+The copy-number correction uses the
+[CRISPRcleanR](https://github.com/francescojm/CRISPRcleanR) package (Iorio et
+al. 2018). It is optional: everything else in this tutorial works without it.
+CRISPRcleanR is not on CRAN or Bioconductor, so it is installed from GitHub;
+`BiocManager::install()` also installs its Bioconductor dependencies:
+
+```{r install-crisprcleanr, eval = FALSE}
+BiocManager::install("francescojm/CRISPRcleanR")
+```
+
+`crisprcleanr_available()` tells whether it is installed:
+
+```{r available, message = FALSE}
+library(ScreenR)
+library(dplyr)
+library(ggplot2)
+crisprcleanr_available()
+```
+
+```{r no-crisprcleanr, echo = FALSE, results = "asis"}
+if (!crisprcleanr) {
+    cat("*CRISPRcleanR is not installed where this tutorial was built: the",
+        "code of the copy-number correction is shown but not run, and its",
+        "results are read from a precomputed table.*\n")
+}
+```
+
+# The data
+
+`hap1_count_table` comes from a genome-wide CRISPR-Cas9 knockout screen of
+HAP1 cells with the TKOv3 library (Hart et al. 2017): the T0 sample and three
+replicates after 3 and 18 days of growth. Cells that lose a gene needed for
+growth (an essential gene) are lost over time, so the sgRNAs of essential
+genes are depleted at day 18. To keep the package small the dataset is a
+subset of the 70,877 sgRNAs of the library (see `?hap1_count_table`).
+
+```{r data}
+data(hap1_count_table)
+data(hap1_annotation_table)
+head(hap1_count_table)
+head(hap1_annotation_table)
+```
+
+The annotation has the gene of each sgRNA and its position in the genome
+(used by CRISPRcleanR), and a Class column that tells the core essential and
+non-essential reference genes, the controls and the other genes.
+
+# Creating the ScreenR object
+
+The sample names (`T0`, `T3_A`, ...) do not follow the
+`Day_Treatment_Replicate` convention of ScreenR, so the samples are described
+with a `sample_table`. In a dropout screen the comparison is between time
+points, so all the samples belong to the same experiment (`Day = "Screen"`)
+and the time point is used as the `Treatment`; the `groups` (used by the
+statistical models) are the time points too.
+
+```{r object, message = FALSE}
+samples <- data.frame(
+    Sample = colnames(hap1_count_table)[-1],
+    Day = "Screen",
+    Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+)
+samples
+object <- create_screenr_object(
+    table = hap1_count_table,
+    annotation = hap1_annotation_table,
+    groups = factor(samples$Treatment, levels = c("T0", "T3", "T18")),
+    sample_table = samples
+)
+object <- remove_all_zero_row(object)
+object
+```
+
+# How many sgRNAs per gene?
+
+Several functions test a gene only if it has enough barcodes:
+`number_barcode` in `find_camera_hit()`, `find_roast_hit()`,
+`find_time_hit()` and `plot_barcode_hit()` (genes need *more than*
+`number_barcode` barcodes, default 3) and `min_barcodes` in
+`find_gene_zscore_hit()` (genes need *at least* `min_barcodes`, default 3).
+These defaults were chosen for shRNA libraries. `barcodes_per_gene()` shows
+what the library has:
+
+```{r per-gene}
+per_gene <- barcodes_per_gene(object)
+table(per_gene$NBarcodes)
+```
+
+Most genes have 4 sgRNAs. With `number_barcode = 3`, genes that lost one
+sgRNA (and genes designed with 3) are not tested; when this excludes many
+genes the functions give a warning that suggests a better value, so it is
+safe to start from the defaults. Here `number_barcode = 2` (at least 3
+sgRNAs) keeps almost every gene.
+
+# Quality control
+
+The general quality control of [Tutorial 2](Tutorial_2_Quality_control.html)
+applies to CRISPR screens. For example, the library should be evenly
+represented at T0 (low Gini index) and the replicates should agree:
+
+```{r gini, fig.height = 3.5}
+plot_gini(object)
+```
+
+```{r replicates, fig.height = 5, fig.width = 6}
+plot_replicate_correlation(object)
+```
+
+## Quality with reference genes
+
+The most informative check of a dropout screen uses genes whose behaviour is
+known: the core essential genes should be depleted, the non-essential genes
+should not. `hart_reference_genes` has the lists of Hart et al. for human
+cells. `compute_screen_quality()` measures how well the two groups are
+separated (NNMD and Cohen's d: more negative is better; ROC AUC: 0.5 is no
+separation, 1 is perfect) and `plot_reference_separation()` shows it.
+
+```{r reference-genes}
+data(hart_reference_genes)
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+```
+
+`compute_metrics()` computes the log2 fold change of each sgRNA between two
+groups of samples (`control` and `treatment` are values of the Treatment
+column):
+
+```{r quality, message = FALSE}
+object <- compute_data_table(normalize_data(object))
+day3 <- compute_metrics(object,
+    control = "T0", treatment = "T3", day = "Screen"
+)
+day18 <- compute_metrics(object,
+    control = "T0", treatment = "T18", day = "Screen"
+)
+quality <- bind_rows(
+    `Day 3` = compute_screen_quality(day3, essential, nonessential),
+    `Day 18` = compute_screen_quality(day18, essential, nonessential),
+    .id = "Time point"
+)
+knitr::kable(quality, digits = 3)
+```
+
+After 3 days the essential genes are only starting to drop out; after 18
+days the separation is almost perfect.
+
+```{r separation, fig.height = 3.5}
+plot_reference_separation(day18, essential, nonessential) +
+    ggtitle("Day 18 vs T0")
+```
+
+# Copy-number bias and CRISPRcleanR
+
+Cas9 cuts the DNA, and cells with many cuts grow less. sgRNAs that target
+amplified regions of the genome therefore deplete the cells whatever the gene
+they target, and the genes there look essential. CRISPRcleanR (Iorio et al.
+2018) finds the regions where many neighbouring sgRNAs that target different
+genes are depleted together and corrects their fold changes, without needing
+copy-number data. `correct_crispr_bias()` runs CRISPRcleanR on a ScreenR
+object and returns a new ScreenR object with the corrected counts. ScreenR
+does not reimplement the method: it only calls CRISPRcleanR.
+
+The correction needs
+
+* the **complete genome-wide library**: CRISPRcleanR assumes that most of the
+  genes in a region have no effect. On a subset of genes enriched in hits it
+  removes real signal, so it must not be used on `hap1_count_table`;
+* a **library annotation** with the position of each sgRNA, in the format of
+  CRISPRcleanR (row names: the sgRNA identifiers; columns GENES, CHRM,
+  STARTpos and ENDpos). CRISPRcleanR includes the annotation of several
+  libraries (`KY_Library_v1.0`, `Brunello_Library`, `AVANA_Library`,
+  `GeCKO_Library_v2`, ...); for another library, build the data frame from
+  its annotation file.
+
+This example uses the complete HT-29 screen distributed with CRISPRcleanR
+(KY library, about 90,000 sgRNAs; HT-29 cells carry an amplification of the
+MYC region on chromosome 8q24). It takes about a minute.
+
+```{r crisprcleanr, eval = crisprcleanr, message = FALSE}
+ccr <- "CRISPRcleanR"
+# Library annotation and counts distributed with CRISPRcleanR
+library_annotation <- get(utils::data("KY_Library_v1.0", package = ccr))
+counts <- read.delim(system.file("extdata", "HT-29_counts.tsv",
+    package = ccr
+))
+colnames(counts) <- c("Barcode", "Gene", "Plasmid", "HT29_R1", "HT29_R2",
+    "HT29_R3")
+ht29 <- create_screenr_object(
+    table = counts[, -2], annotation = counts[, c("Barcode", "Gene")],
+    groups = factor(c("Plasmid", "Late", "Late", "Late")),
+    sample_table = data.frame(
+        Sample = c("Plasmid", "HT29_R1", "HT29_R2", "HT29_R3"),
+        Day = "Screen", Treatment = c("Plasmid", "Late", "Late", "Late")
+    )
+)
+ht29_corrected <- correct_crispr_bias(ht29,
+    library_annotation = library_annotation,
+    control = "Plasmid", treatment = c("HT29_R1", "HT29_R2", "HT29_R3")
+)
+ht29_corrected
+```
+
+The corrected object is analysed like any other: normalize it, compute the
+data table and find the hits. CRISPRcleanR's own results (the corrected
+sgRNA fold changes and the segments of the genome) are in
+`S4Vectors::metadata(ht29_corrected)$crisprcleanr`.
+
+The effect of the correction on this screen (computed with the code above;
+the script is in the `benchmark/crispr` folder of the GitHub repository):
+
+```{r crisprcleanr-results}
+correction <- read.csv(system.file("extdata", "crisprcleanr_ht29.csv",
+    package = "ScreenR"
+))
+knitr::kable(correction, digits = 3,
+    col.names = c("Counts", "NNMD", "Cohen's d", "ROC AUC",
+        "Mean log2FC in 8q24 (genes not known to be essential)")
+)
+```
+
+Before the correction, the genes in the amplified 8q24 region that are not
+known to be essential are depleted (mean log2 fold change about -0.26); after
+the correction they are not (about 0). The separation of the reference genes
+is similar, with a slightly lower ROC AUC: the correction removes a
+gene-independent bias, it does not make the screen stronger.
+
+# Finding the hits
+
+The hit-finding functions are used as in
+[Tutorial 3](Tutorial_3_Finding_hits.html). The comparison is day 18 against
+T0:
+
+```{r design}
+design <- create_design_matrix(object)
+contrast <- create_contrast(design, treatment = "T18", control = "T0")
+```
+
+## Gene-level Z-score test with the non-essential genes as reference
+
+`find_gene_zscore_hit()` compares the mean score of the sgRNAs of each gene
+with the scores of random sets of sgRNAs. By default the random sgRNAs come
+from all the genes, which include the hits, so the test is conservative when
+many genes have an effect, as in proliferation screens. When genes known to
+have no effect are available, they are a better reference (`control_genes`).
+For CRISPR screens the non-essential genes are the natural choice: their
+sgRNAs cut the DNA like any other, while non-targeting sgRNAs do not.
+
+To be able to check the result, here half of the non-essential genes are used
+as reference and the other half is kept to count the false calls; in a real
+analysis use all of them.
+
+```{r zscore-reference}
+set.seed(2017)
+reference <- sample(nonessential, length(nonessential) %/% 2)
+held_out <- setdiff(nonessential, reference)
+statistics <- compute_barcode_statistics(object, design, contrast)
+zscore <- find_gene_zscore_hit(statistics,
+    control_genes = reference, fdr = 1, seed = 1
+)
+head(zscore)
+```
+
+```{r zscore-evaluation}
+called <- zscore$Gene[zscore$FDR <= 0.05]
+data.frame(
+    `Genes called` = length(called),
+    `Core essential` = sum(called %in% essential),
+    `Held-out non-essential` = sum(called %in% held_out),
+    `Other genes` = sum(!called %in% c(essential, nonessential)),
+    check.names = FALSE
+)
+```
+
+Almost all the `r length(essential[essential %in% hap1_annotation_table$Gene])`
+core essential genes of the dataset are found at 5% FDR, with very few of the
+held-out non-essential genes. The other genes called are not in the reference
+lists: HAP1 cells need many more genes than the core essential set, which
+contains only the genes essential in almost every cell line.
+
+## Other methods and their consensus
+
+Without reference genes, use the default reference of the Z-score test and
+CAMERA. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
+
+```{r other-methods}
+zscore_default <- find_gene_zscore_hit(statistics, fdr = 1, seed = 1)
+camera <- find_camera_hit(object, design, contrast,
+    number_barcode = 2, fdr = 1
+)
+hits <- summarise_hits(
+    list(zscore_reference = zscore, zscore = zscore_default,
+        camera = camera),
+    fdr = 0.05
+)
+head(hits)
+table(hits$NMethods)
+```
+
+The two tests that compare each gene with all the others call fewer genes
+than the test with the non-essential reference: with many essential genes in
+the library they are conservative. They need no reference genes, and their
+rankings are very close.
+
+ROAST and FRY (`find_roast_hit()`) test each gene on its own sgRNAs and
+rely on the variability between replicates: with a single T0 sample, as
+here, they find almost nothing. Use them when both groups have replicates.
+
+## Comparable fold changes
+
+`scale_by_reference()` scales the fold changes so that the non-essential
+genes are at 0 and the essential genes at -1. Scaled values can be compared
+between screens of different strength, for example between cell lines or time
+points:
+
+```{r scale}
+scaled <- scale_by_reference(day18, essential, nonessential)
+scaled %>%
+    group_by(Gene) %>%
+    summarise(ScaledLog2FC = mean(ScaledLog2FC)) %>%
+    arrange(ScaledLog2FC) %>%
+    head()
+```
+
+# Positive-selection screens
+
+In a drug-resistance or positive-selection screen the interesting genes are
+**enriched**: their knockout makes the cells survive. Every hit-finding
+function takes `direction = "Up"`:
+
+```{r up, eval = FALSE}
+find_gene_zscore_hit(statistics, direction = "Up")
+find_camera_hit(object, design, contrast, direction = "Up")
+```
+
+The reference genes are not useful there (they describe fitness, not
+resistance); use the default reference of `find_gene_zscore_hit()` or control
+genes known to have no effect on the selection.
+
+# Summary
+
+| Step | CRISPR-specific advice | Functions |
+|---|---|---|
+| Create the object | describe time points with a `sample_table` | `create_screenr_object()` |
+| sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | `barcodes_per_gene()` |
+| Quality control | check the separation of essential and non-essential genes | `compute_screen_quality()`, `plot_reference_separation()` |
+| Copy-number bias | correct with CRISPRcleanR on the complete library | `correct_crispr_bias()` |
+| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, `find_camera_hit()`, `summarise_hits()` |
+| Compare screens | scale to the reference genes | `scale_by_reference()` |
+| Positive selection | look for enriched genes | `direction = "Up"` |
+
+# Literature
+
+* Hart T, Tong AHY, Chan K et al. (2017). Evaluation and design of
+  genome-wide CRISPR/SpCas9 knockout screens. G3 7:2719-2727.
+* Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014). Measuring
+  error rates in genomic perturbation screens: gold standards for human
+  functional genomics. Mol Syst Biol 10:733.
+* Iorio F, Behan FM, Goncalves E et al. (2018). Unsupervised correction of
+  gene-independent cell responses to CRISPR-Cas9 targeting. BMC Genomics
+  19:604.
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
