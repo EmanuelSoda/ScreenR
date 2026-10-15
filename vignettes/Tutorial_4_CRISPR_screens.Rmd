@@ -212,6 +212,25 @@ knitr::kable(quality, digits = 3)
 After 3 days the essential genes are only starting to drop out; after 18
 days the separation is almost perfect.
 
+The non-essential genes have a positive mean log2 fold change
+(`r round(quality$MeanNonessential[2], 2)` at day 18) although they have no
+effect. This is a side effect of the CPM normalization: when many sgRNAs drop
+out, the reads of the sample go to the others, which look enriched. The
+ranking of the genes does not change, but the baseline is not 0. Normalizing
+to the sgRNAs of the non-essential genes (`method = "control"`) puts it back
+at 0:
+
+```{r quality-control-normalization, message = FALSE}
+nonessential_sgrnas <- hap1_annotation_table$Barcode[
+    hap1_annotation_table$Gene %in% nonessential]
+day18_control <- compute_data_table(normalize_data(object,
+    method = "control", control_barcodes = nonessential_sgrnas
+)) %>%
+    compute_metrics(control = "T0", treatment = "T18", day = "Screen")
+knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
+    digits = 3)
+```
+
 ```{r separation, fig.height = 3.5}
 plot_reference_separation(day18, essential, nonessential) +
     ggtitle("Day 18 vs T0")
@@ -347,31 +366,54 @@ contains only the genes essential in almost every cell line.
 
 ## Other methods and their consensus
 
-Without reference genes, use the default reference of the Z-score test and
-CAMERA. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
+Without reference genes, use the default reference of the Z-score test,
+CAMERA and FRY. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
 
 ```{r other-methods}
 zscore_default <- find_gene_zscore_hit(statistics, fdr = 1, seed = 1)
 camera <- find_camera_hit(object, design, contrast,
     number_barcode = 2, fdr = 1
 )
-hits <- summarise_hits(
-    list(zscore_reference = zscore, zscore = zscore_default,
-        camera = camera),
-    fdr = 0.05
+fry <- find_roast_hit(object, design, contrast,
+    method = "fry", number_barcode = 2, fdr = 1
 )
+hit_list <- list(zscore_reference = zscore, zscore = zscore_default,
+    camera = camera, fry = fry)
+hits <- summarise_hits(hit_list, fdr = 0.05)
 head(hits)
 table(hits$NMethods)
 ```
 
-The two tests that compare each gene with all the others call fewer genes
-than the test with the non-essential reference: with many essential genes in
-the library they are conservative. They need no reference genes, and their
-rankings are very close.
+```{r other-methods-evaluation}
+evaluate_hits <- function(result) {
+    called <- result$Gene[result$FDR <= 0.05]
+    data.frame(
+        `Genes called` = length(called),
+        `Core essential` = sum(called %in% essential),
+        `Held-out non-essential` = sum(called %in% held_out),
+        check.names = FALSE
+    )
+}
+knitr::kable(bind_rows(lapply(hit_list, evaluate_hits), .id = "Method"))
+```
 
-ROAST and FRY (`find_roast_hit()`) test each gene on its own sgRNAs and
-rely on the variability between replicates: with a single T0 sample, as
-here, they find almost nothing. Use them when both groups have replicates.
+The two tests that compare each gene with all the others (the default
+Z-score test and CAMERA) are much more conservative than the test with the
+non-essential reference: they find less than half of the core essential
+genes, and the default Z-score test does not give a p-value below 0.05 to
+any of the held-out non-essential genes. Their reference is all the genes of the library, and here it is full of
+hits. This is partly an effect of the dataset: the subset keeps all the
+reference genes, so `r round(100 * mean(per_gene$Gene %in% essential))`% of
+its genes are core essential, against about 4% in the complete TKOv3
+library. On a genome-wide screen they should be less conservative. They need no
+reference genes, and their rankings are very close (Spearman correlation of
+the p-values above 0.99).
+
+FRY (`find_roast_hit()`) tests each gene on its own sgRNAs. It estimates the
+variability from the replicates of the model, so a single T0 sample is
+enough when the other time points have replicates, as here. It finds more
+essential genes than the tests without reference, with very few held-out
+non-essential genes.
 
 ## Comparable fold changes
 
@@ -412,7 +454,7 @@ genes known to have no effect on the selection.
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | `barcodes_per_gene()` |
 | Quality control | check the separation of essential and non-essential genes | `compute_screen_quality()`, `plot_reference_separation()` |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | `correct_crispr_bias()` |
-| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, `find_camera_hit()`, `summarise_hits()` |
+| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, `find_camera_hit()`, `find_roast_hit()`, `summarise_hits()` |
 | Compare screens | scale to the reference genes | `scale_by_reference()` |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 
