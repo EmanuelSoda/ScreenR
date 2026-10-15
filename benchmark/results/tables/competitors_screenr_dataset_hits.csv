@@ -1,0 +1,11 @@
+"Method","Hits at 5% FDR"
+"MAGeCK RRA",0
+"MAGeCK MLE",4
+"ScreenR CAMERA",0
+"ScreenR ROAST",9
+"ScreenR FRY",9
+"ScreenR Z-score (mean)",1
+"ScreenR Z-score (edgeR)",0
+"edgeR gene-level QL",4
+"limma-voom + camera",0
+"gscreend",5

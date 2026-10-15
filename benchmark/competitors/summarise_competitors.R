@@ -84,8 +84,9 @@ write.csv(summary_table, "results/tables/competitors_summary.csv",
 by_scenario <- with_hits %>%
     filter(alpha == 0.05) %>%
     group_by(Method, Scenario) %>%
-    summarise(FDP = mean(FDP), TPR = mean(TPR), AUPRC = mean(AUPRC),
-        AUPRC_se = sd(AUPRC) / sqrt(n()), .groups = "drop")
+    summarise(FDP = mean(FDP), TPR = mean(TPR),
+        AUPRC_se = sd(AUPRC) / sqrt(n()), AUPRC = mean(AUPRC),
+        .groups = "drop")
 write.csv(by_scenario, "results/tables/competitors_by_scenario.csv",
     row.names = FALSE)
 

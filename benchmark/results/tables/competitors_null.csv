@@ -1,0 +1,10 @@
+"Method","Fraction p < 0.05","Genes called at 5% FDR"
+"ScreenR Z-score (mean)",0.0492,0
+"ScreenR CAMERA",0.0408,0
+"ScreenR Z-score (edgeR)",0.0488,0
+"ScreenR FRY",0.0516,0
+"MAGeCK RRA",0.0484,0.2
+"MAGeCK MLE",0.0608,0
+"gscreend",0.06,0.6
+"edgeR gene-level QL",0.048,0.2
+"limma-voom + camera",0.0408,0
