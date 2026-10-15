@@ -1,227 +1,452 @@
 # ScreenR
 
-[![R-CMD-check](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml)
+**Find the genes that matter in pooled shRNA screens — with p-values you
+can trust, quality control built in and publication-ready plots.**
 
-ScreenR is an easy and effective package to perform hits identification
-in loss of function High Throughput Biological Screening performed with
-shRNAs library. ScreenR combines the power of software like edgeR with
-the simplicity of the Tidyverse metapackage. ScreenR executes a pipeline
-able to find candidate hits from barcode counts data and integrates a
-wide range of visualization for each step of the analysis
+ScreenR takes the barcode counts of a pooled shRNA screen and tells you
+which genes are depleted or enriched by your treatment, how confident
+you can be in each of them, and whether the result holds up at the level
+of the single barcodes. It is built on the statistics of
+[edgeR](https://bioconductor.org/packages/edgeR) and
+[limma](https://bioconductor.org/packages/limma), stores the data in a
+Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 
-## Installation instructions
+![The ScreenR workflow](reference/figures/workflow.svg)
 
-Get the latest stable `R` release from
-[CRAN](http://cran.r-project.org/) note that you need to have `R 4.3` or
-greater to use `ScreenR`. Then install `ScreenR` from
-[Bioconductor](http://bioconductor.org/) using the following code:
+## Why ScreenR?
+
+- **Every hit comes with a p-value and a false discovery rate.** The
+  gene-level tests are calibrated: in screens without any real effect
+  about 5% of the genes have p \< 0.05, as they should.
+- **Benchmarked against the main tools.** On simulated screens and on
+  published shRNA (K562) and CRISPR-Cas9 (HAP1) essentiality screens,
+  ScreenR ranks the true hits as well as the best of MAGeCK, BAGEL2,
+  gscreend and plain edgeR/limma workflows, keeps the FDR below the
+  nominal level and runs in seconds
+  ([benchmark](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)).
+- **Several complementary methods, one table.** A permutation test on
+  the barcode Z-scores, limma CAMERA, ROAST and FRY, and an edgeR model
+  for time courses;
+  [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
+  combines them and
+  [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
+  shows how they agree.
+- **Uses your replicates.** Barcode statistics come from the edgeR
+  quasi-likelihood model, so replicate variability is part of the test.
+- **Quality control included.** Mapped reads, library evenness (Gini
+  index), lost barcodes, replicate correlation and MDS plots, before you
+  look at a single hit.
+- **Works with your files as they are.** Any column names, sample
+  descriptions from a table, helpful messages when something does not
+  match.
+- **shRNA and CRISPR.** Works with shRNA and CRISPR-Cas9 libraries,
+  checks the screen with essential and non-essential reference genes
+  ([`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md)),
+  and corrects CRISPR copy-number bias through
+  [CRISPRcleanR](https://github.com/francescojm/CRISPRcleanR)
+  ([`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md)).
+- **Bioconductor native.** The ScreenR object is a
+  `SummarizedExperiment`, so it works with the rest of the Bioconductor
+  ecosystem.
+
+## Installation
+
+ScreenR requires R 4.3 or later. Install the release version from
+[Bioconductor](https://bioconductor.org/packages/ScreenR):
 
 ``` r
 
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
-
 BiocManager::install("ScreenR")
 ```
 
-And the development version from
-[GitHub](https://github.com/EmanuelSoda/ScreenR) with:
+or the development version from GitHub:
 
 ``` r
 
-devtools::install_github("EmanuelSoda/ScreenR")
+BiocManager::install("EmanuelSoda/ScreenR")
 ```
 
-## ScreenR overall workflow
+## Quick start
 
-![](reference/figures/Pipeline.png)
+The package includes an example screen: shRNA counts for treated (`TRT`)
+and control (`CTRL`) cells at several time points, with three
+replicates.
 
-Please note that the `ScreenR` was only made possible thanks to many
-other R and bioinformatics software authors, which are cited either in
-the vignettes and/or the paper(s) describing this package.
+``` r
+
+library(ScreenR)
+
+data(count_table)
+data(annotation_table)
+counts <- count_table[count_table$Barcode != "*", ]
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+groups <- factor(c(
+    "T1/T2", "T1/T2", rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+
+# 1. Create the object and normalize the counts
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+object <- compute_data_table(normalize_data(remove_all_zero_row(object)))
+object
+#> class: screenr_object 
+#> dim: 5317 14 
+#> metadata(0):
+#> assays(2): counts normalized
+#> rownames(5317): 10208 10502 ... 13876 13995
+#> rowData names(5): Barcode Gene Gene_ID Sequence Library
+#> colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C
+#> colData names(4): Sample Day Treatment Group
+#> data table: 74438 rows, 9 columns
+```
+
+Check the samples before looking for hits: replicates should cluster
+together.
+
+``` r
+
+plot_mds(object) + ggplot2::theme_bw()
+```
+
+![](reference/figures/README-qc-1.png)
+
+Compare treated and control cells at the last time point with two
+independent tests, and combine them:
+
+``` r
+
+# 2. Define the comparison
+design <- create_design_matrix(object)
+contrast <- create_contrast(design, treatment = "Time4_TRT", control = "Time4_CTRL")
+
+# 3. Gene-level permutation test on replicate-aware barcode statistics
+barcode_statistics <- compute_barcode_statistics(object, design, contrast)
+zscore <- find_gene_zscore_hit(barcode_statistics, fdr = 1, seed = 1)
+
+# 4. limma CAMERA on the barcodes of each gene
+camera <- find_camera_hit(object, design, contrast, fdr = 1)
+
+# 5. One table with the FDR of both methods, best supported genes first
+#    (the example screen has a weak effect, so we use a lenient FDR of 25%)
+hits <- summarise_hits(list(zscore = zscore, camera = camera), fdr = 0.25)
+head(hits)
+#> # A tibble: 6 x 6
+#>   Gene     FDR_zscore FDR_camera NMethods MaxFDR Hit  
+#>   <chr>         <dbl>      <dbl>    <dbl>  <dbl> <lgl>
+#> 1 Gene_173      0.128     0.0882        2  0.128 TRUE 
+#> 2 Gene_422      0.187     0.0882        2  0.187 TRUE 
+#> 3 Gene_15       0.233     0.232         2  0.233 TRUE 
+#> 4 Gene_296      0.250     0.0882        2  0.250 TRUE 
+#> 5 Gene_370      0.280     0.232         1  0.280 FALSE
+#> 6 Gene_352      0.280     0.232         1  0.280 FALSE
+```
+
+Look at the barcodes of the top candidate before trusting it:
+
+``` r
+
+top_gene <- as.character(hits$Gene[1])
+plot_boxplot(object,
+    genes = top_gene, group_var = c("TRT", "CTRL"), fill_var = "Treatment"
+) +
+    ggplot2::scale_fill_manual(values = c(CTRL = "#93B5A3", TRT = "#C9836A")) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+```
+
+![](reference/figures/README-top-gene-1.png)
+
+## Which method should I use?
+
+Every method looks for **depleted** genes by default; set
+`direction = "Up"` to find **enriched** genes (for example in a
+resistance screen).
+
+| Question | Function | Notes |
+|----|----|----|
+| Which genes are depleted or enriched? | [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) | Permutation test on the barcode scores; robust default. Use `statistic = "median"` against off-target effects. |
+| Do the barcodes of a gene change more than the others? | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) | limma CAMERA, competitive test; works with a single control sample. |
+| Do the barcodes of a gene change at all? | [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md) | limma ROAST or FRY (`method = "fry"`), self-contained; needs replicates in both groups. |
+| Does the effect change over time? | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) | edgeR model of the whole time course. |
+| Which genes are supported by several methods? | [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) | One table with the FDR of every method. |
+
+## How ScreenR compares
+
+![](reference/figures/README-benchmark-1.png)
+
+In the simulations ScreenR ranks the true hits as well as the best tools
+and keeps the false discovery rate below the nominal level; at a fixed
+FDR it is more conservative than MAGeCK MLE and BAGEL2, which find more
+hits but exceed the nominal FDR in some scenarios. On the published K562
+shRNA screen included in the package (`k562_count_table`) the ScreenR
+Z-score test is comparable to MAGeCK RRA and BAGEL2. The [benchmark
+article](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)
+has all the details and reruns the ScreenR side of the comparison.
+
+## Learn more
+
+|  |  |
+|----|----|
+| [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object |
+| [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html) | Sequencing depth, library evenness, replicates, normalization |
+| [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html) | All the hit-finding methods, combining them and checking the hits |
+| [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html) | How the tests work and why |
+| [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html) | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
+| [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html) | Every function, grouped by analysis step |
+
+## Getting help
+
+- Questions about using ScreenR: the [Bioconductor support
+  site](https://support.bioconductor.org/tag/ScreenR) (tag `ScreenR`).
+- Bugs and feature requests: [GitHub
+  issues](https://github.com/EmanuelSoda/ScreenR/issues).
 
 ## Citation
 
-Below is the citation output from using `citation('ScreenR')` in `R`.
-Please run this yourself to check for any updates on how to cite
-**ScreenR**.
-
 ``` r
+print(citation("ScreenR"), bibtex = FALSE)
+To cite package 'ScreenR' in publications use:
 
-print(citation('ScreenR'))
-#> 
-#> To cite package 'ScreenR' in publications use:
-#> 
-#>   Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
-#>   Throughput Biological Screening_. R package version 0.99.53,
-#>   <https://emanuelsoda.github.io/ScreenR/>.
-#> 
-#> A BibTeX entry for LaTeX users is
-#> 
-#>   @Manual{,
-#>     title = {ScreenR: Package to Perform High Throughput Biological Screening},
-#>     author = {Emanuel Michele Soda and Elena Ceccacci},
-#>     year = {2022},
-#>     note = {R package version 0.99.53},
-#>     url = {https://emanuelsoda.github.io/ScreenR/},
-#>   }
+  Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
+  Throughput Biological Screening_. R package version 1.15.14,
+  <https://emanuelsoda.github.io/ScreenR/>.
 ```
 
 ## Code of Conduct
 
-Please note that the `ScreenR` project is released with a [Contributor
-Code of Conduct](http://bioconductor.org/about/code-of-conduct/). By
+The ScreenR project is released with the [Bioconductor Code of
+Conduct](https://bioconductor.org/about/code-of-conduct/). By
 contributing to this project, you agree to abide by its terms.
-
-## Development tools
-
-- Continuous code testing is possible thanks to [GitHub
-  actions](https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/)
-  through *[usethis](https://CRAN.R-project.org/package=usethis)*,
-  *[remotes](https://CRAN.R-project.org/package=remotes)*, and
-  *[rcmdcheck](https://CRAN.R-project.org/package=rcmdcheck)* customized
-  to use [Bioconductor’s docker
-  containers](https://www.bioconductor.org/help/docker/) and
-  *[BiocCheck](https://bioconductor.org/packages/3.15/BiocCheck)*.
-- Code coverage assessment is possible thanks to
-  [codecov](https://codecov.io/gh) and
-  *[covr](https://CRAN.R-project.org/package=covr)*.
-- The [documentation website](http://EmanuelSoda.github.io/ScreenR) is
-  automatically updated thanks to
-  *[pkgdown](https://CRAN.R-project.org/package=pkgdown)*.
-- The code is styled automatically thanks to
-  *[styler](https://CRAN.R-project.org/package=styler)*.
-- The documentation is formatted thanks to
-  *[devtools](https://CRAN.R-project.org/package=devtools)* and
-  *[roxygen2](https://CRAN.R-project.org/package=roxygen2)*.
-
-For more details, check the `dev` directory.
-
-This package was developed using
-*[biocthis](https://bioconductor.org/packages/3.15/biocthis)*.
 
 # Package index
 
-## Object
+## Create the ScreenR object
 
-Function for the ScreenR Object
+Build the object from a count table and a barcode annotation, and update
+objects saved with older versions of ScreenR.
 
-- [`create_edger_obj()`](https://emanuelsoda.github.io/ScreenR/reference/create_edger_obj.md)
-  : Create edgeR Object
 - [`create_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
-  : Create the ScreenR Object
-- [`get_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_annotation_table.md)
-  : Get ScreenR annotation table
-- [`get_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_count_table.md)
-  : Get ScreenR count table
-- [`get_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md)
-  : Get ScreenR data_table
-- [`get_groups()`](https://emanuelsoda.github.io/ScreenR/reference/get_groups.md)
-  : Get ScreenR groups
-- [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md)
-  : Get ScreenR normalized_count_table
-- [`get_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/get_replicates.md)
-  : Get ScreenR replicates
-- [`set_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md)
-  : Set ScreenR annotation table
-- [`set_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md)
-  : Set ScreenR count table
-- [`set_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_data_table.md)
-  : Set ScreenR data_table
-- [`set_groups()`](https://emanuelsoda.github.io/ScreenR/reference/set_groups.md)
-  : Set ScreenR groups
-- [`set_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_normalized_count_table.md)
-  : Set ScreenR normalized_count_table
-- [`set_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/set_replicates.md)
-  : Set ScreenR replicates
-
-## Computation
-
-Function used to perform computations
-
-- [`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
-  : Count number of barcode lost
-- [`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
-  : Compute data Table
-- [`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
-  : Compute Metrics
-- [`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md)
-  : Compute Slope of a Gene
-- [`count_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md)
-  : Count the number of mapped read
-- [`mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md)
-  : Mapped Reads
-- [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
-  : Normalize data
+  : Create a ScreenR object
+- [`screenr_object-class`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)
+  [`screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)
+  : The ScreenR object class
+- [`update_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/update_screenr_object.md)
+  : Update a ScreenR object
 - [`remove_all_zero_row()`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md)
-  : Remove rows that have zero count in all samples
+  : Remove the barcodes with zero counts in all samples
+- [`show(`*`<screenr_object>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/show-screenr_object.md)
+  : Show a ScreenR object
+- [`` `[`( ``*`<screenr_object>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/subset-screenr_object.md)
+  : Subset a ScreenR object
 
-## Find Hit
+## Access and modify the object
 
-Function used to find hits
+Getter and setter functions for the content of the ScreenR object.
 
-- [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
-  : Find Camera Hit
-- [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
-  : Find common hit
-- [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
-  : Find Roast Hit
-- [`find_robust_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_robust_zscore_hit.md)
-  : Title Find robust Z-score Hit
-- [`find_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md)
-  : Title Find Z-score Hit
+- [`get_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_annotation_table.md)
+  : Get the annotation table
+- [`get_column_names()`](https://emanuelsoda.github.io/ScreenR/reference/get_column_names.md)
+  : Get the original column names
+- [`get_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_count_table.md)
+  : Get the count table
+- [`get_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md)
+  : Get the data table
+- [`get_groups()`](https://emanuelsoda.github.io/ScreenR/reference/get_groups.md)
+  : Get the groups
+- [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md)
+  : Get the normalized count table
+- [`get_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/get_replicates.md)
+  : Get the replicates
+- [`get_sample_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md)
+  : Get the sample table
+- [`set_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md)
+  : Set the annotation table
+- [`set_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md)
+  : Set the count table
+- [`set_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_data_table.md)
+  : Set the data table
+- [`set_groups()`](https://emanuelsoda.github.io/ScreenR/reference/set_groups.md)
+  : Set the groups
+- [`set_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_normalized_count_table.md)
+  : Set the normalized count table
+- [`set_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/set_replicates.md)
+  : Set the replicates
 
-## Further Optimization
+## Quality control
 
-Function to further optimize the hit found
+Check the sequencing depth, the library representation and the
+replicates.
 
-- [`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)
-  : Filter using the slope filter
-- [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md)
-  : Filter using the variance filter
-
-## Plot
-
-Functions used to visualize the data
-
-- [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
-  : Plot barcode hit
-- [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
-  : Plot number of barcode lost
-- [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md)
-  : Plot number of barcode lost for gene
-- [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
-  : Plot the trend over time of the barcodes
-- [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
-  : Plot Barcodes Hit
-- [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
-  : Plot common hit
-- [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
-  : Plot the explained variance by the PC
+- [`count_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md)
+  : Get the mapped reads of each barcode in each sample
+- [`mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md)
+  : Compute the number of mapped reads of each sample
 - [`plot_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md)
-  : Plot mapped reads
+  : Plot the number of mapped reads of each sample
 - [`plot_mapped_reads_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md)
   : Plot the distribution of the mapped reads
+- [`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
+  : Compute the number of barcodes lost in each sample
+- [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
+  : Plot the number of barcodes lost in each sample
+- [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md)
+  : Plot the number of barcodes lost for each gene
+- [`compute_gini()`](https://emanuelsoda.github.io/ScreenR/reference/compute_gini.md)
+  : Compute the Gini index of each sample
+- [`plot_gini()`](https://emanuelsoda.github.io/ScreenR/reference/plot_gini.md)
+  : Plot the Gini index of each sample
+- [`plot_replicate_correlation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md)
+  : Plot the correlation between samples
 - [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md)
-  : Multidimensional Scaling Plot
+  : Plot a multidimensional scaling of the samples
+- [`compute_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.md)
+  : Compute the variance explained by the principal components
+- [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+  : Plot the variance explained by the principal components
+- [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
+  : Plot the normalized counts of genes in each sample
+
+## Normalization and barcode statistics
+
+Normalize the counts and compute barcode-level fold changes and scores.
+
+- [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  : Normalize the counts
+- [`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
+  : Compute the data table
+- [`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
+  : Compute the barcode metrics
+- [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md)
+  : Compute replicate-aware barcode statistics
+- [`create_design_matrix()`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
+  : Create the design matrix
+- [`create_contrast()`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md)
+  : Create a contrast
+- [`create_edger_obj()`](https://emanuelsoda.github.io/ScreenR/reference/create_edger_obj.md)
+  : Create an edgeR object
+
+## Find hits
+
+Gene-level tests that return a p-value and a false discovery rate for
+every gene.
+
+- [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
+  : Find hits with a gene-level Z-score test
+- [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
+  : Find hits with CAMERA
+- [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
+  : Find hits with ROAST or FRY
+- [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
+  : Find hits with a time-course model
+
+## Combine and validate hits
+
+Compare the methods and check the hits at the barcode level.
+
+- [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
+  : Summarise the hits of several methods
+- [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
+  : Find the hits in common between methods
+- [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
+  : Plot the hits in common between methods
+- [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
+  : Find discordant barcodes
+- [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
+  : Plot the barcodes of a gene (barcode plot)
+- [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
+  : Plot the trend of the barcodes of genes over time
 - [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-  : Plot the trend hit gene
+  : Plot the trend of genes over the samples
 - [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
-  : Plot distribution Z-score
+  : Plot the distribution of the barcode log2 fold changes
+- [`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)
+  : Filter hits by the slope of their trend
+- [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md)
+  : Filter hits by the variance of their barcodes
+- [`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md)
+  : Compute the slope of the trend of genes
 
-## Data
+## CRISPR screens and reference genes
 
-Example of data used in the ScreenR pipeline
+Choose the barcode thresholds for the library, check the screen with
+essential and non-essential reference genes, and correct CRISPR-Cas9
+copy-number bias with CRISPRcleanR.
 
-- [`annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/annotation_table.md)
-  : Table for the annotation of Barcode
+- [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md)
+  : Count the barcodes of each gene
+- [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md)
+  : Compute the quality of a screen from reference genes
+- [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md)
+  : Plot the separation of reference genes
+- [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md)
+  : Scale scores to reference genes
+- [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md)
+  : Correct CRISPR-Cas9 copy-number and proximity bias with CRISPRcleanR
+- [`crisprcleanr_available()`](https://emanuelsoda.github.io/ScreenR/reference/crisprcleanr_available.md)
+  : Is CRISPRcleanR Available
+- [`hart_reference_genes`](https://emanuelsoda.github.io/ScreenR/reference/hart_reference_genes.md)
+  : Reference essential and non-essential human genes
+
+## Legacy hit rules
+
+Rules of earlier versions of ScreenR, kept for compatibility. They do
+not control the false discovery rate; use the tests above to call hits.
+
+- [`find_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md)
+  : Find hits with the Z-score threshold rule
+- [`find_robust_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_robust_zscore_hit.md)
+  : Find hits with the robust Z-score threshold rule
+
+## Datasets
+
+Example screen and a published K562 screen with known essential genes.
+
 - [`count_table`](https://emanuelsoda.github.io/ScreenR/reference/count_table.md)
-  : Table of the count table
+  : Example count table
+- [`annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/annotation_table.md)
+  : Example annotation table
+- [`k562_count_table`](https://emanuelsoda.github.io/ScreenR/reference/k562_count_table.md)
+  : K562 shRNA essentiality screen: count table
+- [`k562_annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/k562_annotation_table.md)
+  : K562 shRNA essentiality screen: annotation table
+- [`k562_reference_genes`](https://emanuelsoda.github.io/ScreenR/reference/k562_reference_genes.md)
+  : K562 shRNA essentiality screen: reference essential and
+  non-essential genes
+
+## Package
+
+- [`ScreenR-package`](https://emanuelsoda.github.io/ScreenR/reference/ScreenR-package.md)
+  [`ScreenR`](https://emanuelsoda.github.io/ScreenR/reference/ScreenR-package.md)
+  : ScreenR: analysis of pooled shRNA screens
 
 # Articles
 
-### All vignettes
+### Tutorials
+
+Step-by-step guides, from the count table to the list of hits.
+
+- [Tutorial 1: Getting your data into
+  ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.md):
+- [Tutorial 2: Quality
+  control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.md):
+- [Tutorial 3: Finding and validating
+  hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.md):
+
+### Articles
 
 - [ScreenR Example
   Analysis](https://emanuelsoda.github.io/ScreenR/articles/Analysis_Example.md):
+- [Improved statistical analysis with
+  ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.md):
+- [Benchmark against MAGeCK and other
+  tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.md):

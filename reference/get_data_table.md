@@ -1,6 +1,9 @@
-# Get ScreenR data_table
+# Get the data table
 
-Get function for the data_table of the ScreenR object
+Returns the data table of a ScreenR object, the tidy (long) version of
+the normalized counts computed with
+[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md).
+A short summary of the size of the table is printed.
 
 ## Usage
 
@@ -15,21 +18,26 @@ get_data_table(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The data_table of the ScreenR object
+A tibble with one row for each barcode and sample and the columns
+Barcode, Gene, Sample, Frequency (the normalized count), Day and
+Treatment (plus the other annotation columns).
+
+## See also
+
+[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md),
+[`set_data_table`](https://emanuelsoda.github.io/ScreenR/reference/set_data_table.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 data_table <- get_data_table(object)
-#> ScreenR normalized data table containing:
-#>  74480 rows
-#>  9 columns
+#> ScreenR normalized data table: 74480 rows, 9 columns
 data_table
 #> # A tibble: 74,480 × 9
 #>    Barcode Gene     Sample    Frequency Sequence Library Gene_ID Day   Treatment

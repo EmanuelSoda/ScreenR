@@ -1,9 +1,9 @@
-# Plot mapped reads
+# Plot the number of mapped reads of each sample
 
-This function plots the number of reads mapped for each sample. It
-internally call the
-[`count_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md)
-function, to compute the number of mapped reads.
+Draws a bar plot of the total number of reads mapped to the barcodes in
+each sample, computed with
+[`mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md).
+Samples with far fewer reads than the others may have a lower quality.
 
 ## Usage
 
@@ -20,26 +20,33 @@ plot_mapped_reads(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - palette:
 
-  A vector of color that as to be used to fill the barplot.
+  An optional vector of colors, one for each sample, used to fill the
+  bars. By default the ggplot2 colors are used.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  The opacity of the bars, between 0 and 1. Default 1. It is used only
+  when palette is given.
 
 - legende_position:
 
-  Where to positioning the legend of the plot ("none", "left", "right",
-  "bottom", "top")
+  The position of the legend: "none" (default), "top", "bottom", "right"
+  or "left".
 
 ## Value
 
-return a ggplot object
+A ggplot object.
+
+## See also
+
+[`mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md),
+[`plot_mapped_reads_distribution`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md),
+[`plot_barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
 
 ## Examples
 

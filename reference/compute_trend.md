@@ -1,6 +1,7 @@
-# Compute trend
+# Compute the trend of genes
 
-This is an internal function used to computes the trend of a gene
+Internal function that computes, for each gene and sample, the mean
+normalized count of the barcodes of the gene.
 
 ## Usage
 
@@ -12,17 +13,17 @@ compute_trend(screenR_Object, genes, group_var)
 
 - screenR_Object:
 
-  object created with
-  [`estimateDisp`](https://rdrr.io/pkg/edgeR/man/estimateDisp.html)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - genes:
 
-  a list of genes
+  The names of the genes.
 
 - group_var:
 
-  the variable that as to be used as grouping variable
+  The values of the Treatment column of the samples to use.
 
 ## Value
 
-A table with the trend of the genes passed as input
+A tibble with the columns Sample, Gene and Frequency.

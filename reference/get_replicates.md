@@ -1,6 +1,6 @@
-# Get ScreenR replicates
+# Get the replicates
 
-Get function for the replicates of the ScreenR object
+Returns the replicate labels stored in a ScreenR object.
 
 ## Usage
 
@@ -15,12 +15,17 @@ get_replicates(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The replicates of the ScreenR object
+The vector of replicate labels.
+
+## See also
+
+[`set_replicates`](https://emanuelsoda.github.io/ScreenR/reference/set_replicates.md),
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
 
 ## Examples
 

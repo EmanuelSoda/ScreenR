@@ -1,7 +1,9 @@
-# Plot distribution Z-score
+# Plot the distribution of the barcode log2 fold changes
 
-This function plots the Log2FC Z-score distribution of the treated vs
-control in the different time points.
+Draws the density of the log2 fold changes of the barcodes (treated
+versus control), with one curve for each time point. It is useful to
+compare the strength of the effect of the treatment at the different
+time points.
 
 ## Usage
 
@@ -13,18 +15,23 @@ plot_zscore_distribution(time_point_measure, alpha = 1)
 
 - time_point_measure:
 
-  A list containing the table for each time point. Each table contains
-  for each barcode the counts for the treated and control the Log2FC,
-  Zscore, ZscoreRobust, Day.
+  A list with the tables of
+  [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
+  for the different time points (or a single table). Each table
+  contains, for each barcode, the columns Log2FC and Day.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  The opacity of the densities, between 0 and 1. Default 1.
 
 ## Value
 
-return the density plot of the distribution of the Z-score
+A ggplot object.
+
+## See also
+
+[`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
+[`plot_barcode_trend`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
 
 ## Examples
 
@@ -32,12 +39,12 @@ return the density plot of the distribution of the Z-score
 object <- get0("object", envir = asNamespace("ScreenR"))
 
 table1 <- compute_metrics(object,
-    control = "TRT", treatment = "Time3",
+    control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 
 table2 <- compute_metrics(object,
-    control = "TRT", treatment = "Time4",
+    control = "Time4", treatment = "TRT",
     day = "Time4"
 )
 

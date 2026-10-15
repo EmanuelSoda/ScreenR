@@ -1,6 +1,12 @@
-# Table for the annotation of Barcode
+# Example annotation table
 
-Table for the annotation of Barcode
+Annotation of the barcodes of
+[`count_table`](https://emanuelsoda.github.io/ScreenR/reference/count_table.md),
+an example loss-of-function shRNA screen. Each row describes one shRNA
+(barcode) and the gene it targets. Use it together with
+[`count_table`](https://emanuelsoda.github.io/ScreenR/reference/count_table.md)
+to create a ScreenR object with
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Usage
 
@@ -10,29 +16,45 @@ data(annotation_table)
 
 ## Format
 
-A data frame with 5320 rows and 2 columns obtained from a
-loss-of-function genetic screening. This table is used to store
-information about the shRNAs:
+A data frame with 5320 rows (barcodes) and 5 columns:
 
 - Gene:
 
-  It Contains the gene name
+  The name of the gene targeted by the shRNA.
 
 - Barcode:
 
-  It contains an ID that identify each barcode (it is an unique
-  identifier for an shRNA). I t can be use to merge the annotation table
-  with t he count table
+  The barcode identifier, unique for each shRNA. It links the annotation
+  table to the count table.
 
 - Gene_ID:
 
-  It Contains a unique Gene ID
+  A gene identifier (NA in this example).
 
 - Sequence:
 
-  It contains the cDNA sequence of the shRNA associated to the barcode
+  The sequence of the shRNA (NA in this example).
 
 - Library:
 
-  It contains the library from which the shRNA come from. In this case
-  is a pooled from <https://cellecta.com/>cellecta
+  The library of the shRNA, a pooled library from
+  [Cellecta](https://cellecta.com/) (NA in this example).
+
+## See also
+
+[`count_table`](https://emanuelsoda.github.io/ScreenR/reference/count_table.md),
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+
+## Examples
+
+``` r
+data(annotation_table)
+head(annotation_table)
+#>       Gene Barcode Gene_ID Sequence Library
+#> 1 Gene_380   10208      NA       NA      NA
+#> 2 Gene_380   10502      NA       NA      NA
+#> 3 Gene_380   10796      NA       NA      NA
+#> 4 Gene_380   11089      NA       NA      NA
+#> 5 Gene_380   11382      NA       NA      NA
+#> 6 Gene_380   11675      NA       NA      NA
+```

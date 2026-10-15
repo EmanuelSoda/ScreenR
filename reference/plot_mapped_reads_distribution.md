@@ -1,9 +1,8 @@
 # Plot the distribution of the mapped reads
 
-This function creates a boxplot or a densityplot to show the
-distribution of the mapped reads in different samples. This function can
-be used to assess the quality of the samples. Samples which show roughly
-the same distribution have good quality.
+Draws a box plot or a density plot of the number of reads of the
+barcodes in each sample. It is a quality control plot: samples of good
+quality have roughly the same distribution.
 
 ## Usage
 
@@ -20,33 +19,37 @@ plot_mapped_reads_distribution(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
+  The ScreenR object obtained using
   [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - palette:
 
-  The color vector that as to be used for the plot.
+  An optional vector of colors, one for each sample. By default the
+  ggplot2 colors are used.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  The opacity of the boxes or densities, between 0 and 1. Default 1.
 
 - type:
 
-  The type of plot. The default is "boxplot" the other option is
-  "density."
+  The type of plot: "boxplot" (default) or "density".
 
 ## Value
 
-Return a tibble containing the number of mapped read for each sample
+A ggplot object.
+
+## See also
+
+[`count_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md),
+[`plot_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 
-# Boxplot
+# Box plot
 plot_mapped_reads_distribution(object)
 
 
@@ -54,6 +57,6 @@ plot_mapped_reads_distribution(object)
 plot_mapped_reads_distribution(object, type = "density")
 
 
+# Density with transparency
 plot_mapped_reads_distribution(object, type = "density", alpha = 0.2)
-
 ```

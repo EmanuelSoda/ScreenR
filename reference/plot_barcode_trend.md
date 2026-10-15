@@ -1,8 +1,9 @@
-# Plot the trend over time of the barcodes
+# Plot the trend of the barcodes of genes over time
 
-Plot the log2FC over time of the barcodes in the different time point.
-This plot is useful to check we efficacy of each shRNA. Good shRNAs
-should have consistent trend trend over time.
+Plots the log2 fold change of each barcode of the given genes at the
+different time points, one line for each barcode. It is useful to check
+the efficacy of each shRNA: good shRNAs of a hit should have a
+consistent trend over time.
 
 ## Usage
 
@@ -20,28 +21,40 @@ plot_barcode_trend(
 
 - list_data_measure:
 
-  A list containing the measure table of the different time point.
-  Generated using the compute_metrics function.
+  The tables of
+  [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
+  for the different time points, as a list or already combined with
+  [`bind_rows`](https://dplyr.tidyverse.org/reference/bind_rows.html).
+  The time points are shown in the order in which they appear.
 
 - genes:
 
-  The vector of genes name.
+  The names of the genes to plot.
 
 - n_col:
 
-  The number of column to use in the facet wrap.
+  The number of columns used to arrange the plots of the genes (default
+  1). When larger than 1 the plots are combined with
+  [`wrap_plots`](https://patchwork.data-imaginist.com/reference/wrap_plots.html).
 
 - size_line:
 
-  The thickness of the line.
+  The width of the lines. Default 1.
 
 - color:
 
-  The vector of colors. One color for each barcode.
+  An optional vector of colors, one for each barcode.
 
 ## Value
 
-The trend plot for the genes in input.
+With n_col = 1, a list with one ggplot object for each gene; with n_col
+\> 1, a single patchwork object combining them.
+
+## See also
+
+[`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
+[`plot_barcode_hit`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md),
+[`find_discordant_barcodes`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
 
 ## Examples
 
@@ -50,15 +63,15 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 
 metrics <- dplyr::bind_rows(
     compute_metrics(object,
-        control = "TRT", treatment = "Time3",
+        control = "Time3", treatment = "TRT",
         day = "Time3"
     ),
     compute_metrics(object,
-        control = "TRT", treatment = "Time4",
+        control = "Time4", treatment = "TRT",
         day = "Time4"
     )
 )
-# Multiple Genes
+# Multiple genes
 plot_barcode_trend(metrics,
     genes = c("Gene_1", "Gene_50"),
     n_col = 2
@@ -68,7 +81,7 @@ plot_barcode_trend(metrics,
 #> ℹ The deprecated feature was likely used in the ScreenR package.
 #>   Please report the issue at <https://github.com/EmanuelSoda/ScreenR/issues>.
 
-# Single Gene
+# Single gene
 plot_barcode_trend(metrics, genes = "Gene_300")
 #> $Gene_300
 

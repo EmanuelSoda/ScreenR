@@ -1,8 +1,9 @@
-# Remove rows that have zero count in all samples
+# Remove the barcodes with zero counts in all samples
 
-This function removes the rows that have zero count in all samples. It
-takes care of updating both count_table and annotation_table.
-Very_Important: It has to be performed before the data normalization.
+Removes the barcodes (rows) with zero counts in all the samples from the
+count table, the annotation table and, when present, the normalized
+count table and the data table. Run it before
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
 
 ## Usage
 
@@ -14,29 +15,29 @@ remove_all_zero_row(screenR_Object)
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The ScreenR object with the count_table and the annotation_table
-filtered.
+The ScreenR object without the barcodes with zero counts in all samples.
+
+## See also
+
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md),
+[`barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 counts <- get_count_table(object)
-#> ScreenR count table containing:
-#>  5320 rows
-#>  15 columns
+#> ScreenR count table: 5320 rows, 15 columns
 nrow(counts)
 #> [1] 5320
 object <- remove_all_zero_row(object)
 counts <- get_count_table(object)
-#> ScreenR count table containing:
-#>  5317 rows
-#>  15 columns
+#> ScreenR count table: 5317 rows, 15 columns
 nrow(counts)
 #> [1] 5317
 ```

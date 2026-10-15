@@ -5,15 +5,7 @@ This internal function computes the actual hits using the camera method.
 ## Usage
 
 ``` r
-compute_camera(
-  xglm,
-  DGEList,
-  matrix_model,
-  contrast,
-  number_barcode = 3,
-  thresh = 1e-04,
-  lfc = 1
-)
+compute_camera(xglm, DGEList, matrix_model, contrast, number_barcode = 3)
 ```
 
 ## Arguments
@@ -34,25 +26,25 @@ compute_camera(
 
   `matrix_model`
 
-  :   The matrix that will be used to perform the linear model analysis
-      created using
-      [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)
+  :   The design matrix of the linear model, for example created with
+      [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
+      (or with
+      [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)).
 
-  `thresh`
+  `contrast`
 
-  :   The threshold for the False Discovery Rate (FDR) that has to be
-      used to select the statistically significant hits.
-
-  `lfc`
-
-  :   The Log2FC threshold.
+  :   The comparison to test: the name or index of a column of
+      matrix_model, a numeric contrast vector (for example created with
+      [`create_contrast`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md))
+      or a one-column matrix created with
+      [`makeContrasts`](https://rdrr.io/pkg/limma/man/makeContrasts.html).
 
   `number_barcode`
 
-  :   Number of barcode that as to be differentially expressed (DE)in
-      order to consider the gene associated DE. Example a gene is
-      associated with 10 shRNA we consider a gene DE if it has at least
-      number_barcode = 5 shRNA DE.
+  :   Only genes with more than number_barcode barcodes are tested
+      (default 3, so a gene needs at least 4 barcodes). The barcodes of
+      a gene are tested together as a set, so this is not a number of
+      barcodes that must change.
 
 ## Value
 

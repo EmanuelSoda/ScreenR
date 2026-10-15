@@ -1,6 +1,8 @@
-# Get ScreenR count table
+# Get the count table
 
-Get function for the count table of the ScreenR object
+Returns the raw count table of a ScreenR object, with one row for each
+barcode and one column for each sample. A short summary of the size of
+the table is printed.
 
 ## Usage
 
@@ -15,47 +17,26 @@ get_count_table(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The count table of the ScreenR object
+A tibble with the Barcode column and one column of counts for each
+sample.
 
-## Slots
+## See also
 
-- `count_table`:
-
-  It is used to store the count table to perform the analysis
-
-- `annotation_table`:
-
-  It is used to store the annotation of the shRNA
-
-- `groups`:
-
-  It is used to store the vector of treated and untreated
-
-- `replicates`:
-
-  It is used to store information about the replicates
-
-- `normalized_count_table`:
-
-  It is used to store a normalized version of the count table
-
-- `data_table`:
-
-  It is used to store a tidy format of the count table
+[`set_count_table`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md),
+[`get_normalized_count_table`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md),
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 count_table <- get_count_table(object)
-#> ScreenR count table containing:
-#>  5320 rows
-#>  15 columns
+#> ScreenR count table: 5320 rows, 15 columns
 head(count_table)
 #> # A tibble: 6 × 15
 #>   Barcode    T1    T2 Time3_TRT_A Time3_TRT_B Time3_TRT_C Time3_A Time3_B
@@ -68,19 +49,4 @@ head(count_table)
 #> 6 11675    7330  7593        4927        6211        6504    7781    7183
 #> # ℹ 7 more variables: Time3_C <int>, Time4_TRT_A <int>, Time4_TRT_B <int>,
 #> #   Time4_TRT_C <int>, Time4_A <int>, Time4_B <int>, Time4_c <int>
-data("count_table", package = "ScreenR")
-data("annotation_table", package = "ScreenR")
-
-groups <- factor(c(
-    "T1/T2", "T1/T2", "Treated", "Treated", "Treated",
-    "Control", "Control", "Control", "Treated", "Treated",
-    "Treated", "Control", "Control", "Control"
-))
-
-obj <- create_screenr_object(
-    table = count_table,
-    annotation = annotation_table,
-    groups = groups,
-    replicates = c("")
-)
 ```

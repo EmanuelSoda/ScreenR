@@ -1,6 +1,8 @@
-# Get ScreenR normalized_count_table
+# Get the normalized count table
 
-Get function for the normalized_count_table of the ScreenR object
+Returns the normalized count table of a ScreenR object, computed with
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
+A short summary of the size of the table is printed.
 
 ## Usage
 
@@ -15,21 +17,26 @@ get_normalized_count_table(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The normalized_count_table of the ScreenR object
+A tibble with the Barcode column and one column of normalized counts for
+each sample (an empty tibble if the data have not been normalized).
+
+## See also
+
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md),
+[`set_normalized_count_table`](https://emanuelsoda.github.io/ScreenR/reference/set_normalized_count_table.md),
+[`get_count_table`](https://emanuelsoda.github.io/ScreenR/reference/get_count_table.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 normalized_count_table <- get_normalized_count_table(object)
-#> ScreenR normalized count table containing:
-#>  5320 rows
-#>  15 columns
+#> ScreenR normalized count table: 5320 rows, 15 columns
 normalized_count_table
 #> # A tibble: 5,320 × 15
 #>    Barcode    T1    T2 Time3_TRT_A Time3_TRT_B Time3_TRT_C Time3_A Time3_B

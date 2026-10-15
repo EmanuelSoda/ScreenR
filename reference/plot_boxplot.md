@@ -1,8 +1,9 @@
-# Plot Barcodes Hit
+# Plot the normalized counts of genes in each sample
 
-This function plots a boxplot for each sample for the genes passed as
-input. It can be used to see the overall trend of a gene and so to
-visualize if the gene is up or down regulated.
+Draws, for the given genes, a box plot (or violin plot) of the
+normalized counts of their barcodes in each sample, taken from the data
+table. It shows the overall trend of a gene and whether it is depleted
+or enriched.
 
 ## Usage
 
@@ -24,47 +25,53 @@ plot_boxplot(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - genes:
 
-  The vector of genes that will be displayed
+  The names of the genes to plot.
 
 - group_var:
 
-  The variable that as to be used to filter the data, for example the
-  different treatment
+  The values of the Treatment column of the data table (see
+  [`get_sample_table`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md))
+  of the samples to plot.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  Not used.
 
 - nrow:
 
-  The number of rows in case multiple genes are plotted
+  The number of rows of panels, when several genes are plotted.
 
 - ncol:
 
-  The number of columns in case multiple genes are plotted
+  The number of columns of panels, when several genes are plotted.
 
 - fill_var:
 
-  The variable used to fill the boxplot
+  The column of the data table used to fill the boxes, for example
+  "Sample" (default), "Day" or "Treatment".
 
 - type:
 
-  The type of plot to use "boxplot" or "violinplot"
+  The type of plot: "boxplot" (default) or "violinplot".
 
 - scales:
 
-  The scales used for the facet. Possible values can be "free", "fixed"
-  and "free_y"
+  The scales of the panels: "free" (default), "fixed", "free_x" or
+  "free_y".
 
 ## Value
 
-A boxplot
+A ggplot object.
+
+## See also
+
+[`plot_trend`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md),
+[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
 
 ## Examples
 
@@ -76,5 +83,4 @@ plot_boxplot(object,
     group_var = c("T1", "T2", "TRT"), nrow = 1, ncol = 2,
     fill_var = "Day", type = "violinplot"
 )
-
 ```

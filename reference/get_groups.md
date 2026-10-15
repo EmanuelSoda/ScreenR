@@ -1,6 +1,10 @@
-# Get ScreenR groups
+# Get the groups
 
-Get function for the groups of the ScreenR object
+Returns the experimental group of each sample of a ScreenR object, as
+given to
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
+The groups define the columns of the design matrix
+([`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)).
 
 ## Usage
 
@@ -15,12 +19,17 @@ get_groups(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The groups of the ScreenR object
+A factor with one value for each sample.
+
+## See also
+
+[`set_groups`](https://emanuelsoda.github.io/ScreenR/reference/set_groups.md),
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
 
 ## Examples
 

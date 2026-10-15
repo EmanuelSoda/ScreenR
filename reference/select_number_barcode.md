@@ -1,6 +1,7 @@
-# Select number of Barcode
+# Select the barcodes of a gene
 
-Compute a unique gene symbol for gene
+Internal function that returns the indices of the barcodes of a gene,
+when the gene has more than number_barcode barcodes.
 
 ## Usage
 
@@ -21,8 +22,9 @@ select_number_barcode(gene, gene_symbols, number_barcode)
 
   `gene_symbols`
 
-  :   The gene symbols list
+  :   The gene of each barcode.
 
 ## Value
 
-The barcode of the gene passed as input
+The indices of the barcodes of the gene passed as input, or NULL if the
+gene has no more than number_barcode barcodes

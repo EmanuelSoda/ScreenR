@@ -1,7 +1,10 @@
-# Mapped Reads
+# Compute the number of mapped reads of each sample
 
-This function returns the number of mapped reads inside the ScreenR
-object
+Computes the total number of reads mapped to the barcodes in each sample
+(the library size). Samples with far fewer mapped reads than the others
+may have a lower quality. Use
+[`plot_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md)
+to plot the result.
 
 ## Usage
 
@@ -13,12 +16,19 @@ mapped_reads(screenR_Object)
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-Return a tibble containing the number of mapped read for sample
+A tibble with one row for each sample and the columns Sample and Mapped
+(the total number of mapped reads).
+
+## See also
+
+[`count_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md),
+[`plot_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md),
+[`barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
 
 ## Examples
 

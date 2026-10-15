@@ -1,9 +1,9 @@
-# Plot common hit
+# Plot the hits in common between methods
 
-This method plot the hits in common among the three methods is a wrapper
-for the
-[`ggvenn`](https://yanlinlin82.github.io/ggvenn/reference/ggvenn.html)
-function.
+Draws a Venn diagram of the hits of the three methods (Z-score, CAMERA
+and ROAST), to see how many hits they have in common. It is a wrapper
+around
+[`ggvenn`](https://yanlinlin82.github.io/ggvenn/reference/ggvenn.html).
 
 ## Usage
 
@@ -28,59 +28,67 @@ plot_common_hit(
 
 - hit_zscore:
 
-  The list of hits of the
-  [`find_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md)
+  The hits of the Z-score method, a table with a Gene column (for
+  example from
+  [`find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)).
 
 - hit_camera:
 
-  The list of hits of the
-  [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
+  The hits of
+  [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md),
+  a table with a Gene column.
 
 - hit_roast:
 
-  The list of hits of the
-  [`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
+  The hits of
+  [`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md),
+  a table with a Gene column.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  The opacity of the circles, between 0 and 1. Default 0.5.
 
 - stroke_size:
 
-  Stroke size for drawing circles
+  The width of the circle borders.
 
 - set_name_size:
 
-  Text size for set names
+  The text size of the set names.
 
 - text_color:
 
-  Text color for intersect contents
+  The text color of the contents of the intersections.
 
 - text_size:
 
-  Text size for intersect contents
+  The text size of the contents of the intersections.
 
 - show_percentage:
 
-  Show percentage for each set
+  Whether to show the percentage of each set (used when show_elements is
+  FALSE).
 
 - title:
 
-  The title to display above the plot
+  The title displayed above the plot.
 
 - color:
 
-  The three vector color for the venn
+  The three colors used to fill the circles.
 
 - show_elements:
 
-  Show set elements instead of count/percentage.
+  Whether to show the gene names instead of the counts (default TRUE).
 
 ## Value
 
-A vector containing the common hit
+A ggplot object.
+
+## See also
+
+[`find_common_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md),
+[`summarise_hits`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
 
 ## Examples
 
@@ -90,4 +98,7 @@ hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
 hit_roast <- data.frame(Gene = c("A", "L", "N"))
 plot_common_hit(hit_zscore, hit_camera, hit_roast)
 
+
+# Number of genes instead of their names
+plot_common_hit(hit_zscore, hit_camera, hit_roast, show_elements = FALSE)
 ```

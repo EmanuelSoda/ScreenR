@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Package to Perform High Throughput Biological Screening • ScreenR</title>
+<title>ScreenR: hit identification in pooled shRNA screens • ScreenR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -13,22 +13,34 @@
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Inter-0.4.10/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Package to Perform High Throughput Biological Screening">
-<meta name="description" content="ScreenR is a package suitable to perform hit identification in loss of function High Throughput Biological Screenings performed using barcoded shRNA-based libraries. ScreenR combines the computing power of software such as edgeR with the simplicity of use of the Tidyverse metapackage. ScreenR executes a pipeline able to find candidate hits from barcode counts, and integrates a wide range of visualization modes for each step of the analysis.">
-<meta property="og:description" content="ScreenR is a package suitable to perform hit identification in loss of function High Throughput Biological Screenings performed using barcoded shRNA-based libraries. ScreenR combines the computing power of software such as edgeR with the simplicity of use of the Tidyverse metapackage. ScreenR executes a pipeline able to find candidate hits from barcode counts, and integrates a wide range of visualization modes for each step of the analysis.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="ScreenR: hit identification in pooled shRNA screens">
+<meta name="description" content="Find the genes that matter in pooled shRNA screens with calibrated statistics, quality control and publication-ready plots.
+">
+<meta property="og:description" content="Find the genes that matter in pooled shRNA screens with calibrated statistics, quality control and publication-ready plots.
+">
 <meta property="og:image" content="https://emanuelsoda.github.io/ScreenR/logo.png">
+<style>
+  .navbar-dark .navbar-nav .nav-link, .navbar-dark .navbar-brand { color: rgba(255,255,255,.88); }
+  .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link.active { color: #fff; }
+  .navbar-dark .nav-text.text-muted { color: rgba(255,255,255,.65) !important; }
+  h1, h2, h3 { color: #1F5F55; }
+  .ref-index h3 { margin-top: 2rem; border-bottom: 2px solid #93B5A3; padding-bottom: .3rem; }
+  pre { border-left: 4px solid #93B5A3; }
+</style>
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,20 +49,31 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/Tutorial_1_Creating_the_object.html">Get started</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
+<li><a class="dropdown-item" href="articles/Tutorial_1_Creating_the_object.html">1. Getting your data into ScreenR</a></li>
+    <li><a class="dropdown-item" href="articles/Tutorial_2_Quality_control.html">2. Quality control</a></li>
+    <li><a class="dropdown-item" href="articles/Tutorial_3_Finding_hits.html">3. Finding and validating hits</a></li>
+  </ul>
+</li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/Analysis_Example.html">ScreenR Example Analysis</a></li>
+<li><a class="dropdown-item" href="articles/Analysis_Example.html">Complete analysis example</a></li>
+    <li><a class="dropdown-item" href="articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
+    <li><a class="dropdown-item" href="articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/EmanuelSoda/ScreenR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/EmanuelSoda/ScreenR" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -66,68 +89,231 @@
 </div>
 <!-- badges: start -->
 
-<p><a href="https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <!-- badges: end --></p>
-<p>ScreenR is an easy and effective package to perform hits identification in loss of function High Throughput Biological Screening performed with shRNAs library. ScreenR combines the power of software like edgeR with the simplicity of the Tidyverse metapackage. ScreenR executes a pipeline able to find candidate hits from barcode counts data and integrates a wide range of visualization for each step of the analysis</p>
+<p><strong>Find the genes that matter in pooled shRNA screens — with p-values you can trust, quality control built in and publication-ready plots.</strong></p>
+<p>ScreenR takes the barcode counts of a pooled shRNA screen and tells you which genes are depleted or enriched by your treatment, how confident you can be in each of them, and whether the result holds up at the level of the single barcodes. It is built on the statistics of <a href="https://bioconductor.org/packages/edgeR" class="external-link">edgeR</a> and <a href="https://bioconductor.org/packages/limma" class="external-link">limma</a>, stores the data in a Bioconductor <code>SummarizedExperiment</code>, and draws every plot with ggplot2.</p>
+<p><img src="reference/figures/workflow.svg" alt="The ScreenR workflow" width="100%"></p>
 <div class="section level2">
-<h2 id="installation-instructions">Installation instructions<a class="anchor" aria-label="anchor" href="#installation-instructions"></a>
+<h2 id="why-screenr">Why ScreenR?<a class="anchor" aria-label="anchor" href="#why-screenr"></a>
 </h2>
-<p>Get the latest stable <code>R</code> release from <a href="http://cran.r-project.org/" class="external-link">CRAN</a> note that you need to have <code>R 4.3</code> or greater to use <code>ScreenR</code>. Then install <code>ScreenR</code> from <a href="http://bioconductor.org/" class="external-link">Bioconductor</a> using the following code:</p>
+<ul>
+<li>
+<strong>Every hit comes with a p-value and a false discovery rate.</strong> The gene-level tests are calibrated: in screens without any real effect about 5% of the genes have p &lt; 0.05, as they should.</li>
+<li>
+<strong>Benchmarked against the main tools.</strong> On simulated screens and on published shRNA (K562) and CRISPR-Cas9 (HAP1) essentiality screens, ScreenR ranks the true hits as well as the best of MAGeCK, BAGEL2, gscreend and plain edgeR/limma workflows, keeps the FDR below the nominal level and runs in seconds (<a href="https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html">benchmark</a>).</li>
+<li>
+<strong>Several complementary methods, one table.</strong> A permutation test on the barcode Z-scores, limma CAMERA, ROAST and FRY, and an edgeR model for time courses; <code><a href="reference/summarise_hits.html">summarise_hits()</a></code> combines them and <code><a href="reference/plot_common_hit.html">plot_common_hit()</a></code> shows how they agree.</li>
+<li>
+<strong>Uses your replicates.</strong> Barcode statistics come from the edgeR quasi-likelihood model, so replicate variability is part of the test.</li>
+<li>
+<strong>Quality control included.</strong> Mapped reads, library evenness (Gini index), lost barcodes, replicate correlation and MDS plots, before you look at a single hit.</li>
+<li>
+<strong>Works with your files as they are.</strong> Any column names, sample descriptions from a table, helpful messages when something does not match.</li>
+<li>
+<strong>shRNA and CRISPR.</strong> Works with shRNA and CRISPR-Cas9 libraries, checks the screen with essential and non-essential reference genes (<code><a href="reference/compute_screen_quality.html">compute_screen_quality()</a></code>), and corrects CRISPR copy-number bias through <a href="https://github.com/francescojm/CRISPRcleanR" class="external-link">CRISPRcleanR</a> (<code><a href="reference/correct_crispr_bias.html">correct_crispr_bias()</a></code>).</li>
+<li>
+<strong>Bioconductor native.</strong> The ScreenR object is a <code>SummarizedExperiment</code>, so it works with the rest of the Bioconductor ecosystem.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>ScreenR requires R 4.3 or later. Install the release version from <a href="https://bioconductor.org/packages/ScreenR" class="external-link">Bioconductor</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span></span></code></pre></div>
-<p>And the development version from <a href="https://github.com/EmanuelSoda/ScreenR" class="external-link">GitHub</a> with:</p>
+<p>or the development version from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"EmanuelSoda/ScreenR"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"EmanuelSoda/ScreenR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="screenr-overall-workflow">ScreenR overall workflow<a class="anchor" aria-label="anchor" href="#screenr-overall-workflow"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p><img src="reference/figures/Pipeline.png" align="top"></p>
-<p>Please note that the <code>ScreenR</code> was only made possible thanks to many other R and bioinformatics software authors, which are cited either in the vignettes and/or the paper(s) describing this package.</p>
+<p>The package includes an example screen: shRNA counts for treated (<code>TRT</code>) and control (<code>CTRL</code>) cells at several time points, with three replicates.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/">ScreenR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">count_table</span><span class="op">[</span><span class="va">count_table</span><span class="op">$</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Barcode"</span>, <span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"Time3_TRT_A"</span>, <span class="st">"Time3_TRT_B"</span>, <span class="st">"Time3_TRT_C"</span>,</span>
+<span>    <span class="st">"Time3_CTRL_A"</span>, <span class="st">"Time3_CTRL_B"</span>, <span class="st">"Time3_CTRL_C"</span>,</span>
+<span>    <span class="st">"Time4_TRT_A"</span>, <span class="st">"Time4_TRT_B"</span>, <span class="st">"Time4_TRT_C"</span>,</span>
+<span>    <span class="st">"Time4_CTRL_A"</span>, <span class="st">"Time4_CTRL_B"</span>, <span class="st">"Time4_CTRL_C"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"T1/T2"</span>, <span class="st">"T1/T2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time3_TRT"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time3_CTRL"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time4_TRT"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time4_CTRL"</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1. Create the object and normalize the counts</span></span>
+<span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_screenr_object.html">create_screenr_object</a></span><span class="op">(</span></span>
+<span>    table <span class="op">=</span> <span class="va">counts</span>, annotation <span class="op">=</span> <span class="va">annotation_table</span>, groups <span class="op">=</span> <span class="va">groups</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="fu"><a href="reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="fu"><a href="reference/remove_all_zero_row.html">remove_all_zero_row</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">object</span></span>
+<span><span class="co">#&gt; class: screenr_object </span></span>
+<span><span class="co">#&gt; dim: 5317 14 </span></span>
+<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; assays(2): counts normalized</span></span>
+<span><span class="co">#&gt; rownames(5317): 10208 10502 ... 13876 13995</span></span>
+<span><span class="co">#&gt; rowData names(5): Barcode Gene Gene_ID Sequence Library</span></span>
+<span><span class="co">#&gt; colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C</span></span>
+<span><span class="co">#&gt; colData names(4): Sample Day Treatment Group</span></span>
+<span><span class="co">#&gt; data table: 74438 rows, 9 columns</span></span></code></pre></div>
+<p>Check the samples before looking for hits: replicates should cluster together.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-qc-1.png" width="100%"></p>
+<p>Compare treated and control cells at the last time point with two independent tests, and combine them:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 2. Define the comparison</span></span>
+<span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_design_matrix.html">create_design_matrix</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="va">contrast</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_contrast.html">create_contrast</a></span><span class="op">(</span><span class="va">design</span>, treatment <span class="op">=</span> <span class="st">"Time4_TRT"</span>, control <span class="op">=</span> <span class="st">"Time4_CTRL"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3. Gene-level permutation test on replicate-aware barcode statistics</span></span>
+<span><span class="va">barcode_statistics</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compute_barcode_statistics.html">compute_barcode_statistics</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast</span><span class="op">)</span></span>
+<span><span class="va">zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">barcode_statistics</span>, fdr <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. limma CAMERA on the barcodes of each gene</span></span>
+<span><span class="va">camera</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast</span>, fdr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 5. One table with the FDR of both methods, best supported genes first</span></span>
+<span><span class="co">#    (the example screen has a weak effect, so we use a lenient FDR of 25%)</span></span>
+<span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summarise_hits.html">summarise_hits</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>zscore <span class="op">=</span> <span class="va">zscore</span>, camera <span class="op">=</span> <span class="va">camera</span><span class="op">)</span>, fdr <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hits</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 x 6</span></span>
+<span><span class="co">#&gt;   Gene     FDR_zscore FDR_camera NMethods MaxFDR Hit  </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;         &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 1 Gene_173      0.128     0.0882        2  0.128 TRUE </span></span>
+<span><span class="co">#&gt; 2 Gene_422      0.187     0.0882        2  0.187 TRUE </span></span>
+<span><span class="co">#&gt; 3 Gene_15       0.233     0.232         2  0.233 TRUE </span></span>
+<span><span class="co">#&gt; 4 Gene_296      0.250     0.0882        2  0.250 TRUE </span></span>
+<span><span class="co">#&gt; 5 Gene_370      0.280     0.232         1  0.280 FALSE</span></span>
+<span><span class="co">#&gt; 6 Gene_352      0.280     0.232         1  0.280 FALSE</span></span></code></pre></div>
+<p>Look at the barcodes of the top candidate before trusting it:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">top_gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">hits</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_boxplot.html">plot_boxplot</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span>    genes <span class="op">=</span> <span class="va">top_gene</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TRT"</span>, <span class="st">"CTRL"</span><span class="op">)</span>, fill_var <span class="op">=</span> <span class="st">"Treatment"</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>CTRL <span class="op">=</span> <span class="st">"#93B5A3"</span>, TRT <span class="op">=</span> <span class="st">"#C9836A"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-top-gene-1.png" width="100%"></p>
+</div>
+<div class="section level2">
+<h2 id="which-method-should-i-use">Which method should I use?<a class="anchor" aria-label="anchor" href="#which-method-should-i-use"></a>
+</h2>
+<p>Every method looks for <strong>depleted</strong> genes by default; set <code>direction = "Up"</code> to find <strong>enriched</strong> genes (for example in a resistance screen).</p>
+<table class="table">
+<colgroup>
+<col width="26%">
+<col width="19%">
+<col width="53%">
+</colgroup>
+<thead><tr>
+<th>Question</th>
+<th>Function</th>
+<th>Notes</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Which genes are depleted or enriched?</td>
+<td><code><a href="reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code></td>
+<td>Permutation test on the barcode scores; robust default. Use <code>statistic = "median"</code> against off-target effects.</td>
+</tr>
+<tr>
+<td>Do the barcodes of a gene change more than the others?</td>
+<td><code><a href="reference/find_camera_hit.html">find_camera_hit()</a></code></td>
+<td>limma CAMERA, competitive test; works with a single control sample.</td>
+</tr>
+<tr>
+<td>Do the barcodes of a gene change at all?</td>
+<td><code><a href="reference/find_roast_hit.html">find_roast_hit()</a></code></td>
+<td>limma ROAST or FRY (<code>method = "fry"</code>), self-contained; needs replicates in both groups.</td>
+</tr>
+<tr>
+<td>Does the effect change over time?</td>
+<td><code><a href="reference/find_time_hit.html">find_time_hit()</a></code></td>
+<td>edgeR model of the whole time course.</td>
+</tr>
+<tr>
+<td>Which genes are supported by several methods?</td>
+<td>
+<code><a href="reference/summarise_hits.html">summarise_hits()</a></code>, <code><a href="reference/plot_common_hit.html">plot_common_hit()</a></code>
+</td>
+<td>One table with the FDR of every method.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="how-screenr-compares">How ScreenR compares<a class="anchor" aria-label="anchor" href="#how-screenr-compares"></a>
+</h2>
+<p><img src="reference/figures/README-benchmark-1.png" width="100%"></p>
+<p>In the simulations ScreenR ranks the true hits as well as the best tools and keeps the false discovery rate below the nominal level; at a fixed FDR it is more conservative than MAGeCK MLE and BAGEL2, which find more hits but exceed the nominal FDR in some scenarios. On the published K562 shRNA screen included in the package (<code>k562_count_table</code>) the ScreenR Z-score test is comparable to MAGeCK RRA and BAGEL2. The <a href="https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html">benchmark article</a> has all the details and reruns the ScreenR side of the comparison.</p>
+</div>
+<div class="section level2">
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="53%">
+<col width="46%">
+</colgroup>
+<tbody>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html">Tutorial 1: Getting your data into ScreenR</a></td>
+<td>Count tables, annotations, sample descriptions and the ScreenR object</td>
+</tr>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html">Tutorial 2: Quality control</a></td>
+<td>Sequencing depth, library evenness, replicates, normalization</td>
+</tr>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html">Tutorial 3: Finding and validating hits</a></td>
+<td>All the hit-finding methods, combining them and checking the hits</td>
+</tr>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html">Statistics in ScreenR</a></td>
+<td>How the tests work and why</td>
+</tr>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></td>
+<td>Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma</td>
+</tr>
+<tr>
+<td><a href="https://emanuelsoda.github.io/ScreenR/reference/index.html">Function reference</a></td>
+<td>Every function, grouped by analysis step</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h2>
+<ul>
+<li>Questions about using ScreenR: the <a href="https://support.bioconductor.org/tag/ScreenR" class="external-link">Bioconductor support site</a> (tag <code>ScreenR</code>).</li>
+<li>Bugs and feature requests: <a href="https://github.com/EmanuelSoda/ScreenR/issues" class="external-link">GitHub issues</a>.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Below is the citation output from using <code>citation('ScreenR')</code> in <code>R</code>. Please run this yourself to check for any updates on how to cite <strong>ScreenR</strong>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">'ScreenR'</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; To cite package 'ScreenR' in publications use:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High</span></span>
-<span><span class="co">#&gt;   Throughput Biological Screening_. R package version 0.99.53,</span></span>
-<span><span class="co">#&gt;   &lt;https://emanuelsoda.github.io/ScreenR/&gt;.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; A BibTeX entry for LaTeX users is</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   @Manual{,</span></span>
-<span><span class="co">#&gt;     title = {ScreenR: Package to Perform High Throughput Biological Screening},</span></span>
-<span><span class="co">#&gt;     author = {Emanuel Michele Soda and Elena Ceccacci},</span></span>
-<span><span class="co">#&gt;     year = {2022},</span></span>
-<span><span class="co">#&gt;     note = {R package version 0.99.53},</span></span>
-<span><span class="co">#&gt;     url = {https://emanuelsoda.github.io/ScreenR/},</span></span>
-<span><span class="co">#&gt;   }</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">citation</span>(<span class="st">"ScreenR"</span>), <span class="at">bibtex =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>To cite package <span class="st">'ScreenR'</span> <span class="cf">in</span> publications use<span class="sc">:</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  Soda E, Ceccacci <span class="fu">E</span> (<span class="dv">2022</span>). _ScreenR<span class="sc">:</span> Package to Perform High</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  Throughput Biological Screening_. R package version <span class="dv">1</span>.<span class="fl">15.14</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>emanuelsoda.github.io<span class="sc">/</span>ScreenR<span class="sc">/</span><span class="er">&gt;</span>.</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that the <code>ScreenR</code> project is released with a <a href="http://bioconductor.org/about/code-of-conduct/" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
-</div>
-<div class="section level2">
-<h2 id="development-tools">Development tools<a class="anchor" aria-label="anchor" href="#development-tools"></a>
-</h2>
-<ul>
-<li>Continuous code testing is possible thanks to <a href="https://www.tidyverse.org/blog/2020/04/usethis-1-6-0/" class="external-link">GitHub actions</a> through <em><a href="https://CRAN.R-project.org/package=usethis" class="external-link">usethis</a></em>, <em><a href="https://CRAN.R-project.org/package=remotes" class="external-link">remotes</a></em>, and <em><a href="https://CRAN.R-project.org/package=rcmdcheck" class="external-link">rcmdcheck</a></em> customized to use <a href="https://www.bioconductor.org/help/docker/" class="external-link">Bioconductor’s docker containers</a> and <em><a href="https://bioconductor.org/packages/3.15/BiocCheck" class="external-link">BiocCheck</a></em>.</li>
-<li>Code coverage assessment is possible thanks to <a href="https://codecov.io/gh" class="external-link">codecov</a> and <em><a href="https://CRAN.R-project.org/package=covr" class="external-link">covr</a></em>.</li>
-<li>The <a href="http://EmanuelSoda.github.io/ScreenR" class="external-link">documentation website</a> is automatically updated thanks to <em><a href="https://CRAN.R-project.org/package=pkgdown" class="external-link">pkgdown</a></em>.</li>
-<li>The code is styled automatically thanks to <em><a href="https://CRAN.R-project.org/package=styler" class="external-link">styler</a></em>.</li>
-<li>The documentation is formatted thanks to <em><a href="https://CRAN.R-project.org/package=devtools" class="external-link">devtools</a></em> and <em><a href="https://CRAN.R-project.org/package=roxygen2" class="external-link">roxygen2</a></em>.</li>
-</ul>
-<p>For more details, check the <code>dev</code> directory.</p>
-<p>This package was developed using <em><a href="https://bioconductor.org/packages/3.15/biocthis" class="external-link">biocthis</a></em>.</p>
+<p>The ScreenR project is released with the <a href="https://bioconductor.org/about/code-of-conduct/" class="external-link">Bioconductor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -136,6 +322,8 @@
 <li><a href="https://www.bioconductor.org/packages/ScreenR" class="external-link">View on Bioconductor</a></li>
 <li><a href="https://github.com/EmanuelSoda/ScreenR/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/EmanuelSoda/ScreenR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://bioconductor.org/packages/ScreenR" class="external-link">Bioconductor page</a></li>
+<li><a href="https://support.bioconductor.org/tag/ScreenR" class="external-link">Ask a question (Bioconductor support)</a></li>
 </ul>
 </div>
 
@@ -158,24 +346,20 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Emanuel Michele Soda <br><small class="roles"> Author, maintainer </small>   </li>
-<li>Elena Ceccacci <br><small class="roles"> Author </small>   </li>
-<li>Saverio Minucci <br><small class="roles"> Funder, thesis advisor </small>   </li>
-<li><a href="authors.html">More about authors...</a></li>
+<li>Emanuel Michele Soda <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2301-6465" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Elena Ceccacci <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-2285-8994" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Saverio Minucci <br><small class="roles"> Funder, thesis advisor </small> <a href="https://orcid.org/0000-0001-5678-536X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://bioconductor.org/packages/ScreenR" class="external-link"><img src="https://bioconductor.org/shields/years-in-bioc/ScreenR.svg" alt="Bioconductor release"></a></li>
+<li><a href="https://bioconductor.org/checkResults/release/bioc-LATEST/ScreenR/" class="external-link"><img src="https://bioconductor.org/shields/build/release/bioc/ScreenR.svg" alt="Bioc release build"></a></li>
+<li><a href="https://bioconductor.org/checkResults/devel/bioc-LATEST/ScreenR/" class="external-link"><img src="https://bioconductor.org/shields/build/devel/bioc/ScreenR.svg" alt="Bioc devel build"></a></li>
+<li><a href="https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/EmanuelSoda/ScreenR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://codecov.io/gh/EmanuelSoda/ScreenR" class="external-link"><img src="https://codecov.io/gh/EmanuelSoda/ScreenR/branch/master/graph/badge.svg?token=NX5YVRP4L0" alt="codecov"></a></li>
-<li><a href="https://github.com/EmanuelSoda/ScreenR/issues" class="external-link"><img src="https://img.shields.io/github/issues/EmanuelSoda/ScreenR" alt="GitHub issues"></a></li>
-<li><a href="https://github.com/EmanuelSoda/ScreenR/pulls" class="external-link"><img src="https://img.shields.io/github/issues-pr/EmanuelSoda/ScreenR" alt="GitHub pulls"></a></li>
-<li><a href="https://github.com/EmanuelSoda/ScreenR/network/members" class="external-link"><img src="https://img.shields.io/github/forks/EmanuelSoda/ScreenR?style=social" alt="GitHub forks"></a></li>
-<li><a href=""><img src="https://img.shields.io/github/downloads/EmanuelSoda/ScreenR/total" alt="GitHub downloads"></a></li>
-<li><a href=""><img src="https://img.shields.io/github/last-commit/EmanuelSoda/ScreenR" alt="last commit"></a></li>
-<li><a href=""><img src="https://img.shields.io/github/r-package/v/EmanuelSoda/ScreenR/master" alt="Version"></a></li>
-<li><a href=""><img src="https://img.shields.io/github/languages/top/EmanuelSoda/ScreenR" alt="Language"></a></li>
 </ul>
 </div>
 

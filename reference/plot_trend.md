@@ -1,6 +1,9 @@
-# Plot the trend hit gene
+# Plot the trend of genes over the samples
 
-This function plot the trend of a gene resulted as hit
+Plots, for the given genes, the mean normalized count of their barcodes
+in each sample (taken from the data table), with a regression line. It
+shows whether a hit decreases (or increases) over time in the selected
+samples.
 
 ## Usage
 
@@ -23,50 +26,59 @@ plot_trend(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - genes:
 
-  The vector of genes to use
+  The names of the genes to plot.
 
 - group_var:
 
-  The variable that as to be used to filter the data, for example the
-  different treatment
+  The values of the Treatment column of the data table (see
+  [`get_sample_table`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md))
+  of the samples to plot, for example the early time points and the
+  treated samples.
 
 - alpha:
 
-  A value for the opacity of the plot. Allowed values are in the range 0
-  to 1
+  The opacity of the confidence band, between 0 and 1. Default 0.5.
 
 - se:
 
-  A boolean to indicate where or not to plot the standard error
+  Whether to draw the confidence band of the regression line. Default
+  FALSE.
 
 - point_size:
 
-  The dimension of each dot
+  The size of the points. Default 1.
 
 - line_size:
 
-  The dimension of the line
+  The width of the regression line. Default 1.
 
 - nrow:
 
-  The number of rows in case multiple genes are plotted
+  The number of rows of panels, when several genes are plotted.
 
 - ncol:
 
-  The number of columns in case multiple genes are plotted
+  The number of columns of panels, when several genes are plotted.
 
 - scales:
 
-  The scales to be used in the facette
+  The scales of the panels: "free" (default), "fixed", "free_x" or
+  "free_y".
 
 ## Value
 
-The plot of the trend over time for a specific treatment.
+A ggplot object.
+
+## See also
+
+[`compute_slope`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md),
+[`filter_by_slope`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md),
+[`plot_boxplot`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
 
 ## Examples
 

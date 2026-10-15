@@ -1,8 +1,11 @@
-# Count number of barcode lost
+# Compute the number of barcodes lost in each sample
 
-This function counts the number of barcodes lost during the sequencing.
-A barcode is lost if its associated shRNA has zero mapped read in a
-sample.
+Counts, for each sample, the barcodes lost during the screen or the
+sequencing, that is the barcodes with zero mapped reads. Many lost
+barcodes may indicate a sample of low quality or a bottleneck in the
+screen. Use
+[`plot_barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
+to plot the result.
 
 ## Usage
 
@@ -14,20 +17,24 @@ barcode_lost(screenR_Object)
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-Return a tibble containing the number of barcode lost for each sample
+A tibble with the columns Sample and LostBarcode (the number of barcodes
+with zero reads). Samples without lost barcodes are not reported.
+
+## See also
+
+[`plot_barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md),
+[`plot_barcode_lost_for_gene`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md),
+[`count_mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
-
-# In order to count the number of barcodes lost just the ScreenR object is
-# needed
 head(barcode_lost(object))
 #> # A tibble: 6 × 2
 #>   Sample      LostBarcode

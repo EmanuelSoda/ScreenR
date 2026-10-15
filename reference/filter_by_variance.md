@@ -1,8 +1,10 @@
-# Filter using the variance filter
+# Filter hits by the variance of their barcodes
 
-This function is used to improve the quality of the hits. It compute the
-variance among the hits and filter the one with a value greater than the
-threshold set
+Refines a list of candidate hits by the consistency of their barcodes.
+For each gene it computes the variance of the log2 fold changes of its
+barcodes (estimated with edgeR for the given contrast) and keeps the
+genes whose variance is at most the given threshold: a gene whose
+barcodes disagree is a less reliable hit.
 
 ## Usage
 
@@ -20,39 +22,57 @@ filter_by_variance(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - genes:
 
-  The genes for which the variance as to be computed. Those genes are
-  the result of the three statistical methods selection
+  The genes to filter, for example the hits found by
+  [`find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md),
+  [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
+  or
+  [`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md).
 
 - matrix_model:
 
-  a matrix created using
-  [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)
+  The design matrix of the linear model, for example created with
+  [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
+  (or with [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)).
 
 - variance:
 
-  The maximum value of variance accepted
+  The maximum variance of the barcode log2 fold changes accepted
+  (default 0.5).
 
 - contrast:
 
-  The variable to use as X for the linear model for the Treatment
+  The comparison used to compute the log2 fold changes: the name or
+  index of a column of matrix_model, a numeric contrast vector (for
+  example created with
+  [`create_contrast`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md))
+  or a one-column matrix created with
+  [`makeContrasts`](https://rdrr.io/pkg/limma/man/makeContrasts.html).
 
 ## Value
 
-A data frame with the variance for the treatment and the control for
-each gene
+The rows of the data table (see
+[`get_data_table`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md))
+of the genes that pass the filter, with an additional Variance column
+(the variance of the barcode log2 fold changes of the gene).
+
+## See also
+
+[`filter_by_slope`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md),
+[`find_discordant_barcodes`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~ slot(object, "groups"))
-colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+matrix_model <- create_design_matrix(object)
+contrast <- create_contrast(matrix_model,
+    treatment = "Treated", control = "Control"
+)
 
 data <- filter_by_variance(
     screenR_Object = object, genes = c("Gene_42"),

@@ -1,12 +1,10 @@
-# Plot number of barcode lost for gene
+# Plot the number of barcodes lost for each gene
 
-This function plots the number of barcodes lost in each sample for each
-gene. Usually in a genetic screening each gene is is associated with
-multiple shRNAs and so barcodes. For this reason a reasonable number of
-barcodes associated with the gene has to be retrieved in order to have a
-robust result. Visualizing the number of genes that have lost lot's of
-barcode is a Quality Check procedure in order to be aware of the number
-of barcode for the hit identified.
+Plots, for each gene and sample, the number of barcodes of the gene with
+zero reads. Each gene is targeted by several shRNAs (barcodes), and a
+gene needs enough barcodes left to give a robust result: this quality
+control plot shows which genes lost many of their barcodes. Only the
+genes that lost at least one barcode are shown.
 
 ## Usage
 
@@ -18,21 +16,27 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - facet:
 
-  A boolean to use the facet.
+  Whether to draw a separate panel for each sample (TRUE, default) or a
+  single panel.
 
 - samples:
 
-  A vector of samples that as to be visualize
+  The names of the samples to plot (required).
 
 ## Value
 
-Return the plot displaying the number of barcode lost for each gene in
-each sample.
+A ggplot object with the number of lost barcodes on the x axis and the
+genes on the y axis.
+
+## See also
+
+[`barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md),
+[`plot_barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
 
 ## Examples
 

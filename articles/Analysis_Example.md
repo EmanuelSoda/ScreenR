@@ -41,6 +41,15 @@ visually inspect the data and finally identify the most significant hits
 of the experiment through a series of plots and cross-statistical
 analyses.
 
+This vignette gives an overview of the whole analysis. Each step is
+explained in detail in three tutorials:
+
+1.  **Getting your data into ScreenR**: the input tables, the creation
+    of the ScreenR object and the preparation of the data.
+2.  **Quality control**: how to check that the screen worked.
+3.  **Finding and validating hits**: the statistical methods, how to
+    combine them and how to check the candidate genes.
+
 ## Installation
 
 ### Bioconductor
@@ -178,6 +187,7 @@ object <- create_screenr_object(
     table = data, annotation = total_Annotation, groups = groups,
     replicates = ""
 )
+#> The Day and the Treatment of each sample are taken from the sample names (Day_Treatment_Replicate). For 2 sample(s) (Time1, Time2) they cannot be separated and are both set to the first part of the name. If this is not intended, give them with the sample_table argument. Check them with get_sample_table().
 ```
 
 ### Removing all zero rows
@@ -327,9 +337,7 @@ plot_mds(screenR_Object = object)
 group_table <- get_data_table(object)   %>%
     select(Sample, Day, Treatment) %>%
     distinct()
-#> ScreenR normalized data table containing:
-#>  74438 rows
-#>  9 columns
+#> ScreenR normalized data table: 74438 rows, 9 columns
 
 group_treatment <- group_table$Treatment
 
@@ -418,7 +426,7 @@ zscore_hit_TRT <- list(
 )
 zscore_hit_TRT
 #> $Time3
-#> # A tibble: 83 × 2
+#> # A tibble: 84 × 2
 #>    Gene     numberOfBarcode
 #>    <chr>              <int>
 #>  1 Gene_1                 7
@@ -431,7 +439,7 @@ zscore_hit_TRT
 #>  8 Gene_156               8
 #>  9 Gene_158               7
 #> 10 Gene_160               7
-#> # ℹ 73 more rows
+#> # ℹ 74 more rows
 #> 
 #> $Time4
 #> # A tibble: 97 × 2
@@ -450,113 +458,119 @@ zscore_hit_TRT
 #> # ℹ 87 more rows
 ```
 
-#### CAMERA
+#### Design matrix and contrasts
 
-The same can be done with the CAMERA hit using the function
-*find_camera_hit*.
+CAMERA and ROAST are based on a linear model, which needs a *design
+matrix* (which sample belongs to which group) and a *contrast* (which
+groups to compare). The function *create_design_matrix* creates a design
+matrix with one column for each group, and *create_contrast* creates the
+contrast comparing the treated and the control samples of the same time
+point.
 
 ``` r
 
-matrix_model <- model.matrix(~ groups)
-colnames(matrix_model) <- unique(groups)
+matrix_model <- create_design_matrix(object)
+colnames(matrix_model)
+#> [1] "T1.T2"      "Time3_CTRL" "Time3_TRT"  "Time4_CTRL" "Time4_TRT"
 
+contrast_TRT <- list(
+    Time3 = create_contrast(matrix_model,
+        treatment = "Time3_TRT", control = "Time3_CTRL"
+    ),
+    Time4 = create_contrast(matrix_model,
+        treatment = "Time4_TRT", control = "Time4_CTRL"
+    )
+)
+contrast_TRT$Time3
+#>      T1.T2 Time3_CTRL  Time3_TRT Time4_CTRL  Time4_TRT 
+#>          0         -1          1          0          0
+```
+
+#### CAMERA
+
+The same can be done with the CAMERA hit using the function
+*find_camera_hit*. Only the genes with a False Discovery Rate (FDR)
+lower or equal to the *fdr* argument are returned (default 0.05). In
+this example dataset the effect of the treatment is weak, so for
+illustration we use a lenient FDR of 25%. The column *Log2FC* is the
+median log2 fold change of the barcodes of each gene.
+
+``` r
 
 camera_hit_TRT <- list(
     Time3 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time3_TRT",
+        contrast = contrast_TRT$Time3, fdr = 0.25
     ),
     Time4 = find_camera_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time4_TRT"
+        contrast = contrast_TRT$Time4, fdr = 0.25
     )
 )
 
 camera_hit_TRT
 #> $Time3
-#> # A tibble: 255 × 5
-#>    Gene     NGenes Direction   PValue      FDR
-#>    <chr>     <dbl> <fct>        <dbl>    <dbl>
-#>  1 Gene_364     12 Down      1.24e-15 5.57e-13
-#>  2 Gene_372     12 Down      2.09e-15 5.57e-13
-#>  3 Gene_374     10 Down      2.31e- 7 4.11e- 5
-#>  4 Gene_282     10 Down      1.55e- 4 1.66e- 2
-#>  5 Gene_75      10 Down      6.76e- 4 6.02e- 2
-#>  6 Gene_323     10 Down      1.35e- 3 1.03e- 1
-#>  7 Gene_179     10 Down      1.96e- 3 1.28e- 1
-#>  8 Gene_117     10 Down      1.11e- 2 4.45e- 1
-#>  9 Gene_228     10 Down      1.52e- 2 5.06e- 1
-#> 10 Gene_211     10 Down      1.82e- 2 5.70e- 1
-#> # ℹ 245 more rows
+#> # A tibble: 0 × 6
+#> # ℹ 6 variables: Gene <chr>, NGenes <dbl>, Direction <fct>, PValue <dbl>,
+#> #   FDR <dbl>, Log2FC <dbl>
 #> 
 #> $Time4
-#> # A tibble: 241 × 5
-#>    Gene     NGenes Direction   PValue      FDR
-#>    <chr>     <dbl> <fct>        <dbl>    <dbl>
-#>  1 Gene_364     12 Down      6.21e-26 3.32e-23
-#>  2 Gene_372     12 Down      1.16e-21 3.11e-19
-#>  3 Gene_374     10 Down      5.69e- 8 1.01e- 5
-#>  4 Gene_323     10 Down      6.16e- 7 8.22e- 5
-#>  5 Gene_282     10 Down      3.20e- 6 3.41e- 4
-#>  6 Gene_75      10 Down      1.27e- 5 1.13e- 3
-#>  7 Gene_296     10 Down      9.87e- 5 7.53e- 3
-#>  8 Gene_80      10 Down      3.02e- 4 2.01e- 2
-#>  9 Gene_54      10 Down      7.77e- 3 3.19e- 1
-#> 10 Gene_521     10 Down      1.34e- 2 4.53e- 1
-#> # ℹ 231 more rows
+#> # A tibble: 7 × 6
+#>   Gene     NGenes Direction   PValue    FDR Log2FC
+#>   <chr>     <dbl> <fct>        <dbl>  <dbl>  <dbl>
+#> 1 Gene_173     10 Down      0.000214 0.0882 -0.515
+#> 2 Gene_422     10 Down      0.000418 0.0882 -0.433
+#> 3 Gene_296     10 Down      0.000495 0.0882 -0.508
+#> 4 Gene_352     10 Down      0.00200  0.232  -0.467
+#> 5 Gene_87      10 Down      0.00250  0.232  -0.436
+#> 6 Gene_370     10 Down      0.00295  0.232  -0.344
+#> 7 Gene_15      10 Down      0.00304  0.232  -0.325
 ```
 
 #### ROAST
 
 Last but not least this is done also for the ROAST hit using the
 function  
-*find_roast_hit*.
+*find_roast_hit*. ROAST uses random rotations, so the *seed* argument is
+set to make the result reproducible.
 
 ``` r
 
 roast_hit_TRT <- list(
     Time3 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time3_TRT", 
+        contrast = contrast_TRT$Time3, fdr = 0.25, seed = 42
     ),
     Time4 = find_roast_hit(
         screenR_Object = object, matrix_model = matrix_model,
-        contrast = "Time4_TRT"
+        contrast = contrast_TRT$Time4, fdr = 0.25, seed = 42
     )
 )
 
 roast_hit_TRT
 #> $Time3
-#> # A tibble: 31 × 9
-#>    Gene    NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
-#>    <chr>    <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
-#>  1 Gene_3…     12    0.917    0   Down      0.0001 0.0089       0.0001    0.0267
-#>  2 Gene_3…     10    0.7      0   Down      0.0001 0.0089       0.0003    0.0445
-#>  3 Gene_3…     12    0.917    0   Down      0.0002 0.0200       0.0002    0.0400
-#>  4 Gene_88     10    0.5      0.1 Down      0.0006 0.0489       0.0015    0.103 
-#>  5 Gene_1…     10    0.3      0   Down      0.0006 0.0489       0.0181    0.229 
-#>  6 Gene_75     10    0.4      0   Down      0.001  0.0701       0.0231    0.246 
-#>  7 Gene_2…     10    0.5      0   Down      0.0022 0.0957       0.0236    0.247 
-#>  8 Gene_2…     10    0.2      0   Down      0.0068 0.225        0.0813    0.421 
-#>  9 Gene_4…     10    0.4      0.1 Down      0.0074 0.231        0.0096    0.170 
-#> 10 Gene_4…     10    0.1      0.1 Down      0.0089 0.263        0.155     0.495 
-#> # ℹ 21 more rows
+#> # A tibble: 1 × 10
+#>   Gene     NGenes PropDown PropUp Direction  PValue   FDR PValue.Mixed FDR.Mixed
+#>   <chr>     <int>    <dbl>  <dbl> <fct>       <dbl> <dbl>        <dbl>     <dbl>
+#> 1 Gene_446     10      0.2      0 Down      0.00045 0.240        0.283     1.000
+#> # ℹ 1 more variable: Log2FC <dbl>
 #> 
 #> $Time4
-#> # A tibble: 108 × 9
-#>    Gene   NGenes PropDown PropUp Direction PValue     FDR PValue.Mixed FDR.Mixed
-#>    <chr>   <int>    <dbl>  <dbl> <fct>      <dbl>   <dbl>        <dbl>     <dbl>
-#>  1 Gene_…     12      1      0   Down      0.0001 0.00191       0.0001   0.00089
-#>  2 Gene_…     12      1      0   Down      0.0001 0.00191       0.0001   0.00089
-#>  3 Gene_…     10      0.9    0   Down      0.0001 0.00191       0.0001   0.00089
-#>  4 Gene_…     10      0.9    0   Down      0.0001 0.00191       0.0002   0.00174
-#>  5 Gene_…     10      0.7    0   Down      0.0001 0.00191       0.0001   0.00089
-#>  6 Gene_…     10      0.7    0.1 Down      0.0001 0.00191       0.0001   0.00089
-#>  7 Gene_…     10      0.7    0   Down      0.0001 0.00191       0.0001   0.00089
-#>  8 Gene_…     10      0.7    0   Down      0.0001 0.00191       0.0001   0.00089
-#>  9 Gene_…     10      0.6    0   Down      0.0001 0.00191       0.0012   0.00539
-#> 10 Gene_…     10      0.4    0   Down      0.0001 0.00191       0.0002   0.00174
-#> # ℹ 98 more rows
+#> # A tibble: 53 × 10
+#>    Gene    NGenes PropDown PropUp Direction PValue    FDR PValue.Mixed FDR.Mixed
+#>    <chr>    <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>        <dbl>     <dbl>
+#>  1 Gene_1…     10      0.5    0.1 Down      5  e-5 0.0134       0.0001    0.0134
+#>  2 Gene_4…     10      0.5    0.1 Down      5  e-5 0.0134       0.0002    0.0267
+#>  3 Gene_2…     10      0.6    0   Down      1  e-4 0.0134       0.0292    0.143 
+#>  4 Gene_4…     10      0.5    0   Down      1  e-4 0.0134       0.0006    0.0434
+#>  5 Gene_15     10      0.5    0   Down      2.5e-4 0.0267       0.0032    0.0647
+#>  6 Gene_3…     10      0.4    0   Down      3  e-4 0.0267       0.0014    0.0584
+#>  7 Gene_3…     10      0.3    0.1 Down      4.5e-4 0.0326       0.0141    0.104 
+#>  8 Gene_4…     10      0.2    0   Down      5  e-4 0.0326       0.331     0.457 
+#>  9 Gene_3…     10      0.2    0   Down      5.5e-4 0.0326       0.163     0.306 
+#> 10 Gene_59     10      0.3    0   Down      1.1e-3 0.0587       0.0431    0.167 
+#> # ℹ 43 more rows
+#> # ℹ 1 more variable: Log2FC <dbl>
 ```
 
 #### Find Common Hit
@@ -579,11 +593,11 @@ function::
 
 common_hit_TRT_at_least_2 <- list(
     Time3 = find_common_hit(
-        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Day3,
+        zscore_hit_TRT$Time3, camera_hit_TRT$Time3, roast_hit_TRT$Time3,
         common_in = 2
     ),
     Time4 = find_common_hit(
-        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Day6,
+        zscore_hit_TRT$Time4, camera_hit_TRT$Time4, roast_hit_TRT$Time4,
         common_in = 2
     )
 )
@@ -623,7 +637,7 @@ function **plot_trend**.
 
 ``` r
 
-candidate_hits <- common_hit_TRT_at_least_2$Time3
+candidate_hits <- common_hit_TRT_at_least_2$Time4
 
 plot_trend(screenR_Object = object, 
            genes = candidate_hits[1], 
@@ -651,6 +665,14 @@ plot_trend(screenR_Object = object,
 
 ![](Analysis_Example_files/figure-html/plot_trend-2.png)
 
+### More statistical methods
+
+The vignette *Improved statistical analysis with ScreenR* shows further
+methods: a gene-level Z-score test with p-values and FDR,
+replicate-aware barcode statistics, a single model for the whole time
+course, the combination of the results of several methods and additional
+quality controls.
+
 ``` r
 
 sessionInfo()
@@ -675,28 +697,45 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ScreenR_1.15.1   tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
+#> [1] ScreenR_1.15.14  tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
 #> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] utf8_1.2.6          sass_0.4.10         generics_0.1.4     
-#>  [4] stringi_1.8.9       lattice_0.22-9      digest_0.6.39      
-#>  [7] magrittr_2.0.5      evaluate_1.0.5      grid_4.6.1         
-#> [10] RColorBrewer_1.1-3  bookdown_0.48       fastmap_1.2.0      
-#> [13] Matrix_1.7-5        jsonlite_2.0.0      limma_3.68.5       
-#> [16] BiocManager_1.30.27 mgcv_1.9-4          purrr_1.2.2        
-#> [19] scales_1.4.0        textshaping_1.0.5   jquerylib_0.1.4    
-#> [22] cli_3.6.6           rlang_1.3.0         splines_4.6.1      
-#> [25] withr_3.0.3         cachem_1.1.0        yaml_2.3.12        
-#> [28] otel_0.2.0          tools_4.6.1         locfit_1.5-9.12    
-#> [31] ggvenn_0.1.19       vctrs_0.7.3         R6_2.6.1           
-#> [34] lifecycle_1.0.5     stringr_1.6.0       edgeR_4.10.5       
-#> [37] fs_2.1.0            ragg_1.5.2          pkgconfig_2.0.3    
-#> [40] desc_1.4.3          pkgdown_2.2.1       pillar_1.11.1      
-#> [43] bslib_0.12.0        gtable_0.3.6        glue_1.8.1         
-#> [46] statmod_1.5.2       systemfonts_1.3.2   xfun_0.61          
-#> [49] tibble_3.3.1        tidyselect_1.2.1    knitr_1.52         
-#> [52] farver_2.1.2        nlme_3.1-169        htmltools_0.5.9    
-#> [55] patchwork_1.3.2     rmarkdown_2.32      labeling_0.4.3     
-#> [58] compiler_4.6.1      S7_0.2.2
+#>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
+#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [5] Biobase_2.72.0              lattice_0.22-9             
+#>  [7] vctrs_0.7.3                 tools_4.6.1                
+#>  [9] generics_0.1.4              stats4_4.6.1               
+#> [11] tibble_3.3.1                pkgconfig_2.0.3            
+#> [13] Matrix_1.7-5                RColorBrewer_1.1-3         
+#> [15] S7_0.2.2                    desc_1.4.3                 
+#> [17] S4Vectors_0.50.3            lifecycle_1.0.5            
+#> [19] compiler_4.6.1              farver_2.1.2               
+#> [21] stringr_1.6.0               textshaping_1.0.5          
+#> [23] statmod_1.5.2               Seqinfo_1.2.0              
+#> [25] ggvenn_0.1.19               htmltools_0.5.9            
+#> [27] sass_0.4.10                 yaml_2.3.12                
+#> [29] pillar_1.11.1               pkgdown_2.2.1              
+#> [31] jquerylib_0.1.4             cachem_1.1.0               
+#> [33] DelayedArray_0.38.2         limma_3.68.5               
+#> [35] abind_1.4-8                 nlme_3.1-169               
+#> [37] tidyselect_1.2.1            locfit_1.5-9.12            
+#> [39] digest_0.6.39               stringi_1.8.9              
+#> [41] purrr_1.2.2                 bookdown_0.48              
+#> [43] splines_4.6.1               labeling_0.4.3             
+#> [45] fastmap_1.2.0               grid_4.6.1                 
+#> [47] cli_3.6.6                   SparseArray_1.12.3         
+#> [49] magrittr_2.0.5              patchwork_1.3.2            
+#> [51] S4Arrays_1.12.1             utf8_1.2.6                 
+#> [53] edgeR_4.10.5                withr_3.0.3                
+#> [55] scales_1.4.0                rmarkdown_2.32             
+#> [57] XVector_0.52.0              matrixStats_1.5.0          
+#> [59] otel_0.2.0                  ragg_1.5.2                 
+#> [61] evaluate_1.0.5              knitr_1.52                 
+#> [63] GenomicRanges_1.64.0        IRanges_2.46.0             
+#> [65] mgcv_1.9-4                  rlang_1.3.0                
+#> [67] glue_1.8.1                  BiocManager_1.30.27        
+#> [69] BiocGenerics_0.58.1         jsonlite_2.0.0             
+#> [71] R6_2.6.1                    MatrixGenerics_1.24.0      
+#> [73] systemfonts_1.3.2           fs_2.1.0
 ```

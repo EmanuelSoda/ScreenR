@@ -1,6 +1,7 @@
-# Unique gene Symbols
+# Barcodes of each gene
 
-Compute a unique gene symbol for gene
+Internal function that returns, for each gene with more than
+number_barcode barcodes, the indices of its barcodes.
 
 ## Usage
 
@@ -12,7 +13,7 @@ unique_gene_symbols(gene_symbols, number_barcode = 3)
 
 - gene_symbols:
 
-  The gene symbols list
+  The gene of each barcode.
 
 - ...:
 
@@ -21,11 +22,11 @@ unique_gene_symbols(gene_symbols, number_barcode = 3)
 
   `number_barcode`
 
-  :   Number of barcode that as to be differentially expressed (DE)in
-      order to consider the gene associated DE. Example a gene is
-      associated with 10 shRNA we consider a gene DE if it has at least
-      number_barcode = 5 shRNA DE.
+  :   Only genes with more than number_barcode barcodes are tested
+      (default 3, so a gene needs at least 4 barcodes). The barcodes of
+      a gene are tested together as a set, so this is not a number of
+      barcodes that must change.
 
 ## Value
 
-A list of unique gene symbols
+A named list with the indices of the barcodes of each gene.

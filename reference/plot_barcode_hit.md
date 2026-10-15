@@ -1,9 +1,14 @@
-# Plot barcode hit
+# Plot the barcodes of a gene (barcode plot)
 
-Create a barcode plot for a hit. A barcode plot displays if the hit is
-differentially up or down regulated. If most of the vertical line are on
-the left side the gene associated to the barcodes is down regulated
-otherwise is up regulated.
+Draws a [`barcodeplot`](https://rdrr.io/pkg/limma/man/barcodeplot.html)
+for a gene: all the barcodes are ranked by their log2 fold change
+(computed with edgeR for the given contrast) and the barcodes of the
+gene are shown as vertical bars. If most of the bars are on the left
+(negative log2 fold change) the gene is depleted, if they are on the
+right it is enriched. It is useful to check the hits of
+[`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
+and
+[`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md).
 
 ## Usage
 
@@ -23,56 +28,65 @@ plot_barcode_hit(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - matrix_model:
 
-  The matrix that will be used to perform the linear model analysis. It
-  is created using model.matrix.
+  The design matrix of the linear model, for example created with
+  [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
+  (or with [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)).
 
 - contrast:
 
-  An object created with
-  [`makeContrasts`](https://rdrr.io/pkg/limma/man/makeContrasts.html)
-  function.
+  The comparison to plot: the name or index of a column of matrix_model,
+  a numeric contrast vector (for example created with
+  [`create_contrast`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md))
+  or a one-column matrix created with
+  [`makeContrasts`](https://rdrr.io/pkg/limma/man/makeContrasts.html).
 
 - number_barcode:
 
-  Number of barcode that as to be differentially expressed (DE) in order
-  to consider the associated gene DE. Example a gene is associated with
-  10 shRNA we consider a gene DE if it has at least number_barcode = 5
-  shRNA DE.
+  The gene must have more than number_barcode barcodes (default 3), as
+  in
+  [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md).
 
 - gene:
 
-  The name of the gene that has to be plot
+  The name of the gene to plot.
 
 - quantile:
 
-  Quantile to display on the plot
+  The two log2 fold change values that delimit the central (shaded)
+  region of the plot. Default c(-0.5, 0.5).
 
 - labels:
 
-  The label to be displayed on the quantile side
+  The labels of the left and right ends of the plot.
 
 ## Value
 
-The barcode plot
+Draws the plot with base graphics and returns NULL invisibly.
+
+## See also
+
+[`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md),
+[`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md),
+[`plot_barcode_trend`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
-matrix_model <- model.matrix(~ slot(object, "groups"))
-colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
-contrast <- limma::makeContrasts(Treated - Control, levels = matrix_model)
+matrix_model <- create_design_matrix(object)
+contrast <- create_contrast(matrix_model,
+    treatment = "Treated", control = "Control"
+)
 
 plot_barcode_hit(object, matrix_model,
     contrast = contrast,
     gene = "Gene_300"
 )
-#> Using classic mode.
 
 #> NULL
 ```

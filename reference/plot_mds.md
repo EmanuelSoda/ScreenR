@@ -1,7 +1,10 @@
-# Multidimensional Scaling Plot
+# Plot a multidimensional scaling of the samples
 
-Plot samples on a two-dimensional scatterplot so that distances on the
-plot approximate the typical log2 fold changes between the samples.
+Plots the samples on a two-dimensional scatter plot so that the
+distances on the plot approximate the typical log2 fold changes between
+the samples ([`plotMDS`](https://rdrr.io/pkg/limma/man/plotMDS.html) on
+the log2 counts per million of the raw counts). Replicates should
+cluster together and the groups should separate.
 
 ## Usage
 
@@ -19,29 +22,34 @@ plot_mds(
 
 - screenR_Object:
 
-  The Object of the package
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - groups:
 
-  The vector that has to be used to fill the plot if NULL the function
-  will use the default groups slot in the object passed as input.
+  An optional vector, with one value for each sample, used to fill the
+  labels. By default the groups of the ScreenR object are used.
 
 - alpha:
 
-  The opacity of the labels. Possible value are in a range from 0 to 1.
+  The opacity of the labels, between 0 and 1. Default 0.8.
 
 - size:
 
-  The dimension of the labels. The default value is 2.5
+  The size of the labels. Default 2.5.
 
 - color:
 
-  The color of the labels. The default value is black
+  The color of the label text. Default "black".
 
 ## Value
 
-The MDS Plot
+A ggplot object.
+
+## See also
+
+[`plot_replicate_correlation`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md),
+[`plot_explained_variance`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
 
 ## Examples
 

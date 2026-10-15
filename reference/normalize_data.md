@@ -1,26 +1,64 @@
-# Normalize data
+# Normalize the counts
 
-This function perform a normalization on the data considering the fact
-that each shRNA has a defined length so this will not influence the
-data. Basically is computed the sum for each row and then multiply by
-1e6. At the end the data obtained will be Count Per Million.
+Normalizes the counts to counts per million (CPM), so that samples
+sequenced at different depths can be compared. Run it before
+[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md).
+Three methods are available:
+
+- "cpm" (default): each count is divided by the total number of reads of
+  its sample and multiplied by 1e6.
+
+- "tmm": as "cpm", but the library sizes are corrected with the trimmed
+  mean of M-values (TMM) normalization factors of edgeR
+  ([`normLibSizes`](https://rdrr.io/pkg/edgeR/man/calcNormFactors.html)).
+  This is more robust when strong hits deplete a large part of the
+  library.
+
+- "control": each count is divided by the number of reads of the control
+  barcodes (for example non-targeting shRNAs) of its sample and
+  multiplied by 1e6. This assumes that the control barcodes are not
+  affected by the treatment.
+
+The normalization only affects the normalized count table (and so the
+data table, the Z-score and the plots). The edgeR based methods (CAMERA,
+ROAST) always model the raw counts.
 
 ## Usage
 
 ``` r
-normalize_data(screenR_Object)
+normalize_data(
+  screenR_Object,
+  method = c("cpm", "tmm", "control"),
+  control_barcodes = NULL
+)
 ```
 
 ## Arguments
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
+
+- method:
+
+  The normalization method: "cpm" (default), "tmm" or "control".
+
+- control_barcodes:
+
+  The barcodes to use for the "control" method (required by that method,
+  ignored by the others).
 
 ## Value
 
-Return the ScreenR object with the normalize data
+The ScreenR object with the normalized count table (see
+[`get_normalized_count_table`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md)).
+
+## See also
+
+[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md),
+[`get_normalized_count_table`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md),
+[`remove_all_zero_row`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md)
 
 ## Examples
 
@@ -28,7 +66,8 @@ Return the ScreenR object with the normalize data
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- normalize_data(object)
 
-slot(object, "normalized_count_table")
+get_normalized_count_table(object)
+#> ScreenR normalized count table: 5320 rows, 15 columns
 #> # A tibble: 5,320 × 15
 #>    Barcode    T1    T2 Time3_TRT_A Time3_TRT_B Time3_TRT_C Time3_A Time3_B
 #>    <fct>   <dbl> <dbl>       <dbl>       <dbl>       <dbl>   <dbl>   <dbl>
@@ -45,4 +84,7 @@ slot(object, "normalized_count_table")
 #> # ℹ 5,310 more rows
 #> # ℹ 7 more variables: Time3_C <dbl>, Time4_TRT_A <dbl>, Time4_TRT_B <dbl>,
 #> #   Time4_TRT_C <dbl>, Time4_A <dbl>, Time4_B <dbl>, Time4_c <dbl>
+
+# TMM normalization
+object <- normalize_data(object, method = "tmm")
 ```

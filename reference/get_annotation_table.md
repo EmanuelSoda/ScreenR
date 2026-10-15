@@ -1,6 +1,8 @@
-# Get ScreenR annotation table
+# Get the annotation table
 
-Get function for the annotation table of the ScreenR object
+Returns the annotation table of a ScreenR object, with the gene (and any
+other information) of each barcode. A short summary of the size of the
+table is printed.
 
 ## Usage
 
@@ -15,21 +17,25 @@ get_annotation_table(object)
 
 - object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-The annotation table of the ScreenR object
+The annotation table, a data frame with at least the columns Barcode and
+Gene.
+
+## See also
+
+[`set_annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md),
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
 
 ## Examples
 
 ``` r
 object <- get0("object", envir = asNamespace("ScreenR"))
 annotation_table <- get_annotation_table(object)
-#> ScreenR annotation table containing:
-#>  5320 rows
-#>  5 columns
+#> ScreenR annotation table: 5320 rows, 5 columns
 head(annotation_table)
 #> # A tibble: 6 × 5
 #>   Gene     Barcode Gene_ID Sequence Library

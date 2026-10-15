@@ -1,9 +1,12 @@
-# Count the number of mapped read
+# Get the mapped reads of each barcode in each sample
 
-This function counts the number of reads for each barcode in each
-sample. It is a quality control function (QC) to see if the biological
-protocol went as planned. If a sample has very low mapped compared to
-the other means that is has a lower quality.
+Returns the count table in long format, with the number of reads mapped
+to each barcode in each sample. It is the starting point of the quality
+control functions, such as
+[`mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md),
+[`barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
+and
+[`plot_mapped_reads_distribution`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md).
 
 ## Usage
 
@@ -15,12 +18,20 @@ count_mapped_reads(screenR_Object)
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-Return a tibble containing the number of mapped read for sample
+A tibble with one row for each barcode and sample and the columns
+Barcode, Sample (a factor in the order of the samples of the count
+table) and Mapped (the number of reads).
+
+## See also
+
+[`mapped_reads`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md),
+[`barcode_lost`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md),
+[`plot_mapped_reads_distribution`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md)
 
 ## Examples
 

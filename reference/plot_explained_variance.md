@@ -1,7 +1,11 @@
-# Plot the explained variance by the PC
+# Plot the variance explained by the principal components
 
-This function plot the explained variance by the Principal Component
-analysis.
+Plots the proportion of the variance explained by each principal
+component of a principal component analysis (PCA) of the samples,
+computed on the raw counts with
+[`compute_explained_variance`](https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.md).
+It shows how many components are needed to describe the differences
+between the samples.
 
 ## Usage
 
@@ -17,21 +21,26 @@ plot_explained_variance(
 
 - screenR_Object:
 
-  The ScreenR object obtained using the
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 - cumulative:
 
-  A boolean value which indicates whether or not to plot the cumulative
-  variance. The default value is FALSE.
+  Whether to plot the cumulative proportion of variance instead of the
+  proportion of each component. Default FALSE.
 
 - color:
 
-  The color to fill the barplot the default value is steelblue
+  The fill color of the bars. Default "steelblue".
 
 ## Value
 
-The explained variance plot
+A ggplot object.
+
+## See also
+
+[`plot_mds`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
+[`plot_replicate_correlation`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md)
 
 ## Examples
 
@@ -41,6 +50,6 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 plot_explained_variance(object)
 
 
-# For the cumulative plot
+# Cumulative variance
 plot_explained_variance(object, cumulative = TRUE)
 ```

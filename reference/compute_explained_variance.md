@@ -1,7 +1,10 @@
-# Compute explained variance
+# Compute the variance explained by the principal components
 
-This is an internal function used to compute the explained variance by
-each of the Principal Components.
+Internal function that computes a principal component analysis of the
+samples on the raw counts
+([`prcomp`](https://rdrr.io/r/stats/prcomp.html)) and returns the
+variance explained by each component. It is used by
+[`plot_explained_variance`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md).
 
 ## Usage
 
@@ -13,12 +16,14 @@ compute_explained_variance(screenR_Object)
 
 - screenR_Object:
 
-  The Object of the package
+  The ScreenR object obtained using
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Value
 
-A data.frame containing all the information of the variance expressed by
-the components
+A data frame with the column Name ("Standard deviation", "Proportion of
+Variance" and "Cumulative Proportion") and one column for each principal
+component.
 
 ## Examples
 
@@ -35,7 +40,7 @@ compute_explained_variance(object)
 #> 2    0.04284    0.03716    0.03568    0.03213    0.03013    0.02732    0.02335
 #> 3    0.78733    0.82448    0.86016    0.89229    0.92242    0.94974    0.97309
 #>         PC12       PC13         PC14
-#> 1 5190.01211 4293.13649 1.427332e-11
+#> 1 5190.01211 4293.13649 1.433355e-11
 #> 2    0.01598    0.01093 0.000000e+00
 #> 3    0.98907    1.00000 1.000000e+00
 ```
