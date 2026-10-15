@@ -431,14 +431,16 @@ plot_barcode_trend(
 )
 ```
 
-`plot_barcode_hit()` places the barcodes of a gene (vertical lines) on the
-log2 fold changes of all the barcodes: most lines on the left side means that
-the gene is depleted.
+`plot_barcode_hit()` ranks all the barcodes by their log2 fold change and
+places the barcodes of a gene on the ranking (vertical lines): most lines on
+the left side means that the gene is depleted. The line on top shows where
+the barcodes of the gene are concentrated (above 1, dashed line), and the
+bottom panel shows their log2 fold changes (`show_log2fc = FALSE` hides it):
 
-```{r barcode-hit}
-invisible(plot_barcode_hit(object, design,
+```{r barcode-hit, fig.height = 5}
+plot_barcode_hit(object, design,
     contrast = contrast_time4, gene = candidates[1]
-))
+)
 ```
 
 `find_discordant_barcodes()` lists the barcodes that behave very differently

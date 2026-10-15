@@ -26,6 +26,13 @@
   `plot_explained_variance()` and `plot_boxplot()`).
 * `plot_boxplot()` orders the fill legend as the samples (T0, T3, T18), not
   alphabetically (T0, T18, T3).
+* `plot_barcode_hit()` is drawn with ggplot2 instead of
+  `limma::barcodeplot()` and returns a ggplot object (it returned NULL), so
+  it can be saved, themed and combined with other plots. No theme is
+  applied. It has the same enrichment line and barcode strip, the barcodes
+  are colored by their log2 fold change, and a new panel (`show_log2fc`,
+  TRUE by default) shows the log2 fold change of all the barcodes with those
+  of the gene.
 
 # ScreenR 1.15.14
 

@@ -189,10 +189,36 @@ test_that("plot_barcode_hit", {
     contrast <- create_contrast(matrix_model,
         treatment = "Treated", control = "Control"
     )
-    expect_null(plot_barcode_hit(object, matrix_model,
+    plot <- plot_barcode_hit(object, matrix_model,
         contrast = contrast,
         gene = "Gene_10"
-    ))
+    )
+    expect_true(ggplot2::is_ggplot(plot))
+    expect_s3_class(plot, "patchwork")
+    expect_length(plot$patches$plots, 2)
+
+    # Without the panel of the log2 fold changes
+    plot <- plot_barcode_hit(object, matrix_model,
+        contrast = contrast,
+        gene = "Gene_10", show_log2fc = FALSE
+    )
+    expect_length(plot$patches$plots, 1)
+})
+
+test_that("barcode_plot marks the barcodes of the gene", {
+    log2fc <- c(-3, 2, -2, 0, 1, 0.2)
+    in_gene <- c(TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)
+    plot <- barcode_plot(log2fc, in_gene, title = "G",
+        quantile = c(-0.5, 0.5), labels = c("Down", "Up"),
+        show_log2fc = TRUE)
+    # The gene's barcodes are the two most depleted, ranks 1 and 2
+    points <- ggplot2::layer_data(plot, 4)
+    expect_equal(sort(points$x), c(1, 2))
+    expect_equal(sort(points$y), c(-3, -2))
+    # The enrichment line is above 1 on the left, where the barcodes are
+    worm <- ggplot2::layer_data(plot$patches$plots[[1]], 2)
+    expect_gt(worm$y[1], 1)
+    expect_lt(worm$y[6], 1)
 })
 
 
