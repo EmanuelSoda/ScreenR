@@ -2,10 +2,13 @@
 
 Plots the proportion of the variance explained by each principal
 component of a principal component analysis (PCA) of the samples,
-computed on the raw counts with
+computed on the log2 normalized counts (with the normalization chosen in
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md))
+with
 [`compute_explained_variance`](https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.md).
 It shows how many components are needed to describe the differences
-between the samples.
+between the samples. The samples on the components are shown by
+[`plot_pca`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md).
 
 ## Usage
 
@@ -39,6 +42,7 @@ A ggplot object.
 
 ## See also
 
+[`plot_pca`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md),
 [`plot_mds`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
 [`plot_replicate_correlation`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md)
 

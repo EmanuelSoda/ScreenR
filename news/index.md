@@ -37,6 +37,59 @@
 - [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
   orders the fill legend as the samples (T0, T3, T18), not
   alphabetically (T0, T18, T3).
+- [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
+  is drawn with ggplot2 instead of
+  [`limma::barcodeplot()`](https://rdrr.io/pkg/limma/man/barcodeplot.html)
+  and returns a ggplot object (it returned NULL), so it can be saved,
+  themed and combined with other plots. No theme is applied. It has the
+  same enrichment line and barcode strip, the barcodes are colored by
+  their log2 fold change, and a new panel (`show_log2fc`, TRUE by
+  default) shows the log2 fold change of all the barcodes with those of
+  the gene.
+- [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md)
+  no longer applies
+  [`theme_bw()`](https://ggplot2.tidyverse.org/reference/ggtheme.html):
+  set the theme with
+  [`ggplot2::theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html)
+  or by adding it to the plot.
+- Clearer axis labels: “Explained variance” and “Principal component” in
+  [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+  (it said “Expressed Variance”), the dimensions of
+  [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md)
+  with the share of variance they explain, “Mapped reads” in
+  [`plot_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.md),
+  “Reads per barcode” in
+  [`plot_mapped_reads_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.md),
+  “Lost barcodes” in
+  [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
+  and
+  [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md),
+  “Normalized counts” in
+  [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
+  and “Mean normalized counts” in
+  [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
+  (they said “Frequency”).
+- [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
+  and
+  [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
+  use `linewidth` instead of the `size` aesthetic deprecated in ggplot2
+  3.4.0, so they no longer give a deprecation warning.
+- New
+  [`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md):
+  the samples on two principal components (PC1 and PC2 by default,
+  `components` selects others), with the share of the variance on the
+  axes.
+- [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+  computed the principal components on the raw counts, so the first
+  component mostly followed the sequencing depth of the samples
+  (correlation 0.995 in the HAP1 screen). The principal components, and
+  the MDS of
+  [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
+  are now computed on the log2 normalized counts, with the normalization
+  chosen in
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  (“cpm”, “tmm” or “control”; counts per million when the counts have
+  not been normalized).
 
 ## ScreenR 1.15.14
 

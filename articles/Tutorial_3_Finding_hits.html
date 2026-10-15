@@ -703,14 +703,7 @@ not in the controls.</p>
 <span>    nrow <span class="op">=</span> <span class="fl">1</span>, ncol <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Treated samples"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ScreenR</span> package.</span></span>
-<span><span class="co">#&gt;   Please report the issue at <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/EmanuelSoda/ScreenR/issues&gt;</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Treated samples"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/trend-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -748,13 +741,16 @@ each barcode over the time points:</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; $Gene_173</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/barcode-trend-1.png" class="r-plt" alt="" width="672"></p>
-<p><code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code> places the barcodes of a gene
-(vertical lines) on the log2 fold changes of all the barcodes: most
-lines on the left side means that the gene is depleted.</p>
+<p><code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code> ranks all the barcodes by their log2
+fold change and places the barcodes of a gene on the ranking (vertical
+lines): most lines on the left side means that the gene is depleted. The
+line on top shows where the barcodes of the gene are concentrated (above
+1, dashed line), and the bottom panel shows their log2 fold changes
+(<code>show_log2fc = FALSE</code> hides it):</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/plot_barcode_hit.html">plot_barcode_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_hit.html">plot_barcode_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>,</span>
 <span>    contrast <span class="op">=</span> <span class="va">contrast_time4</span>, gene <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/barcode-hit-1.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code> lists the barcodes that
 behave very differently from the other barcodes of their gene, which may

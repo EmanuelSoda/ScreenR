@@ -61,7 +61,7 @@ palette <- c(
 | 3 | How many barcodes were lost? | [`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md), [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md), [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md) |
 | 4 | Do replicates agree? | [`plot_replicate_correlation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md) |
 | 5 | Is the library still evenly represented? | [`compute_gini()`](https://emanuelsoda.github.io/ScreenR/reference/compute_gini.md), [`plot_gini()`](https://emanuelsoda.github.io/ScreenR/reference/plot_gini.md) |
-| 6 | Do samples cluster by condition? | [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md), [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md) |
+| 6 | Do samples cluster by condition? | [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md), [`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md), [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md) |
 | 7 | Which normalization should I use? | [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md) |
 
 ## Step 1: sequencing depth
@@ -260,8 +260,31 @@ plot_mds(object, groups = factor(samples$Day))
 
 ![](Tutorial_2_Quality_control_files/figure-html/mds-groups-2.png)
 
+[`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md)
+shows the samples on the components of a principal component analysis of
+the log2 normalized counts (with the normalization chosen in
+[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)),
+with the share of the variability each component explains on the axes;
+`components` selects other components. Unlike the MDS, which uses the
+most variable barcodes, it uses all of them, so the two plots are a
+check of each other:
+
+``` r
+
+plot_pca(object)
+```
+
+![](Tutorial_2_Quality_control_files/figure-html/pca-1.png)
+
+``` r
+
+plot_pca(object, groups = factor(samples$Treatment))
+```
+
+![](Tutorial_2_Quality_control_files/figure-html/pca-2.png)
+
 [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
-shows how much of the variability each dimension explains
+shows how much of the variability each principal component explains
 (`cumulative = TRUE` for the cumulative proportion).
 
 ``` r

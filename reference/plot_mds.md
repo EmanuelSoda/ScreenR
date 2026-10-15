@@ -3,8 +3,12 @@
 Plots the samples on a two-dimensional scatter plot so that the
 distances on the plot approximate the typical log2 fold changes between
 the samples ([`plotMDS`](https://rdrr.io/pkg/limma/man/plotMDS.html) on
-the log2 counts per million of the raw counts). Replicates should
-cluster together and the groups should separate.
+the log2 normalized counts, see
+[`log_normalized_counts`](https://emanuelsoda.github.io/ScreenR/reference/log_normalized_counts.md):
+the normalization chosen in
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+is used). Replicates should cluster together and the groups should
+separate.
 
 ## Usage
 

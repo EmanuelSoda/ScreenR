@@ -79,6 +79,8 @@ replicates.
   : Plot the correlation between samples
 - [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md)
   : Plot a multidimensional scaling of the samples
+- [`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md)
+  : Plot a principal component analysis of the samples
 - [`compute_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.md)
   : Compute the variance explained by the principal components
 - [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)

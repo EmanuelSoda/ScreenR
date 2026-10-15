@@ -526,13 +526,6 @@ plot_trend(object,
 ) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle("Treated samples")
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the ScreenR package.
-#>   Please report the issue at <https://github.com/EmanuelSoda/ScreenR/issues>.
-#> This warning is displayed once per session.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/trend-1.png)
@@ -585,15 +578,18 @@ plot_barcode_trend(
 ![](Tutorial_3_Finding_hits_files/figure-html/barcode-trend-1.png)
 
 [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
-places the barcodes of a gene (vertical lines) on the log2 fold changes
-of all the barcodes: most lines on the left side means that the gene is
-depleted.
+ranks all the barcodes by their log2 fold change and places the barcodes
+of a gene on the ranking (vertical lines): most lines on the left side
+means that the gene is depleted. The line on top shows where the
+barcodes of the gene are concentrated (above 1, dashed line), and the
+bottom panel shows their log2 fold changes (`show_log2fc = FALSE` hides
+it):
 
 ``` r
 
-invisible(plot_barcode_hit(object, design,
+plot_barcode_hit(object, design,
     contrast = contrast_time4, gene = candidates[1]
-))
+)
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/barcode-hit-1.png)

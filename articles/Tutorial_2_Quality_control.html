@@ -198,7 +198,8 @@ replicates of the same condition share a color:</p>
 <td>6</td>
 <td>Do samples cluster by condition?</td>
 <td>
-<code><a href="../reference/plot_mds.html">plot_mds()</a></code>, <code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code>
+<code><a href="../reference/plot_mds.html">plot_mds()</a></code>, <code><a href="../reference/plot_pca.html">plot_pca()</a></code>,
+<code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code>
 </td>
 </tr>
 <tr class="odd">
@@ -364,13 +365,26 @@ for example by treatment or by time point:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Day</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/mds-groups-2.png" class="r-plt" alt="" width="672"></p>
-<p><code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code> shows how much of the
-variability each dimension explains (<code>cumulative = TRUE</code> for
-the cumulative proportion).</p>
+<p><code><a href="../reference/plot_pca.html">plot_pca()</a></code> shows the samples on the components of a
+principal component analysis of the log2 normalized counts (with the
+normalization chosen in <code><a href="../reference/normalize_data.html">normalize_data()</a></code>), with the share
+of the variability each component explains on the axes;
+<code>components</code> selects other components. Unlike the MDS, which
+uses the most variable barcodes, it uses all of them, so the two plots
+are a check of each other:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_pca.html">plot_pca</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_2_Quality_control_files/figure-html/pca-1.png" class="r-plt" alt="" width="672"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_pca.html">plot_pca</a></span><span class="op">(</span><span class="va">object</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Treatment</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_2_Quality_control_files/figure-html/pca-2.png" class="r-plt" alt="" width="672"></p>
+<p><code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code> shows how much of the
+variability each principal component explains
+(<code>cumulative = TRUE</code> for the cumulative proportion).</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/explained-variance-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span>, cumulative <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/explained-variance-2.png" class="r-plt" alt="" width="672"></p>
 <p><strong>What to look for.</strong> Replicates should be close to each
@@ -426,7 +440,7 @@ treatment</td>
 <p>A quick way to decide between <code>"cpm"</code> and
 <code>"tmm"</code> is to compare them: if they agree, the default is
 fine.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object_tmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span>, method <span class="op">=</span> <span class="st">"tmm"</span><span class="op">)</span></span>
 <span><span class="va">ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">object_tmm</span>, <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">object</span>, <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span></span>
@@ -474,7 +488,7 @@ re-computed the data table if you changed it.</label></li>
 </ul>
 <p>The next tutorial, <strong>3. Finding and validating hits</strong>,
 uses this object.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>

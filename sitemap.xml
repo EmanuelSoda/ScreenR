@@ -19,6 +19,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/as_contrast.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/barcode_log2fc.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/barcode_plot.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/build_screenr_object.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_annotation_table.html</loc></url>
@@ -32,6 +33,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_explained_variance.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_gini.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_pca.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_slope.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_trend.html</loc></url>
@@ -73,8 +75,10 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/k562_annotation_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/k562_count_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/k562_reference_genes.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/log_normalized_counts.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/match_to_counts.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/mds_axis_label.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/message_unparsed_samples.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/normalize_data.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/one_direction.html</loc></url>
@@ -91,6 +95,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_mapped_reads_distribution.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_mds.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_pca.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_trend.html</loc></url>

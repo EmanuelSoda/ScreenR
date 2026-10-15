@@ -1,11 +1,12 @@
 # Plot the barcodes of a gene (barcode plot)
 
-Draws a [`barcodeplot`](https://rdrr.io/pkg/limma/man/barcodeplot.html)
-for a gene: all the barcodes are ranked by their log2 fold change
-(computed with edgeR for the given contrast) and the barcodes of the
-gene are shown as vertical bars. If most of the bars are on the left
-(negative log2 fold change) the gene is depleted, if they are on the
-right it is enriched. It is useful to check the hits of
+Draws a barcode plot for a gene, as
+[`barcodeplot`](https://rdrr.io/pkg/limma/man/barcodeplot.html) but with
+ggplot2: all the barcodes are ranked by their log2 fold change (computed
+with edgeR for the given contrast) and the barcodes of the gene are
+shown as vertical bars. If most of the bars are on the left (negative
+log2 fold change) the gene is depleted, if they are on the right it is
+enriched. It is useful to check the hits of
 [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
 and
 [`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md).
@@ -20,7 +21,8 @@ plot_barcode_hit(
   number_barcode = 3,
   gene,
   quantile = c(-0.5, 0.5),
-  labels = c("Negative logFC", "Positive logFC")
+  labels = c("Negative logFC", "Positive logFC"),
+  show_log2fc = TRUE
 )
 ```
 
@@ -57,16 +59,44 @@ plot_barcode_hit(
 
 - quantile:
 
-  The two log2 fold change values that delimit the central (shaded)
-  region of the plot. Default c(-0.5, 0.5).
+  The two log2 fold change values that delimit the central (grey) region
+  of the plot. Default c(-0.5, 0.5).
 
 - labels:
 
   The labels of the left and right ends of the plot.
 
+- show_log2fc:
+
+  Whether to add the panel with the log2 fold change of all the barcodes
+  (default TRUE).
+
 ## Value
 
-Draws the plot with base graphics and returns NULL invisibly.
+A ggplot object (a patchwork of the panels), which can be printed, saved
+with [`ggsave`](https://ggplot2.tidyverse.org/reference/ggsave.html) or
+combined with other plots. No theme is applied: add one to all the
+panels with `&`, for example
+`plot_barcode_hit(...) & ggplot2::theme_classic()`.
+
+## Details
+
+The plot has up to three panels, which share the ranking of the barcodes
+on the x axis:
+
+- the enrichment line: the density of the barcodes of the gene along the
+  ranking divided by their average density (computed as in
+  [`barcodeplot`](https://rdrr.io/pkg/limma/man/barcodeplot.html), with
+  a tricube moving average). Values above 1 (dashed line) mean that the
+  barcodes of the gene are concentrated there;
+
+- the barcodes of the gene as vertical bars, colored by their log2 fold
+  change, on three regions: below, between and above the two values of
+  quantile;
+
+- (when show_log2fc = TRUE) the log2 fold change of all the barcodes, in
+  order, with the barcodes of the gene as points. It shows how strong
+  the effect is, which the ranks alone do not.
 
 ## See also
 
@@ -88,5 +118,10 @@ plot_barcode_hit(object, matrix_model,
     gene = "Gene_300"
 )
 
-#> NULL
+
+# Without the panel of the log2 fold changes
+plot_barcode_hit(object, matrix_model,
+    contrast = contrast,
+    gene = "Gene_300", show_log2fc = FALSE
+)
 ```

@@ -76,10 +76,6 @@ plot_barcode_trend(metrics,
     genes = c("Gene_1", "Gene_50"),
     n_col = 2
 )
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the ScreenR package.
-#>   Please report the issue at <https://github.com/EmanuelSoda/ScreenR/issues>.
 
 # Single gene
 plot_barcode_trend(metrics, genes = "Gene_300")

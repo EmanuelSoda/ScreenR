@@ -645,13 +645,6 @@ plot_trend(screenR_Object = object,
            genes = candidate_hits[1], 
            nrow = 2, ncol = 2, 
            group_var = c("Time1", "Time2", "TRT"))
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the ScreenR package.
-#>   Please report the issue at <https://github.com/EmanuelSoda/ScreenR/issues>.
-#> This warning is displayed once per session.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 ```
 
 ![](Analysis_Example_files/figure-html/plot_trend-1.png)

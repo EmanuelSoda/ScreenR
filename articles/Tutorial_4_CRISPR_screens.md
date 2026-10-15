@@ -246,10 +246,16 @@ plot_replicate_correlation(object)
 ### Clustering of the samples
 
 [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md)
-places the samples so that similar samples are close, and
+and
+[`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md)
+place the samples so that similar samples are close, and
 [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
 shows how much of the differences between the samples each principal
-component explains:
+component explains. Both the MDS and the PCA use the log2 normalized
+counts, with the normalization chosen in
+[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+(here counts per million), so that the sequencing depth of the samples
+does not drive the result:
 
 ``` r
 
@@ -257,6 +263,13 @@ plot_mds(object)
 ```
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/mds-1.png)
+
+``` r
+
+plot_pca(object)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/mds-2.png)
 
 ``` r
 
@@ -272,13 +285,12 @@ plot_explained_variance(object, cumulative = TRUE)
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/explained-variance-2.png)
 
-The first dimension of the MDS plot orders the samples by time point
-(T0, then day 3, then day 18): the main difference between the samples
-is the growth of the cells, as expected in a dropout screen. The day 3
+The first dimension of both plots orders the samples by time point (T0,
+then day 3, then day 18): the main difference between the samples is the
+growth of the cells, as expected in a dropout screen. The day 3
 replicates are very close; the day 18 replicates differ more, because
-the depletion has had more time to diverge. One principal component
-explains about 70% of the variability, so the samples differ mainly
-along a single direction.
+the depletion has had more time to diverge. The first principal
+component explains 59% of the variability.
 
 ### Quality with reference genes
 
