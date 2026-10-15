@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_zscore_hit.R
 \name{find_zscore_hit}
 \alias{find_zscore_hit}
-\title{Title Find Z-score Hit}
+\title{Find hits with the Z-score threshold rule}
 \usage{
 find_zscore_hit(
   table_treate_vs_control,
@@ -11,39 +11,50 @@ find_zscore_hit(
 )
 }
 \arguments{
-\item{table_treate_vs_control}{table computed with the function
-\code{compute_data_table}}
+\item{table_treate_vs_control}{The table of barcode metrics returned by
+\code{\link{compute_metrics}}, with one row for each barcode and the
+columns Gene and Zscore.}
 
-\item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+\item{number_barcode}{A gene is a hit when more than number_barcode of its
+barcodes have a Z-score below the threshold (default 6). For example,
+with the default a gene with 10 barcodes is a hit when at least 7 of
+them are below the threshold.}
 
-\item{metric}{A string containing the metric to use. The value allowed are
-"median" (the default) or "mean".}
+\item{metric}{The threshold on the Z-score: "median" (the default) or
+"mean" of the Z-scores of all the barcodes.}
 }
 \value{
-Return a tibble containing the hit for the Z-score
+A tibble with the columns Gene and numberOfBarcode (the number of
+    barcodes of the gene below the threshold), with one row for each hit.
 }
 \description{
-Title Find Z-score Hit
+Finds the genes with more than number_barcode barcodes whose
+    Z-score is below the median (or the mean) of the Z-scores of all the
+    barcodes. This simple rule gives no p-value and flags many genes
+    without any effect (with the median, about 17\% of them when genes
+    have 10 barcodes and number_barcode = 6): use \code{\link{find_gene_zscore_hit}}, which
+    computes a p-value and an FDR for each gene, instead.
 }
 \examples{
-\dontrun{
+\donttest{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
     control = "Time3", treatment = "TRT",
     day = "Time3"
 )
 
-# For the the median
+# Threshold on the median
 result <- find_zscore_hit(table, number_barcode = 6)
 head(result)
 
-# For the mean
+# Threshold on the mean
 result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 head(result)
 }
+}
+\seealso{
+\code{\link{find_gene_zscore_hit}},
+    \code{\link{find_robust_zscore_hit}}, \code{\link{compute_metrics}},
+    \code{\link{find_common_hit}}
 }
 \concept{find}

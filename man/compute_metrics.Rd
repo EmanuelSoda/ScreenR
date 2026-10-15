@@ -2,53 +2,59 @@
 % Please edit documentation in R/compute_metrics.R
 \name{compute_metrics}
 \alias{compute_metrics}
-\title{Compute Metrics}
+\title{Compute the barcode metrics}
 \usage{
 compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{control}{A string specifying the sample that as to be used as
-control in the analysis.
-This string has to be equal to the interested sample in the
-Treatment column of the data_table slot}
+\item{control}{The value(s) of the Treatment column of the data table (see
+\code{\link{get_sample_table}}) that identify the control samples.}
 
-\item{treatment}{A string specifying the sample that as to be used as
-treatment in the analysis.
-This string has to be equal to the interested sample in the
-Treatment column of the data_table slot.}
+\item{treatment}{The value(s) of the Treatment column of the data table
+that identify the treated samples.}
 
-\item{day}{A string containing the day (time point) to consider in the
-metrics computation.
-This string has to be equal to the interested sample in the
-Day column of the data_table slot.}
+\item{day}{The day (time point) to use, as in the Day column of the data
+table.}
 
 \item{pseudocount}{A small value (in counts per million) added to the
-treated and control mean frequencies before computing
-the log2 fold change, so that barcodes with zero reads
-get a finite fold change:
-Log2FC = log2((Treated + pseudocount) /
-(Control + pseudocount)). Barcodes with zero reads in
-both treated and control are removed. The value is on
-the scale of the normalized count table, which is
-counts per million of all the reads for the "cpm" and
-"tmm" methods of \code{\link{normalize_data}}, but
-per million reads of the control barcodes for the
-"control" method.}
+treated and control mean frequencies before computing the log2 fold
+change, so that barcodes with zero reads get a finite fold change:
+Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)).
+Default 0.5. Barcodes with zero reads in both treated and control are
+removed. The value is on the scale of the normalized count table, which
+is counts per million of all the reads for the "cpm" and "tmm" methods
+of \code{\link{normalize_data}}, but per million reads of the control
+barcodes for the "control" method.}
 }
 \value{
-Return a tibble with all the measure computed.
+A tibble with one row for each barcode and the columns Barcode,
+    Gene, Treated and Control (the mean normalized counts), Log2FC, Zscore,
+    ZscoreRobust, Day and Treatment.
 }
 \description{
-This function computes the metrics that will be then used
-             to compute the z-score using the function
-             \code{\link{find_zscore_hit}} starting from the screenr object
-             for a given treatment in a given day. More information about the
-             z-score and other metrics used in genetic screening can be found
-             at this paper
-             \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{z-score}
+Computes, for each barcode, the log2 fold change between the
+    treated and the control samples of a given time point, and its Z-score
+    and robust Z-score. The result is the input of the Z-score methods
+    (\code{\link{find_gene_zscore_hit}}, \code{\link{find_zscore_hit}}) and
+    of several plots. More information about the Z-score and other metrics
+    used in genetic screens can be found in this
+    \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{paper}.
+}
+\details{
+The function uses the data table, so run
+    \code{\link{normalize_data}} and \code{\link{compute_data_table}}
+    first. For each barcode the normalized counts of the treated and of the
+    control samples of the given day are averaged, then
+    Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)),
+    Zscore = (Log2FC - mean(Log2FC)) / sd(Log2FC) and
+    ZscoreRobust = (Log2FC - median(Log2FC)) / mad(Log2FC), where the mean,
+    standard deviation, median and median absolute deviation are computed
+    over all the barcodes. Since the replicates are averaged, their
+    variability is not used: see \code{\link{compute_barcode_statistics}}
+    for a replicate-aware alternative.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -57,5 +63,12 @@ metrics <- compute_metrics(object,
     treatment = "TRT", day = "Time3"
 )
 head(metrics)
+}
+\seealso{
+\code{\link{find_gene_zscore_hit}},
+    \code{\link{compute_barcode_statistics}},
+    \code{\link{find_discordant_barcodes}},
+    \code{\link{plot_zscore_distribution}},
+    \code{\link{plot_barcode_trend}}
 }
 \concept{compute}

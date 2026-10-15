@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_by.R
 \name{filter_by_variance}
 \alias{filter_by_variance}
-\title{Filter using the variance filter}
+\title{Filter hits by the variance of their barcodes}
 \usage{
 filter_by_variance(
   screenR_Object,
@@ -13,30 +13,36 @@ filter_by_variance(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{genes}{The genes for which the variance as to be computed.
-Those genes are the result of the three statistical
-methods selection}
+\item{genes}{The genes to filter, for example the hits found by
+\code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
+\code{\link{find_roast_hit}}.}
 
-\item{matrix_model}{a matrix created using \code{\link[stats]{model.matrix}}}
+\item{matrix_model}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
 
-\item{variance}{The maximum value of variance accepted}
+\item{variance}{The maximum variance of the barcode log2 fold changes
+accepted (default 0.5).}
 
-\item{contrast}{The comparison used to compute the log2 fold changes:
-an object created with \code{\link[limma]{makeContrasts}}
-or \code{\link{create_contrast}}, or the name or index of
-a column of matrix_model.}
+\item{contrast}{The comparison used to compute the log2 fold changes: the
+name or index of a column of matrix_model, a numeric contrast vector
+(for example created with \code{\link{create_contrast}}) or a
+one-column matrix created with \code{\link[limma]{makeContrasts}}.}
 }
 \value{
-A data frame with the variance for the treatment and the control
-        for each gene
+The rows of the data table (see \code{\link{get_data_table}}) of
+    the genes that pass the filter, with an additional Variance column (the
+    variance of the barcode log2 fold changes of the gene).
 }
 \description{
-This function is used to improve the quality of the hits.
-             It compute the variance among the hits and filter the one with
-             a value greater than the threshold set
+Refines a list of candidate hits by the consistency of their
+    barcodes. For each gene it computes the variance of the log2 fold
+    changes of its barcodes (estimated with edgeR for the given contrast)
+    and keeps the genes whose variance is at most the given threshold:
+    a gene whose barcodes disagree is a less reliable hit.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -50,6 +56,9 @@ data <- filter_by_variance(
     matrix_model = matrix_model, contrast = contrast
 )
 head(data)
-
+}
+\seealso{
+\code{\link{filter_by_slope}},
+    \code{\link{find_discordant_barcodes}}
 }
 \concept{filter}

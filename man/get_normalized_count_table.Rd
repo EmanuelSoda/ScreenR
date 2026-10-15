@@ -4,26 +4,34 @@
 \alias{get_normalized_count_table}
 \alias{get_normalized_count_table,screenr_object-method}
 \alias{get_normalized_count_table,screenr_object}
-\title{Get ScreenR normalized_count_table}
+\title{Get the normalized count table}
 \usage{
 get_normalized_count_table(object)
 
 \S4method{get_normalized_count_table}{screenr_object}(object)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The normalized_count_table of the ScreenR object
+A tibble with the Barcode column and one column of normalized
+    counts for each sample (an empty tibble if the data have not been
+    normalized).
 }
 \description{
-Get function for the normalized_count_table of
-             the ScreenR object
+Returns the normalized count table of a ScreenR object,
+    computed with \code{\link{normalize_data}}. A short summary of the size
+    of the table is printed.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 normalized_count_table <- get_normalized_count_table(object)
 normalized_count_table
+}
+\seealso{
+\code{\link{normalize_data}},
+    \code{\link{set_normalized_count_table}},
+    \code{\link{get_count_table}}
 }
 \concept{objects}

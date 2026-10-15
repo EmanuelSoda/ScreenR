@@ -1,20 +1,22 @@
-#' @title Multidimensional Scaling Plot
-#' @description Plot samples on a two-dimensional scatterplot so that
-#'              distances on the plot approximate the typical log2 fold
-#'              changes between the samples.
-#' @param screenR_Object The Object of the package
-#'                       \code{\link{create_screenr_object}}
-#' @param groups The vector that has to be used to fill the plot if NULL the
-#'               function will use the default groups slot in the object passed
-#'               as input.
-#' @param alpha The opacity of the labels.
-#'              Possible value are in a range from 0 to 1.
-#' @param size The dimension of the labels. The default value is 2.5
-#' @param color The color of the labels. The default value is black
+#' @title Plot a multidimensional scaling of the samples
+#' @description Plots the samples on a two-dimensional scatter plot so that
+#'     the distances on the plot approximate the typical log2 fold changes
+#'     between the samples (\code{\link[limma]{plotMDS}} on the log2
+#'     counts per million of the raw counts).
+#'     Replicates should cluster together and the groups should separate.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param groups An optional vector, with one value for each sample, used to
+#'     fill the labels. By default the groups of the ScreenR object are used.
+#' @param alpha The opacity of the labels, between 0 and 1. Default 0.8.
+#' @param size The size of the labels. Default 2.5.
+#' @param color The color of the label text. Default "black".
 #' @importFrom ggplot2 geom_label labs
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom limma plotMDS
-#' @return The MDS Plot
+#' @return A ggplot object.
+#' @seealso \code{\link{plot_replicate_correlation}},
+#'     \code{\link{plot_explained_variance}}
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
@@ -52,23 +54,27 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     return(plot)
 }
 
-#' @title Plot the explained variance by the PC
-#' @description This function plot the explained variance by the
-#'              Principal Component analysis.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param cumulative A boolean value which indicates whether or not to plot
-#'                   the cumulative variance. The default value is FALSE.
-#' @param color The color to fill the barplot the default value is steelblue
+#' @title Plot the variance explained by the principal components
+#' @description Plots the proportion of the variance explained by each
+#'     principal component of a principal component analysis (PCA) of the
+#'     samples, computed on the raw counts with
+#'     \code{\link{compute_explained_variance}}. It shows how many components
+#'     are needed to describe the differences between the samples.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param cumulative Whether to plot the cumulative proportion of variance
+#'     instead of the proportion of each component. Default FALSE.
+#' @param color The fill color of the bars. Default "steelblue".
 #' @importFrom  scales percent
-#' @return The explained variance plot
+#' @return A ggplot object.
+#' @seealso \code{\link{plot_mds}}, \code{\link{plot_replicate_correlation}}
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #'
 #' plot_explained_variance(object)
 #'
-#' # For the cumulative plot
+#' # Cumulative variance
 #' plot_explained_variance(object, cumulative = TRUE)
 plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
     color = "steelblue") {
@@ -119,13 +125,17 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
     return(plot)
 }
 
-#' @title Compute explained variance
-#' @description This  is an internal function  used to compute
-#'              the explained variance by each of the Principal Components.
+#' @title Compute the variance explained by the principal components
+#' @description Internal function that computes a principal component
+#'     analysis of the samples on the raw counts (\code{\link[stats]{prcomp}})
+#'     and returns the variance explained by each component. It is used by
+#'     \code{\link{plot_explained_variance}}.
 #' @importFrom stats  prcomp
-#' @param screenR_Object The Object of the package
-#' @return A data.frame containing all the information of the variance
-#'         expressed by the components
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @return A data frame with the column Name ("Standard deviation",
+#'     "Proportion of Variance" and "Cumulative Proportion") and one column
+#'     for each principal component.
 #' @keywords internal
 #' @export
 #' @examples

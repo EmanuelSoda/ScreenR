@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_by.R
 \name{filter_by_slope}
 \alias{filter_by_slope}
-\title{Filter using the slope filter}
+\title{Filter hits by the slope of their trend}
 \usage{
 filter_by_slope(
   screenR_Object,
@@ -14,30 +14,48 @@ filter_by_slope(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{genes}{The genes for which the slope as to be computed. Those genes
-are the result of the three statistical methods selection}
+\item{genes}{The genes to filter, for example the hits found by
+\code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
+\code{\link{find_roast_hit}}.}
 
-\item{group_var_treatment}{The variable to use as independent variable (x)
-for the linear model of the treatment}
+\item{group_var_treatment}{The values of the Treatment column of the data
+table (see \code{\link{get_sample_table}}) of the samples used for the
+treatment trend, for example the early time points and the treated
+samples.}
 
-\item{group_var_control}{The variable to use as independent variable (x)
-for the linear model of the the control}
+\item{group_var_control}{The values of the Treatment column of the data
+table of the samples used for the control trend.}
 
-\item{slope_control}{A value used as threshold for the control slope}
+\item{slope_control}{An optional threshold: genes whose control slope is
+larger than this in absolute value are removed. Default NULL (no
+threshold).}
 
-\item{slope_treatment}{A value used as threshold for the treatment slope}
+\item{slope_treatment}{An optional threshold: genes whose treatment slope
+is smaller than this in absolute value are removed. Default NULL (no
+threshold).}
 }
 \value{
-A data frame with the slope for the treatment and the control
-        for each gene
+A tibble with the columns Gene, slope_control and slope_treatment,
+    with one row for each gene that passes the filter.
 }
 \description{
-This function is used to improve the quality of the hits found.
-             It computes a regression line in the different samples ad uses
-             the slope of this line to see the trend
+Refines a list of candidate hits (for example found by the
+    statistical methods) by their trend over time. For each gene it fits a
+    regression line of the normalized counts of its barcodes over the time
+    points, separately in the treated and in the control samples (see
+    \code{\link{compute_slope}}), and keeps the genes that decrease more in
+    the treated samples than in the controls.
+}
+\details{
+A gene is kept when both slopes are negative and the treatment
+    slope is lower than the control slope, or when the control slope is
+    zero or positive and the treatment slope negative. Before
+    this, the optional thresholds remove the genes whose control slope is
+    larger in absolute value than slope_control and those whose treatment
+    slope is smaller in absolute value than slope_treatment.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -48,6 +66,9 @@ filter_by_slope(
     group_var_control = c("T1", "T2", "Time3", "Time4"),
     slope_control = 0.5, slope_treatment = 1
 )
-
+}
+\seealso{
+\code{\link{compute_slope}}, \code{\link{filter_by_variance}},
+    \code{\link{plot_trend}}
 }
 \concept{filter}

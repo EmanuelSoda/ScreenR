@@ -1,3 +1,27 @@
+# ScreenR 1.15.12
+
+## Documentation
+
+* Every help page has been rewritten: clearer titles and descriptions, all
+  arguments with their defaults, the columns of the returned tables, links
+  between related functions and runnable examples. Several descriptions that
+  did not match the code were corrected, for example `number_barcode` (genes
+  need more than `number_barcode` barcodes to be tested), the return values
+  of `plot_common_hit()`, `plot_mapped_reads_distribution()`,
+  `filter_by_variance()` and `filter_by_slope()`, and `group_var` in
+  `plot_trend()`, `plot_boxplot()` and `filter_by_slope()`.
+* The `screenr_object` class has its own help page (`?"screenr_object-class"`).
+* New README and package website, with a quick start, a guide to the
+  hit-finding methods and the benchmark against MAGeCK.
+
+## Other changes
+
+* `compute_metrics()` is about 40 times faster (same results).
+* `get_count_table()`, `get_annotation_table()`,
+  `get_normalized_count_table()` and `get_data_table()` report the size of the
+  table with `message()` instead of printing it, so it can be silenced with
+  `suppressMessages()`.
+
 # ScreenR 1.15.11
 
 ## Documentation

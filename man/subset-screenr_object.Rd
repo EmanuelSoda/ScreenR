@@ -2,7 +2,7 @@
 % Please edit documentation in R/screenr-class.R
 \name{[,screenr_object,ANY,ANY,ANY-method}
 \alias{[,screenr_object,ANY,ANY,ANY-method}
-\title{Subset a ScreenR Object}
+\title{Subset a ScreenR object}
 \usage{
 \S4method{[}{screenr_object,ANY,ANY,ANY}(x, i, j, ..., drop = TRUE)
 }
@@ -23,7 +23,8 @@ The subset ScreenR object.
 Subsets the barcodes (rows) and the samples (columns) of a
              ScreenR object, like any
              \code{\link[SummarizedExperiment]{SummarizedExperiment}}.
-             The data table is subset to the same barcodes and samples.
+             The normalized counts and the data table are subset to the
+             same barcodes and samples.
 }
 \examples{
 object <- update_screenr_object(
@@ -31,5 +32,8 @@ object <- update_screenr_object(
 )
 object[1:100, ]
 object[, object$Treatment == "TRT"]
+}
+\seealso{
+\code{\link{remove_all_zero_row}}
 }
 \concept{objects}

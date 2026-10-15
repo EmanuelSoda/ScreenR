@@ -1,18 +1,22 @@
-#' @title Plot mapped reads
-#' @description This function plots the number of reads mapped for each
-#'              sample. It internally call the \code{\link{count_mapped_reads}}
-#'              function, to compute the number of mapped reads.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param palette A vector of color that as to be used to fill the barplot.
-#' @param alpha A value for the opacity of the plot.
-#'              Allowed values are in the range 0 to 1
-#' @param legende_position Where to positioning the legend of the plot
-#'                         ("none", "left", "right", "bottom", "top")
+#' @title Plot the number of mapped reads of each sample
+#' @description Draws a bar plot of the total number of reads mapped to the
+#'     barcodes in each sample, computed with \code{\link{mapped_reads}}.
+#'     Samples with far fewer reads than the others may have a lower quality.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param palette An optional vector of colors, one for each sample, used to
+#'     fill the bars. By default the ggplot2 colors are used.
+#' @param alpha The opacity of the bars, between 0 and 1. Default 1. It is
+#'     used only when palette is given.
+#' @param legende_position The position of the legend: "none" (default),
+#'     "top", "bottom", "right" or "left".
 #' @importFrom magrittr %>%
 #' @importFrom  ggplot2 geom_bar
 #' @importFrom rlang .data
-#' @return return a ggplot object
+#' @return A ggplot object.
+#' @seealso \code{\link{mapped_reads}},
+#'     \code{\link{plot_mapped_reads_distribution}},
+#'     \code{\link{plot_barcode_lost}}
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))

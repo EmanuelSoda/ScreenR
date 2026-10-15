@@ -1,29 +1,30 @@
-#' @title Plot barcode hit
-#' @description Create a barcode plot for a hit.
-#'              A barcode plot displays if the hit is differentially up or
-#'              down regulated. If most of the vertical line are on the left
-#'              side the gene associated to the barcodes is down regulated
-#'              otherwise is up regulated.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param matrix_model The matrix that will be used to perform the
-#'                     linear model analysis. It is created using
-#'                     model.matrix.
-
-#' @param contrast The comparison to plot: an object created with
-#'                 \code{\link[limma]{makeContrasts}} or
-#'                 \code{\link{create_contrast}}, or the name or index of a
-#'                 column of matrix_model.
-#' @param number_barcode Number of barcode that as to be differentially
-#'                       expressed (DE) in order to consider the associated gene
-#'                       DE. Example a gene is associated with 10 shRNA we
-#'                       consider a gene DE if it has at least
-#'                       number_barcode = 5 shRNA DE.
-#' @param quantile Quantile to display on the plot
-#' @param labels The label to be displayed on the quantile side
-#' @param gene The name of the gene that has to be plot
+#' @title Plot the barcodes of a gene (barcode plot)
+#' @description Draws a \code{\link[limma]{barcodeplot}} for a gene: all the
+#'     barcodes are ranked by their log2 fold change (computed with edgeR for
+#'     the given contrast) and the barcodes of the gene are shown as vertical
+#'     bars. If most of the bars are on the left (negative log2 fold change)
+#'     the gene is depleted, if they are on the right it is enriched. It is
+#'     useful to check the hits of \code{\link{find_camera_hit}} and
+#'     \code{\link{find_roast_hit}}.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param matrix_model The design matrix of the linear model, for example
+#'     created with \code{\link{create_design_matrix}} (or with
+#'     \code{\link[stats]{model.matrix}}).
+#' @param contrast The comparison to plot: the name or index of a column of
+#'     matrix_model, a numeric contrast vector (for example created with
+#'     \code{\link{create_contrast}}) or a one-column matrix created with
+#'     \code{\link[limma]{makeContrasts}}.
+#' @param number_barcode The gene must have more than number_barcode barcodes
+#'     (default 3), as in \code{\link{find_camera_hit}}.
+#' @param quantile The two log2 fold change values that delimit the central
+#'     (shaded) region of the plot. Default c(-0.5, 0.5).
+#' @param labels The labels of the left and right ends of the plot.
+#' @param gene The name of the gene to plot.
 #' @concept  plot
-#' @return The barcode plot
+#' @return Draws the plot with base graphics and returns NULL invisibly.
+#' @seealso \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+#'     \code{\link{plot_barcode_trend}}
 #' @importFrom edgeR estimateDisp
 #' @importFrom edgeR glmFit
 #' @importFrom edgeR glmLRT

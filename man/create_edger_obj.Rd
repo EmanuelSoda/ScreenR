@@ -2,29 +2,34 @@
 % Please edit documentation in R/create_object.R
 \name{create_edger_obj}
 \alias{create_edger_obj}
-\title{Create edgeR Object}
+\title{Create an edgeR object}
 \usage{
 create_edger_obj(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The edgeR object will all the needed information for the analysis.
+A \code{\link[edgeR]{DGEList}} with the raw counts, the groups of
+    the samples and the annotation of the barcodes (genes).
 }
 \description{
-Utility function that using the screenr-class
-             object create the corresponding edgeR object.
-             This function and other utility function enables the user to
-             not worry abut the implementation and just focus
-             on the analysis. The ScreenR package will take care of the rest.
-             The edgeR object is built from the raw counts (the count
-             table), as required by the edgeR negative binomial model, and
-             the annotation is matched to the counts by Barcode.
+Converts a ScreenR object into an edgeR
+    \code{\link[edgeR]{DGEList}}, for example to use the object with edgeR
+    or limma functions directly. The edgeR/limma based functions of ScreenR
+    (such as \code{\link{find_camera_hit}} and
+    \code{\link{find_roast_hit}}) call it internally. The DGEList is built
+    from the raw counts (the count table), as required by the edgeR
+    negative binomial model, and the annotation is matched to the counts
+    by barcode; all the barcodes of the count table must be in the
+    annotation table.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 create_edger_obj(object)
+}
+\seealso{
+\code{\link{create_design_matrix}}
 }
 \concept{objects}

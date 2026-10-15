@@ -1,35 +1,37 @@
-#' @title Normalize data
-#' @description This function normalizes the counts to Counts Per Million
-#'              (CPM), so that samples sequenced at different depths can be
-#'              compared. Three methods are available:
-#'              \itemize{
-#'                \item "cpm" (default): each count is divided by the total
-#'                      number of reads of its sample and multiplied by 1e6.
-#'                \item "tmm": as "cpm", but the library sizes are corrected
-#'                      with the trimmed mean of M-values (TMM) normalization
-#'                      factors of edgeR (\code{\link[edgeR]{normLibSizes}}).
-#'                      This is more robust when strong hits deplete a large
-#'                      part of the library.
-#'                \item "control": each count is divided by the number of
-#'                      reads of the control barcodes (for example
-#'                      non-targeting shRNAs) of its sample and multiplied by
-#'                      1e6. This assumes that the control barcodes are not
-#'                      affected by the treatment.
-#'              }
-#'              The normalization only affects the normalized count table
-#'              (and so the data table, the Z-score and the plots). The
-#'              edgeR based methods (CAMERA, ROAST) always model the raw
-#'              counts.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Normalize the counts
+#' @description Normalizes the counts to counts per million (CPM), so that
+#'     samples sequenced at different depths can be compared. Run it before
+#'     \code{\link{compute_data_table}}. Three methods are available:
+#'     \itemize{
+#'       \item "cpm" (default): each count is divided by the total number of
+#'             reads of its sample and multiplied by 1e6.
+#'       \item "tmm": as "cpm", but the library sizes are corrected with the
+#'             trimmed mean of M-values (TMM) normalization factors of edgeR
+#'             (\code{\link[edgeR]{normLibSizes}}). This is more robust when
+#'             strong hits deplete a large part of the library.
+#'       \item "control": each count is divided by the number of reads of the
+#'             control barcodes (for example non-targeting shRNAs) of its
+#'             sample and multiplied by 1e6. This assumes that the control
+#'             barcodes are not affected by the treatment.
+#'     }
+#'     The normalization only affects the normalized count table (and so the
+#'     data table, the Z-score and the plots). The edgeR based methods
+#'     (CAMERA, ROAST) always model the raw counts.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @param method The normalization method: "cpm" (default), "tmm" or
-#'               "control".
-#' @param control_barcodes The barcodes to use for the "control" method.
+#'     "control".
+#' @param control_barcodes The barcodes to use for the "control" method
+#'     (required by that method, ignored by the others).
 #' @importFrom magrittr %>%
 #' @importFrom dplyr as_tibble
 #' @importFrom purrr map_if
 #' @importFrom edgeR DGEList normLibSizes
-#' @return Return the ScreenR object with the normalize data
+#' @return The ScreenR object with the normalized count table (see
+#'     \code{\link{get_normalized_count_table}}).
+#' @seealso \code{\link{compute_data_table}},
+#'     \code{\link{get_normalized_count_table}},
+#'     \code{\link{remove_all_zero_row}}
 #' @export
 #' @concept  compute
 #' @examples

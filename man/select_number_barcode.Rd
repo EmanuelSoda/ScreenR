@@ -2,7 +2,7 @@
 % Please edit documentation in R/camera_method.R
 \name{select_number_barcode}
 \alias{select_number_barcode}
-\title{Select  number of Barcode}
+\title{Select the barcodes of a gene}
 \usage{
 select_number_barcode(gene, gene_symbols, number_barcode)
 }
@@ -12,14 +12,15 @@ select_number_barcode(gene, gene_symbols, number_barcode)
 \item{...}{
   Arguments passed on to \code{\link[=unique_gene_symbols]{unique_gene_symbols}}
   \describe{
-    \item{\code{gene_symbols}}{The gene symbols list}
+    \item{\code{gene_symbols}}{The gene of each barcode.}
   }}
 }
 \value{
 The indices of the barcodes of the gene passed as input, or
-        NULL if the gene has no more than number_barcode barcodes
+    NULL if the gene has no more than number_barcode barcodes
 }
 \description{
-Compute a unique gene symbol for gene
+Internal function that returns the indices of the barcodes of
+    a gene, when the gene has more than number_barcode barcodes.
 }
 \keyword{internal}

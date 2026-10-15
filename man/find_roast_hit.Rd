@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_roast_hit.R
 \name{find_roast_hit}
 \alias{find_roast_hit}
-\title{Find Roast Hit}
+\title{Find hits with ROAST or FRY}
 \usage{
 find_roast_hit(
   screenR_Object,
@@ -19,83 +19,93 @@ find_roast_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{matrix_model}{The matrix that will be used to perform the
-linear model analysis. Created using
-\code{\link[stats]{model.matrix}}}
+\item{matrix_model}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
 
 \item{contrast}{The comparison to test: the name or index of a column of
-matrix_model, a numeric contrast vector (for example
-created with \code{\link{create_contrast}}) or a
-one-column matrix created with
+matrix_model, a numeric contrast vector (for example created with
+\code{\link{create_contrast}}) or a one-column matrix created with
 \code{\link[limma]{makeContrasts}}.}
 
-\item{nrot}{Number of rotation to perform the test.
-Higher number of rotation leads to more statistically significant
-result.}
+\item{nrot}{The number of random rotations used by method = "roast"
+(default 9999). More rotations give more precise p-values and allow
+smaller ones (the smallest is 1 / (nrot + 1)), but take longer. Not
+used by method = "fry".}
 
-\item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+\item{number_barcode}{Only genes with more than number_barcode barcodes
+are tested (default 3, so a gene needs at least 4 barcodes). The
+barcodes of a gene are tested together as a set, so this is not a
+number of barcodes that must change.}
 
-\item{direction}{Direction of variation}
+\item{direction}{The direction of the change: "Down" (default) for
+depleted genes or "Up" for enriched genes.}
 
-\item{p_val}{An optional cut off on the raw (not adjusted) p-value. By
-default (NULL) only the FDR cut off is used.}
+\item{p_val}{An optional cut off on the raw (not adjusted) one-sided
+p-value: only genes with PValue < p_val are returned. By default (NULL)
+only the FDR cut off is used.}
 
-\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
-lower or equal to this value are returned. Use fdr = 1 to
-return all the genes with the given direction.}
+\item{fdr}{The FDR threshold: only genes with an FDR lower than or equal
+to this value are returned (default 0.05). Use fdr = 1 to return all
+the genes with the given direction.}
 
 \item{seed}{An optional random seed. ROAST uses random rotations, so the
-p-values change slightly between runs; setting a seed makes
-the result reproducible. The random number state of the
-session is restored afterwards. Not used by method = "fry".}
+p-values change slightly between runs; setting a seed makes the result
+reproducible. The random number state of the session is restored
+afterwards. Not used by method = "fry".}
 
 \item{method}{"roast" (default, random rotations) or "fry" (fast exact
 approximation, recommended for large screens).}
 
 \item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
-default) or "storey" (Benjamini-Hochberg multiplied by
-the estimated proportion of genes without effect, less
-conservative when many genes have an effect).}
+default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+proportion of genes without effect, less conservative when many genes
+have an effect).}
 }
 \value{
-A tibble with the hits found by the ROAST method, with the
-        columns returned by \code{\link[limma]{mroast}} (or
-        \code{\link[limma]{fry}}) and Log2FC, the median log2 fold change
-        of the barcodes of the gene. PValue is the one-sided p-value for
-        the requested direction (roast and fry report two-sided p-values)
-        and FDR is computed from it over all the genes.
+A tibble with one row for each hit in the requested direction and
+    the columns returned by \code{\link[limma]{mroast}} (Gene, NGenes,
+    PropDown, PropUp, Direction, PValue, FDR, PValue.Mixed, FDR.Mixed) or
+    by \code{\link[limma]{fry}} (without PropDown and PropUp), plus Log2FC,
+    the median log2 fold change of the barcodes of the gene. NGenes is the
+    number of barcodes of the gene. PValue is the one-sided p-value for
+    the requested direction and FDR is computed from it over all the
+    genes; PValue.Mixed and FDR.Mixed are those of limma (a change in
+    either direction).
 }
 \description{
-Find the hit using the roast method. Roast is a
-             self-contained gene set test: it tests whether the barcodes
-             of a gene change, without comparing them with the other
-             barcodes, so it is not affected by the number of genes with
-             an effect. The p-values are computed with random rotations
-             (method = "roast", whose smallest possible p-value is
-             1 / (nrot + 1)) or with \code{\link[limma]{fry}}
-             (method = "fry"), a fast and exact approximation of roast
-             with an unlimited number of rotations, which is faster and
-             gives continuous p-values.
+Finds the genes whose barcodes are depleted (or enriched) in
+    the comparison given by the contrast, using the
+    \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{ROAST}
+    method (\code{\link[limma]{mroast}}) or its fast approximation FRY
+    (\code{\link[limma]{fry}}). ROAST is a self-contained gene set test:
+    it tests whether the barcodes of a gene change, without comparing them
+    with the other barcodes, so it is not affected by the number of genes
+    with an effect. It needs replicates in both groups (see Details).
+}
+\details{
+The raw counts are modelled with edgeR (the dispersion is
+    estimated with \code{\link[edgeR]{estimateDisp}}) and the barcodes of
+    each gene are tested together. The p-values are computed with random
+    rotations (method = "roast", whose smallest possible p-value is
+    1 / (nrot + 1)) or with \code{\link[limma]{fry}} (method = "fry"), a
+    fast and exact approximation of roast with an unlimited number of
+    rotations, which is faster and gives continuous p-values. The two-sided
+    p-values are converted into one-sided p-values for the requested
+    direction and the FDR is computed from them over all the tested genes.
 
-             Since roast tests each gene on its own barcodes, its power
-             depends on the variability between replicates: it needs
-             replicates in both the treated and the control group and
-             has little power with two replicates or noisy data. With a
-             single control sample (for example a plasmid library) it
-             finds almost no hits; in this case use
-             \code{\link{find_camera_hit}} or
-             \code{\link{find_gene_zscore_hit}}, which compare each gene
-             with the other genes. Being self-contained, roast also
-             reports genes whose barcodes change because of off-target
-             effects. More information can be found in
-          \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
+    Since roast tests each gene on its own barcodes, its power depends on
+    the variability between replicates: it needs replicates in both the
+    treated and the control group and has little power with two replicates
+    or noisy data. With a single control sample (for example a plasmid
+    library) it finds almost no hits; in this case use
+    \code{\link{find_camera_hit}} or \code{\link{find_gene_zscore_hit}},
+    which compare each gene with the other genes. Being self-contained,
+    roast also reports genes whose barcodes change because of off-target
+    effects.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -108,5 +118,18 @@ result <- find_roast_hit(object,
     contrast = contrast, nrot = 100, seed = 42
 )
 head(result)
+
+# FRY: faster, with continuous p-values (fdr = 1 returns all the genes)
+result <- find_roast_hit(object,
+    matrix_model = matrix_model,
+    contrast = contrast, method = "fry", fdr = 1
+)
+head(result)
+}
+\seealso{
+\code{\link{find_camera_hit}}, \code{\link{find_gene_zscore_hit}},
+    \code{\link{find_time_hit}}, \code{\link{summarise_hits}},
+    \code{\link{plot_barcode_hit}}, \code{\link{create_design_matrix}},
+    \code{\link{create_contrast}}
 }
 \concept{find}

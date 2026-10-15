@@ -4,27 +4,30 @@
 \alias{set_replicates}
 \alias{set_replicates,screenr_object-method}
 \alias{set_replicates,screenr_object}
-\title{Set ScreenR replicates}
+\title{Set the replicates}
 \usage{
 set_replicates(object, replicates)
 
 \S4method{set_replicates}{screenr_object}(object, replicates)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{replicates}{The vector containing the replicates name}
+\item{replicates}{A vector with the replicate labels.}
 }
 \value{
-The ScreenR object with the specific replicates
+The ScreenR object with the new replicates.
 }
 \description{
-Set function for the replicates of the ScreenR object
+Replaces the replicate labels of a ScreenR object.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 replicates <- get_replicates(object)
 set_replicates(object, replicates)
+}
+\seealso{
+\code{\link{get_replicates}}
 }
 \concept{objects}

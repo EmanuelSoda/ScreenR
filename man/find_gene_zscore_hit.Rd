@@ -2,7 +2,7 @@
 % Please edit documentation in R/gene_level_statistics.R
 \name{find_gene_zscore_hit}
 \alias{find_gene_zscore_hit}
-\title{Find Gene-level Z-score Hit}
+\title{Find hits with a gene-level Z-score test}
 \usage{
 find_gene_zscore_hit(
   table_treate_vs_control,
@@ -19,88 +19,88 @@ find_gene_zscore_hit(
 }
 \arguments{
 \item{table_treate_vs_control}{A table with one row for each barcode and
-at least the columns Gene, Log2FC and the
-score column, as returned by
+at least the columns Gene, Log2FC and the score column, as returned by
 \code{\link{compute_metrics}} or
 \code{\link{compute_barcode_statistics}}.}
 
 \item{score}{The column to use as score: "Zscore" (default) or
 "ZscoreRobust".}
 
-\item{direction}{"Down" (default) for depleted genes or "Up" for
-enriched genes.}
+\item{direction}{"Down" (default) for depleted genes or "Up" for enriched
+genes.}
 
 \item{statistic}{The gene score: "mean" (default) or "median" of the
-barcode scores. The median is less affected by single
-barcodes with a strong effect (for example off-target
-effects) but has less power.}
+barcode scores. The median is less affected by single barcodes with a
+strong effect (for example off-target effects) but has less power.}
 
 \item{control_genes}{Optional names of control genes (as in the Gene
-column), for example "non-targeting". When given,
-the random barcodes of the permutations are drawn
-from their barcodes, and they are not tested.
-Use only controls that behave like genes without
-effect (see Description); the default (NULL) uses
-all the barcodes.}
+column), for example "non-targeting". When given, the random barcodes
+of the permutations are drawn from their barcodes, and they are not
+tested. Use only controls that behave like genes without effect (see
+Details); the default (NULL) uses all the barcodes.}
 
 \item{n_permutations}{The number of random barcode sets used to compute
-the p-values.}
+the p-values (default 1e5, at least 100).}
 
-\item{min_barcodes}{Genes with fewer barcodes than this are not tested.}
+\item{min_barcodes}{Genes with fewer barcodes than this are not tested
+(default 3).}
 
-\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
-lower or equal to this value are returned. Use fdr = 1 to
-return all the tested genes.}
+\item{fdr}{The FDR threshold: only genes with an FDR lower than or equal to
+this value are returned (default 0.05). Use fdr = 1 to return all the
+tested genes.}
 
 \item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
-default) or "storey" (Benjamini-Hochberg multiplied by
-the estimated proportion of genes without effect, less
-conservative when many genes have an effect).}
+default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+proportion of genes without effect, less conservative when many genes
+have an effect).}
 
 \item{seed}{An optional random seed, to make the permutations
-reproducible. The random number state of the session is
-restored afterwards.}
+reproducible. The random number state of the session is restored
+afterwards.}
 }
 \value{
-A tibble with one row for each hit and the columns Gene,
-        NBarcodes (number of barcodes), Score (mean or median score of the
-        barcodes), Log2FC (median log2 fold change of the barcodes),
-        PValue and FDR, ordered by p-value.
+A tibble with one row for each hit and the columns Gene, NBarcodes
+    (number of barcodes), Score (mean or median score of the barcodes),
+    Log2FC (median log2 fold change of the barcodes), PValue and FDR,
+    ordered by p-value.
 }
 \description{
 Gene-level test for the Z-score method, with a p-value and a
-             False Discovery Rate (FDR) for each gene.
-             For each gene it computes a score, the mean (or the median)
-             of the scores of its barcodes. Under the null hypothesis that
-             the gene has no effect, its barcodes behave like barcodes
-             taken at random, so the p-value is computed by permutation:
-             the gene score is compared with the scores of n_permutations
-             random sets of barcodes of the same size. The p-values are
-             continuous (the smallest is 1 / (n_permutations + 1)) and do
-             not depend on the distribution of the barcode scores.
+    False Discovery Rate (FDR) for each gene. Each gene gets a score, the
+    mean (or the median) of the Z-scores of its barcodes, which is compared
+    with the scores of random sets of barcodes of the same size. Use it on
+    the table returned by \code{\link{compute_metrics}} or
+    \code{\link{compute_barcode_statistics}}; it replaces
+    \code{\link{find_zscore_hit}}.
+}
+\details{
+Under the null hypothesis that the gene has no effect, its
+    barcodes behave like barcodes taken at random, so the p-value is
+    computed by permutation: the gene score is compared with the scores of
+    n_permutations random sets of barcodes of the same size. The p-values
+    are continuous (the smallest is 1 / (n_permutations + 1)) and do not
+    depend on the distribution of the barcode scores.
 
-             The random barcodes are drawn from all the barcodes or, when
-             control_genes is given, only from the barcodes of the
-             control genes (for example the non-targeting shRNAs).
-             With all the barcodes (the default), the barcodes of the
-             true hits are part of the reference, which makes the test
-             conservative when many genes have an effect. Control genes
-             avoid this, but only if their barcodes behave like the
-             barcodes of genes without effect. This is often not true for
-             non-targeting shRNAs: targeting shRNAs are usually somewhat
-             depleted compared with them (off-target effects, toxicity
-             of the RNAi machinery), so every gene looks depleted. In the
-             K562 essentiality screen (\code{\link{k562_count_table}})
-             the non-targeting reference called hundreds of non-essential
-             genes, while the default reference did not. Before using
-             control genes, check that their scores match those of genes
-             known to have no effect (for example the non-essential
-             genes); otherwise use the default.
+    The random barcodes are drawn from all the barcodes or, when
+    control_genes is given, only from the barcodes of the control genes
+    (for example the non-targeting shRNAs). With all the barcodes (the
+    default), the barcodes of the true hits are part of the reference,
+    which makes the test conservative when many genes have an effect.
+    Control genes avoid this, but only if their barcodes behave like the
+    barcodes of genes without effect. This is often not true for
+    non-targeting shRNAs: targeting shRNAs are usually somewhat depleted
+    compared with them (off-target effects, toxicity of the RNAi
+    machinery), so every gene looks depleted. In the K562 essentiality
+    screen (\code{\link{k562_count_table}}) the non-targeting reference
+    called hundreds of non-essential genes, while the default reference did
+    not. Before using control genes, check that their scores match those
+    of genes known to have no effect (for example the non-essential
+    genes); otherwise use the default.
 
-             This replaces the rule of \code{\link{find_zscore_hit}}
-             ("more than number_barcode barcodes below the median"),
-             which flags about 17\% of the genes without any effect when
-             genes have 10 barcodes and number_barcode = 6.
+    This replaces the rule of \code{\link{find_zscore_hit}} ("more than
+    number_barcode barcodes below the median"), which flags about 17\% of
+    the genes without any effect when genes have 10 barcodes and
+    number_barcode = 6.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -109,5 +109,11 @@ table <- compute_metrics(object,
     day = "Time3"
 )
 find_gene_zscore_hit(table, fdr = 1, n_permutations = 1000, seed = 1)
+}
+\seealso{
+\code{\link{compute_metrics}},
+    \code{\link{compute_barcode_statistics}},
+    \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+    \code{\link{summarise_hits}}, \code{\link{find_discordant_barcodes}}
 }
 \concept{find}

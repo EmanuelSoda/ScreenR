@@ -4,25 +4,32 @@
 \alias{get_annotation_table}
 \alias{get_annotation_table,screenr_object-method}
 \alias{get_annotation_table,screenr_object}
-\title{Get ScreenR annotation table}
+\title{Get the annotation table}
 \usage{
 get_annotation_table(object)
 
 \S4method{get_annotation_table}{screenr_object}(object)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The annotation table of the ScreenR object
+The annotation table, a data frame with at least the columns
+    Barcode and Gene.
 }
 \description{
-Get function for the annotation table of the ScreenR object
+Returns the annotation table of a ScreenR object, with the
+    gene (and any other information) of each barcode. A short summary of
+    the size of the table is printed.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 annotation_table <- get_annotation_table(object)
 head(annotation_table)
+}
+\seealso{
+\code{\link{set_annotation_table}},
+    \code{\link{create_screenr_object}}
 }
 \concept{objects}

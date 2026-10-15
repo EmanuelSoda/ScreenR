@@ -2,27 +2,36 @@
 % Please edit documentation in R/compute_data_table.R
 \name{compute_data_table}
 \alias{compute_data_table}
-\title{Compute data Table}
+\title{Compute the data table}
 \usage{
 compute_data_table(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-ScreenR_Object with the data_table filed containing the table.
+The ScreenR object with the data table filled. The data table has
+    one row for each barcode and sample and the columns Barcode, Gene,
+    Sample, Frequency (the normalized count), Day and Treatment, plus
+    Sequence, Library and Gene_ID when the annotation table has them. It
+    can be read with \code{\link{get_data_table}}.
 }
 \description{
-This function computes the data table that will be used
-             for the analysis. The data_table is a tidy and normalized
-             version of the original count_table and will be used
-             throughout the analysis. The Day and Treatment columns come
-             from \code{\link{get_sample_table}}.
+Computes the data table, a tidy (long) version of the
+    normalized count table used by many functions of the analysis, such as
+    \code{\link{compute_metrics}}, \code{\link{plot_boxplot}},
+    \code{\link{plot_trend}} and \code{\link{filter_by_slope}}. Run it
+    after \code{\link{normalize_data}}. The Day and Treatment of each
+    sample come from \code{\link{get_sample_table}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
+object <- normalize_data(object)
 object <- compute_data_table(object)
-head(slot(object, "data_table"))
+head(get_data_table(object))
+}
+\seealso{
+\code{\link{normalize_data}}, \code{\link{get_data_table}}
 }
 \concept{compute}

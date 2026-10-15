@@ -4,25 +4,28 @@
 \alias{get_replicates}
 \alias{get_replicates,screenr_object-method}
 \alias{get_replicates,screenr_object}
-\title{Get ScreenR replicates}
+\title{Get the replicates}
 \usage{
 get_replicates(object)
 
 \S4method{get_replicates}{screenr_object}(object)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The replicates of the ScreenR object
+The vector of replicate labels.
 }
 \description{
-Get function for the replicates of the ScreenR object
+Returns the replicate labels stored in a ScreenR object.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 replicates <- get_replicates(object)
 replicates
+}
+\seealso{
+\code{\link{set_replicates}}, \code{\link{create_screenr_object}}
 }
 \concept{objects}

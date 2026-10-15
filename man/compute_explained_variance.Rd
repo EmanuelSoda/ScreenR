@@ -2,20 +2,24 @@
 % Please edit documentation in R/plot_mds.R
 \name{compute_explained_variance}
 \alias{compute_explained_variance}
-\title{Compute explained variance}
+\title{Compute the variance explained by the principal components}
 \usage{
 compute_explained_variance(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The Object of the package}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-A data.frame containing all the information of the variance
-        expressed by the components
+A data frame with the column Name ("Standard deviation",
+    "Proportion of Variance" and "Cumulative Proportion") and one column
+    for each principal component.
 }
 \description{
-This  is an internal function  used to compute
-             the explained variance by each of the Principal Components.
+Internal function that computes a principal component
+    analysis of the samples on the raw counts (\code{\link[stats]{prcomp}})
+    and returns the variance explained by each component. It is used by
+    \code{\link{plot_explained_variance}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

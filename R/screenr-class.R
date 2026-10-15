@@ -1,36 +1,40 @@
 #' @include  generics.R
 
-#' @title S4 ScreenR object class
-#' @description The screenr_object class is the main object of the package,
-#' it is passed to a series of function to perform the analysis.
+#' @title The ScreenR object class
+#' @description The screenr_object class is the main object of the package:
+#'     it stores the data of a screen and is passed to the functions of the
+#'     analysis. Create it with \code{\link{create_screenr_object}}.
 #'
-#' It extends \code{\link[SummarizedExperiment]{SummarizedExperiment}}, so
-#' it can be used with all the Bioconductor tools that work with that class:
-#' \itemize{
-#'   \item \code{assay(object, "counts")}: the raw counts, one row for each
-#'         barcode and one column for each sample;
-#'   \item \code{assay(object, "normalized")}: the normalized counts, after
-#'         \code{\link{normalize_data}};
-#'   \item \code{rowData(object)}: the barcode identifier (Barcode) and its
-#'         annotation (Gene, ...);
-#'   \item \code{colData(object)}: the Sample, Day and Treatment of each
-#'         sample (see \code{\link{get_sample_table}}) and its Group.
-#' }
-#' The ScreenR functions to read and change the object
-#' (\code{\link{get_count_table}}, \code{\link{set_count_table}}, ...) work
-#' as in the previous versions of the package.
+#'     It extends \code{\link[SummarizedExperiment]{SummarizedExperiment}},
+#'     so it can be used with all the Bioconductor tools that work with that
+#'     class:
+#'     \itemize{
+#'       \item \code{assay(object, "counts")}: the raw counts, one row for
+#'             each barcode and one column for each sample;
+#'       \item \code{assay(object, "normalized")}: the normalized counts,
+#'             after \code{\link{normalize_data}};
+#'       \item \code{rowData(object)}: the barcode identifier (Barcode) and
+#'             its annotation (Gene, ...);
+#'       \item \code{colData(object)}: the Sample, Day and Treatment of each
+#'             sample (see \code{\link{get_sample_table}}) and its Group.
+#'     }
+#'     The ScreenR accessors (\code{\link{get_count_table}},
+#'     \code{\link{set_count_table}}, ...) work as in the previous versions
+#'     of the package. Objects created with versions older than 1.15.8 are
+#'     converted automatically (see \code{\link{update_screenr_object}}).
 #'
 #' @slot annotation_table The annotation table as given by the user (it can
-#'                        contain barcodes that are not in the count table)
-#' @slot replicates It is used to store information about the replicates
-#' @slot data_table It is used to store a tidy format of the count table
-#' @slot column_names It is used to store the names that the columns had in
-#'                    the tables given by the user (see
-#'                    \code{\link{get_column_names}})
+#'     contain barcodes that are not in the count table).
+#' @slot replicates The replicate labels.
+#' @slot data_table The data table, a tidy (long) version of the normalized
+#'     counts (see \code{\link{compute_data_table}}).
+#' @slot column_names The names that the columns had in the tables given by
+#'     the user (see \code{\link{get_column_names}}).
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 #' @exportClass screenr_object
 #' @concept objects
-#' @rdname get_count_table
+#' @seealso \code{\link{create_screenr_object}},
+#'     \code{\link{update_screenr_object}}
 #' @examples
 #' data("count_table", package = "ScreenR")
 #' data("annotation_table", package = "ScreenR")
@@ -47,6 +51,7 @@
 #'     groups = groups,
 #'     replicates = c("")
 #' )
+#' obj
 screenr_object <- setClass("screenr_object",
   contains = "SummarizedExperiment",
   representation = methods::representation(
@@ -177,15 +182,16 @@ is_legacy_screenr <- function(object) {
     !is.null(attr(object, "count_table", exact = TRUE))
 }
 
-#' @title Update a ScreenR Object
+#' @title Update a ScreenR object
 #' @description Converts a ScreenR object created with a version of ScreenR
-#'              older than 1.15.8 to the current class, which extends
-#'              \code{\link[SummarizedExperiment]{SummarizedExperiment}}. All
-#'              the ScreenR functions do this automatically, so it is only
-#'              needed to use the object with other Bioconductor tools.
-#'              Objects of the current class are returned unchanged.
+#'     older than 1.15.8 to the current class, which extends
+#'     \code{\link[SummarizedExperiment]{SummarizedExperiment}}. All the
+#'     ScreenR functions do this automatically, so it is only needed to use
+#'     the object with other Bioconductor tools. Objects of the current class
+#'     are returned unchanged.
 #' @param object A ScreenR object.
-#' @return A screenr_object of the current class.
+#' @return A ScreenR object of the current class.
+#' @seealso \code{\link{create_screenr_object}}
 #' @concept objects
 #' @export
 #' @examples
@@ -306,10 +312,9 @@ setMethod(
       stop("The object is not defined!")
     }
     count_table <- count_table_of(object)
-    cat(
-      "ScreenR count table containing:\n",
-      nrow(x = count_table), "rows\n",
-      ncol(x = count_table), "columns\n"
+    message(
+      "ScreenR count table: ", nrow(count_table), " rows, ",
+      ncol(count_table), " columns"
     )
     return(count_table)
   }
@@ -327,12 +332,9 @@ setMethod(
       stop("The object is not defined!")
     }
     annotation_table <- annotation_of(object)
-    cat(
-      "ScreenR annotation table containing:\n",
-      nrow(annotation_table),
-      "rows\n",
-      ncol(annotation_table),
-      "columns\n"
+    message(
+      "ScreenR annotation table: ", nrow(annotation_table), " rows, ",
+      ncol(annotation_table), " columns"
     )
     return(annotation_table)
   }
@@ -380,10 +382,9 @@ setMethod(
       stop("The object is not defined!")
     }
     normalized_count_table <- normalized_table_of(object)
-    cat(
-      "ScreenR normalized count table containing:\n",
-      nrow(x = normalized_count_table), "rows\n",
-      ncol(x = normalized_count_table), "columns\n"
+    message(
+      "ScreenR normalized count table: ", nrow(normalized_count_table), " rows, ",
+      ncol(normalized_count_table), " columns"
     )
     return(normalized_count_table)
   }
@@ -401,10 +402,9 @@ setMethod(
       stop("The object is not defined!")
     }
     data_table <- update_screenr_object(object)@data_table
-    cat(
-      "ScreenR normalized data table containing:\n",
-      nrow(x = data_table), "rows\n",
-      ncol(x = data_table), "columns\n"
+    message(
+      "ScreenR normalized data table: ", nrow(data_table), " rows, ",
+      ncol(data_table), " columns"
     )
     return(data_table)
   }
@@ -564,17 +564,19 @@ setMethod(
   }
 )
 
-#' @title Subset a ScreenR Object
+#' @title Subset a ScreenR object
 #' @description Subsets the barcodes (rows) and the samples (columns) of a
 #'              ScreenR object, like any
 #'              \code{\link[SummarizedExperiment]{SummarizedExperiment}}.
-#'              The data table is subset to the same barcodes and samples.
+#'              The normalized counts and the data table are subset to the
+#'              same barcodes and samples.
 #' @param x A ScreenR object.
 #' @param i,j The barcodes and samples to keep (indices, names or logical
 #'            vectors).
 #' @param ... Not used.
 #' @param drop Not used.
 #' @return The subset ScreenR object.
+#' @seealso \code{\link{remove_all_zero_row}}
 #' @concept objects
 #' @rdname subset-screenr_object
 #' @export
@@ -602,7 +604,7 @@ setMethod(
   }
 )
 
-#' @title Show a ScreenR Object
+#' @title Show a ScreenR object
 #' @description Prints a summary of a ScreenR object: the
 #'              SummarizedExperiment summary and the size of the data table.
 #'              Objects created with older versions of ScreenR are converted

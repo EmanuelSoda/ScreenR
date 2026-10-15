@@ -2,7 +2,7 @@
 % Please edit documentation in R/design.R
 \name{create_contrast}
 \alias{create_contrast}
-\title{Create a Contrast}
+\title{Create a contrast}
 \usage{
 create_contrast(design, treatment, control)
 }
@@ -10,27 +10,31 @@ create_contrast(design, treatment, control)
 \item{design}{A design matrix created with
 \code{\link{create_design_matrix}}.}
 
-\item{treatment}{The name(s) of the treatment group(s), as in the groups
-of the ScreenR object or as in the column names of the
-design matrix.}
+\item{treatment}{The name(s) of the treatment group(s), as in the groups of
+the ScreenR object or as in the column names of the design matrix.}
 
-\item{control}{The name(s) of the control group(s), as in the groups
-of the ScreenR object or as in the column names of the
-design matrix.}
+\item{control}{The name(s) of the control group(s), as in the groups of the
+ScreenR object or as in the column names of the design matrix.}
 }
 \value{
-A named numeric vector with one value for each column of the
-        design matrix.
+A named numeric vector with one value for each column of the design
+    matrix: 1 / (number of treatment groups) for the treatment groups,
+    -1 / (number of control groups) for the control groups and 0 for the
+    others.
 }
 \description{
-Creates the contrast that compares the treatment group(s)
-             with the control group(s) of a design matrix created with
-             \code{\link{create_design_matrix}}. When more than one group
-             is given on one side, their average is used.
+Creates the contrast that compares the treatment group(s) with
+    the control group(s) of a design matrix created with
+    \code{\link{create_design_matrix}}. When more than one group is given
+    on one side, their average is used.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 design <- create_design_matrix(object)
 create_contrast(design, treatment = "Treated", control = "Control")
+}
+\seealso{
+\code{\link{create_design_matrix}}, \code{\link{find_camera_hit}},
+    \code{\link{find_roast_hit}}
 }
 \concept{compute}

@@ -1,60 +1,67 @@
-#' @title Create the ScreenR Object
-#' @description Initial function to create the Screen Object.
-#'              The tables can use any column names: the names of the
-#'              barcode and gene columns are given with barcode_column and
-#'              gene_column, and the object renames them internally to
-#'              Barcode and Gene (the original names are kept, see
-#'              \code{\link{get_column_names}}). When a column is not found
-#'              the error suggests the most similar column name.
+#' @title Create a ScreenR object
+#' @description Creates the ScreenR object, the starting point of every
+#'     analysis, from a count table and an annotation table. The object stores
+#'     the counts, the annotation, the groups of the samples and, later, the
+#'     normalized counts and the data table.
+#' @details The tables can use any column names: the names of the barcode and
+#'     gene columns are given with barcode_column and gene_column, and the
+#'     object renames them internally to Barcode and Gene (the original names
+#'     are kept, see \code{\link{get_column_names}}). When a column is not
+#'     found, the error suggests the most similar column name.
 #'
-#'              The input is checked when the object is created:
-#'              \itemize{
-#'                \item sample columns stored as text but containing only
-#'                      numbers are converted to numbers;
-#'                \item other non-numeric columns of the count table (for
-#'                      example a gene column) are removed with a message,
-#'                      since they are not samples;
-#'                \item groups must have one value for each sample;
-#'                \item barcodes that are duplicated, or that are missing
-#'                      from the annotation (for example the unmapped reads
-#'                      "*"), give a warning.
-#'              }
+#'     The input is checked when the object is created:
+#'     \itemize{
+#'       \item sample columns stored as text but containing only numbers are
+#'             converted to numbers;
+#'       \item other non-numeric columns of the count table (for example a
+#'             gene column) are removed with a message, since they are not
+#'             samples;
+#'       \item groups must have one value for each sample;
+#'       \item barcodes that are duplicated, or that are missing from the
+#'             annotation (for example the unmapped reads "*"), give a
+#'             warning.
+#'     }
 #'
-#'              The Day (time point) and the Treatment of each sample are
-#'              used by several functions. By default they are taken from
-#'              the sample names, which must have the form
-#'              Day_Treatment_Replicate (for example Time3_TRT_A). When the
-#'              sample names have another form, give them explicitly with
-#'              sample_table.
-#' @param table The count table obtained from the read alignment that
-#'                    contains the Barcodes as rows and samples as columns.
-#' @param annotation The annotation table containing the information
-#'                        for each Barcode and the association to the
-#'                        corresponding Gene
-#' @param groups A factor containing the experimental design label, with
-#'               one value for each sample (column of the count table other
-#'               than the barcode column)
-#' @param replicates A vector containing the replicates label
+#'     The Day (time point) and the Treatment of each sample are used by
+#'     several functions. By default they are taken from the sample names,
+#'     which must have the form Day_Treatment_Replicate (for example
+#'     Time3_TRT_A). When the sample names have another form, give them
+#'     explicitly with sample_table, and check the result with
+#'     \code{\link{get_sample_table}}.
+#' @param table The count table obtained from the read alignment, with one
+#'     row for each barcode and one column for each sample, plus the barcode
+#'     column.
+#' @param annotation The annotation table, with one row for each barcode and
+#'     at least the barcode column and the gene column (the gene targeted by
+#'     the shRNA).
+#' @param groups A factor with the experimental group of each sample (for
+#'     example "Control" and "Treated"), with one value for each sample
+#'     (column of the count table other than the barcode column). It is used
+#'     by the edgeR/limma based methods, see
+#'     \code{\link{create_design_matrix}}.
+#' @param replicates An optional vector with the replicate labels. Default
+#'     c("").
 #' @param barcode_column The name of the column containing the barcode
-#'                       identifiers, in both the count and the annotation
-#'                       table. Default "Barcode".
+#'     identifiers, in both the count and the annotation table. Default
+#'     "Barcode".
 #' @param gene_column The name of the column of the annotation table
-#'                    containing the gene names. Default "Gene".
+#'     containing the gene names. Default "Gene".
 #' @param sample_table An optional data frame with one row for each sample
-#'                     and columns giving the sample name, the Day (time
-#'                     point) and the Treatment of the sample. When given,
-#'                     these values are used instead of the ones derived
-#'                     from the sample names.
+#'     and columns giving the sample name, the Day (time point) and the
+#'     Treatment of the sample. When given, these values are used instead of
+#'     the ones derived from the sample names.
 #' @param sample_columns A named character vector giving the names of the
-#'                       columns of sample_table that contain the sample
-#'                       names, the Day and the Treatment. Default
-#'                       c(Sample = "Sample", Day = "Day",
-#'                       Treatment = "Treatment").
+#'     columns of sample_table that contain the sample names, the Day and the
+#'     Treatment. Default c(Sample = "Sample", Day = "Day",
+#'     Treatment = "Treatment").
 #' @importFrom rlang .data
 #' @importFrom methods new
 #' @importFrom tibble tibble
 #' @concept objects
-#' @return An object containing all the needed information for the analysis.
+#' @return A ScreenR object (class \code{\link[=screenr_object-class]{screenr_object}}).
+#' @seealso \code{\link{normalize_data}}, \code{\link{compute_data_table}},
+#'     \code{\link{get_sample_table}}, \code{\link{get_count_table}} and the
+#'     other accessors.
 #' @export
 #' @examples
 #' count_table <-
@@ -170,17 +177,19 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
     return(object)
 }
 
-#' @title Get Sample Table
-#' @description Returns the Day (time point) and the Treatment of each
-#'              sample, as used by the analysis. They come from the
-#'              sample_table given to \code{\link{create_screenr_object}} or,
-#'              when it was not given, from the sample names
-#'              (Day_Treatment_Replicate). Use this function to check that
-#'              the samples are interpreted correctly.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return A tibble with the columns Sample, Day and Treatment (and any
-#'         other column of the sample_table).
+#' @title Get the sample table
+#' @description Returns the Day (time point) and the Treatment of each sample,
+#'     as used by the analysis. They come from the sample_table given to
+#'     \code{\link{create_screenr_object}} or, when it was not given, from the
+#'     sample names (Day_Treatment_Replicate). Use this function to check that
+#'     the samples are interpreted correctly, and to find the values to give
+#'     to the day, treatment and control arguments of functions such as
+#'     \code{\link{compute_metrics}} and \code{\link{find_time_hit}}.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @return A tibble with the columns Sample, Day and Treatment (and any other
+#'     column of the sample_table).
+#' @seealso \code{\link{create_screenr_object}}, \code{\link{get_column_names}}
 #' @concept objects
 #' @export
 #' @examples
@@ -190,15 +199,16 @@ get_sample_table <- function(screenR_Object) {
     sample_table_of(screenR_Object)
 }
 
-#' @title Get Column Names
-#' @description Returns the names that the columns had in the tables given
-#'              to \code{\link{create_screenr_object}}. Internally the
-#'              barcode and gene columns are always called Barcode and Gene,
-#'              and the sample information Sample, Day and Treatment.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @return A named character vector: the names are the internal column
-#'         names and the values the original ones.
+#' @title Get the original column names
+#' @description Returns the names that the columns had in the tables given to
+#'     \code{\link{create_screenr_object}}. Internally the barcode and gene
+#'     columns are always called Barcode and Gene, and the sample information
+#'     Sample, Day and Treatment.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @return A named character vector: the names are the internal column names
+#'     and the values the original ones.
+#' @seealso \code{\link{create_screenr_object}}, \code{\link{get_sample_table}}
 #' @concept objects
 #' @export
 #' @examples
@@ -486,19 +496,22 @@ check_sample_table <- function(sample_table, sample_columns, samples) {
     sample_table[, c(needed, setdiff(colnames(sample_table), needed))]
 }
 
-#' @title Create edgeR Object
-#' @description Utility function that using the screenr-class
-#'              object create the corresponding edgeR object.
-#'              This function and other utility function enables the user to
-#'              not worry abut the implementation and just focus
-#'              on the analysis. The ScreenR package will take care of the rest.
-#'              The edgeR object is built from the raw counts (the count
-#'              table), as required by the edgeR negative binomial model, and
-#'              the annotation is matched to the counts by Barcode.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Create an edgeR object
+#' @description Converts a ScreenR object into an edgeR
+#'     \code{\link[edgeR]{DGEList}}, for example to use the object with edgeR
+#'     or limma functions directly. The edgeR/limma based functions of ScreenR
+#'     (such as \code{\link{find_camera_hit}} and
+#'     \code{\link{find_roast_hit}}) call it internally. The DGEList is built
+#'     from the raw counts (the count table), as required by the edgeR
+#'     negative binomial model, and the annotation is matched to the counts
+#'     by barcode; all the barcodes of the count table must be in the
+#'     annotation table.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @importFrom  edgeR DGEList
-#' @return The edgeR object will all the needed information for the analysis.
+#' @return A \code{\link[edgeR]{DGEList}} with the raw counts, the groups of
+#'     the samples and the annotation of the barcodes (genes).
+#' @seealso \code{\link{create_design_matrix}}
 #' @concept objects
 #' @export
 #' @examples

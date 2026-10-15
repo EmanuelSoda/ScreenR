@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_object.R
 \name{create_screenr_object}
 \alias{create_screenr_object}
-\title{Create the ScreenR Object}
+\title{Create a ScreenR object}
 \usage{
 create_screenr_object(
   table = NULL,
@@ -16,69 +16,75 @@ create_screenr_object(
 )
 }
 \arguments{
-\item{table}{The count table obtained from the read alignment that
-contains the Barcodes as rows and samples as columns.}
+\item{table}{The count table obtained from the read alignment, with one
+row for each barcode and one column for each sample, plus the barcode
+column.}
 
-\item{annotation}{The annotation table containing the information
-for each Barcode and the association to the
-corresponding Gene}
+\item{annotation}{The annotation table, with one row for each barcode and
+at least the barcode column and the gene column (the gene targeted by
+the shRNA).}
 
-\item{groups}{A factor containing the experimental design label, with
-one value for each sample (column of the count table other
-than the barcode column)}
+\item{groups}{A factor with the experimental group of each sample (for
+example "Control" and "Treated"), with one value for each sample
+(column of the count table other than the barcode column). It is used
+by the edgeR/limma based methods, see
+\code{\link{create_design_matrix}}.}
 
-\item{replicates}{A vector containing the replicates label}
+\item{replicates}{An optional vector with the replicate labels. Default
+c("").}
 
 \item{barcode_column}{The name of the column containing the barcode
-identifiers, in both the count and the annotation
-table. Default "Barcode".}
+identifiers, in both the count and the annotation table. Default
+"Barcode".}
 
 \item{gene_column}{The name of the column of the annotation table
 containing the gene names. Default "Gene".}
 
 \item{sample_table}{An optional data frame with one row for each sample
-and columns giving the sample name, the Day (time
-point) and the Treatment of the sample. When given,
-these values are used instead of the ones derived
-from the sample names.}
+and columns giving the sample name, the Day (time point) and the
+Treatment of the sample. When given, these values are used instead of
+the ones derived from the sample names.}
 
 \item{sample_columns}{A named character vector giving the names of the
-columns of sample_table that contain the sample
-names, the Day and the Treatment. Default
-c(Sample = "Sample", Day = "Day",
+columns of sample_table that contain the sample names, the Day and the
+Treatment. Default c(Sample = "Sample", Day = "Day",
 Treatment = "Treatment").}
 }
 \value{
-An object containing all the needed information for the analysis.
+A ScreenR object (class \code{\link[=screenr_object-class]{screenr_object}}).
 }
 \description{
-Initial function to create the Screen Object.
-             The tables can use any column names: the names of the
-             barcode and gene columns are given with barcode_column and
-             gene_column, and the object renames them internally to
-             Barcode and Gene (the original names are kept, see
-             \code{\link{get_column_names}}). When a column is not found
-             the error suggests the most similar column name.
+Creates the ScreenR object, the starting point of every
+    analysis, from a count table and an annotation table. The object stores
+    the counts, the annotation, the groups of the samples and, later, the
+    normalized counts and the data table.
+}
+\details{
+The tables can use any column names: the names of the barcode and
+    gene columns are given with barcode_column and gene_column, and the
+    object renames them internally to Barcode and Gene (the original names
+    are kept, see \code{\link{get_column_names}}). When a column is not
+    found, the error suggests the most similar column name.
 
-             The input is checked when the object is created:
-             \itemize{
-               \item sample columns stored as text but containing only
-                     numbers are converted to numbers;
-               \item other non-numeric columns of the count table (for
-                     example a gene column) are removed with a message,
-                     since they are not samples;
-               \item groups must have one value for each sample;
-               \item barcodes that are duplicated, or that are missing
-                     from the annotation (for example the unmapped reads
-                     "*"), give a warning.
-             }
+    The input is checked when the object is created:
+    \itemize{
+      \item sample columns stored as text but containing only numbers are
+            converted to numbers;
+      \item other non-numeric columns of the count table (for example a
+            gene column) are removed with a message, since they are not
+            samples;
+      \item groups must have one value for each sample;
+      \item barcodes that are duplicated, or that are missing from the
+            annotation (for example the unmapped reads "*"), give a
+            warning.
+    }
 
-             The Day (time point) and the Treatment of each sample are
-             used by several functions. By default they are taken from
-             the sample names, which must have the form
-             Day_Treatment_Replicate (for example Time3_TRT_A). When the
-             sample names have another form, give them explicitly with
-             sample_table.
+    The Day (time point) and the Treatment of each sample are used by
+    several functions. By default they are taken from the sample names,
+    which must have the form Day_Treatment_Replicate (for example
+    Time3_TRT_A). When the sample names have another form, give them
+    explicitly with sample_table, and check the result with
+    \code{\link{get_sample_table}}.
 }
 \examples{
 count_table <-
@@ -125,5 +131,10 @@ obj <- create_screenr_object(
 )
 get_sample_table(obj)
 get_column_names(obj)
+}
+\seealso{
+\code{\link{normalize_data}}, \code{\link{compute_data_table}},
+    \code{\link{get_sample_table}}, \code{\link{get_count_table}} and the
+    other accessors.
 }
 \concept{objects}

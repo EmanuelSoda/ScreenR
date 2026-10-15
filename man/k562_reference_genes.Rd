@@ -3,7 +3,7 @@
 \docType{data}
 \name{k562_reference_genes}
 \alias{k562_reference_genes}
-\title{Reference essential and non-essential genes}
+\title{K562 shRNA essentiality screen: reference essential and non-essential genes}
 \format{
 A data frame with 1585 rows (genes) and 3 columns:
 \describe{

@@ -2,39 +2,38 @@
 % Please edit documentation in R/gene_level_statistics.R
 \name{compute_barcode_statistics}
 \alias{compute_barcode_statistics}
-\title{Compute Barcode Statistics}
+\title{Compute replicate-aware barcode statistics}
 \usage{
 compute_barcode_statistics(screenR_Object, matrix_model, contrast)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{matrix_model}{The design matrix, for example created with
-\code{\link{create_design_matrix}}.}
+\item{matrix_model}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
 
 \item{contrast}{The comparison to test: the name or index of a column of
-matrix_model, a numeric contrast vector (for example
-created with \code{\link{create_contrast}}) or a
-one-column matrix created with
+matrix_model, a numeric contrast vector (for example created with
+\code{\link{create_contrast}}) or a one-column matrix created with
 \code{\link[limma]{makeContrasts}}.}
 }
 \value{
 A tibble with one row for each barcode and the columns Barcode,
-        Gene, Log2FC, logCPM, F, PValue, FDR and Zscore.
+    Gene, Log2FC, logCPM, F, PValue, FDR (Benjamini-Hochberg, over all the
+    barcodes) and Zscore.
 }
 \description{
-Computes for each barcode a replicate-aware test of the
-             given contrast with the edgeR quasi-likelihood F-test
-             (\code{\link[edgeR]{glmQLFit}},
-             \code{\link[edgeR]{glmQLFTest}}). Unlike
-             \code{\link{compute_metrics}}, which averages the replicates
-             before computing the fold change, this uses the variability
-             between replicates: barcodes that are noisy across
-             replicates get a smaller score.
-             The score is reported as a signed Z-score
-             (sign(Log2FC) * qnorm(1 - PValue / 2)) so that the table can
-             be used with \code{\link{find_gene_zscore_hit}}.
+Tests, for each barcode, the comparison given by the contrast
+    with the edgeR quasi-likelihood F-test (\code{\link[edgeR]{glmQLFit}},
+    \code{\link[edgeR]{glmQLFTest}}). Unlike \code{\link{compute_metrics}},
+    which averages the replicates before computing the log2 fold change,
+    this uses the variability between replicates: barcodes that are noisy
+    across replicates get a smaller score. The score is reported as a
+    signed Z-score (sign(Log2FC) * qnorm(1 - PValue / 2)), so that the table
+    can be used with \code{\link{find_gene_zscore_hit}} and
+    \code{\link{find_discordant_barcodes}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -45,5 +44,9 @@ contrast <- create_contrast(design,
 )
 statistics <- compute_barcode_statistics(object, design, contrast)
 head(statistics)
+}
+\seealso{
+\code{\link{compute_metrics}}, \code{\link{find_gene_zscore_hit}},
+    \code{\link{create_design_matrix}}, \code{\link{create_contrast}}
 }
 \concept{compute}

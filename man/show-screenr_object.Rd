@@ -2,7 +2,7 @@
 % Please edit documentation in R/screenr-class.R
 \name{show,screenr_object-method}
 \alias{show,screenr_object-method}
-\title{Show a ScreenR Object}
+\title{Show a ScreenR object}
 \usage{
 \S4method{show}{screenr_object}(object)
 }

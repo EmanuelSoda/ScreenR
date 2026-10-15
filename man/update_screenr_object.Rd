@@ -2,7 +2,7 @@
 % Please edit documentation in R/screenr-class.R
 \name{update_screenr_object}
 \alias{update_screenr_object}
-\title{Update a ScreenR Object}
+\title{Update a ScreenR object}
 \usage{
 update_screenr_object(object)
 }
@@ -10,20 +10,23 @@ update_screenr_object(object)
 \item{object}{A ScreenR object.}
 }
 \value{
-A screenr_object of the current class.
+A ScreenR object of the current class.
 }
 \description{
 Converts a ScreenR object created with a version of ScreenR
-             older than 1.15.8 to the current class, which extends
-             \code{\link[SummarizedExperiment]{SummarizedExperiment}}. All
-             the ScreenR functions do this automatically, so it is only
-             needed to use the object with other Bioconductor tools.
-             Objects of the current class are returned unchanged.
+    older than 1.15.8 to the current class, which extends
+    \code{\link[SummarizedExperiment]{SummarizedExperiment}}. All the
+    ScreenR functions do this automatically, so it is only needed to use
+    the object with other Bioconductor tools. Objects of the current class
+    are returned unchanged.
 }
 \examples{
 # The example object of the package was saved with an older version
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- update_screenr_object(object)
 object
+}
+\seealso{
+\code{\link{create_screenr_object}}
 }
 \concept{objects}

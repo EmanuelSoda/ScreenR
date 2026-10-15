@@ -1,20 +1,28 @@
-#' @title Plot the trend hit gene
-#' @description This function plot the trend of a gene resulted as hit
-#' @importFrom rlang .data
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param group_var The variable that as to be used to filter the data, for
-#'                  example the different treatment
-#' @param alpha A value for the opacity of the plot.
-#'              Allowed values are in the range 0 to 1
-#' @param se A boolean to indicate where or not to plot the standard error
-#' @param point_size The dimension of each dot
-#' @param line_size The dimension of the line
-#' @param nrow The number of rows in case multiple genes are plotted
-#' @param ncol The number of columns in case multiple genes are plotted
-#' @param genes The vector of genes to use
-#' @param scales The scales to be used in the facette
-#' @return The plot of the trend over time for a specific treatment.
+#' @title Plot the trend of genes over the samples
+#' @description Plots, for the given genes, the mean normalized count of their
+#'     barcodes in each sample (taken from the data table), with a regression
+#'     line. It shows whether a hit decreases (or increases) over time in the
+#'     selected samples.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param group_var The values of the Treatment column of the data table (see
+#'     \code{\link{get_sample_table}}) of the samples to plot, for example the
+#'     early time points and the treated samples.
+#' @param alpha The opacity of the confidence band, between 0 and 1. Default
+#'     0.5.
+#' @param se Whether to draw the confidence band of the regression line.
+#'     Default FALSE.
+#' @param point_size The size of the points. Default 1.
+#' @param line_size The width of the regression line. Default 1.
+#' @param nrow The number of rows of panels, when several genes are plotted.
+#' @param ncol The number of columns of panels, when several genes are
+#'     plotted.
+#' @param genes The names of the genes to plot.
+#' @param scales The scales of the panels: "free" (default), "fixed",
+#'     "free_x" or "free_y".
+#' @return A ggplot object.
+#' @seealso \code{\link{compute_slope}}, \code{\link{filter_by_slope}},
+#'     \code{\link{plot_boxplot}}
 #' @importFrom ggplot2 geom_smooth
 #' @export
 #' @examples
@@ -48,13 +56,14 @@ plot_trend <- function(screenR_Object, genes, group_var,
     return(plot)
 }
 
-#' @title Compute trend
-#' @description This is an internal function  used to computes the trend of
-#'              a gene
-#' @param screenR_Object object created with \code{\link[edgeR]{estimateDisp}}
-#' @param genes a list of genes
-#' @param group_var the variable that as to be used as grouping variable
-#' @return A table with the trend of the genes passed as input
+#' @title Compute the trend of genes
+#' @description Internal function that computes, for each gene and sample, the
+#'     mean normalized count of the barcodes of the gene.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param genes The names of the genes.
+#' @param group_var The values of the Treatment column of the samples to use.
+#' @return A tibble with the columns Sample, Gene and Frequency.
 #' @keywords internal
 compute_trend <- function(screenR_Object, genes, group_var) {
     data <- screenR_Object@data_table

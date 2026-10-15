@@ -1,75 +1,77 @@
-#' @title Find Gene-level Z-score Hit
+#' @title Find hits with a gene-level Z-score test
 #' @description Gene-level test for the Z-score method, with a p-value and a
-#'              False Discovery Rate (FDR) for each gene.
-#'              For each gene it computes a score, the mean (or the median)
-#'              of the scores of its barcodes. Under the null hypothesis that
-#'              the gene has no effect, its barcodes behave like barcodes
-#'              taken at random, so the p-value is computed by permutation:
-#'              the gene score is compared with the scores of n_permutations
-#'              random sets of barcodes of the same size. The p-values are
-#'              continuous (the smallest is 1 / (n_permutations + 1)) and do
-#'              not depend on the distribution of the barcode scores.
+#'     False Discovery Rate (FDR) for each gene. Each gene gets a score, the
+#'     mean (or the median) of the Z-scores of its barcodes, which is compared
+#'     with the scores of random sets of barcodes of the same size. Use it on
+#'     the table returned by \code{\link{compute_metrics}} or
+#'     \code{\link{compute_barcode_statistics}}; it replaces
+#'     \code{\link{find_zscore_hit}}.
+#' @details Under the null hypothesis that the gene has no effect, its
+#'     barcodes behave like barcodes taken at random, so the p-value is
+#'     computed by permutation: the gene score is compared with the scores of
+#'     n_permutations random sets of barcodes of the same size. The p-values
+#'     are continuous (the smallest is 1 / (n_permutations + 1)) and do not
+#'     depend on the distribution of the barcode scores.
 #'
-#'              The random barcodes are drawn from all the barcodes or, when
-#'              control_genes is given, only from the barcodes of the
-#'              control genes (for example the non-targeting shRNAs).
-#'              With all the barcodes (the default), the barcodes of the
-#'              true hits are part of the reference, which makes the test
-#'              conservative when many genes have an effect. Control genes
-#'              avoid this, but only if their barcodes behave like the
-#'              barcodes of genes without effect. This is often not true for
-#'              non-targeting shRNAs: targeting shRNAs are usually somewhat
-#'              depleted compared with them (off-target effects, toxicity
-#'              of the RNAi machinery), so every gene looks depleted. In the
-#'              K562 essentiality screen (\code{\link{k562_count_table}})
-#'              the non-targeting reference called hundreds of non-essential
-#'              genes, while the default reference did not. Before using
-#'              control genes, check that their scores match those of genes
-#'              known to have no effect (for example the non-essential
-#'              genes); otherwise use the default.
+#'     The random barcodes are drawn from all the barcodes or, when
+#'     control_genes is given, only from the barcodes of the control genes
+#'     (for example the non-targeting shRNAs). With all the barcodes (the
+#'     default), the barcodes of the true hits are part of the reference,
+#'     which makes the test conservative when many genes have an effect.
+#'     Control genes avoid this, but only if their barcodes behave like the
+#'     barcodes of genes without effect. This is often not true for
+#'     non-targeting shRNAs: targeting shRNAs are usually somewhat depleted
+#'     compared with them (off-target effects, toxicity of the RNAi
+#'     machinery), so every gene looks depleted. In the K562 essentiality
+#'     screen (\code{\link{k562_count_table}}) the non-targeting reference
+#'     called hundreds of non-essential genes, while the default reference did
+#'     not. Before using control genes, check that their scores match those
+#'     of genes known to have no effect (for example the non-essential
+#'     genes); otherwise use the default.
 #'
-#'              This replaces the rule of \code{\link{find_zscore_hit}}
-#'              ("more than number_barcode barcodes below the median"),
-#'              which flags about 17\% of the genes without any effect when
-#'              genes have 10 barcodes and number_barcode = 6.
+#'     This replaces the rule of \code{\link{find_zscore_hit}} ("more than
+#'     number_barcode barcodes below the median"), which flags about 17\% of
+#'     the genes without any effect when genes have 10 barcodes and
+#'     number_barcode = 6.
 #' @param table_treate_vs_control A table with one row for each barcode and
-#'                                at least the columns Gene, Log2FC and the
-#'                                score column, as returned by
-#'                                \code{\link{compute_metrics}} or
-#'                                \code{\link{compute_barcode_statistics}}.
+#'     at least the columns Gene, Log2FC and the score column, as returned by
+#'     \code{\link{compute_metrics}} or
+#'     \code{\link{compute_barcode_statistics}}.
 #' @param score The column to use as score: "Zscore" (default) or
-#'              "ZscoreRobust".
-#' @param direction "Down" (default) for depleted genes or "Up" for
-#'                  enriched genes.
+#'     "ZscoreRobust".
+#' @param direction "Down" (default) for depleted genes or "Up" for enriched
+#'     genes.
 #' @param statistic The gene score: "mean" (default) or "median" of the
-#'                  barcode scores. The median is less affected by single
-#'                  barcodes with a strong effect (for example off-target
-#'                  effects) but has less power.
+#'     barcode scores. The median is less affected by single barcodes with a
+#'     strong effect (for example off-target effects) but has less power.
 #' @param control_genes Optional names of control genes (as in the Gene
-#'                      column), for example "non-targeting". When given,
-#'                      the random barcodes of the permutations are drawn
-#'                      from their barcodes, and they are not tested.
-#'                      Use only controls that behave like genes without
-#'                      effect (see Description); the default (NULL) uses
-#'                      all the barcodes.
+#'     column), for example "non-targeting". When given, the random barcodes
+#'     of the permutations are drawn from their barcodes, and they are not
+#'     tested. Use only controls that behave like genes without effect (see
+#'     Details); the default (NULL) uses all the barcodes.
 #' @param n_permutations The number of random barcode sets used to compute
-#'                       the p-values.
-#' @param min_barcodes Genes with fewer barcodes than this are not tested.
-#' @param fdr The False Discovery Rate threshold: only genes with an FDR
-#'            lower or equal to this value are returned. Use fdr = 1 to
-#'            return all the tested genes.
+#'     the p-values (default 1e5, at least 100).
+#' @param min_barcodes Genes with fewer barcodes than this are not tested
+#'     (default 3).
+#' @param fdr The FDR threshold: only genes with an FDR lower than or equal to
+#'     this value are returned (default 0.05). Use fdr = 1 to return all the
+#'     tested genes.
 #' @param fdr_method How the FDR is computed: "BH" (Benjamini-Hochberg, the
-#'                   default) or "storey" (Benjamini-Hochberg multiplied by
-#'                   the estimated proportion of genes without effect, less
-#'                   conservative when many genes have an effect).
+#'     default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+#'     proportion of genes without effect, less conservative when many genes
+#'     have an effect).
 #' @param seed An optional random seed, to make the permutations
-#'             reproducible. The random number state of the session is
-#'             restored afterwards.
+#'     reproducible. The random number state of the session is restored
+#'     afterwards.
 #' @importFrom stats median
-#' @return A tibble with one row for each hit and the columns Gene,
-#'         NBarcodes (number of barcodes), Score (mean or median score of the
-#'         barcodes), Log2FC (median log2 fold change of the barcodes),
-#'         PValue and FDR, ordered by p-value.
+#' @return A tibble with one row for each hit and the columns Gene, NBarcodes
+#'     (number of barcodes), Score (mean or median score of the barcodes),
+#'     Log2FC (median log2 fold change of the barcodes), PValue and FDR,
+#'     ordered by p-value.
+#' @seealso \code{\link{compute_metrics}},
+#'     \code{\link{compute_barcode_statistics}},
+#'     \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+#'     \code{\link{summarise_hits}}, \code{\link{find_discordant_barcodes}}
 #' @concept find
 #' @export
 #' @examples
@@ -172,31 +174,32 @@ random_set_scores <- function(reference, size, n, statistic) {
     (sorted[floor((size + 1) / 2), ] + sorted[ceiling((size + 1) / 2), ]) / 2
 }
 
-#' @title Compute Barcode Statistics
-#' @description Computes for each barcode a replicate-aware test of the
-#'              given contrast with the edgeR quasi-likelihood F-test
-#'              (\code{\link[edgeR]{glmQLFit}},
-#'              \code{\link[edgeR]{glmQLFTest}}). Unlike
-#'              \code{\link{compute_metrics}}, which averages the replicates
-#'              before computing the fold change, this uses the variability
-#'              between replicates: barcodes that are noisy across
-#'              replicates get a smaller score.
-#'              The score is reported as a signed Z-score
-#'              (sign(Log2FC) * qnorm(1 - PValue / 2)) so that the table can
-#'              be used with \code{\link{find_gene_zscore_hit}}.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param matrix_model The design matrix, for example created with
-#'                     \code{\link{create_design_matrix}}.
+#' @title Compute replicate-aware barcode statistics
+#' @description Tests, for each barcode, the comparison given by the contrast
+#'     with the edgeR quasi-likelihood F-test (\code{\link[edgeR]{glmQLFit}},
+#'     \code{\link[edgeR]{glmQLFTest}}). Unlike \code{\link{compute_metrics}},
+#'     which averages the replicates before computing the log2 fold change,
+#'     this uses the variability between replicates: barcodes that are noisy
+#'     across replicates get a smaller score. The score is reported as a
+#'     signed Z-score (sign(Log2FC) * qnorm(1 - PValue / 2)), so that the table
+#'     can be used with \code{\link{find_gene_zscore_hit}} and
+#'     \code{\link{find_discordant_barcodes}}.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param matrix_model The design matrix of the linear model, for example
+#'     created with \code{\link{create_design_matrix}} (or with
+#'     \code{\link[stats]{model.matrix}}).
 #' @param contrast The comparison to test: the name or index of a column of
-#'                 matrix_model, a numeric contrast vector (for example
-#'                 created with \code{\link{create_contrast}}) or a
-#'                 one-column matrix created with
-#'                 \code{\link[limma]{makeContrasts}}.
+#'     matrix_model, a numeric contrast vector (for example created with
+#'     \code{\link{create_contrast}}) or a one-column matrix created with
+#'     \code{\link[limma]{makeContrasts}}.
 #' @importFrom edgeR estimateDisp glmQLFit glmQLFTest
 #' @importFrom stats qnorm p.adjust
 #' @return A tibble with one row for each barcode and the columns Barcode,
-#'         Gene, Log2FC, logCPM, F, PValue, FDR and Zscore.
+#'     Gene, Log2FC, logCPM, F, PValue, FDR (Benjamini-Hochberg, over all the
+#'     barcodes) and Zscore.
+#' @seealso \code{\link{compute_metrics}}, \code{\link{find_gene_zscore_hit}},
+#'     \code{\link{create_design_matrix}}, \code{\link{create_contrast}}
 #' @concept compute
 #' @export
 #' @examples
@@ -235,52 +238,55 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
     return(statistics)
 }
 
-#' @title Find Time Hit
-#' @description Finds the genes whose depletion (or enrichment) caused by
-#'              the treatment grows over time, using a single model for the
-#'              whole time course instead of a separate analysis for each
-#'              time point.
-#'              The barcode counts are modelled with edgeR as
-#'              log(abundance) = a + b * time + d * treated +
-#'              c * time * treated,
-#'              where time is the index of the time point (0 for the first
-#'              element of days, 1 for the second, ...; the time points are
-#'              treated as equally spaced) and treated is 1 for the treated
-#'              samples and 0 for the control and baseline samples. The
-#'              untreated samples and the treated samples each follow their
-#'              own line; the coefficient c is the difference between the
-#'              slopes, i.e. how much the treatment effect changes per time
-#'              point. A constant treatment effect gives c = 0. The barcodes
-#'              of each gene are then tested together with
-#'              \code{\link[limma]{camera}}. Both the treated and the
-#'              untreated samples must cover at least two time points.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Find hits with a time-course model
+#' @description Finds the genes whose depletion (or enrichment) caused by the
+#'     treatment grows over time, using a single model for the whole time
+#'     course instead of a separate analysis for each time point. Both the
+#'     treated and the untreated samples must cover at least two time points.
+#' @details The barcode counts are modelled with edgeR as
+#'     log(abundance) = a + b * time + d * treated + c * time * treated,
+#'     where time is the index of the time point (0 for the first element of
+#'     days, 1 for the second, ...; the time points are treated as equally
+#'     spaced) and treated is 1 for the treated samples and 0 for the control
+#'     and baseline samples. The untreated samples and the treated samples
+#'     each follow their own line; the coefficient c is the difference between
+#'     the slopes, i.e. how much the treatment effect changes per time point.
+#'     A constant treatment effect gives c = 0. The barcodes of each gene are
+#'     then tested together with \code{\link[limma]{camera}}, as in
+#'     \code{\link{find_camera_hit}}.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @param treatment The value(s) of the Treatment column of
-#'                  \code{\link{get_sample_table}} for the treated samples.
+#'     \code{\link{get_sample_table}} for the treated samples.
 #' @param control The value(s) of the Treatment column of
-#'                \code{\link{get_sample_table}} for the control samples.
-#' @param days The time points to use, in temporal order, as in the Day
-#'             column of \code{\link{get_sample_table}}.
-#' @param baseline Optional value(s) of the Treatment column of samples
-#'                 taken before the treatment (for example the first time
-#'                 points), which are used as untreated samples.
+#'     \code{\link{get_sample_table}} for the control samples.
+#' @param days The time points to use, in temporal order, as in the Day column
+#'     of \code{\link{get_sample_table}}.
+#' @param baseline Optional value(s) of the Treatment column of samples taken
+#'     before the treatment (for example the first time points), which are
+#'     used as untreated samples.
 #' @param number_barcode Only genes with more than number_barcode barcodes
-#'                       are tested.
+#'     are tested (default 3, so a gene needs at least 4 barcodes). The
+#'     barcodes of a gene are tested together as a set, so this is not a
+#'     number of barcodes that must change.
 #' @param direction "Down" (default) for genes depleted over time in the
-#'                  treated samples or "Up" for enriched genes.
-#' @param fdr The False Discovery Rate threshold: only genes with an FDR
-#'            lower or equal to this value are returned. Use fdr = 1 to
-#'            return all the genes with the given direction.
+#'     treated samples or "Up" for enriched genes.
+#' @param fdr The FDR threshold: only genes with an FDR lower than or equal
+#'     to this value are returned (default 0.05). Use fdr = 1 to return all
+#'     the genes with the given direction.
 #' @param fdr_method How the FDR is computed: "BH" (Benjamini-Hochberg, the
-#'                   default) or "storey" (Benjamini-Hochberg multiplied by
-#'                   the estimated proportion of genes without effect).
+#'     default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+#'     proportion of genes without effect).
 #' @importFrom edgeR estimateDisp
 #' @importFrom limma camera
-#' @return A tibble with the columns of \code{\link[limma]{camera}} (with
-#'         one-sided PValue for the requested direction and FDR computed
-#'         from it) and Log2FC, the median over the barcodes of the gene of the change
-#'         of the treatment log2 fold change per time point (c).
+#' @return A tibble with one row for each hit in the requested direction and
+#'     the columns of \code{\link[limma]{camera}} (Gene, NGenes, Direction,
+#'     PValue, FDR), where PValue is the one-sided p-value for the requested
+#'     direction and FDR is computed from it, plus Log2FC: the median over the
+#'     barcodes of the gene of c, the change of the treatment log2 fold change
+#'     per time point.
+#' @seealso \code{\link{find_camera_hit}}, \code{\link{summarise_hits}},
+#'     \code{\link{plot_barcode_trend}}, \code{\link{get_sample_table}}
 #' @concept find
 #' @export
 #' @examples
@@ -343,33 +349,37 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
     return(time_hit)
 }
 
-#' @title Summarise Hits
+#' @title Summarise the hits of several methods
 #' @description Combines the results of several hit-finding methods in one
-#'              table. For each gene it reports the FDR of each method and
-#'              the largest of them (MaxFDR), a conservative score to rank
-#'              the genes supported by all the methods. Since an FDR
-#'              (Benjamini-Hochberg adjusted p-value) is never smaller than
-#'              the p-value, MaxFDR <= alpha implies that the gene has a
-#'              p-value <= alpha in every method: for each single gene this
-#'              is a level-alpha intersection-union test of the hypothesis
-#'              "the gene has no effect in at least one method", valid
-#'              whatever the dependence between the methods. Note however
-#'              that the list of genes with MaxFDR <= alpha does not have a
-#'              guaranteed False Discovery Rate: the false discoveries of
-#'              the single methods can concentrate in their intersection.
-#'              To get a complete picture, compute the tables with fdr = 1
-#'              so that they contain all the tested genes. A gene missing
-#'              from a table gets an NA FDR for that method and a NA MaxFDR.
-#' @param hit_list A named list of tables, each with the columns Gene and
-#'                 FDR (for example from \code{\link{find_gene_zscore_hit}},
-#'                 \code{\link{find_camera_hit}},
-#'                 \code{\link{find_roast_hit}} or
-#'                 \code{\link{find_time_hit}}).
-#' @param fdr The FDR threshold used for the columns NMethods and Hit.
+#'     table. For each gene it reports the FDR of each method and the largest
+#'     of them (MaxFDR), a conservative score to rank the genes supported by
+#'     all the methods. To get a complete picture, compute the tables with
+#'     fdr = 1 so that they contain all the tested genes.
+#' @details Since an FDR (Benjamini-Hochberg adjusted p-value) is never
+#'     smaller than the p-value, MaxFDR <= alpha implies that the gene has a
+#'     p-value <= alpha in every method: for each single gene this is a
+#'     level-alpha intersection-union test of the hypothesis "the gene has no
+#'     effect in at least one method", valid whatever the dependence between
+#'     the methods. Note however that the list of genes with MaxFDR <= alpha
+#'     does not have a guaranteed False Discovery Rate: the false discoveries
+#'     of the single methods can concentrate in their intersection.
+#'
+#'     A gene missing from a table gets an NA FDR for that method and an NA
+#'     MaxFDR.
+#' @param hit_list A named list of tables, each with the columns Gene and FDR
+#'     (for example from \code{\link{find_gene_zscore_hit}},
+#'     \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}} or
+#'     \code{\link{find_time_hit}}). The names are used in the column names
+#'     of the result.
+#' @param fdr The FDR threshold used for the columns NMethods and Hit
+#'     (default 0.05).
 #' @return A tibble with one row for each gene and the columns Gene,
-#'         FDR_<method> for each method, NMethods (number of methods in
-#'         which the gene has FDR <= fdr), MaxFDR and Hit
-#'         (MaxFDR <= fdr), ordered by MaxFDR.
+#'     FDR_<method> for each method, NMethods (number of methods in which the
+#'     gene has FDR <= fdr), MaxFDR and Hit (MaxFDR <= fdr), ordered by
+#'     MaxFDR.
+#' @seealso \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}},
+#'     \code{\link{find_roast_hit}}, \code{\link{find_time_hit}},
+#'     \code{\link{find_common_hit}}
 #' @concept find
 #' @export
 #' @examples

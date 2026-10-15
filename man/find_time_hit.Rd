@@ -2,7 +2,7 @@
 % Please edit documentation in R/gene_level_statistics.R
 \name{find_time_hit}
 \alias{find_time_hit}
-\title{Find Time Hit}
+\title{Find hits with a time-course model}
 \usage{
 find_time_hit(
   screenR_Object,
@@ -17,8 +17,8 @@ find_time_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
 \item{treatment}{The value(s) of the Treatment column of
 \code{\link{get_sample_table}} for the treated samples.}
@@ -26,52 +26,55 @@ find_time_hit(
 \item{control}{The value(s) of the Treatment column of
 \code{\link{get_sample_table}} for the control samples.}
 
-\item{days}{The time points to use, in temporal order, as in the Day
-column of \code{\link{get_sample_table}}.}
+\item{days}{The time points to use, in temporal order, as in the Day column
+of \code{\link{get_sample_table}}.}
 
-\item{baseline}{Optional value(s) of the Treatment column of samples
-taken before the treatment (for example the first time
-points), which are used as untreated samples.}
+\item{baseline}{Optional value(s) of the Treatment column of samples taken
+before the treatment (for example the first time points), which are
+used as untreated samples.}
 
 \item{number_barcode}{Only genes with more than number_barcode barcodes
-are tested.}
+are tested (default 3, so a gene needs at least 4 barcodes). The
+barcodes of a gene are tested together as a set, so this is not a
+number of barcodes that must change.}
 
 \item{direction}{"Down" (default) for genes depleted over time in the
 treated samples or "Up" for enriched genes.}
 
-\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
-lower or equal to this value are returned. Use fdr = 1 to
-return all the genes with the given direction.}
+\item{fdr}{The FDR threshold: only genes with an FDR lower than or equal
+to this value are returned (default 0.05). Use fdr = 1 to return all
+the genes with the given direction.}
 
 \item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
-default) or "storey" (Benjamini-Hochberg multiplied by
-the estimated proportion of genes without effect).}
+default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+proportion of genes without effect).}
 }
 \value{
-A tibble with the columns of \code{\link[limma]{camera}} (with
-        one-sided PValue for the requested direction and FDR computed
-        from it) and Log2FC, the median over the barcodes of the gene of the change
-        of the treatment log2 fold change per time point (c).
+A tibble with one row for each hit in the requested direction and
+    the columns of \code{\link[limma]{camera}} (Gene, NGenes, Direction,
+    PValue, FDR), where PValue is the one-sided p-value for the requested
+    direction and FDR is computed from it, plus Log2FC: the median over the
+    barcodes of the gene of c, the change of the treatment log2 fold change
+    per time point.
 }
 \description{
-Finds the genes whose depletion (or enrichment) caused by
-             the treatment grows over time, using a single model for the
-             whole time course instead of a separate analysis for each
-             time point.
-             The barcode counts are modelled with edgeR as
-             log(abundance) = a + b * time + d * treated +
-             c * time * treated,
-             where time is the index of the time point (0 for the first
-             element of days, 1 for the second, ...; the time points are
-             treated as equally spaced) and treated is 1 for the treated
-             samples and 0 for the control and baseline samples. The
-             untreated samples and the treated samples each follow their
-             own line; the coefficient c is the difference between the
-             slopes, i.e. how much the treatment effect changes per time
-             point. A constant treatment effect gives c = 0. The barcodes
-             of each gene are then tested together with
-             \code{\link[limma]{camera}}. Both the treated and the
-             untreated samples must cover at least two time points.
+Finds the genes whose depletion (or enrichment) caused by the
+    treatment grows over time, using a single model for the whole time
+    course instead of a separate analysis for each time point. Both the
+    treated and the untreated samples must cover at least two time points.
+}
+\details{
+The barcode counts are modelled with edgeR as
+    log(abundance) = a + b * time + d * treated + c * time * treated,
+    where time is the index of the time point (0 for the first element of
+    days, 1 for the second, ...; the time points are treated as equally
+    spaced) and treated is 1 for the treated samples and 0 for the control
+    and baseline samples. The untreated samples and the treated samples
+    each follow their own line; the coefficient c is the difference between
+    the slopes, i.e. how much the treatment effect changes per time point.
+    A constant treatment effect gives c = 0. The barcodes of each gene are
+    then tested together with \code{\link[limma]{camera}}, as in
+    \code{\link{find_camera_hit}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -80,5 +83,9 @@ find_time_hit(object,
     treatment = "TRT", control = c("Time3", "Time4"),
     days = c("Time3", "Time4"), fdr = 1
 )
+}
+\seealso{
+\code{\link{find_camera_hit}}, \code{\link{summarise_hits}},
+    \code{\link{plot_barcode_trend}}, \code{\link{get_sample_table}}
 }
 \concept{find}

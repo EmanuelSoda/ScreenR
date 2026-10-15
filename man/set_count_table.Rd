@@ -4,28 +4,36 @@
 \alias{set_count_table}
 \alias{set_count_table,screenr_object-method}
 \alias{set_count_table,screenr_object}
-\title{Set ScreenR count table}
+\title{Set the count table}
 \usage{
 set_count_table(object, count_table)
 
 \S4method{set_count_table}{screenr_object}(object, count_table)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{count_table}{A count table containing in each row an shRNA and in each
-column a sample}
+\item{count_table}{A count table with a Barcode column and one column of
+counts for each sample.}
 }
 \value{
-The ScreenR object with the count table
+The ScreenR object with the new count table.
 }
 \description{
-Set function for the count table of the ScreenR object
+Replaces the raw count table of a ScreenR object. The
+    annotation, the groups and the normalized counts are kept (the
+    normalized counts are matched to the new table by barcode and sample);
+    the Day and Treatment of the samples are kept when the samples are the
+    same, otherwise they are taken again from the sample names. Unlike
+    \code{\link{create_screenr_object}}, the table is not checked.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 counts <- get_count_table(object)
 set_count_table(object, counts)
+}
+\seealso{
+\code{\link{get_count_table}}, \code{\link{create_screenr_object}}
 }
 \concept{objects}

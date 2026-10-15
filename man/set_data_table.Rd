@@ -4,27 +4,32 @@
 \alias{set_data_table}
 \alias{set_data_table,screenr_object-method}
 \alias{set_data_table,screenr_object}
-\title{Set ScreenR data_table}
+\title{Set the data table}
 \usage{
 set_data_table(object, data_table)
 
 \S4method{set_data_table}{screenr_object}(object, data_table)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{data_table}{A count table in a tidy format}
+\item{data_table}{A data table in tidy (long) format, with the columns
+described in \code{\link{get_data_table}}.}
 }
 \value{
-The ScreenR object with the set data_table
+The ScreenR object with the new data table.
 }
 \description{
-Set function for the data_table of the ScreenR object
+Replaces the data table of a ScreenR object. Usually the data
+    table is computed with \code{\link{compute_data_table}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 data_table <- get_data_table(object)
 set_data_table(object, data_table)
+}
+\seealso{
+\code{\link{compute_data_table}}, \code{\link{get_data_table}}
 }
 \concept{objects}

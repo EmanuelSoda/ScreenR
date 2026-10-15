@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcode_lost.R
 \name{plot_barcode_lost}
 \alias{plot_barcode_lost}
-\title{Plot number of barcode lost}
+\title{Plot the number of barcodes lost in each sample}
 \usage{
 plot_barcode_lost(
   screenR_Object,
@@ -12,30 +12,30 @@ plot_barcode_lost(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{palette}{A vector of colors to be used to fill the barplot.}
+\item{palette}{An optional vector of colors, one for each sample, used to
+fill the bars. By default the ggplot2 colors are used.}
 
-\item{alpha}{A value for the opacity of the plot.
-Allowed values are in the range 0 to 1}
+\item{alpha}{The opacity of the bars, between 0 and 1. Default 1.}
 
-\item{legende_position}{Where to positioning the legend of the plot.
-Allowed values are in the "top", "bottom", "right",
-"left", "none".}
+\item{legende_position}{The position of the legend: "none" (default),
+"top", "bottom", "right" or "left".}
 }
 \value{
-Returns the plot displaying the number of barcode lost in each
-        sample
+A ggplot object.
 }
 \description{
-This function plots the number of barcode lost in each sample.
-             Usually lots of barcodes lost mean that the sample has low
-             quality.
+Draws a bar plot of the number of barcodes with zero reads in
+    each sample, as computed by \code{\link{barcode_lost}}. A sample that
+    lost many more barcodes than the others usually has a low quality.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
-
 plot_barcode_lost(object)
+}
+\seealso{
+\code{\link{barcode_lost}}, \code{\link{plot_barcode_lost_for_gene}}
 }
 \concept{plot}

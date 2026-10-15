@@ -86,7 +86,7 @@
 #' table(k562_annotation_table$Class)
 "k562_annotation_table"
 
-#' Reference essential and non-essential genes
+#' K562 shRNA essentiality screen: reference essential and non-essential genes
 #'
 #' The core essential genes (CEGv2) and the non-essential genes (NEGv1)
 #' defined by Hart et al. from many genome-wide screens, restricted to the

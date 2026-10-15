@@ -2,29 +2,33 @@
 % Please edit documentation in R/barcode_lost.R
 \name{barcode_lost}
 \alias{barcode_lost}
-\title{Count number of barcode lost}
+\title{Compute the number of barcodes lost in each sample}
 \usage{
 barcode_lost(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-Return a tibble containing the number of barcode lost for each
-        sample
+A tibble with the columns Sample and LostBarcode (the number of
+    barcodes with zero reads). Samples without lost barcodes are not
+    reported.
 }
 \description{
-This function counts the number of barcodes lost during the
-             sequencing. A barcode is lost if its associated shRNA has zero
-             mapped read in a sample.
+Counts, for each sample, the barcodes lost during the screen
+    or the sequencing, that is the barcodes with zero mapped reads. Many
+    lost barcodes may indicate a sample of low quality or a bottleneck in
+    the screen. Use \code{\link{plot_barcode_lost}} to plot the result.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
-
-# In order to count the number of barcodes lost just the ScreenR object is
-# needed
 head(barcode_lost(object))
 
+}
+\seealso{
+\code{\link{plot_barcode_lost}},
+    \code{\link{plot_barcode_lost_for_gene}},
+    \code{\link{count_mapped_reads}}
 }
 \concept{compute}

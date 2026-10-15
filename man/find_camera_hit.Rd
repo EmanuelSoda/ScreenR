@@ -2,7 +2,7 @@
 % Please edit documentation in R/camera_method.R
 \name{find_camera_hit}
 \alias{find_camera_hit}
-\title{Find Camera Hit}
+\title{Find hits with CAMERA}
 \usage{
 find_camera_hit(
   screenR_Object,
@@ -17,63 +17,72 @@ find_camera_hit(
 )
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{matrix_model}{The matrix that will be used to perform the
-linear model analysis created using
-\code{\link[stats]{model.matrix}}}
+\item{matrix_model}{The design matrix of the linear model, for example
+created with \code{\link{create_design_matrix}} (or with
+\code{\link[stats]{model.matrix}}).}
 
 \item{contrast}{The comparison to test: the name or index of a column of
-matrix_model, a numeric contrast vector (for example
-created with \code{\link{create_contrast}}) or a
-one-column matrix created with
+matrix_model, a numeric contrast vector (for example created with
+\code{\link{create_contrast}}) or a one-column matrix created with
 \code{\link[limma]{makeContrasts}}.}
 
-\item{number_barcode}{Number of barcode that as to be differentially
-expressed (DE)in order to consider the gene associated
-DE. Example a gene is associated
-with 10 shRNA we consider a gene DE if it has at least
-number_barcode = 5 shRNA DE.}
+\item{number_barcode}{Only genes with more than number_barcode barcodes
+are tested (default 3, so a gene needs at least 4 barcodes). The
+barcodes of a gene are tested together as a set, so this is not a
+number of barcodes that must change.}
 
 \item{thresh}{Deprecated and ignored: it never had an effect on the
 result. Filter the returned table on the FDR column instead.}
 
 \item{lfc}{Deprecated and ignored: it never had an effect on the result.}
 
-\item{direction}{String containing the direction of the variation,
-"Down" for the down regulation "Up" for the up regulation.}
+\item{direction}{The direction of the change: "Down" (default) for
+depleted genes or "Up" for enriched genes.}
 
-\item{fdr}{The False Discovery Rate threshold: only genes with an FDR
-lower or equal to this value are returned. Use fdr = 1 to
-return all the genes with the given direction.}
+\item{fdr}{The FDR threshold: only genes with an FDR lower than or equal
+to this value are returned (default 0.05). Use fdr = 1 to return all
+the genes with the given direction.}
 
 \item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
-default) or "storey" (Benjamini-Hochberg multiplied by
-the estimated proportion of genes without effect, less
-conservative when many genes have an effect).}
+default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+proportion of genes without effect, less conservative when many genes
+have an effect).}
 }
 \value{
-A tibble with the hits found using the camera method, with the
-        columns of \code{\link[limma]{camera}} and Log2FC, the median log2
-        fold change of the barcodes of the gene. PValue is the one-sided
-        p-value for the requested direction (camera reports two-sided
-        p-values) and FDR is computed from it over all the genes.
-        CAMERA is a competitive test: it compares the barcodes of each
-        gene with all the other barcodes, so when many genes have an
-        effect it becomes conservative. \code{\link{find_roast_hit}} with
-        method = "fry" (self-contained) and
-        \code{\link{find_gene_zscore_hit}} with non-targeting controls
-        as reference do not have this limitation.
+A tibble with one row for each hit in the requested direction and
+    the columns Gene, NGenes (the number of barcodes of the gene),
+    Direction, PValue (the one-sided p-value for the requested direction),
+    FDR and Log2FC (the median log2 fold change of the barcodes of the
+    gene).
 }
 \description{
-This function implements the method by proposed by Wu and
-             Smyth (2012).
-             The original \code{\link[limma]{camera}} method is a gene set
-             test, here is applied in the contest of a genetic screening
-             and so it erforms a competitive barcode set test.
-             The paper can be found here
-     \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
+Finds the genes whose barcodes are depleted (or enriched) in
+    the comparison given by the contrast, using the
+    \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
+    method of Wu and Smyth (2012), \code{\link[limma]{camera}}. CAMERA is a
+    gene set test: here each gene is a set of barcodes, and the barcodes of
+    the gene are compared with all the other barcodes (a competitive test).
+    Unlike \code{\link{find_roast_hit}}, it also works with a single
+    control sample (for example a plasmid library).
+}
+\details{
+The raw counts are modelled with edgeR (the dispersion is
+    estimated with \code{\link[edgeR]{estimateDisp}}), and camera tests
+    the barcodes of each gene together, accounting for the correlation
+    between them. The two-sided p-values of camera are converted into
+    one-sided p-values for the requested direction and the FDR is computed
+    from them over all the tested genes.
+
+    CAMERA is a competitive test: it compares the barcodes of each gene with
+    all the other barcodes, so when many genes have an effect it becomes
+    conservative. \code{\link{find_roast_hit}} with method = "fry"
+    (self-contained) does not have this limitation, and neither does
+    \code{\link{find_gene_zscore_hit}} with control genes as reference, as
+    long as the control genes behave like genes without effect (see its
+    documentation).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -87,5 +96,11 @@ result <- find_camera_hit(
     matrix_model = matrix, contrast = contrast
 )
 head(result)
+}
+\seealso{
+\code{\link{find_roast_hit}}, \code{\link{find_gene_zscore_hit}},
+    \code{\link{find_time_hit}}, \code{\link{summarise_hits}},
+    \code{\link{plot_barcode_hit}}, \code{\link{create_design_matrix}},
+    \code{\link{create_contrast}}
 }
 \concept{find}

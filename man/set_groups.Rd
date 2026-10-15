@@ -4,27 +4,33 @@
 \alias{set_groups}
 \alias{set_groups,screenr_object-method}
 \alias{set_groups,screenr_object}
-\title{Set ScreenR groups}
+\title{Set the groups}
 \usage{
 set_groups(object, groups)
 
 \S4method{set_groups}{screenr_object}(object, groups)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 
-\item{groups}{The treatment and control groups}
+\item{groups}{A factor (or a vector, which is converted to a factor) with
+the group of each sample, for example "Control" and "Treated".}
 }
 \value{
-The ScreenR object containing the group field
+The ScreenR object with the new groups.
 }
 \description{
-Set function for the groups of the ScreenR object
+Replaces the experimental groups of the samples of a ScreenR
+    object. A warning is given when the number of groups differs from the
+    number of samples.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 groups <- get_groups(object)
 set_groups(object, groups)
+}
+\seealso{
+\code{\link{get_groups}}, \code{\link{create_design_matrix}}
 }
 \concept{objects}

@@ -1,14 +1,15 @@
-#' @title Compute Gini Index
-#' @description Computes the Gini index of the barcode counts of each
-#'              sample, a measure of how evenly the reads are distributed
-#'              over the barcodes of the library. It is 0 when all the
-#'              barcodes have the same number of reads and close to 1 when
-#'              a few barcodes take most of the reads. A Gini index that
-#'              increases strongly over time or differs between replicates
-#'              can indicate a bottleneck or a technical problem.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Compute the Gini index of each sample
+#' @description Computes the Gini index of the barcode counts of each sample,
+#'     a measure of how evenly the reads are distributed over the barcodes of
+#'     the library. It is 0 when all the barcodes have the same number of
+#'     reads and close to 1 when a few barcodes take most of the reads. A Gini
+#'     index that increases strongly over time or differs between replicates
+#'     can indicate a bottleneck or a technical problem. Use
+#'     \code{\link{plot_gini}} to plot it.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @return A tibble with the columns Sample and Gini.
+#' @seealso \code{\link{plot_gini}}, \code{\link{barcode_lost}}
 #' @concept compute
 #' @export
 #' @examples
@@ -33,21 +34,23 @@ compute_gini <- function(screenR_Object) {
     )
 }
 
-#' @title Plot Gini Index
+#' @title Plot the Gini index of each sample
 #' @description Plots the Gini index of each sample computed with
-#'              \code{\link{compute_gini}}: 0 means that all the barcodes
-#'              have the same number of reads, values close to 1 that a few
-#'              barcodes take most of the reads. In a dropout screen it
-#'              usually increases over time; a strong increase or a large
-#'              difference between replicates can signal a bottleneck.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#'     \code{\link{compute_gini}}: 0 means that all the barcodes have the same
+#'     number of reads, values close to 1 that a few barcodes take most of the
+#'     reads. In a dropout screen it usually increases over time; a strong
+#'     increase or a large difference between replicates can signal a
+#'     bottleneck.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @param palette An optional vector of colors, one for each sample.
-#' @param alpha The opacity of the bars.
-#' @param legende_position The position of the legend ("none" by default).
+#' @param alpha The opacity of the bars, between 0 and 1. Default 1.
+#' @param legende_position The position of the legend: "none" (default),
+#'     "top", "bottom", "right" or "left".
 #' @importFrom ggplot2 ggplot aes geom_col geom_text scale_fill_manual
 #' @importFrom ggplot2 theme element_text labs scale_y_continuous expansion
 #' @return A ggplot object.
+#' @seealso \code{\link{compute_gini}}, \code{\link{plot_barcode_lost}}
 #' @concept plot
 #' @export
 #' @examples
@@ -77,20 +80,21 @@ plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
     return(plot)
 }
 
-#' @title Plot Replicate Correlation
-#' @description Plots the correlation between all the pairs of samples,
-#'              computed on the log2 of the counts per million (plus 1).
-#'              Replicates of the same condition are expected to be highly
-#'              correlated; a replicate with a low correlation to the others
-#'              may be an outlier.
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
+#' @title Plot the correlation between samples
+#' @description Plots, as a heatmap, the correlation between all the pairs of
+#'     samples, computed on log2(CPM + 1) of the raw counts. Replicates of the
+#'     same condition are expected to be highly correlated; a replicate with a
+#'     low correlation to the others may be an outlier.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
 #' @param method The correlation method: "pearson" (default) or "spearman".
-#' @param label Whether to write the correlation value in each tile.
+#' @param label Whether to write the correlation value in each tile (default
+#'     TRUE).
 #' @importFrom ggplot2 ggplot aes geom_tile geom_text scale_fill_gradient
 #' @importFrom ggplot2 theme element_text labs
 #' @importFrom stats cor
 #' @return A ggplot object.
+#' @seealso \code{\link{plot_mds}}, \code{\link{plot_explained_variance}}
 #' @concept plot
 #' @export
 #' @examples
@@ -133,28 +137,28 @@ plot_replicate_correlation <- function(screenR_Object,
     return(plot)
 }
 
-#' @title Find Discordant Barcodes
-#' @description Finds the barcodes whose log2 fold change is far from the
-#'              other barcodes of the same gene. For each gene it computes
-#'              the median and the median absolute deviation (MAD) of the
-#'              log2 fold changes of its barcodes; a barcode is discordant
-#'              when its distance from the median is larger than threshold
-#'              MADs (when the MAD of a gene is 0, every barcode that differs
-#'              from the median is discordant, with an infinite deviation). Discordant barcodes may have off-target effects or a
-#'              poor knockdown, and can drive a gene to be (or not to be) a
-#'              hit.
+#' @title Find discordant barcodes
+#' @description Finds the barcodes whose log2 fold change is far from that of
+#'     the other barcodes of the same gene. Discordant barcodes may have
+#'     off-target effects or a poor knockdown, and can drive a gene to be (or
+#'     not to be) a hit.
+#' @details For each gene it computes the median and the median absolute
+#'     deviation (MAD) of the log2 fold changes of its barcodes; a barcode is
+#'     discordant when its distance from the median is larger than threshold
+#'     MADs. When the MAD of a gene is 0, every barcode that differs from the
+#'     median is discordant, with an infinite deviation.
 #' @param table_treate_vs_control A table with one row for each barcode and
-#'                                at least the columns Barcode, Gene and
-#'                                Log2FC, as returned by
-#'                                \code{\link{compute_metrics}} or
-#'                                \code{\link{compute_barcode_statistics}}.
+#'     at least the columns Barcode, Gene and Log2FC, as returned by
+#'     \code{\link{compute_metrics}} or
+#'     \code{\link{compute_barcode_statistics}}.
 #' @param threshold The number of MADs from the gene median beyond which a
-#'                  barcode is discordant.
+#'     barcode is discordant (default 3).
 #' @importFrom stats median mad
 #' @return A tibble with the discordant barcodes and the columns Barcode,
-#'         Gene, Log2FC, GeneLog2FC (median of the gene) and Deviation
-#'         (distance from the gene median in MADs), ordered by the absolute
-#'         deviation.
+#'     Gene, Log2FC, GeneLog2FC (median of the gene) and Deviation (distance
+#'     from the gene median in MADs), ordered by the absolute deviation.
+#' @seealso \code{\link{compute_metrics}}, \code{\link{filter_by_variance}},
+#'     \code{\link{plot_barcode_trend}}
 #' @concept compute
 #' @export
 #' @examples

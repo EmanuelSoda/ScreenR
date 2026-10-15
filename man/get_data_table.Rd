@@ -4,25 +4,33 @@
 \alias{get_data_table}
 \alias{get_data_table,screenr_object-method}
 \alias{get_data_table,screenr_object}
-\title{Get ScreenR data_table}
+\title{Get the data table}
 \usage{
 get_data_table(object)
 
 \S4method{get_data_table}{screenr_object}(object)
 }
 \arguments{
-\item{object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-The data_table of the ScreenR object
+A tibble with one row for each barcode and sample and the columns
+    Barcode, Gene, Sample, Frequency (the normalized count), Day and
+    Treatment (plus the other annotation columns).
 }
 \description{
-Get function for the data_table of the ScreenR object
+Returns the data table of a ScreenR object, the tidy (long)
+    version of the normalized counts computed with
+    \code{\link{compute_data_table}}. A short summary of the size of the
+    table is printed.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 data_table <- get_data_table(object)
 data_table
+}
+\seealso{
+\code{\link{compute_data_table}}, \code{\link{set_data_table}}
 }
 \concept{objects}

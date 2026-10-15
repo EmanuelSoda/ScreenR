@@ -2,40 +2,46 @@
 % Please edit documentation in R/find_common_hit.R
 \name{find_common_hit}
 \alias{find_common_hit}
-\title{Find common hit}
+\title{Find the hits in common between methods}
 \usage{
 find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 3)
 }
 \arguments{
-\item{hit_zscore}{The matrix obtained by the \code{\link{find_zscore_hit}}
-method}
+\item{hit_zscore}{The hits of the Z-score method, a table with a Gene
+column (for example from \code{\link{find_gene_zscore_hit}} or
+\code{\link{find_zscore_hit}}).}
 
-\item{hit_camera}{The matrix obtained by the \code{\link{find_camera_hit}}
-method}
+\item{hit_camera}{The hits of \code{\link{find_camera_hit}}, a table with a
+Gene column.}
 
-\item{hit_roast}{The matrix obtained by the \code{\link{find_roast_hit}}
-method}
+\item{hit_roast}{The hits of \code{\link{find_roast_hit}}, a table with a
+Gene column.}
 
-\item{common_in}{Number of methods in which the hit has to be in common
-in order to be considered a candidate hit.
-The default value is 3, which means that has to be present
-in the result of all the three methods.}
+\item{common_in}{The minimum number of methods in which a gene has to be
+found to be returned. The default, 3, returns the genes found by all
+three methods.}
 }
 \value{
-A vector containing the common hit
+A character vector with the names of the common hits.
 }
 \description{
-This method find the hit in common between the three methods
+Returns the genes found as hits by at least common_in of the
+    three methods (Z-score, CAMERA and ROAST). Only the gene names are
+    used, so the tables can come from any method. To combine the methods
+    using their FDR, see \code{\link{summarise_hits}}.
 }
 \examples{
 hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
 hit_camera <- data.frame(Gene = c("A", "B", "C", "F", "H", "G"))
 hit_roast <- data.frame(Gene = c("A", "L", "N"))
 
-# common among all the three methods
+# Common to all the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast)
 
-# common among at least two of the three methods
+# Common to at least two of the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
+}
+\seealso{
+\code{\link{plot_common_hit}}, \code{\link{summarise_hits}}
 }
 \concept{find}

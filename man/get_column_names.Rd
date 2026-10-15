@@ -2,26 +2,29 @@
 % Please edit documentation in R/create_object.R
 \name{get_column_names}
 \alias{get_column_names}
-\title{Get Column Names}
+\title{Get the original column names}
 \usage{
 get_column_names(screenR_Object)
 }
 \arguments{
-\item{screenR_Object}{The ScreenR object obtained using the
-\code{\link{create_screenr_object}}}
+\item{screenR_Object}{The ScreenR object obtained using
+\code{\link{create_screenr_object}}.}
 }
 \value{
-A named character vector: the names are the internal column
-        names and the values the original ones.
+A named character vector: the names are the internal column names
+    and the values the original ones.
 }
 \description{
-Returns the names that the columns had in the tables given
-             to \code{\link{create_screenr_object}}. Internally the
-             barcode and gene columns are always called Barcode and Gene,
-             and the sample information Sample, Day and Treatment.
+Returns the names that the columns had in the tables given to
+    \code{\link{create_screenr_object}}. Internally the barcode and gene
+    columns are always called Barcode and Gene, and the sample information
+    Sample, Day and Treatment.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 get_column_names(object)
+}
+\seealso{
+\code{\link{create_screenr_object}}, \code{\link{get_sample_table}}
 }
 \concept{objects}

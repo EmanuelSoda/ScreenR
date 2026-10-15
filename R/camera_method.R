@@ -1,53 +1,64 @@
-#' @title Find Camera Hit
-#' @description This function implements the method by proposed by Wu and
-#'              Smyth (2012).
-#'              The original \code{\link[limma]{camera}} method is a gene set
-#'              test, here is applied in the contest of a genetic screening
-#'              and so it erforms a competitive barcode set test.
-#'              The paper can be found here
-#'      \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
-#' @param screenR_Object The ScreenR object obtained using the
-#'                       \code{\link{create_screenr_object}}
-#' @param matrix_model The matrix that will be used to perform the
-#'                     linear model analysis created using
-#'                     \code{\link[stats]{model.matrix}}
+#' @title Find hits with CAMERA
+#' @description Finds the genes whose barcodes are depleted (or enriched) in
+#'     the comparison given by the contrast, using the
+#'     \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3458527/}{CAMERA}
+#'     method of Wu and Smyth (2012), \code{\link[limma]{camera}}. CAMERA is a
+#'     gene set test: here each gene is a set of barcodes, and the barcodes of
+#'     the gene are compared with all the other barcodes (a competitive test).
+#'     Unlike \code{\link{find_roast_hit}}, it also works with a single
+#'     control sample (for example a plasmid library).
+#' @details The raw counts are modelled with edgeR (the dispersion is
+#'     estimated with \code{\link[edgeR]{estimateDisp}}), and camera tests
+#'     the barcodes of each gene together, accounting for the correlation
+#'     between them. The two-sided p-values of camera are converted into
+#'     one-sided p-values for the requested direction and the FDR is computed
+#'     from them over all the tested genes.
+#'
+#'     CAMERA is a competitive test: it compares the barcodes of each gene with
+#'     all the other barcodes, so when many genes have an effect it becomes
+#'     conservative. \code{\link{find_roast_hit}} with method = "fry"
+#'     (self-contained) does not have this limitation, and neither does
+#'     \code{\link{find_gene_zscore_hit}} with control genes as reference, as
+#'     long as the control genes behave like genes without effect (see its
+#'     documentation).
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param matrix_model The design matrix of the linear model, for example
+#'     created with \code{\link{create_design_matrix}} (or with
+#'     \code{\link[stats]{model.matrix}}).
 #' @param contrast The comparison to test: the name or index of a column of
-#'                 matrix_model, a numeric contrast vector (for example
-#'                 created with \code{\link{create_contrast}}) or a
-#'                 one-column matrix created with
-#'                 \code{\link[limma]{makeContrasts}}.
+#'     matrix_model, a numeric contrast vector (for example created with
+#'     \code{\link{create_contrast}}) or a one-column matrix created with
+#'     \code{\link[limma]{makeContrasts}}.
 #' @param thresh Deprecated and ignored: it never had an effect on the
-#'               result. Filter the returned table on the FDR column instead.
+#'     result. Filter the returned table on the FDR column instead.
 #' @param lfc Deprecated and ignored: it never had an effect on the result.
-#' @param number_barcode Number of barcode that as to be differentially
-#'                       expressed (DE)in order to consider the gene associated
-#'                       DE. Example a gene is associated
-#'                       with 10 shRNA we consider a gene DE if it has at least
-#'                       number_barcode = 5 shRNA DE.
-#' @param direction String containing the direction of the variation,
-#'                  "Down" for the down regulation "Up" for the up regulation.
-#' @param fdr The False Discovery Rate threshold: only genes with an FDR
-#'            lower or equal to this value are returned. Use fdr = 1 to
-#'            return all the genes with the given direction.
+#' @param number_barcode Only genes with more than number_barcode barcodes
+#'     are tested (default 3, so a gene needs at least 4 barcodes). The
+#'     barcodes of a gene are tested together as a set, so this is not a
+#'     number of barcodes that must change.
+#' @param direction The direction of the change: "Down" (default) for
+#'     depleted genes or "Up" for enriched genes.
+#' @param fdr The FDR threshold: only genes with an FDR lower than or equal
+#'     to this value are returned (default 0.05). Use fdr = 1 to return all
+#'     the genes with the given direction.
 #' @param fdr_method How the FDR is computed: "BH" (Benjamini-Hochberg, the
-#'                   default) or "storey" (Benjamini-Hochberg multiplied by
-#'                   the estimated proportion of genes without effect, less
-#'                   conservative when many genes have an effect).
+#'     default) or "storey" (Benjamini-Hochberg multiplied by the estimated
+#'     proportion of genes without effect, less conservative when many genes
+#'     have an effect).
 #' @importFrom edgeR estimateDisp
 #' @importFrom tibble rownames_to_column
 #' @importFrom limma camera
 #' @importFrom purrr map_lgl
-#' @return A tibble with the hits found using the camera method, with the
-#'         columns of \code{\link[limma]{camera}} and Log2FC, the median log2
-#'         fold change of the barcodes of the gene. PValue is the one-sided
-#'         p-value for the requested direction (camera reports two-sided
-#'         p-values) and FDR is computed from it over all the genes.
-#'         CAMERA is a competitive test: it compares the barcodes of each
-#'         gene with all the other barcodes, so when many genes have an
-#'         effect it becomes conservative. \code{\link{find_roast_hit}} with
-#'         method = "fry" (self-contained) and
-#'         \code{\link{find_gene_zscore_hit}} with non-targeting controls
-#'         as reference do not have this limitation.
+#' @return A tibble with one row for each hit in the requested direction and
+#'     the columns Gene, NGenes (the number of barcodes of the gene),
+#'     Direction, PValue (the one-sided p-value for the requested direction),
+#'     FDR and Log2FC (the median log2 fold change of the barcodes of the
+#'     gene).
+#' @seealso \code{\link{find_roast_hit}}, \code{\link{find_gene_zscore_hit}},
+#'     \code{\link{find_time_hit}}, \code{\link{summarise_hits}},
+#'     \code{\link{plot_barcode_hit}}, \code{\link{create_design_matrix}},
+#'     \code{\link{create_contrast}}
 #' @export
 #' @concept find
 #' @examples
@@ -113,11 +124,12 @@ compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     return(camera.res)
 }
 
-#' @title Unique gene Symbols
-#' @description Compute a unique gene symbol for gene
-#' @param gene_symbols The gene symbols list
+#' @title Barcodes of each gene
+#' @description Internal function that returns, for each gene with more than
+#'     number_barcode barcodes, the indices of its barcodes.
+#' @param gene_symbols The gene of each barcode.
 #' @inheritDotParams  find_camera_hit number_barcode
-#' @return A list of unique gene symbols
+#' @return A named list with the indices of the barcodes of each gene.
 #' @keywords internal
 unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
     gene_symbols <- as.character(gene_symbols)
@@ -134,12 +146,13 @@ unique_gene_symbols <- function(gene_symbols, number_barcode = 3) {
     return(gene_symbol_list)
 }
 
-#' @title Select  number of Barcode
-#' @description Compute a unique gene symbol for gene
+#' @title Select the barcodes of a gene
+#' @description Internal function that returns the indices of the barcodes of
+#'     a gene, when the gene has more than number_barcode barcodes.
 #' @param gene The gene name
 #' @inheritDotParams unique_gene_symbols gene_symbols number_barcode
 #' @return The indices of the barcodes of the gene passed as input, or
-#'         NULL if the gene has no more than number_barcode barcodes
+#'     NULL if the gene has no more than number_barcode barcodes
 #' @keywords internal
 select_number_barcode <- function(gene, gene_symbols, number_barcode) {
     sel <- gene_symbols == gene & !is.na(gene_symbols)
