@@ -5,6 +5,11 @@
 \alias{screenr_object-class}
 \alias{screenr_object}
 \title{The ScreenR object class}
+\value{
+\code{screenr_object()} (the class generator) returns a new
+    object of class \code{screenr_object}; use
+    \code{\link{create_screenr_object}} to build one from your data.
+}
 \description{
 The screenr_object class is the main object of the package:
     it stores the data of a screen and is passed to the functions of the

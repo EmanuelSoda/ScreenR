@@ -36,7 +36,6 @@ Finds the genes with more than number_barcode barcodes whose
     computes a p-value and an FDR for each gene, instead.
 }
 \examples{
-\donttest{
 object <- get0("object", envir = asNamespace("ScreenR"))
 table <- compute_metrics(object,
     control = "Time3", treatment = "TRT",
@@ -50,7 +49,6 @@ head(result)
 # Threshold on the mean
 result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 head(result)
-}
 }
 \seealso{
 \code{\link{find_gene_zscore_hit}},

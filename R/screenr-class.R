@@ -31,6 +31,9 @@
 #' @slot column_names The names that the columns had in the tables given by
 #'     the user (see \code{\link{get_column_names}}).
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
+#' @return \code{screenr_object()} (the class generator) returns a new
+#'     object of class \code{screenr_object}; use
+#'     \code{\link{create_screenr_object}} to build one from your data.
 #' @exportClass screenr_object
 #' @concept objects
 #' @seealso \code{\link{create_screenr_object}},

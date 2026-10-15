@@ -22,7 +22,6 @@
 #' @export
 #' @concept find
 #' @examples
-#' \donttest{
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' table <- compute_metrics(object,
 #'     control = "Time3", treatment = "TRT",
@@ -36,7 +35,6 @@
 #' # Threshold on the mean
 #' result <- find_zscore_hit(table, number_barcode = 6, metric = "mean")
 #' head(result)
-#' }
 find_zscore_hit <- function(table_treate_vs_control, number_barcode = 6,
     metric = c("median", "mean")) {
     metric <- match.arg(metric)
