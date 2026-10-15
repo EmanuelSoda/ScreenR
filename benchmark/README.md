@@ -65,6 +65,13 @@ Rscript k562_screenr_methods.R <ScreenR lib> <ScreenR repo> \
 The script that builds the K562 dataset is
 `inst/scripts/k562_essential_screen.R`.
 
+## Vignette data
+
+`make_extdata.R` copies the simulation evaluations and the MAGeCK gene results
+of the real screens into `inst/extdata/benchmark`, used by the package
+vignette "Benchmark against MAGeCK" (MAGeCK cannot run on the Bioconductor
+builders).
+
 ## Report
 
 `paper/ScreenR_report.Rmd` documents all the changes of ScreenR 1.15.1 –

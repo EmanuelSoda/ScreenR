@@ -82,7 +82,19 @@ Find the hit using the roast method. Roast is a
              1 / (nrot + 1)) or with \code{\link[limma]{fry}}
              (method = "fry"), a fast and exact approximation of roast
              with an unlimited number of rotations, which is faster and
-             gives continuous p-values. More information can be found in
+             gives continuous p-values.
+
+             Since roast tests each gene on its own barcodes, its power
+             depends on the variability between replicates: it needs
+             replicates in both the treated and the control group and
+             has little power with two replicates or noisy data. With a
+             single control sample (for example a plasmid library) it
+             finds almost no hits; in this case use
+             \code{\link{find_camera_hit}} or
+             \code{\link{find_gene_zscore_hit}}, which compare each gene
+             with the other genes. Being self-contained, roast also
+             reports genes whose barcodes change because of off-target
+             effects. More information can be found in
           \href{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2922896/}{Roast}
 }
 \examples{

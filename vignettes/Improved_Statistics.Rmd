@@ -244,10 +244,14 @@ compares it with the scores of many random sets of barcodes of the same size
 sets with a score at least as extreme. This permutation test makes no
 assumption on the distribution of the Z-scores and gives continuous,
 well-calibrated p-values. The random barcodes are drawn from the whole library
-or, when the library has them, only from non-targeting controls
-(`control_genes`), which is the best reference because it does not contain the
-barcodes of the true hits. The p-values are corrected with the
-Benjamini-Hochberg (or Storey) method.
+(default) or only from control genes (`control_genes`). Controls remove the
+true hits from the reference, but they must behave like genes without
+effect: in shRNA screens the non-targeting shRNAs often do not (targeting
+shRNAs are usually somewhat depleted compared with them), and in the K562
+screen distributed with ScreenR they made hundreds of non-essential genes look
+like hits. Use them only after checking them, for example against known
+non-essential genes. The p-values are corrected with the Benjamini-Hochberg
+(or Storey) method.
 
 The log2 fold changes are now computed with a pseudocount
 (`compute_metrics(pseudocount = 0.5)`, in counts per million), so barcodes

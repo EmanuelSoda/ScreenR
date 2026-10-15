@@ -177,10 +177,14 @@ times (`n_permutations`), so the p-value needs no assumption on the
 distribution of the Z-scores; `seed` makes it reproducible. The p-values are
 then corrected for testing many genes (FDR).
 
-If the library has non-targeting controls, give their gene name with
+If the library has control genes, their gene name can be given with
 `control_genes` (for example `control_genes = "non-targeting"`): the random
-sets are then drawn from the controls, which is the best reference because
-they cannot contain true hits. `statistic = "median"` uses the median instead
+sets are then drawn from the controls, which cannot contain true hits. Do this
+only if the controls behave like genes without effect. Non-targeting shRNAs
+often do not: targeting shRNAs are usually somewhat depleted compared with
+them, so every gene looks depleted (in the K562 screen of ScreenR this called
+hundreds of non-essential genes). Check first that the controls have the same
+scores as genes known to have no effect; when in doubt, keep the default. `statistic = "median"` uses the median instead
 of the mean, which is less affected by a single barcode with a strong
 (possibly off-target) effect.
 
@@ -243,7 +247,11 @@ Both test the barcodes of each gene as a set, using edgeR on the raw counts.
 
 CAMERA becomes conservative when many genes have an effect, because the other
 barcodes it compares with then include true hits; ROAST and fry do not have
-this limitation. The p-values of all three are one-sided, for the requested
+this limitation. On the other hand ROAST and fry test each gene on its own
+barcodes, so they rely on the variability between replicates: they need
+replicates in both groups, have little power with two replicates or noisy
+data, and find almost nothing when the control is a single sample (for
+example a plasmid library). The p-values of all three are one-sided, for the requested
 direction.
 
 `number_barcode` sets the minimum number of barcodes (more than

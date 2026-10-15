@@ -50,7 +50,7 @@ get <- function(table, method, column, ...) {
 # Summary
 
 ScreenR is a Bioconductor package for the analysis of pooled shRNA screens.
-This report documents a revision of the package (versions 1.15.1 to 1.15.10)
+This report documents a revision of the package (versions 1.15.1 to 1.15.11)
 and a benchmark of its hit-finding methods against MAGeCK, the most used tool
 for pooled screens. The revision
 
@@ -62,7 +62,7 @@ for pooled screens. The revision
   and false discovery rates (FDR);
 * made the ScreenR object a `SummarizedExperiment`, accepted any input format
   and added quality-control functions, a new real dataset with known hits and
-  four new vignettes.
+  five new vignettes.
 
 The benchmark used `r n_runs` simulated screens with known hits in six
 scenarios and a published K562 shRNA essentiality screen with reference
@@ -165,9 +165,14 @@ and MIT (BAGEL) licensed; the build script is in `inst/scripts`.
 
 ## Documentation
 
-Four new vignettes: "Improved statistical analysis with ScreenR" and three
+Five new vignettes: "Improved statistical analysis with ScreenR", three
 step-by-step tutorials (creating the object, quality control, finding and
-validating hits).
+validating hits) and "Benchmark against MAGeCK" (1.15.11), which shows the
+simulation results and reruns the ScreenR methods on the K562 screen against
+precomputed MAGeCK results (`inst/extdata/benchmark`). Following the results
+of Section 6, the documentation of `find_gene_zscore_hit()` warns that
+non-targeting shRNAs are often not a good reference, and that of
+`find_roast_hit()` that ROAST and FRY need replicates in both groups.
 
 # Calibration of the p-values (1.15.10)
 

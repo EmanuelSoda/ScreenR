@@ -12,10 +12,21 @@
 #'
 #'              The random barcodes are drawn from all the barcodes or, when
 #'              control_genes is given, only from the barcodes of the
-#'              control genes (for example the non-targeting shRNAs). The
-#'              controls are the best reference: with all the barcodes, the
-#'              barcodes of the true hits are part of the reference, which
-#'              makes the test conservative when many genes have an effect.
+#'              control genes (for example the non-targeting shRNAs).
+#'              With all the barcodes (the default), the barcodes of the
+#'              true hits are part of the reference, which makes the test
+#'              conservative when many genes have an effect. Control genes
+#'              avoid this, but only if their barcodes behave like the
+#'              barcodes of genes without effect. This is often not true for
+#'              non-targeting shRNAs: targeting shRNAs are usually somewhat
+#'              depleted compared with them (off-target effects, toxicity
+#'              of the RNAi machinery), so every gene looks depleted. In the
+#'              K562 essentiality screen (\code{\link{k562_count_table}})
+#'              the non-targeting reference called hundreds of non-essential
+#'              genes, while the default reference did not. Before using
+#'              control genes, check that their scores match those of genes
+#'              known to have no effect (for example the non-essential
+#'              genes); otherwise use the default.
 #'
 #'              This replaces the rule of \code{\link{find_zscore_hit}}
 #'              ("more than number_barcode barcodes below the median"),
@@ -38,6 +49,9 @@
 #'                      column), for example "non-targeting". When given,
 #'                      the random barcodes of the permutations are drawn
 #'                      from their barcodes, and they are not tested.
+#'                      Use only controls that behave like genes without
+#'                      effect (see Description); the default (NULL) uses
+#'                      all the barcodes.
 #' @param n_permutations The number of random barcode sets used to compute
 #'                       the p-values.
 #' @param min_barcodes Genes with fewer barcodes than this are not tested.

@@ -1,3 +1,20 @@
+# ScreenR 1.15.11
+
+## Documentation
+
+* New vignette "Benchmark against MAGeCK": compares the ScreenR methods with
+  MAGeCK RRA and MLE on simulated screens and on the K562 screen. MAGeCK and
+  simulation results are precomputed in `inst/extdata/benchmark`; the ScreenR
+  methods are run in the vignette. The scripts are in the `benchmark` folder
+  of the GitHub repository.
+* `find_gene_zscore_hit()`: the documentation no longer calls control genes
+  the best reference. Non-targeting shRNAs are often not a good model of a
+  gene without effect (in the K562 screen they made hundreds of non-essential
+  genes look depleted); check them before using `control_genes`.
+* `find_roast_hit()`: the documentation explains that ROAST and FRY need
+  replicates in both groups and find almost no hits with a single control
+  sample.
+
 # ScreenR 1.15.10
 
 ## Calibrated p-values

@@ -1,0 +1,507 @@
+---
+title: "Benchmark against MAGeCK"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Benchmark against MAGeCK}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.5
+)
+```
+
+# About this vignette
+
+MAGeCK (Li et al. 2014, 2015) is the most used tool to find hits in pooled
+screens. This vignette compares the hit-finding methods of ScreenR with MAGeCK
+RRA and MAGeCK MLE on
+
+1. simulated screens, where the true hits are known exactly;
+2. a published K562 shRNA essentiality screen (`k562_count_table`), where
+   the core essential genes are the true hits and the non-essential genes the
+   true negatives;
+3. the ScreenR example dataset (`count_table`), which has no ground truth.
+
+MAGeCK is a Python program and cannot run while this vignette is built, so its
+results (MAGeCK 0.5.9.5) and the simulation results are precomputed and
+distributed in `inst/extdata/benchmark`. The ScreenR methods on the K562
+screen are run here, so this vignette also shows how to compare ScreenR with
+MAGeCK on your own data. The scripts that produced the precomputed results
+are in the `benchmark` folder of the
+[GitHub repository](https://github.com/EmanuelSoda/ScreenR).
+
+```{r packages, message=FALSE}
+library(ScreenR)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+benchmark_dir <- system.file("extdata", "benchmark", package = "ScreenR")
+```
+
+```{r labels}
+labels <- c(
+    MAGeCK_RRA = "MAGeCK RRA",
+    MAGeCK_RRA_controls = "MAGeCK RRA (controls)",
+    MAGeCK_MLE = "MAGeCK MLE",
+    ScreenR_CAMERA = "CAMERA",
+    ScreenR_CAMERA_storey = "CAMERA (Storey)",
+    ScreenR_ROAST = "ROAST",
+    ScreenR_FRY = "FRY",
+    ScreenR_Zscore_mean = "Z-score (mean)",
+    ScreenR_Zscore_median = "Z-score (median)",
+    ScreenR_Zscore_controls = "Z-score (controls)",
+    ScreenR_Zscore_edgeR = "Z-score (edgeR)",
+    ScreenR_legacy_rule = "Legacy rule"
+)
+colours <- c(
+    "MAGeCK RRA" = "#B2182B", "MAGeCK RRA (controls)" = "#EF8A62",
+    "MAGeCK MLE" = "#67001F", "CAMERA" = "#2166AC",
+    "CAMERA (Storey)" = "#67A9CF", "ROAST" = "#1B7837", "FRY" = "#7FBF7B",
+    "Z-score (mean)" = "#762A83", "Z-score (median)" = "#C2A5CF",
+    "Z-score (controls)" = "#DE77AE", "Z-score (edgeR)" = "#8C510A",
+    "Legacy rule" = "grey50"
+)
+scenarios <- c(
+    S0_null = "No hits", S1_baseline = "Baseline",
+    S2_weak_effect = "Weak effect", S3_two_replicates = "2 replicates",
+    S4_noisy = "Noisy", S5_off_target = "Off-target"
+)
+```
+
+# Simulated screens
+
+## Design
+
+Each simulated screen has 500 genes with 10 shRNAs each and 500 non-targeting
+shRNAs, with 3 control and 3 treated samples. The counts are negative
+binomial, and the abundance of the shRNAs in the library is log-normal. 10% of
+the genes are true hits, depleted in the treated samples: each of their shRNAs
+has its own knockdown efficiency and 20% of them do not work at all. Six
+scenarios were simulated, each with 5 random seeds:
+
+| Scenario | Change from the baseline |
+|---|---|
+| No hits | no true hits: every call is false |
+| Baseline | 3 vs 3 replicates, log2 fold change -1, dispersion 0.05 |
+| Weak effect | log2 fold change -0.5 |
+| 2 replicates | 2 vs 2 replicates |
+| Noisy | dispersion 0.2 (four times more biological variability) |
+| Off-target | 3% of the shRNAs depleted whatever gene they target |
+
+The methods compared are MAGeCK RRA, MAGeCK RRA with the non-targeting
+shRNAs as controls (`--control-sgrna`), MAGeCK MLE and the ScreenR methods:
+`find_camera_hit()` (with Benjamini-Hochberg or Storey FDR),
+`find_roast_hit()` (ROAST and FRY), `find_gene_zscore_hit()` (mean, median,
+with the non-targeting shRNAs as reference and on the statistics of
+`compute_barcode_statistics()`) and the legacy rule of `find_zscore_hit()`.
+
+```{r load-simulation}
+simulation <- read.csv(file.path(benchmark_dir, "simulation.csv")) %>%
+    mutate(
+        Method = factor(labels[method], levels = labels),
+        Scenario = factor(scenarios[scenario], levels = scenarios)
+    )
+head(simulation)
+```
+
+For each method, screen and nominal FDR level (`alpha`) the table has the
+number of genes called (`n_called`), the false discovery proportion (`FDP`,
+the fraction of called genes that are not true hits), the true positive rate
+(`TPR`), the fraction of genes without effect with p-value below `alpha`
+(`null_p_below`), the area under the precision-recall curve of the p-value
+ranking (`AUPRC`) and the run time in seconds.
+
+## Are the p-values valid?
+
+In the screens without hits, a valid test has about 5% of the genes with
+p < 0.05.
+
+```{r null-calibration, fig.height = 4}
+simulation %>%
+    filter(scenario == "S0_null", alpha == 0.05, method != "ScreenR_legacy_rule") %>%
+    group_by(Method) %>%
+    summarise(fraction = mean(null_p_below), se = sd(null_p_below) / sqrt(n())) %>%
+    ggplot(aes(fraction, Method, colour = Method)) +
+    geom_vline(xintercept = 0.05, linetype = "dashed") +
+    geom_pointrange(aes(xmin = fraction - 2 * se, xmax = fraction + 2 * se)) +
+    scale_colour_manual(values = colours, guide = "none") +
+    scale_y_discrete(limits = rev) +
+    labs(x = "Fraction of genes with p < 0.05 (no true hits)", y = NULL) +
+    theme_bw()
+```
+
+All the methods are close to 5%. The legacy rule, which has no p-value,
+called on average
+`r round(mean(filter(simulation, scenario == "S0_null", method == "ScreenR_legacy_rule", alpha == 0.05)$n_called))`
+genes in these screens, all of them false.
+
+## Is the FDR controlled?
+
+A method controls the FDR when the observed FDR (the mean false discovery
+proportion) is at or below the nominal level, the dashed line.
+
+```{r fdr-control, fig.height = 5}
+simulation %>%
+    filter(scenario != "S0_null", method != "ScreenR_legacy_rule") %>%
+    group_by(Method, Scenario, alpha) %>%
+    summarise(FDR = mean(FDP), .groups = "drop") %>%
+    ggplot(aes(alpha, FDR, colour = Method)) +
+    geom_abline(linetype = "dashed", colour = "grey40") +
+    geom_line() +
+    geom_point(size = 1) +
+    facet_wrap(~Scenario, nrow = 1) +
+    scale_colour_manual(values = colours) +
+    scale_x_continuous(breaks = c(0.01, 0.05, 0.1, 0.2)) +
+    labs(x = "Nominal FDR", y = "Observed FDR", colour = NULL) +
+    theme_bw() +
+    theme(legend.position = "bottom", axis.text.x = element_text(angle = 90))
+```
+
+```{r fdr-table}
+fdr_table <- simulation %>%
+    filter(scenario != "S0_null", alpha == 0.05) %>%
+    group_by(Method, Scenario) %>%
+    summarise(FDP = mean(FDP), .groups = "drop") %>%
+    pivot_wider(names_from = Scenario, values_from = FDP)
+knitr::kable(fdr_table, digits = 3,
+    caption = "Observed FDR at a nominal FDR of 5% (mean over 5 seeds).")
+```
+
+CAMERA and the Z-score tests stay well below the nominal FDR in every
+scenario. MAGeCK MLE exceeds it with off-target effects, MAGeCK RRA with the
+non-targeting controls in every scenario, and the legacy rule has about 50%
+false hits.
+
+## How many hits are found?
+
+```{r power, fig.height = 5}
+simulation %>%
+    filter(scenario != "S0_null", alpha == 0.05) %>%
+    group_by(Method, Scenario) %>%
+    summarise(TPR = mean(TPR), se = sd(TPR) / sqrt(n()), .groups = "drop") %>%
+    ggplot(aes(Scenario, TPR, fill = Method)) +
+    geom_col(position = position_dodge(0.9)) +
+    scale_fill_manual(values = colours) +
+    labs(x = NULL, y = "True positive rate at 5% FDR", fill = NULL) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+The true positive rate depends on the FDR threshold, so it should be read
+together with the previous section: the legacy rule finds almost all the hits
+because it calls many false ones. The area under the precision-recall curve
+measures how well the true hits are ranked first, whatever the threshold:
+
+```{r auprc, fig.height = 5}
+simulation %>%
+    filter(scenario != "S0_null", alpha == 0.05, !is.na(AUPRC)) %>%
+    ggplot(aes(Scenario, AUPRC, colour = Method)) +
+    geom_boxplot(position = position_dodge(0.85), width = 0.75,
+        outlier.size = 0.5) +
+    scale_colour_manual(values = colours) +
+    labs(x = NULL, y = "Area under the precision-recall curve",
+        colour = NULL) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+```
+
+```{r summary-table}
+simulation %>%
+    filter(scenario != "S0_null", alpha == 0.05) %>%
+    group_by(Method) %>%
+    summarise(`Observed FDR` = mean(FDP), TPR = mean(TPR),
+        AUPRC = mean(AUPRC), `Time (s)` = median(time)) %>%
+    knitr::kable(digits = 3,
+        caption = "Mean over the five scenarios with hits, at 5% FDR.")
+```
+
+CAMERA and the Z-score tests rank the hits as well as or better than MAGeCK
+MLE in most scenarios and are about 200 times faster. At the same nominal
+FDR they are more conservative: MAGeCK MLE finds more hits when the effects
+are weak or the data noisy, but it does not control the FDR with off-target
+effects. ROAST and FRY test each gene on its own barcodes, so they have
+little power with two replicates or noisy data.
+
+## Before and after the calibration of ScreenR 1.15.10
+
+The first version of this benchmark showed that the ScreenR tests were valid
+but too conservative (two-sided p-values used for a one-sided question and a
+binomial gene test with few possible p-values). ScreenR 1.15.10 fixed both.
+
+```{r before-after, fig.height = 3.5}
+before <- read.csv(file.path(benchmark_dir, "simulation_before_1.15.10.csv"))
+compared <- c("ScreenR_CAMERA", "ScreenR_ROAST", "ScreenR_Zscore_mean",
+    "ScreenR_Zscore_edgeR")
+bind_rows(
+    before %>%
+        mutate(method = recode(method, ScreenR_Zscore = "ScreenR_Zscore_mean"),
+            version = "1.15.9"),
+    simulation %>% mutate(version = "1.15.10")
+) %>%
+    filter(method %in% compared, scenario != "S0_null", alpha == 0.05) %>%
+    mutate(Method = factor(labels[method], levels = labels),
+        version = factor(version, c("1.15.9", "1.15.10"))) %>%
+    group_by(Method, version) %>%
+    summarise(TPR = mean(TPR), .groups = "drop") %>%
+    ggplot(aes(TPR, Method, fill = version)) +
+    geom_col(position = position_dodge(0.8), width = 0.75) +
+    scale_fill_manual(values = c("grey70", "#2166AC")) +
+    scale_y_discrete(limits = rev) +
+    labs(x = "True positive rate at 5% FDR", y = NULL, fill = "ScreenR") +
+    theme_bw()
+```
+
+# K562 essentiality screen
+
+## The data
+
+`k562_count_table` is a subset of the genome-wide shRNA screen of Morgens et
+al. (2016): the plasmid library and two replicates after 14 days of growth of
+K562 cells. The shRNAs of the genes needed for growth are depleted. The
+reference genes of Hart et al. (`k562_reference_genes`) give the truth: the
+681 core essential genes should be called, the 904 non-essential genes
+should not.
+
+```{r k562-object, message=FALSE}
+data(k562_count_table)
+data(k562_annotation_table)
+data(k562_reference_genes)
+samples <- data.frame(
+    Sample = c("Plasmid", "T14_A", "T14_B"),
+    Day = "Screen",
+    Treatment = c("Plasmid", "T14", "T14")
+)
+k562 <- create_screenr_object(
+    table = k562_count_table, annotation = k562_annotation_table,
+    groups = factor(c("Plasmid", "T14", "T14")), sample_table = samples
+)
+k562 <- compute_data_table(normalize_data(k562))
+k562
+```
+
+## Running the ScreenR methods
+
+The comparison is day 14 against the plasmid. `fdr = 1` returns every gene, so
+that the methods can be evaluated at any threshold.
+
+```{r k562-screenr}
+design <- create_design_matrix(k562)
+contrast <- create_contrast(design, treatment = "T14", control = "Plasmid")
+metrics <- compute_metrics(k562,
+    control = "Plasmid", treatment = "T14", day = "Screen"
+)
+results <- list(
+    `ScreenR_CAMERA` = find_camera_hit(k562, design, contrast,
+        fdr = 1, number_barcode = 1),
+    `ScreenR_FRY` = find_roast_hit(k562, design, contrast,
+        method = "fry", fdr = 1, number_barcode = 1),
+    `ScreenR_Zscore_mean` = find_gene_zscore_hit(metrics,
+        fdr = 1, min_barcodes = 1, n_permutations = 20000, seed = 1),
+    `ScreenR_Zscore_controls` = find_gene_zscore_hit(metrics,
+        control_genes = "non-targeting", fdr = 1, min_barcodes = 1,
+        n_permutations = 20000, seed = 1)
+)
+results <- lapply(results, function(x) select(x, Gene, PValue, FDR))
+```
+
+## Adding the MAGeCK results
+
+MAGeCK was run on the same counts (`mageck test` for RRA and `mageck mle`
+with a design with intercept and treatment); for MAGeCK MLE the depletion
+p-value is computed from the Wald statistic.
+
+```{r k562-mageck}
+mageck <- read.csv(file.path(benchmark_dir, "mageck_k562.csv"))
+results <- c(split(select(mageck, -method), mageck$method), results)
+names(results)
+```
+
+## Evaluation on the reference genes
+
+```{r k562-evaluate}
+evaluate <- function(result, alpha = 0.05) {
+    # Genes are sorted by name, so that tied p-values are ordered the same
+    # way for every method
+    merged <- left_join(k562_reference_genes, result, by = "Gene") %>%
+        mutate(PValue = coalesce(PValue, 1), FDR = coalesce(FDR, 1)) %>%
+        arrange(Gene)
+    essential <- merged$Class == "core essential"
+    called <- merged$FDR <= alpha
+    hit <- essential[order(merged$PValue)]
+    precision <- cumsum(hit) / seq_along(hit)
+    tibble(
+        `Essential called` = sum(called & essential),
+        `Non-essential called` = sum(called & !essential),
+        Recall = mean(called[essential]),
+        `Non-essential fraction` = sum(called & !essential) / max(1, sum(called)),
+        AUPRC = sum(precision[hit]) / sum(hit)
+    )
+}
+k562_evaluation <- bind_rows(lapply(results, evaluate), .id = "method") %>%
+    mutate(Method = labels[method]) %>%
+    select(Method, everything(), -method)
+knitr::kable(k562_evaluation, digits = 3,
+    caption = "K562: reference genes called at 5% FDR.")
+```
+
+```{r k562-pr, fig.height = 5, fig.width = 6.5}
+precision_recall <- bind_rows(lapply(results, function(result) {
+    merged <- left_join(k562_reference_genes, result, by = "Gene") %>%
+        mutate(PValue = coalesce(PValue, 1)) %>%
+        arrange(Gene)
+    hit <- merged$Class[order(merged$PValue)] == "core essential"
+    tibble(recall = cumsum(hit) / sum(hit),
+        precision = cumsum(hit) / seq_along(hit))
+}), .id = "method") %>%
+    mutate(Method = factor(labels[method], levels = labels))
+ggplot(precision_recall, aes(recall, precision, colour = Method)) +
+    geom_line() +
+    scale_colour_manual(values = colours) +
+    coord_cartesian(ylim = c(0.4, 1)) +
+    labs(x = "Recall (core essential genes)", y = "Precision", colour = NULL) +
+    theme_bw()
+```
+
+The Z-score test (mean) and CAMERA call about as many essential genes as
+MAGeCK RRA with few non-essential genes, and the Z-score test ranks the genes
+as well as MAGeCK RRA and better than MAGeCK MLE. MAGeCK MLE finds more
+essential genes but also many non-essential ones (MAGeCK MLE skipped the
+genes with more than about 40 shRNAs, which count as not called here).
+
+Two ScreenR results show the limits of some methods:
+
+* **FRY calls no gene.** It tests each gene on its own barcodes and relies on
+  the variability between replicates, but the control group is a single
+  plasmid sample. With one control sample use CAMERA or the Z-score test.
+* **The non-targeting reference calls hundreds of non-essential genes.** In
+  shRNA screens the targeting shRNAs are usually somewhat depleted compared
+  with the non-targeting ones, so every gene looks depleted against them.
+  Before using `control_genes`, check that the controls behave like genes
+  without effect:
+
+```{r k562-controls, fig.height = 3.5}
+metrics %>%
+    left_join(distinct(k562_annotation_table, Gene, Class), by = "Gene") %>%
+    filter(Class %in% c("non-targeting", "non-essential", "core essential")) %>%
+    ggplot(aes(Log2FC, colour = Class)) +
+    geom_density() +
+    labs(x = "Barcode log2 fold change (day 14 vs plasmid)", colour = NULL) +
+    theme_bw()
+```
+
+The non-targeting shRNAs (the reference) are shifted to the right of the
+non-essential genes, so they are not a good model of a gene without effect.
+
+# ScreenR example dataset
+
+The example dataset has no ground truth, so we only measure the agreement
+between the methods on the day 4 comparison of treated and control samples.
+
+```{r example-data, message=FALSE}
+data(count_table)
+data(annotation_table)
+counts <- count_table
+colnames(counts) <- c(
+    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
+    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
+    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
+    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+)
+counts <- filter(counts, Barcode != "*")
+groups <- factor(c(
+    "T1/T2", "T1/T2",
+    rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
+    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
+))
+object <- create_screenr_object(
+    table = counts, annotation = annotation_table, groups = groups
+)
+object <- compute_data_table(normalize_data(remove_all_zero_row(object)))
+design <- create_design_matrix(object)
+contrast <- create_contrast(design, "Time4_TRT", "Time4_CTRL")
+metrics <- compute_metrics(object,
+    control = "CTRL", treatment = "TRT", day = "Time4"
+)
+example <- list(
+    ScreenR_CAMERA = find_camera_hit(object, design, contrast,
+        fdr = 1, number_barcode = 1),
+    ScreenR_FRY = find_roast_hit(object, design, contrast,
+        method = "fry", fdr = 1, number_barcode = 1),
+    ScreenR_Zscore_mean = find_gene_zscore_hit(metrics,
+        fdr = 1, min_barcodes = 1, n_permutations = 20000, seed = 1)
+)
+example <- lapply(example, function(x) select(x, Gene, PValue, FDR))
+mageck <- read.csv(file.path(benchmark_dir, "mageck_screenr_dataset.csv"))
+example <- c(split(select(mageck, -method), mageck$method), example)
+```
+
+```{r example-correlation, fig.height = 4, fig.width = 5.5}
+genes <- Reduce(intersect, lapply(example, function(x) as.character(x$Gene)))
+ranks <- sapply(example, function(x) {
+    rank(x$PValue[match(genes, as.character(x$Gene))])
+})
+colnames(ranks) <- labels[colnames(ranks)]
+as.data.frame(as.table(cor(ranks, method = "spearman"))) %>%
+    ggplot(aes(Var1, Var2, fill = Freq)) +
+    geom_tile(colour = "white") +
+    geom_text(aes(label = sprintf("%.2f", Freq)), size = 3) +
+    scale_fill_gradient(low = "white", high = "#2166AC", limits = c(0, 1)) +
+    labs(x = NULL, y = NULL, fill = "Spearman") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r example-hits}
+vapply(example, function(x) sum(x$FDR <= 0.05), integer(1))
+```
+
+The treatment effect in the example dataset is weak and few genes pass 5%
+FDR. The rankings of the ScreenR methods agree well with MAGeCK MLE and less
+with MAGeCK RRA.
+
+# Recommendations
+
+* Use `find_gene_zscore_hit()` or `find_camera_hit()` to call hits: they
+  control the FDR, rank the hits as well as MAGeCK and run in seconds. Use
+  `statistic = "median"` when off-target effects are a concern.
+* Use `find_roast_hit()` (ROAST or FRY) only with replicates in both groups.
+* Keep the default reference of `find_gene_zscore_hit()` unless the control
+  genes are shown to behave like genes without effect.
+* Do not use the legacy rule of `find_zscore_hit()` to call hits: about half
+  of its hits are false.
+
+# Literature
+
+* Li W, Xu H, Xiao T et al. (2014). MAGeCK enables robust identification of
+  essential genes from genome-scale CRISPR/Cas9 knockout screens. Genome Biol
+  15:554.
+* Li W, Köster J, Xu H et al. (2015). Quality control, modeling, and
+  visualization of CRISPR screens with MAGeCK-VISPR. Genome Biol 16:281.
+* Morgens DW, Deans RM, Li A, Bassik MC (2016). Systematic comparison of
+  CRISPR/Cas9 and RNAi screens for essential genes. Nat Biotechnol
+  34:634-636.
+* Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014). Measuring
+  error rates in genomic perturbation screens: gold standards for human
+  functional genomics. Mol Syst Biol 10:733.
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
