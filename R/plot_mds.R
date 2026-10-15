@@ -2,7 +2,8 @@
 #' @description Plots the samples on a two-dimensional scatter plot so that
 #'     the distances on the plot approximate the typical log2 fold changes
 #'     between the samples (\code{\link[limma]{plotMDS}} on the log2
-#'     counts per million of the raw counts).
+#'     normalized counts, see \code{\link{log_normalized_counts}}: the
+#'     normalization chosen in \code{\link{normalize_data}} is used).
 #'     Replicates should cluster together and the groups should separate.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
@@ -24,11 +25,12 @@
 #' plot_mds(object)
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
-    # We have to convert the screenR obj into an edgeR obj
+    # The groups of the samples, from the edgeR object
     DGEList <- create_edger_obj(screenR_Object)
 
-    # The Standard plotMDS
-    plotMDS <- limma::plotMDS(DGEList, plot = FALSE, ndim = 2)
+    # MDS of the log2 normalized counts
+    plotMDS <- limma::plotMDS(log_normalized_counts(screenR_Object),
+        plot = FALSE, ndim = 2)
 
     # Create the Updated plot MDS
     PLTdata <- data.frame(
@@ -77,9 +79,11 @@ mds_axis_label <- function(mds, dimension) {
 #' @title Plot the variance explained by the principal components
 #' @description Plots the proportion of the variance explained by each
 #'     principal component of a principal component analysis (PCA) of the
-#'     samples, computed on the raw counts with
+#'     samples, computed on the log2 normalized counts (with the
+#'     normalization chosen in \code{\link{normalize_data}}) with
 #'     \code{\link{compute_explained_variance}}. It shows how many components
-#'     are needed to describe the differences between the samples.
+#'     are needed to describe the differences between the samples. The
+#'     samples on the components are shown by \code{\link{plot_pca}}.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param cumulative Whether to plot the cumulative proportion of variance
@@ -87,7 +91,8 @@ mds_axis_label <- function(mds, dimension) {
 #' @param color The fill color of the bars. Default "steelblue".
 #' @importFrom  scales percent
 #' @return A ggplot object.
-#' @seealso \code{\link{plot_mds}}, \code{\link{plot_replicate_correlation}}
+#' @seealso \code{\link{plot_pca}}, \code{\link{plot_mds}},
+#'     \code{\link{plot_replicate_correlation}}
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
@@ -147,8 +152,8 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
 
 #' @title Compute the variance explained by the principal components
 #' @description Internal function that computes a principal component
-#'     analysis of the samples on the raw counts (\code{\link[stats]{prcomp}})
-#'     and returns the variance explained by each component. It is used by
+#'     analysis of the samples (\code{\link{compute_pca}}) and returns the
+#'     variance explained by each component. It is used by
 #'     \code{\link{plot_explained_variance}}.
 #' @importFrom stats  prcomp
 #' @param screenR_Object The ScreenR object obtained using
@@ -163,21 +168,7 @@ plot_explained_variance <- function(screenR_Object, cumulative = FALSE,
 #'
 #' compute_explained_variance(object)
 compute_explained_variance <- function(screenR_Object) {
-    data <- count_table_of(screenR_Object)
-    # Get only the numeric columns
-    numeric_col <- unlist(lapply(data, is.numeric))
-
-    # The data for the PC corresponds only on the numeric column
-    data_PC <- data[, numeric_col]
-
-    # To compute the PC the features has to be columns
-    data_PC <- t(data_PC)
-
-    # Rename the columns
-    colnames(data_PC) <- data$Barcode
-
-    # Computing the PCS
-    PC <- prcomp(data_PC)
+    PC <- compute_pca(screenR_Object)
 
     # Extract the importance ad create a data.frame
     PC <- data.frame(summary(PC)$importance)
@@ -190,6 +181,109 @@ compute_explained_variance <- function(screenR_Object) {
     ))
 
     return(PC)
+}
+
+#' @title Principal component analysis of the samples
+#' @description Internal function that computes the principal component
+#'     analysis (\code{\link[stats]{prcomp}}) of the samples on the log2
+#'     normalized counts (\code{\link{log_normalized_counts}}).
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @return A prcomp object, with one row for each sample in x.
+#' @keywords internal
+compute_pca <- function(screenR_Object) {
+    # The samples are the observations, the barcodes the variables
+    stats::prcomp(t(log_normalized_counts(screenR_Object)))
+}
+
+#' @title Log2 normalized counts
+#' @description Internal function that returns the log2 of the normalized
+#'     counts plus 1, used by \code{\link{plot_pca}},
+#'     \code{\link{plot_explained_variance}} and \code{\link{plot_mds}}.
+#'     The normalized counts are those computed by
+#'     \code{\link{normalize_data}}, with the method chosen there ("cpm",
+#'     "tmm" or "control"); if the counts have not been normalized, counts per
+#'     million are used, as \code{\link{normalize_data}} does by default.
+#'     On the raw counts the first principal component would mostly follow
+#'     the sequencing depth of the samples. Barcodes with no reads in any
+#'     sample are left out.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @return A numeric matrix with one row for each barcode and one column for
+#'     each sample.
+#' @keywords internal
+log_normalized_counts <- function(screenR_Object) {
+    table <- normalized_table_of(screenR_Object)
+    if (nrow(table) == 0) {
+        table <- normalized_table_of(normalize_data(screenR_Object))
+    }
+    numeric_col <- vapply(table, is.numeric, logical(1))
+    counts <- as.matrix(table[, numeric_col])
+    rownames(counts) <- table$Barcode
+    keep <- rowSums(counts, na.rm = TRUE) > 0 & !apply(is.na(counts), 1, any)
+    log2(counts[keep, , drop = FALSE] + 1)
+}
+
+#' @title Plot a principal component analysis of the samples
+#' @description Plots the samples on two principal components of a principal
+#'     component analysis (PCA) of the log2 normalized counts, with the
+#'     normalization chosen in \code{\link{normalize_data}} (see
+#'     \code{\link{plot_explained_variance}} for the variance explained by
+#'     each component). Replicates should cluster together and the groups
+#'     should separate. Unlike \code{\link{plot_mds}}, which uses the most
+#'     variable barcodes between each pair of samples, it uses all the
+#'     barcodes.
+#' @param screenR_Object The ScreenR object obtained using
+#'     \code{\link{create_screenr_object}}.
+#' @param groups An optional vector, with one value for each sample, used to
+#'     fill the labels. By default the groups of the ScreenR object are used.
+#' @param components The two principal components to plot. Default c(1, 2).
+#' @param alpha The opacity of the labels, between 0 and 1. Default 0.8.
+#' @param size The size of the labels. Default 2.5.
+#' @param color The color of the label text. Default "black".
+#' @return A ggplot object.
+#' @seealso \code{\link{plot_explained_variance}}, \code{\link{plot_mds}}
+#' @concept plot
+#' @export
+#' @examples
+#' object <- get0("object", envir = asNamespace("ScreenR"))
+#'
+#' plot_pca(object)
+#'
+#' # Second and third components
+#' plot_pca(object, components = c(2, 3))
+plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
+    alpha = 0.8, size = 2.5, color = "black") {
+    pca <- compute_pca(screenR_Object)
+    if (length(components) != 2 || !is.numeric(components) ||
+        any(components < 1) || any(components > ncol(pca$x))) {
+        stop("components must be two numbers between 1 and ", ncol(pca$x),
+            " (the number of principal components).")
+    }
+    if (is.null(groups)) {
+        groups <- create_edger_obj(screenR_Object)$samples$group
+    }
+    if (length(groups) != nrow(pca$x)) {
+        stop("groups must have one value for each sample (", nrow(pca$x),
+            ").")
+    }
+    variance <- summary(pca)$importance["Proportion of Variance", ]
+    axis_label <- function(i) {
+        sprintf("PC%d (%.0f%%)", i, 100 * variance[i])
+    }
+    data <- data.frame(
+        Sample = rownames(pca$x),
+        x = pca$x[, components[1]], y = pca$x[, components[2]],
+        group = groups
+    )
+
+    ggplot2::ggplot(data, aes(x = .data$x, y = .data$y,
+        fill = .data$group)) +
+        ggplot2::geom_label(aes(label = .data$Sample),
+            color = color, size = size, alpha = alpha
+        ) +
+        ggplot2::labs(x = axis_label(components[1]),
+            y = axis_label(components[2]), fill = "group")
 }
 
 

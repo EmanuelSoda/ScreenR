@@ -25,9 +25,11 @@ A ggplot object.
 \description{
 Plots the proportion of the variance explained by each
     principal component of a principal component analysis (PCA) of the
-    samples, computed on the raw counts with
+    samples, computed on the log2 normalized counts (with the
+    normalization chosen in \code{\link{normalize_data}}) with
     \code{\link{compute_explained_variance}}. It shows how many components
-    are needed to describe the differences between the samples.
+    are needed to describe the differences between the samples. The
+    samples on the components are shown by \code{\link{plot_pca}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -38,5 +40,6 @@ plot_explained_variance(object)
 plot_explained_variance(object, cumulative = TRUE)
 }
 \seealso{
-\code{\link{plot_mds}}, \code{\link{plot_replicate_correlation}}
+\code{\link{plot_pca}}, \code{\link{plot_mds}},
+    \code{\link{plot_replicate_correlation}}
 }

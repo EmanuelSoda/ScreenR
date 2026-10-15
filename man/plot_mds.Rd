@@ -32,7 +32,8 @@ A ggplot object.
 Plots the samples on a two-dimensional scatter plot so that
     the distances on the plot approximate the typical log2 fold changes
     between the samples (\code{\link[limma]{plotMDS}} on the log2
-    counts per million of the raw counts).
+    normalized counts, see \code{\link{log_normalized_counts}}: the
+    normalization chosen in \code{\link{normalize_data}} is used).
     Replicates should cluster together and the groups should separate.
 }
 \examples{

@@ -46,6 +46,16 @@
 * `plot_trend()` and `plot_barcode_trend()` use `linewidth` instead of the
   `size` aesthetic deprecated in ggplot2 3.4.0, so they no longer give a
   deprecation warning.
+* New `plot_pca()`: the samples on two principal components (PC1 and PC2
+  by default, `components` selects others), with the share of the variance
+  on the axes.
+* `plot_explained_variance()` computed the principal components on the raw
+  counts, so the first component mostly followed the sequencing depth of
+  the samples (correlation 0.995 in the HAP1 screen). The principal
+  components, and the MDS of `plot_mds()`, are now computed on the log2
+  normalized counts, with the normalization chosen in `normalize_data()`
+  ("cpm", "tmm" or "control"; counts per million when the counts have not
+  been normalized).
 
 # ScreenR 1.15.14
 

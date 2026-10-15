@@ -203,12 +203,16 @@ plot_replicate_correlation(object)
 
 ## Clustering of the samples
 
-`plot_mds()` places the samples so that similar samples are close, and
-`plot_explained_variance()` shows how much of the differences between the
-samples each principal component explains:
+`plot_mds()` and `plot_pca()` place the samples so that similar samples are
+close, and `plot_explained_variance()` shows how much of the differences
+between the samples each principal component explains. Both the MDS and the
+PCA use the log2 normalized counts, with the normalization chosen in
+`normalize_data()` (here counts per million), so that the sequencing depth
+of the samples does not drive the result:
 
 ```{r mds, fig.height = 3.5}
 plot_mds(object)
+plot_pca(object)
 ```
 
 ```{r explained-variance, fig.height = 3.5}
@@ -216,12 +220,13 @@ plot_explained_variance(object)
 plot_explained_variance(object, cumulative = TRUE)
 ```
 
-The first dimension of the MDS plot orders the samples by time point (T0,
+The first dimension of both plots orders the samples by time point (T0,
 then day 3, then day 18): the main difference between the samples is the
 growth of the cells, as expected in a dropout screen. The day 3 replicates
 are very close; the day 18 replicates differ more, because the depletion has
-had more time to diverge. One principal component explains about 70% of the
-variability, so the samples differ mainly along a single direction.
+had more time to diverge. The first principal component explains
+`r round(100 * compute_explained_variance(object)[2, "PC1"])`% of the
+variability.
 
 ## Quality with reference genes
 

@@ -17,8 +17,8 @@ A data frame with the column Name ("Standard deviation",
 }
 \description{
 Internal function that computes a principal component
-    analysis of the samples on the raw counts (\code{\link[stats]{prcomp}})
-    and returns the variance explained by each component. It is used by
+    analysis of the samples (\code{\link{compute_pca}}) and returns the
+    variance explained by each component. It is used by
     \code{\link{plot_explained_variance}}.
 }
 \examples{

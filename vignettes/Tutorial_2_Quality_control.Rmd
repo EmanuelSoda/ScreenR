@@ -83,7 +83,7 @@ palette <- c(
 | 3 | How many barcodes were lost? | `barcode_lost()`, `plot_barcode_lost()`, `plot_barcode_lost_for_gene()` |
 | 4 | Do replicates agree? | `plot_replicate_correlation()` |
 | 5 | Is the library still evenly represented? | `compute_gini()`, `plot_gini()` |
-| 6 | Do samples cluster by condition? | `plot_mds()`, `plot_explained_variance()` |
+| 6 | Do samples cluster by condition? | `plot_mds()`, `plot_pca()`, `plot_explained_variance()` |
 | 7 | Which normalization should I use? | `normalize_data()` |
 
 # Step 1: sequencing depth
@@ -192,8 +192,20 @@ plot_mds(object, groups = factor(samples$Treatment))
 plot_mds(object, groups = factor(samples$Day))
 ```
 
-`plot_explained_variance()` shows how much of the variability each dimension
-explains (`cumulative = TRUE` for the cumulative proportion).
+`plot_pca()` shows the samples on the components of a principal component
+analysis of the log2 normalized counts (with the normalization chosen in
+`normalize_data()`), with the share of the variability
+each component explains on the axes; `components` selects other components.
+Unlike the MDS, which uses the most variable barcodes, it uses all of them,
+so the two plots are a check of each other:
+
+```{r pca}
+plot_pca(object)
+plot_pca(object, groups = factor(samples$Treatment))
+```
+
+`plot_explained_variance()` shows how much of the variability each principal
+component explains (`cumulative = TRUE` for the cumulative proportion).
 
 ```{r explained-variance}
 plot_explained_variance(object)

@@ -79,3 +79,60 @@ test_that("plot_explained_variance CUM", {
     )
     expect_true(ggplot2::is_ggplot(plot))
 })
+
+test_that("the PCA does not depend on the sequencing depth", {
+    data(hap1_count_table, package = "ScreenR", envir = environment())
+    data(hap1_annotation_table, package = "ScreenR", envir = environment())
+    make_object <- function(table) {
+        create_screenr_object(
+            table = table, annotation = hap1_annotation_table,
+            groups = factor(c("T0", "T3", "T3", "T3", "T18", "T18", "T18")),
+            sample_table = data.frame(
+                Sample = colnames(table)[-1], Day = "Screen",
+                Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+            )
+        )
+    }
+    deeper <- hap1_count_table
+    deeper$T0 <- deeper$T0 * 10
+    variance <- compute_explained_variance(make_object(hap1_count_table))
+    variance_deeper <- compute_explained_variance(make_object(deeper))
+    # Sequencing T0 ten times more deeply barely changes the components (on
+    # the raw counts PC1 would go from 71% to almost 100%)
+    difference <- unlist(variance[2, -1]) - unlist(variance_deeper[2, -1])
+    expect_lt(max(abs(difference)), 0.02)
+})
+
+test_that("plot_pca", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    plot <- plot_pca(object)
+    expect_true(ggplot2::is_ggplot(plot))
+    expect_match(plot$labels$x, "^PC1 \\([0-9]+%\\)$")
+    expect_match(plot$labels$y, "^PC2 \\([0-9]+%\\)$")
+    expect_equal(nrow(plot$data), 14)
+
+    plot <- plot_pca(object, components = c(2, 3))
+    expect_match(plot$labels$x, "^PC2")
+
+    expect_error(plot_pca(object, components = c(1, 99)), "components")
+    expect_error(plot_pca(object, groups = c("a", "b")), "groups")
+})
+
+test_that("the PCA and the MDS use the normalization of normalize_data()", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    counts <- count_table_of(object)
+    controls <- counts$Barcode[seq(1, nrow(counts), by = 10)]
+
+    cpm <- normalize_data(object, method = "cpm")
+    control <- normalize_data(object, method = "control",
+        control_barcodes = controls)
+    # Without normalize_data() the counts per million are used
+    expect_equal(log_normalized_counts(object), log_normalized_counts(cpm))
+    expect_equal(compute_explained_variance(object),
+        compute_explained_variance(cpm))
+    # Another normalization gives other values
+    expect_false(isTRUE(all.equal(log_normalized_counts(cpm),
+        log_normalized_counts(control))))
+    expect_false(isTRUE(all.equal(plot_mds(cpm)$data,
+        plot_mds(control)$data)))
+})
