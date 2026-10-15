@@ -147,6 +147,18 @@ plot_replicate_correlation <- function(screenR_Object,
 #'     discordant when its distance from the median is larger than threshold
 #'     MADs. When the MAD of a gene is 0, every barcode that differs from the
 #'     median is discordant, with an infinite deviation.
+#'
+#'     Use it to inspect the hits, not to filter the barcodes before finding
+#'     them. The discordant barcodes are found with the same fold changes
+#'     that the tests use, so removing them is circular: it makes the genes
+#'     look more consistent than they are and the p-values too small. In
+#'     shRNA screens it also removes the hairpins that work, when most of
+#'     the hairpins of an essential gene do not. In the K562 screen
+#'     (\code{\link{k562_count_table}}) removing them before
+#'     \code{\link{find_gene_zscore_hit}} found fewer essential genes and
+#'     more non-essential ones. To exclude bad barcodes, use information that
+#'     does not come from the comparison, for example barcodes that are
+#'     discordant in several independent screens with the same library.
 #' @param table_treate_vs_control A table with one row for each barcode and
 #'     at least the columns Barcode, Gene and Log2FC, as returned by
 #'     \code{\link{compute_metrics}} or
