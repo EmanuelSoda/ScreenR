@@ -44,8 +44,9 @@ plot_trend <- function(screenR_Object, genes, group_var,
         ggplot2::geom_point(size = point_size) +
         ggplot2::geom_smooth(aes(group = .data$Gene),
             method = "lm", formula = y ~ x, alpha = alpha,
-            se = se, size = line_size
-        )
+            se = se, linewidth = line_size
+        ) +
+        ggplot2::labs(y = "Mean normalized counts")
 
     if (length(genes) > 1) {
         plot <- plot +

@@ -174,8 +174,7 @@ plot_reference_separation <- function(table, essential, nonessential,
             y = "Density", fill = NULL,
             subtitle = sprintf("NNMD %.2f, Cohen's d %.2f, ROC AUC %.3f",
                 quality$NNMD, quality$CohenD, quality$AUC)
-        ) +
-        ggplot2::theme_bw()
+        )
 }
 
 #' @title Scores of the Reference Genes

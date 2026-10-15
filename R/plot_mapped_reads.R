@@ -39,6 +39,7 @@ plot_mapped_reads <- function(screenR_Object, palette = NULL, alpha = 1,
             geom_bar(alpha = alpha, stat = "identity") +
             scale_fill_manual(values = palette)
     }
+    plot <- plot + ggplot2::labs(y = "Mapped reads")
     plot <- plot + theme(legend.position = legende_position)
     return(plot)
 }

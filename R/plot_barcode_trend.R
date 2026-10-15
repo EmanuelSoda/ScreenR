@@ -57,7 +57,7 @@ plot_barcode_trend <- function(list_data_measure, genes,
                 x = .data$Day, y = .data$Log2FC,
                 group = .data$Barcode, col = .data$Barcode
             )) +
-                geom_line(size = size_line) +
+                geom_line(linewidth = size_line) +
                 geom_point() +
                 facet_wrap(facets = "Gene", scales = "free")
         )
@@ -68,7 +68,7 @@ plot_barcode_trend <- function(list_data_measure, genes,
                 x = .data$Day, y = .data$Log2FC,
                 group = .data$Barcode, col = .data$Barcode
             )) +
-                geom_line(size = size_line) +
+                geom_line(linewidth = size_line) +
                 geom_point() +
                 scale_color_manual(values = color) +
                 facet_wrap(facets = "Gene", scales = "free")

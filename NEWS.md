@@ -26,6 +26,36 @@
   `plot_explained_variance()` and `plot_boxplot()`).
 * `plot_boxplot()` orders the fill legend as the samples (T0, T3, T18), not
   alphabetically (T0, T18, T3).
+* `plot_barcode_hit()` is drawn with ggplot2 instead of
+  `limma::barcodeplot()` and returns a ggplot object (it returned NULL), so
+  it can be saved, themed and combined with other plots. No theme is
+  applied. It has the same enrichment line and barcode strip, the barcodes
+  are colored by their log2 fold change, and a new panel (`show_log2fc`,
+  TRUE by default) shows the log2 fold change of all the barcodes with those
+  of the gene.
+* `plot_reference_separation()` no longer applies `theme_bw()`: set the
+  theme with `ggplot2::theme_set()` or by adding it to the plot.
+* Clearer axis labels: "Explained variance" and "Principal component" in
+  `plot_explained_variance()` (it said "Expressed Variance"), the dimensions
+  of `plot_mds()` with the share of variance they explain, "Mapped reads" in
+  `plot_mapped_reads()`, "Reads per barcode" in
+  `plot_mapped_reads_distribution()`, "Lost barcodes" in
+  `plot_barcode_lost()` and `plot_barcode_lost_for_gene()`, "Normalized
+  counts" in `plot_boxplot()` and "Mean normalized counts" in `plot_trend()`
+  (they said "Frequency").
+* `plot_trend()` and `plot_barcode_trend()` use `linewidth` instead of the
+  `size` aesthetic deprecated in ggplot2 3.4.0, so they no longer give a
+  deprecation warning.
+* New `plot_pca()`: the samples on two principal components (PC1 and PC2
+  by default, `components` selects others), with the share of the variance
+  on the axes.
+* `plot_explained_variance()` computed the principal components on the raw
+  counts, so the first component mostly followed the sequencing depth of
+  the samples (correlation 0.995 in the HAP1 screen). The principal
+  components, and the MDS of `plot_mds()`, are now computed on the log2
+  normalized counts, with the normalization chosen in `normalize_data()`
+  ("cpm", "tmm" or "control"; counts per million when the counts have not
+  been normalized).
 
 # ScreenR 1.15.14
 

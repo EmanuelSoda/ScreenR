@@ -116,6 +116,7 @@ reference:
   - plot_gini
   - plot_replicate_correlation
   - plot_mds
+  - plot_pca
   - compute_explained_variance
   - plot_explained_variance
   - plot_boxplot

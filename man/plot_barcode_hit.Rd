@@ -11,7 +11,8 @@ plot_barcode_hit(
   number_barcode = 3,
   gene,
   quantile = c(-0.5, 0.5),
-  labels = c("Negative logFC", "Positive logFC")
+  labels = c("Negative logFC", "Positive logFC"),
+  show_log2fc = TRUE
 )
 }
 \arguments{
@@ -33,21 +34,46 @@ matrix_model, a numeric contrast vector (for example created with
 \item{gene}{The name of the gene to plot.}
 
 \item{quantile}{The two log2 fold change values that delimit the central
-(shaded) region of the plot. Default c(-0.5, 0.5).}
+(grey) region of the plot. Default c(-0.5, 0.5).}
 
 \item{labels}{The labels of the left and right ends of the plot.}
+
+\item{show_log2fc}{Whether to add the panel with the log2 fold change of
+all the barcodes (default TRUE).}
 }
 \value{
-Draws the plot with base graphics and returns NULL invisibly.
+A ggplot object (a patchwork of the panels), which can be printed,
+    saved with \code{\link[ggplot2]{ggsave}} or combined with other
+    plots. No theme is applied: add one to all the panels with \code{&},
+    for example \code{plot_barcode_hit(...) & ggplot2::theme_classic()}.
 }
 \description{
-Draws a \code{\link[limma]{barcodeplot}} for a gene: all the
-    barcodes are ranked by their log2 fold change (computed with edgeR for
-    the given contrast) and the barcodes of the gene are shown as vertical
+Draws a barcode plot for a gene, as
+    \code{\link[limma]{barcodeplot}} but with ggplot2: all the barcodes
+    are ranked by their log2 fold change (computed with edgeR for the
+    given contrast) and the barcodes of the gene are shown as vertical
     bars. If most of the bars are on the left (negative log2 fold change)
     the gene is depleted, if they are on the right it is enriched. It is
     useful to check the hits of \code{\link{find_camera_hit}} and
     \code{\link{find_roast_hit}}.
+}
+\details{
+The plot has up to three panels, which share the ranking of the
+    barcodes on the x axis:
+    \itemize{
+      \item the enrichment line: the density of the barcodes of the gene
+            along the ranking divided by their average density (computed
+            as in \code{\link[limma]{barcodeplot}}, with a tricube moving
+            average). Values above 1 (dashed line) mean that the barcodes
+            of the gene are concentrated there;
+      \item the barcodes of the gene as vertical bars, colored by their
+            log2 fold change, on three regions: below, between and above
+            the two values of quantile;
+      \item (when show_log2fc = TRUE) the log2 fold change of all the
+            barcodes, in order, with the barcodes of the gene as points.
+            It shows how strong the effect is, which the ranks alone do
+            not.
+    }
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -59,6 +85,12 @@ contrast <- create_contrast(matrix_model,
 plot_barcode_hit(object, matrix_model,
     contrast = contrast,
     gene = "Gene_300"
+)
+
+# Without the panel of the log2 fold changes
+plot_barcode_hit(object, matrix_model,
+    contrast = contrast,
+    gene = "Gene_300", show_log2fc = FALSE
 )
 }
 \seealso{
