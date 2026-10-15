@@ -124,11 +124,12 @@ barcode_plot <- function(log2fc, in_gene, title, quantile, labels,
         guide = "none")
     barcode_colour <- ggplot2::scale_colour_gradient2(low = "#2166ac",
         mid = "grey40", high = "#b2182b", midpoint = 0, guide = "none")
-    # The panels share the x axis: only the bottom one shows it. The axes
-    # are hidden with the scales, so that the theme is left to the user
+    # The panels share the x axis: only the bottom one has its title. The
+    # rank numbers are not shown. The axes are set with the scales, so that
+    # the theme is left to the user
     x_scale <- function(show) {
         ggplot2::scale_x_continuous(limits = c(0.5, n + 0.5),
-            expand = c(0, 0), breaks = if (show) ggplot2::waiver() else NULL,
+            expand = c(0, 0), breaks = NULL,
             name = if (show) "Barcodes ranked by log2 fold change" else NULL)
     }
 
