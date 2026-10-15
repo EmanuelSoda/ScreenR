@@ -65,6 +65,29 @@ Rscript k562_screenr_methods.R <ScreenR lib> <ScreenR repo> \
 The script that builds the K562 dataset is
 `inst/scripts/k562_essential_screen.R`.
 
+## Other tools (`competitors/`)
+
+BAGEL2, gscreend and two plain edgeR/limma workflows, run on the same 30
+simulated screens (same scenarios and seeds as `simulation/run_benchmark.R`,
+so the counts are identical) and on the real screens:
+
+| Tool | How it is run |
+|---|---|
+| edgeR gene-level QL | barcode counts summed per gene, `filterByExpr`, TMM, `glmQLFit`/`glmQLFTest`, one-sided p-value from the sign of logFC, BH |
+| limma-voom + camera | `voom` on the barcode counts (TMM), `camera` with the barcodes of each gene as a set, one-sided p-value, BH |
+| gscreend (1.17.2) | control replicates summed into one T0 sample (gscreend accepts only one reference), treated samples as T1, `ResultsTable(direction = "negative")`; deprecated in Bioconductor 3.19 |
+| BAGEL2 (GitHub master) | `fc` (pseudocount 5) then `bf` with 10-fold cross-validation and `pr`; supervised: trained on half of the true hits and half of the null genes in the simulations, and on CEGv2/NEGv1 for K562; calls at BAGEL's own FDR; no p-values, so it is ranked by the Bayes factor and has no null calibration |
+
+```sh
+cd competitors
+Rscript run_competitors_simulation.R <path/to/BAGEL.py> <python with numpy<2.3, scipy, pandas, scikit-learn, click> <cores>
+Rscript run_competitors_realdata.R <ScreenR repo> <path/to/BAGEL.py> <python>
+cd .. && Rscript competitors/summarise_competitors.R
+```
+
+Results: `results/competitors_simulation/`, `results/realdata_competitors.rds`,
+`results/tables/competitors_*.csv`, `results/figures/competitors_*`.
+
 ## Vignette data
 
 `make_extdata.R` copies the simulation evaluations and the MAGeCK gene results
