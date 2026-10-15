@@ -17,6 +17,10 @@
   without reference are on this subset enriched in essential genes, and
   explains the positive fold change of the non-essential genes after CPM
   normalization (normalizing to their sgRNAs puts them back at 0).
+* `find_discordant_barcodes()` documents that it is for inspecting the hits,
+  not for filtering the barcodes before finding them: the filter is circular
+  and, in the K562 screen, finds fewer essential and more non-essential
+  genes.
 
 # ScreenR 1.15.14
 
