@@ -115,18 +115,21 @@ evaluate <- function(result) {
     called <- result$Gene[result$FDR <= 0.05]
     tested_null <- result$Gene %in% held_out
     data.frame(
-        `Genes called` = length(called),
-        `Core essential found` = mean(essential[essential %in% result$Gene]
+        Called = length(called),
+        `Essential found` = mean(essential[essential %in% result$Gene]
             %in% called),
-        `Non-essential called` = sum(called %in% held_out),
-        `Non-essential with p <= 0.05` = mean(result$PValue[tested_null]
-            <= 0.05),
+        `NE called` = sum(called %in% held_out),
+        `NE p <= 0.05` = mean(result$PValue[tested_null] <= 0.05),
         check.names = FALSE
     )
 }
 ```
 
-The last column is the check of the p-values: the held-out non-essential
+The columns of the tables below are the number of genes called at 5% FDR
+(`Called`), the share of the core essential genes among them
+(`Essential found`), the number of held-out non-essential genes called
+(`NE called`) and the share of held-out non-essential genes with a p-value
+below 0.05 (`NE p <= 0.05`). The last one is the check of the p-values: these
 genes have no effect, so about 5% of them should have a p-value below 0.05.
 Much less means a conservative test (hits are missed), much more means
 p-values that are too small (genes without effect are called).
@@ -318,25 +321,25 @@ essential genes are much more frequent than in a genome-wide library
 repository repeats the comparison on the complete HAP1 TKOv3 screen
 (70,797 sgRNAs, 18,056 genes) and on the two subsets with the essential genes
 removed at random until they are 5% or 10% of the genes (mean of three
-random draws):
+random draws). `Essential` is the share of core essential genes in the data;
+the other columns are as above:
 
 ```{r benchmark}
 benchmark <- read.csv(system.file("extdata", "benchmark",
     "empirical_null.csv", package = "ScreenR"), check.names = FALSE)
 benchmark %>%
     mutate(Essential = paste0(round(100 * Essential, 1), "%")) %>%
-    select(Data, `Essential genes` = Essential, Reference = Method,
-        `Core essential found` = Recall,
-        `Non-essential called` = `NE called`,
-        `Non-essential with p <= 0.05` = `NE p<=0.05`) %>%
-    knitr::kable(digits = 3)
+    select(Data, Essential, Reference = Method,
+        `Essential found` = Recall, `NE called`,
+        `NE p <= 0.05` = `NE p<=0.05`) %>%
+    knitr::kable(digits = c(0, 0, 0, 3, 1, 3))
 ```
 
 * In the CRISPR screen the default reference finds 55-61% of the core
   essential genes when they are as rare as in a genome-wide library
   (including the complete library), and fewer when they are more frequent;
   the empirical null finds about 90% (`"central"`) and 94-97%
-  (`"one-sided"`), with the expected rate of false positives. Only the
+  (`"one-sided"`), with no more false positives than expected. Only the
   non-essential controls do as well, and they need reference genes.
 * In the shRNA screen, with genome-wide proportions of essential genes, the
   default reference gives 11-13% of non-essential genes with a p-value below
