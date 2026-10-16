@@ -79,3 +79,18 @@ writeLines(c(readLines(file.path(out, "README.txt")),
     "  CEGv2/NEGv1 reference genes (benchmark/crispr/hap1_crispr.R)."),
     file.path(out, "README.txt"))
 print(file.info(list.files(out, full.names = TRUE))["size"])
+
+# ------------------------------- empirical null (realdata/empirical_null.R) ---
+# Mean over the random splits and dilutions of recall, false calls, share of
+# held-out non-essential genes with p <= 0.05 and AUPRC of each reference
+empirical <- as.data.frame(readRDS("results/empirical_null.rds"))
+write.csv(round_numeric(empirical), file.path(out, "empirical_null.csv"),
+    row.names = FALSE)
+writeLines(c(readLines(file.path(out, "README.txt")),
+    "empirical_null.csv: find_gene_zscore_hit() with the random barcode sets",
+    "  and with the empirical null, on the HAP1 CRISPR screen (subset and",
+    "  complete TKOv3 library) and the K562 shRNA screen, with the essential",
+    "  genes diluted to 5% and 10% of the genes: recall of the core essential",
+    "  genes at 5% FDR, held-out non-essential genes called and with",
+    "  p <= 0.05, AUPRC (benchmark/realdata/empirical_null.R)."),
+    file.path(out, "README.txt"))

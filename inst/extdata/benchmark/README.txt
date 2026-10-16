@@ -18,3 +18,9 @@ competitors_k562.csv: their gene results on k562_count_table.
 crispr_hap1.csv: gene results of every method on the HAP1 TKOv3
   CRISPR-Cas9 screen (Hart et al. 2017, T18 vs T0), restricted to the
   CEGv2/NEGv1 reference genes (benchmark/crispr/hap1_crispr.R).
+empirical_null.csv: find_gene_zscore_hit() with the random barcode sets
+  and with the empirical null, on the HAP1 CRISPR screen (subset and
+  complete TKOv3 library) and the K562 shRNA screen, with the essential
+  genes diluted to 5% and 10% of the genes: recall of the core essential
+  genes at 5% FDR, held-out non-essential genes called and with
+  p <= 0.05, AUPRC (benchmark/realdata/empirical_null.R).

@@ -148,7 +148,11 @@ Under the null hypothesis that the gene has no effect, its
     The empirical null needs most genes to be without effect, and enough
     genes (hundreds) to estimate it. It is not used with control_genes.
     The benchmark script is benchmark/realdata/empirical_null.R in the
-    GitHub repository.
+    GitHub repository. The vignette "Choosing the reference of the
+    gene-level test" (\code{vignette("Empirical_null", package =
+    "ScreenR")}) explains when to use each reference; we suggest
+    reference = "empirical" for libraries with hundreds of genes, most of
+    them without effect.
 
     This replaces the rule of \code{\link{find_zscore_hit}} ("more than
     number_barcode barcodes below the median"), which flags about 17\% of

@@ -1,0 +1,365 @@
+---
+title: "Choosing the reference of the gene-level test"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{Choosing the reference of the gene-level test}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 3.5
+)
+```
+
+# In short
+
+`find_gene_zscore_hit()` decides whether a gene is a hit by comparing its
+score with a **reference**: what the score of a gene without effect looks
+like. Two references are available:
+
+* `reference = "random"` (the default): random sets of barcodes, drawn from
+  all the barcodes or from those of `control_genes`;
+* `reference = "empirical"`: an **empirical null**, the distribution of the
+  scores of the genes without effect estimated from the data.
+
+**We suggest `reference = "empirical"`** for libraries with hundreds of genes
+or more, most of them without effect, which is the case of genome-wide and of
+most focused screens:
+
+```{r suggestion, eval = FALSE}
+find_gene_zscore_hit(table, reference = "empirical")
+```
+
+The random barcodes have two problems, shown below with the screens
+distributed with ScreenR: in dropout screens the hits make them conservative
+(many hits are missed), and in shRNA screens they give p-values that are too
+small (genes without effect are called). The empirical null has neither
+problem. The default is still `"random"`, so that the results of existing
+analyses do not change.
+
+| Your screen | Suggested call |
+|---|---|
+| CRISPR knockout, dropout or positive selection | `reference = "empirical", empirical_fit = "one-sided"` |
+| shRNA, or when unsure | `reference = "empirical"` (`empirical_fit = "central"`, the default) |
+| Small library (fewer than a few hundred genes), or most genes with an effect | `reference = "random"`, ideally with `control_genes` checked against known non-essential genes |
+
+Always look at `plot_empirical_null()` (see [Checking the fit](#checking-the-fit)).
+
+```{r packages, message = FALSE}
+library(ScreenR)
+library(dplyr)
+library(ggplot2)
+```
+
+# How the gene-level test works
+
+Each gene gets a score, the mean of the Z-scores of its barcodes (see
+[Tutorial 3](Tutorial_3_Finding_hits.html)). A hit is a gene whose score is
+more extreme than the scores of genes without effect, so the test needs to
+know how those scores are distributed.
+
+With the **random barcodes**, the score of a gene of *k* barcodes is compared
+with the scores of many random sets of *k* barcodes. This assumes that the
+barcodes of a gene without effect behave like barcodes taken at random from
+the reference.
+
+With the **empirical null**, the score of each gene is standardized into a
+statistic (centred on the median of all the barcode scores and divided by
+their median absolute deviation over $\sqrt{k}$). Most genes have no effect,
+so the centre of the distribution of these statistics is made of genes
+without effect: a normal distribution is fitted there, and the p-value of
+each gene comes from it. The hits, in the tail, are left out of the fit. Two
+fits are available:
+
+* `empirical_fit = "central"` (default): a parabola is fitted to the log
+  density of the statistics around its mode (central matching, as in Efron's
+  `locfdr`);
+* `empirical_fit = "one-sided"`: the centre is the mode and the spread is
+  estimated only on the side without hits (above the mode for depleted
+  genes, below it with `direction = "Up"`).
+
+# Two screens with known answers
+
+The core essential and non-essential genes of Hart et al. give the answer:
+essential genes should be hits, non-essential genes should not. Half of the
+non-essential genes are used as `control_genes` (the best possible
+reference, when such genes are known); the other half is kept out of every
+reference, to count the false calls.
+
+```{r reference-genes}
+data(hart_reference_genes)
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+set.seed(2017)
+reference <- sample(nonessential, length(nonessential) %/% 2)
+held_out <- setdiff(nonessential, reference)
+
+evaluate <- function(result) {
+    called <- result$Gene[result$FDR <= 0.05]
+    tested_null <- result$Gene %in% held_out
+    data.frame(
+        `Genes called` = length(called),
+        `Core essential found` = mean(essential[essential %in% result$Gene]
+            %in% called),
+        `Non-essential called` = sum(called %in% held_out),
+        `Non-essential with p <= 0.05` = mean(result$PValue[tested_null]
+            <= 0.05),
+        check.names = FALSE
+    )
+}
+```
+
+The last column is the check of the p-values: the held-out non-essential
+genes have no effect, so about 5% of them should have a p-value below 0.05.
+Much less means a conservative test (hits are missed), much more means
+p-values that are too small (genes without effect are called).
+
+## A CRISPR dropout screen: the random barcodes miss hits
+
+`hap1_count_table` is a CRISPR-Cas9 screen of HAP1 cells (TKOv3 library),
+compared here at day 18 against T0, as in
+[Tutorial 4](Tutorial_4_CRISPR_screens.html):
+
+```{r hap1, message = FALSE}
+data(hap1_count_table)
+data(hap1_annotation_table)
+samples <- data.frame(
+    Sample = colnames(hap1_count_table)[-1], Day = "Screen",
+    Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+)
+hap1 <- create_screenr_object(
+    table = hap1_count_table, annotation = hap1_annotation_table,
+    groups = factor(samples$Treatment, levels = c("T0", "T3", "T18")),
+    sample_table = samples
+)
+hap1 <- compute_data_table(normalize_data(remove_all_zero_row(hap1)))
+design <- create_design_matrix(hap1)
+contrast <- create_contrast(design, treatment = "T18", control = "T0")
+hap1_statistics <- compute_barcode_statistics(hap1, design, contrast)
+```
+
+```{r hap1-tests}
+hap1_results <- list(
+    `Random, all barcodes (default)` = find_gene_zscore_hit(
+        hap1_statistics, fdr = 1, n_permutations = 2e4, seed = 1),
+    `Random, non-essential controls` = find_gene_zscore_hit(
+        hap1_statistics, control_genes = reference, fdr = 1,
+        n_permutations = 2e4, seed = 1),
+    `Empirical, central` = find_gene_zscore_hit(
+        hap1_statistics, reference = "empirical", fdr = 1),
+    `Empirical, one-sided` = find_gene_zscore_hit(
+        hap1_statistics, reference = "empirical",
+        empirical_fit = "one-sided", fdr = 1)
+)
+knitr::kable(bind_rows(lapply(hap1_results, evaluate), .id = "Reference"),
+    digits = 3)
+```
+
+With the default reference only a minority of the core essential genes is
+found, and not a single held-out non-essential gene has a p-value below
+0.05: the test is far too conservative. The reason is that the random
+barcodes are drawn from all the genes, and in a dropout screen many of them
+are hits. Their depleted barcodes widen the reference, so a gene must be
+very depleted to stand out from it. The empirical null is fitted where the
+genes without effect are and is not widened by the hits: it finds about as
+many essential genes as the non-essential controls, without needing them,
+and with no more false positives than expected (`"one-sided"` close to the
+nominal 5%, `"central"` somewhat conservative).
+
+## An shRNA screen: the random barcodes call genes without effect
+
+`k562_count_table` is an shRNA screen of K562 cells, compared at day 14
+against the plasmid. Each gene has about 20 shRNAs.
+
+```{r k562, message = FALSE}
+data(k562_count_table)
+data(k562_annotation_table)
+data(k562_reference_genes)
+k562 <- create_screenr_object(
+    table = k562_count_table, annotation = k562_annotation_table,
+    groups = factor(c("Plasmid", "T14", "T14")),
+    sample_table = data.frame(
+        Sample = c("Plasmid", "T14_A", "T14_B"),
+        Day = "Screen", Treatment = c("Plasmid", "T14", "T14")
+    )
+)
+k562 <- compute_data_table(normalize_data(k562))
+k562_metrics <- compute_metrics(k562,
+    control = "Plasmid", treatment = "T14", day = "Screen"
+)
+```
+
+The reference genes of this screen are in `k562_reference_genes`; as above,
+half of the non-essential genes are the controls and half are kept out.
+
+```{r k562-tests}
+essential <- k562_reference_genes$Gene[
+    k562_reference_genes$Class == "core essential"]
+nonessential <- k562_reference_genes$Gene[
+    k562_reference_genes$Class != "core essential"]
+set.seed(2017)
+reference <- sample(nonessential, length(nonessential) %/% 2)
+held_out <- setdiff(nonessential, reference)
+
+k562_results <- list(
+    `Random, all barcodes (default)` = find_gene_zscore_hit(
+        k562_metrics, fdr = 1, min_barcodes = 1, n_permutations = 2e4,
+        seed = 1),
+    `Random, non-essential controls` = find_gene_zscore_hit(
+        k562_metrics, control_genes = reference, fdr = 1, min_barcodes = 1,
+        n_permutations = 2e4, seed = 1),
+    `Empirical, central` = find_gene_zscore_hit(
+        k562_metrics, reference = "empirical", fdr = 1, min_barcodes = 1),
+    `Empirical, one-sided` = find_gene_zscore_hit(
+        k562_metrics, reference = "empirical", empirical_fit = "one-sided",
+        fdr = 1, min_barcodes = 1)
+)
+knitr::kable(bind_rows(lapply(k562_results, evaluate), .id = "Reference"),
+    digits = 3)
+```
+
+Here the non-essential controls, the reference that worked best in the
+CRISPR screen, call dozens of non-essential genes, and far more than 5% of
+them have a p-value below 0.05. The random barcodes assume that the barcodes
+of a gene without effect behave like barcodes taken at random. They do not:
+the shRNAs of a gene share its knockdown efficiency, its expression and its
+off-target profile, so they tend to move together, and the scores of whole
+genes vary more than those of random sets of barcodes. This can be measured
+on the held-out non-essential genes: their standardized statistic would have
+a standard deviation of 1 if their barcodes behaved like random barcodes.
+
+```{r overdispersion}
+statistic <- k562_results[["Empirical, central"]]
+sd(statistic$Statistic[statistic$Gene %in% held_out])
+```
+
+It is about twice as large, and with about 20 barcodes per gene this extra
+variation dominates. The empirical null measures the spread of the gene
+statistics directly, so it includes it, and keeps the false positives below
+the nominal rate.
+
+The default reference looks well calibrated on this dataset, but only by
+chance: its reference is widened by the many essential genes of the subset
+(`r round(100 * mean(unique(k562_metrics$Gene) %in% essential))`% of the
+genes are core essential), which hides the problem. With the essential genes
+as rare as in a genome-wide library it calls genes without effect too (see
+the [benchmark](#benchmark) below).
+
+The empirical null finds fewer essential genes here. This is the honest
+result: with so much variation between genes, the weak shRNAs of many
+essential genes cannot be told apart from genes without effect. The other
+references find more only because their p-values are too small.
+
+# Checking the fit
+
+`plot_empirical_null()` shows the gene statistics and the fitted null. The
+null (red line) should follow the central peak; the hits are in the tail on
+the side of `direction`:
+
+```{r plot-hap1}
+plot_empirical_null(hap1_statistics, empirical_fit = "one-sided") +
+    ggtitle("HAP1 CRISPR screen")
+```
+
+```{r plot-k562}
+plot_empirical_null(k562_metrics, min_barcodes = 1) +
+    ggtitle("K562 shRNA screen")
+```
+
+The subtitle gives the fitted mean and standard deviation and the share of
+genes described by the null. Things to look for:
+
+* **The null does not follow the central peak**, or the peak is not clear:
+  the screen may have too few genes, or too many genes with an effect, for
+  an empirical null. Use the random barcodes with checked control genes.
+* **The tail is on the wrong side**: check `direction` ("Down" for depleted
+  genes, "Up" for enriched genes).
+* **A standard deviation much larger than 1** means that the genes vary more
+  than their barcodes (as in K562): the random barcodes would give too small
+  p-values.
+
+`find_gene_zscore_hit()` also returns the fitted null as an attribute:
+
+```{r null-attribute}
+attr(hap1_results[["Empirical, one-sided"]], "null")
+```
+
+# Central or one-sided?
+
+`"one-sided"` uses only the side of the distribution without hits, so the
+hits cannot enter the fit at all: it has the most power when the hits are
+well separated from the genes without effect, as in CRISPR knockout screens.
+`"central"` is the safer choice when hits and genes without effect overlap,
+as in shRNA screens, where `"one-sided"` can be too conservative. In the
+benchmark below `"central"` never gave too small p-values.
+
+# Benchmark
+
+The bundled screens are subsets that keep all the reference genes, so
+essential genes are much more frequent than in a genome-wide library
+(about 4%). The script `benchmark/realdata/empirical_null.R` of the GitHub
+repository repeats the comparison on the complete HAP1 TKOv3 screen
+(70,797 sgRNAs, 18,056 genes) and on the two subsets with the essential genes
+removed at random until they are 5% or 10% of the genes (mean of three
+random draws):
+
+```{r benchmark}
+benchmark <- read.csv(system.file("extdata", "benchmark",
+    "empirical_null.csv", package = "ScreenR"), check.names = FALSE)
+benchmark %>%
+    mutate(Essential = paste0(round(100 * Essential, 1), "%")) %>%
+    select(Data, `Essential genes` = Essential, Reference = Method,
+        `Core essential found` = Recall,
+        `Non-essential called` = `NE called`,
+        `Non-essential with p <= 0.05` = `NE p<=0.05`) %>%
+    knitr::kable(digits = 3)
+```
+
+* In the CRISPR screen the default reference finds 55-61% of the core
+  essential genes when they are as rare as in a genome-wide library
+  (including the complete library), and fewer when they are more frequent;
+  the empirical null finds about 90% (`"central"`) and 94-97%
+  (`"one-sided"`), with the expected rate of false positives. Only the
+  non-essential controls do as well, and they need reference genes.
+* In the shRNA screen, with genome-wide proportions of essential genes, the
+  default reference gives 11-13% of non-essential genes with a p-value below
+  0.05 and calls 17 to 26 of them, and the non-essential controls about 20%
+  and 50. The empirical null stays below 4% and calls none.
+
+# When not to use the empirical null
+
+The empirical null needs the genes without effect to be the majority, and
+enough genes (hundreds) to estimate their distribution. It is not suited to:
+
+* small focused libraries, or the toy dataset of the other tutorials
+  (`find_gene_zscore_hit()` warns when fewer than 100 genes are tested);
+* screens where most genes have an effect;
+* comparisons where the genes without effect are not at the centre, for
+  example when a normalization problem shifts all the genes: check the
+  normalization first ([Tutorial 2](Tutorial_2_Quality_control.html)).
+
+In these cases use the random barcodes, if possible with control genes that
+were checked against known non-essential genes.
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```

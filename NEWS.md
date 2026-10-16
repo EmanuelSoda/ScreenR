@@ -82,6 +82,10 @@
   below 0.05 under 4%, where the random barcodes reached 13% (default, with
   genome-wide proportions of essential genes) and 20% (non-essential genes as
   `control_genes`). See `benchmark/realdata/empirical_null.R`.
+* New vignette "Choosing the reference of the gene-level test", which
+  suggests `reference = "empirical"` and shows why on the HAP1 and K562
+  screens. The default of `find_gene_zscore_hit()` is still
+  `reference = "random"`, so existing results do not change.
 
 # ScreenR 1.15.14
 
