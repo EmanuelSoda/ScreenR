@@ -42,11 +42,13 @@ This tutorial explains, step by step:
 
 It continues from the object of the previous tutorials:
 
-```{r object, message=FALSE}
+```{r packages, message=FALSE, warning=FALSE}
 library(ScreenR)
 library(dplyr)
 library(ggplot2)
+```
 
+```{r object, message=FALSE}
 data(count_table)
 data(annotation_table)
 

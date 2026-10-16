@@ -42,7 +42,7 @@ Everything in ScreenR starts from a **ScreenR object**, which keeps all the
 tables of your experiment together. At the end of this tutorial you will know
 how to build it from your own data.
 
-```{r packages, message=FALSE}
+```{r packages, message=FALSE, warning=FALSE}
 library(ScreenR)
 library(dplyr)
 ```

@@ -71,7 +71,7 @@ Some differences in how the tools were run matter for the interpretation:
 * **gscreend** accepts a single reference sample, so the control replicates
   were summed. It is deprecated in Bioconductor 3.19.
 
-```{r packages, message=FALSE}
+```{r packages, message=FALSE, warning=FALSE}
 library(ScreenR)
 library(dplyr)
 library(tidyr)

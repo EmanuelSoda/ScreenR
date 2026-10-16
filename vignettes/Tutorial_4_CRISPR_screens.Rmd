@@ -76,10 +76,13 @@ BiocManager::install("francescojm/CRISPRcleanR")
 
 `crisprcleanr_available()` tells whether it is installed:
 
-```{r available, message = FALSE}
+```{r packages, message = FALSE, warning = FALSE}
 library(ScreenR)
 library(dplyr)
 library(ggplot2)
+```
+
+```{r available}
 crisprcleanr_available()
 ```
 

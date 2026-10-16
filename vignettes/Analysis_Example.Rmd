@@ -92,7 +92,7 @@ Here is reported the ScreenR pipeline
 
 After installation, loading the package is simple as :
 
-```{r, message=TRUE, warning=TRUE}
+```{r, message=FALSE, warning=FALSE}
 library(ScreenR)
 ```
 

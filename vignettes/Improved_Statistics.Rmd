@@ -45,7 +45,7 @@ This vignette shows the statistical methods added to ScreenR in version
 | Combining the methods | `summarise_hits()` |
 | Quality control | `plot_replicate_correlation()`, `compute_gini()`, `find_discordant_barcodes()` |
 
-```{r packages}
+```{r packages, warning = FALSE}
 library(ScreenR)
 library(dplyr)
 library(ggplot2)
