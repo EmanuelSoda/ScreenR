@@ -207,6 +207,7 @@ has all the details and reruns the ScreenR side of the comparison.
 | [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html)           | All the hit-finding methods, combining them and checking the hits                                                 |
 | [Tutorial 4: CRISPR-Cas9 screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html) | sgRNA thresholds, quality with reference genes, copy-number correction with CRISPRcleanR, hits |
 | [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html)                                 | How the tests work and why                                                                                        |
+| [Choosing the reference of the gene-level test](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.html) | Why we suggest `find_gene_zscore_hit(reference = "empirical")` |
 | [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)                 | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
 | [Function reference](https://emanuelsoda.github.io/ScreenR/reference/index.html)                                                 | Every function, grouped by analysis step                                                                          |
 

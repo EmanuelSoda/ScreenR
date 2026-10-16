@@ -56,6 +56,36 @@
   normalized counts, with the normalization chosen in `normalize_data()`
   ("cpm", "tmm" or "control"; counts per million when the counts have not
   been normalized).
+* `plot_barcode_lost()` drew the bars twice, an opaque layer under the one
+  with `alpha`, so `alpha` had no visible effect; the bars are drawn once.
+* `plot_trend()` draws the samples at their time point instead of one
+  position per sample, so replicates share the same time and the line is
+  the one of `compute_slope()` (used by `filter_by_slope()`); before, the
+  line was fitted along the order of the samples. New arguments of
+  `plot_trend()`, `compute_slope()` and `filter_by_slope()`: `time_column`
+  (the column with the time points, "Day" by default) and `time` (the real
+  times of the time points, for example `c(T0 = 0, T3 = 3, T18 = 18)`;
+  by default they are equally spaced, as before).
+* `plot_trend()` and `plot_boxplot()` failed with several genes unless
+  `nrow` or `ncol` was given; by default ggplot2 now chooses the layout.
+* `find_gene_zscore_hit(reference = "empirical")`: the gene scores are
+  compared with an empirical null, the distribution of the genes without
+  effect estimated from the centre of the distribution of the gene
+  statistics (`empirical_fit = "central"`, default, or `"one-sided"`). New
+  `plot_empirical_null()` shows the fit. The random barcode sets of the
+  default reference are conservative in dropout screens (the hits widen the
+  null) and ignore that the barcodes of a gene vary together, which gives
+  too small p-values in shRNA screens. In the genome-wide HAP1 CRISPR screen
+  the empirical null found 90% (central) and 94% (one-sided) of the core
+  essential genes at 5% FDR, against 58% with the default reference; in the
+  K562 shRNA screen it kept the share of non-essential genes with a p-value
+  below 0.05 under 4%, where the random barcodes reached 13% (default, with
+  genome-wide proportions of essential genes) and 20% (non-essential genes as
+  `control_genes`). See `benchmark/realdata/empirical_null.R`.
+* New vignette "Choosing the reference of the gene-level test", which
+  suggests `reference = "empirical"` and shows why on the HAP1 and K562
+  screens. The default of `find_gene_zscore_hit()` is still
+  `reference = "random"`, so existing results do not change.
 
 # ScreenR 1.15.14
 

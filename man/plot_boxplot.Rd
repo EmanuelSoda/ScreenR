@@ -9,8 +9,8 @@ plot_boxplot(
   genes,
   group_var,
   alpha = 0.5,
-  nrow = 1,
-  ncol = 1,
+  nrow = NULL,
+  ncol = NULL,
   fill_var = "Sample",
   type = "boxplot",
   scales = "free"
@@ -30,7 +30,7 @@ plot_boxplot(
 \item{nrow}{The number of rows of panels, when several genes are plotted.}
 
 \item{ncol}{The number of columns of panels, when several genes are
-plotted.}
+plotted. By default (NULL) ggplot2 chooses nrow and ncol.}
 
 \item{fill_var}{The column of the data table used to fill the boxes, for
 example "Sample" (default), "Day" or "Treatment".}

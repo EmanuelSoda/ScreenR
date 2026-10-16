@@ -62,6 +62,8 @@ navbar:
         href: articles/Analysis_Example.html
       - text: Statistics in ScreenR
         href: articles/Improved_Statistics.html
+      - text: Choosing the reference of the gene-level test
+        href: articles/Empirical_null.html
       - text: Benchmark against MAGeCK and other tools
         href: articles/Benchmark_MAGeCK.html
     github:
@@ -81,6 +83,7 @@ articles:
   contents:
   - Analysis_Example
   - Improved_Statistics
+  - Empirical_null
   - Benchmark_MAGeCK
 
 reference:
@@ -138,6 +141,7 @@ reference:
     every gene.
   contents:
   - find_gene_zscore_hit
+  - plot_empirical_null
   - find_camera_hit
   - find_roast_hit
   - find_time_hit

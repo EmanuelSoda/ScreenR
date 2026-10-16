@@ -13,7 +13,7 @@
 #' @param genes The names of the genes to plot.
 #' @param nrow The number of rows of panels, when several genes are plotted.
 #' @param ncol The number of columns of panels, when several genes are
-#'     plotted.
+#'     plotted. By default (NULL) ggplot2 chooses nrow and ncol.
 #' @param type The type of plot: "boxplot" (default) or "violinplot".
 #' @param scales The scales of the panels: "free" (default), "fixed",
 #'     "free_x" or "free_y".
@@ -32,7 +32,7 @@
 #'     fill_var = "Day", type = "violinplot"
 #' )
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
-    nrow = 1, ncol = 1, fill_var = "Sample",
+    nrow = NULL, ncol = NULL, fill_var = "Sample",
     type = "boxplot", scales = "free") {
     data <- screenR_Object@data_table
 

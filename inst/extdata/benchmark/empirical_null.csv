@@ -1,0 +1,29 @@
+"Data","Essential","Method","Recall","NE called","NE p<=0.05","AUPRC"
+"HAP1 genome-wide",0.036,"Empirical, central",0.8993808,1.6666667,0.020076889,0.99802374
+"HAP1 genome-wide",0.036,"Empirical, one-sided",0.93962848,4.6666667,0.027587812,0.99802374
+"HAP1 genome-wide",0.036,"Random, all barcodes (default)",0.58359133,0,0.0075361781,0.99809389
+"HAP1 genome-wide",0.036,"Random, non-essential controls",0.95717234,5,0.046816568,0.99784797
+"HAP1 subset",0.05,"Empirical, central",0.88738739,1,0.020512821,0.99279301
+"HAP1 subset",0.05,"Empirical, one-sided",0.95495495,4,0.048717949,0.99279301
+"HAP1 subset",0.05,"Random, all barcodes (default)",0.60810811,0,0.0051282051,0.99306269
+"HAP1 subset",0.05,"Random, non-essential controls",0.95495495,4,0.053846154,0.99227316
+"HAP1 subset",0.1,"Empirical, central",0.90705128,1,0.020512821,0.99602849
+"HAP1 subset",0.1,"Empirical, one-sided",0.95619658,4,0.048717949,0.99602849
+"HAP1 subset",0.1,"Random, all barcodes (default)",0.55128205,0,0.0025641026,0.99618213
+"HAP1 subset",0.1,"Random, non-essential controls",0.96047009,4,0.053846154,0.99571555
+"HAP1 subset",0.19,"Empirical, central",0.90866873,1,0.012820513,0.99842085
+"HAP1 subset",0.19,"Empirical, one-sided",0.96749226,5,0.043589744,0.99842085
+"HAP1 subset",0.19,"Random, all barcodes (default)",0.37925697,0,0,0.99851827
+"HAP1 subset",0.19,"Random, non-essential controls",0.96749226,8,0.053846154,0.99819678
+"K562",0.05,"Empirical, central",0.30333333,0,0.036873156,0.71560248
+"K562",0.05,"Empirical, one-sided",0.22,0,0.0066371681,0.71560248
+"K562",0.05,"Random, all barcodes (default)",0.57666667,26.333333,0.13126844,0.69716417
+"K562",0.05,"Random, non-essential controls",0.65666667,50,0.19469027,0.66843659
+"K562",0.1,"Empirical, central",0.28930818,0,0.026548673,0.79999502
+"K562",0.1,"Empirical, one-sided",0.22012579,0,0.0066371681,0.79999502
+"K562",0.1,"Random, all barcodes (default)",0.53301887,17,0.10988201,0.79423616
+"K562",0.1,"Random, non-essential controls",0.66666667,51,0.19469027,0.7764073
+"K562",0.26,"Empirical, central",0.32305433,0,0.013274336,0.90932764
+"K562",0.26,"Empirical, one-sided",0.27312775,0,0.0066371681,0.90932764
+"K562",0.26,"Random, all barcodes (default)",0.48751836,5,0.048672566,0.90891825
+"K562",0.26,"Random, non-essential controls",0.69456681,57,0.19469027,0.90206838

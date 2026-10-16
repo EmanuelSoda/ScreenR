@@ -436,10 +436,40 @@ held-out non-essential genes. The other genes called are not in the reference
 lists: HAP1 cells need many more genes than the core essential set, which
 contains only the genes essential in almost every cell line.
 
+## Without reference genes: the empirical null
+
+When no reference genes are available, `reference = "empirical"` estimates
+the scores of the genes without effect from the data. Most genes have no
+effect, so the centre of the distribution of the gene statistics is the null;
+a normal distribution is fitted there and gives the p-values. The hits, in
+the tail, do not widen it. `empirical_fit = "one-sided"` estimates the spread
+from the side without hits only (above the centre for depleted genes), which
+gives more power when the hits are well separated, as in CRISPR screens; the
+default, `"central"`, is the safer choice (see `?find_gene_zscore_hit`).
+
+```{r zscore-empirical}
+zscore_empirical <- find_gene_zscore_hit(statistics,
+    reference = "empirical", fdr = 1
+)
+zscore_one_sided <- find_gene_zscore_hit(statistics,
+    reference = "empirical", empirical_fit = "one-sided", fdr = 1
+)
+attr(zscore_one_sided, "null")
+```
+
+`plot_empirical_null()` shows the gene statistics and the fitted null, which
+should follow the centre of the distribution; the depleted genes are in the
+tail on the left:
+
+```{r empirical-null-plot, fig.height = 3.5}
+plot_empirical_null(statistics, empirical_fit = "one-sided")
+```
+
 ## Other methods and their consensus
 
-Without reference genes, use the default reference of the Z-score test,
-CAMERA and FRY. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
+The other methods need no reference genes either: the default reference of
+the Z-score test (random sets of sgRNAs of all the genes), CAMERA and FRY.
+`number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
 
 ```{r other-methods}
 zscore_default <- find_gene_zscore_hit(statistics, fdr = 1, seed = 1)
@@ -449,7 +479,9 @@ camera <- find_camera_hit(object, design, contrast,
 fry <- find_roast_hit(object, design, contrast,
     method = "fry", number_barcode = 2, fdr = 1
 )
-hit_list <- list(zscore_reference = zscore, zscore = zscore_default,
+hit_list <- list(zscore_reference = zscore,
+    zscore_empirical = zscore_empirical,
+    zscore_one_sided = zscore_one_sided, zscore = zscore_default,
     camera = camera, fry = fry)
 hits <- summarise_hits(hit_list, fdr = 0.05)
 head(hits)
@@ -469,17 +501,21 @@ evaluate_hits <- function(result) {
 knitr::kable(bind_rows(lapply(hit_list, evaluate_hits), .id = "Method"))
 ```
 
-The two tests that compare each gene with all the others (the default
-Z-score test and CAMERA) are much more conservative than the test with the
-non-essential reference: they find less than half of the core essential
-genes, and the default Z-score test does not give a p-value below 0.05 to
-any of the held-out non-essential genes. Their reference is all the genes of the library, and here it is full of
-hits. This is partly an effect of the dataset: the subset keeps all the
-reference genes, so `r round(100 * mean(per_gene$Gene %in% essential))`% of
-its genes are core essential, against about 4% in the complete TKOv3
-library. On a genome-wide screen they should be less conservative. They need no
-reference genes, and their rankings are very close (Spearman correlation of
-the p-values above 0.99).
+The empirical null finds almost as many core essential genes as the
+non-essential reference, without reference genes and with very few held-out
+non-essential genes. The two tests that compare each gene with all the others
+(the default Z-score test and CAMERA) are much more conservative: they find
+less than half of the core essential genes, and the default Z-score test does
+not give a p-value below 0.05 to any of the held-out non-essential genes.
+Their reference is all the genes of the library, and here it is full of hits:
+the subset keeps all the reference genes, so
+`r round(100 * mean(per_gene$Gene %in% essential))`% of its genes are core
+essential, against about 4% in the complete TKOv3 library. They remain
+conservative on the complete library: there the default Z-score test found
+58% of the core essential genes at 5% FDR, the empirical null 90%
+(`"central"`) and 94% (`"one-sided"`), and the non-essential reference 96%.
+The default Z-score test and CAMERA rank the genes almost in the same way
+(Spearman correlation of the p-values above 0.99).
 
 FRY (`find_roast_hit()`) tests each gene on its own sgRNAs. It estimates the
 variability from the replicates of the model, so a single T0 sample is
@@ -526,7 +562,7 @@ genes known to have no effect on the selection.
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | `barcodes_per_gene()` |
 | Quality control | check the separation of essential and non-essential genes | `compute_screen_quality()`, `plot_reference_separation()` |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | `correct_crispr_bias()` |
-| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, `find_camera_hit()`, `find_roast_hit()`, `summarise_hits()` |
+| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, `plot_empirical_null()`, `find_camera_hit()`, `find_roast_hit()`, `summarise_hits()` |
 | Compare screens | scale to the reference genes | `scale_by_reference()` |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 
