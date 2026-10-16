@@ -56,6 +56,8 @@
   normalized counts, with the normalization chosen in `normalize_data()`
   ("cpm", "tmm" or "control"; counts per million when the counts have not
   been normalized).
+* `plot_barcode_lost()` drew the bars twice, an opaque layer under the one
+  with `alpha`, so `alpha` had no visible effect; the bars are drawn once.
 
 # ScreenR 1.15.14
 

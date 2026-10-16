@@ -64,7 +64,6 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
         x = .data$Sample, y = .data$LostBarcode,
         fill = .data$Sample
     )) +
-        geom_bar(stat = "identity", color = "black") +
         theme(legend.position = legende_position) +
         geom_bar(alpha = alpha, stat = "identity", color = "black") +
         geom_text(aes(label = .data$LostBarcode),

@@ -304,3 +304,12 @@ test_that("plot_boxplot orders the fill legend as the samples", {
         group_var = c("T0", "T3", "T18"), fill_var = "Treatment")
     expect_equal(levels(plot$data$Treatment), c("T0", "T3", "T18"))
 })
+
+test_that("plot_barcode_lost draws the bars once, with alpha", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    plot <- plot_barcode_lost(object, alpha = 0.3)
+    bars <- vapply(plot$layers, function(l) inherits(l$geom, "GeomBar"),
+        logical(1))
+    expect_equal(sum(bars), 1)
+    expect_equal(plot$layers[[which(bars)]]$aes_params$alpha, 0.3)
+})
