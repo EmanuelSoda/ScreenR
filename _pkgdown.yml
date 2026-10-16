@@ -138,6 +138,7 @@ reference:
     every gene.
   contents:
   - find_gene_zscore_hit
+  - plot_empirical_null
   - find_camera_hit
   - find_roast_hit
   - find_time_hit

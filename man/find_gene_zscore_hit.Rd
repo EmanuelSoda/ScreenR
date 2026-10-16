@@ -14,7 +14,9 @@ find_gene_zscore_hit(
   min_barcodes = 3,
   fdr = 0.05,
   fdr_method = c("BH", "storey"),
-  seed = NULL
+  seed = NULL,
+  reference = c("random", "empirical"),
+  empirical_fit = c("central", "one-sided")
 )
 }
 \arguments{
@@ -40,7 +42,8 @@ tested. Use only controls that behave like genes without effect (see
 Details); the default (NULL) uses all the barcodes.}
 
 \item{n_permutations}{The number of random barcode sets used to compute
-the p-values (default 1e5, at least 100).}
+the p-values (default 1e5, at least 100). Not used with
+reference = "empirical".}
 
 \item{min_barcodes}{Genes with fewer barcodes than this are not tested
 (default 3).}
@@ -57,12 +60,22 @@ have an effect).}
 \item{seed}{An optional random seed, to make the permutations
 reproducible. The random number state of the session is restored
 afterwards.}
+
+\item{reference}{How the null is obtained: "random" (default), random
+sets of barcodes (from all the barcodes, or from those of
+control_genes), or "empirical", an empirical null of the gene
+statistics estimated from the data (see Details).}
+
+\item{empirical_fit}{With reference = "empirical", how the null is
+fitted: "central" (default) or "one-sided" (see Details).}
 }
 \value{
 A tibble with one row for each hit and the columns Gene, NBarcodes
     (number of barcodes), Score (mean or median score of the barcodes),
     Log2FC (median log2 fold change of the barcodes), PValue and FDR,
-    ordered by p-value.
+    ordered by p-value. With reference = "empirical" it also has the
+    column Statistic (the standardized gene score) and the attribute
+    "null", the mean and standard deviation of the fitted null.
 }
 \description{
 Gene-level test for the Z-score method, with a p-value and a
@@ -97,6 +110,46 @@ Under the null hypothesis that the gene has no effect, its
     of genes known to have no effect (for example the non-essential
     genes); otherwise use the default.
 
+    \strong{Empirical null (reference = "empirical").} Instead of random
+    barcodes, the gene scores are compared with the distribution of the
+    scores of the genes without effect, estimated from the data (an
+    empirical null, as in Efron's locfdr). Each gene gets a statistic,
+    its score standardized by the median and the median absolute
+    deviation of all the barcode scores and by the square root of its
+    number of barcodes. Most genes have no effect, so the centre of the
+    distribution of these statistics is the null: a normal distribution is
+    fitted there (empirical_fit = "central": a parabola fitted to the log
+    density around its mode; "one-sided": the mode and the spread of the
+    statistics on the side without hits, above the mode for "Down"), and
+    the p-values come from it. Two things make it better than the random
+    barcodes in a dropout screen: the hits do not widen the null, and the
+    null includes the variation between genes. The barcodes of a gene
+    often vary together (the same knockdown efficiency, the same position
+    in the genome), so the scores of genes without effect vary more than
+    random sets of barcodes; the random barcodes ignore this and give too
+    small p-values. Use \code{\link{plot_empirical_null}} to check the fit.
+
+    In the benchmarks (core essential and non-essential genes of Hart et
+    al., half of the non-essential genes kept out to count the false
+    calls), in the genome-wide HAP1 CRISPR screen (TKOv3) the default
+    found 58\% of the core essential genes at 5\% FDR and the empirical
+    null 90\% ("central") and 94\% ("one-sided"), with 2 and 5
+    non-essential genes called. In the K562 shRNA screen the random
+    barcodes gave too small p-values: with control_genes 20\% of the
+    non-essential genes had a p-value below 0.05 (50 to 57 called), and
+    with the default 13\% when the essential genes were as rare as in a
+    genome-wide library. The empirical null kept this below 4\% (no
+    non-essential gene called) and found 30\% of the essential genes: the
+    shRNAs of many essential genes do not separate them from the genes
+    without effect. "central" never gave too small p-values; "one-sided"
+    has more power when the hits are well separated (CRISPR screens) but
+    was too conservative in the shRNA screen.
+
+    The empirical null needs most genes to be without effect, and enough
+    genes (hundreds) to estimate it. It is not used with control_genes.
+    The benchmark script is benchmark/realdata/empirical_null.R in the
+    GitHub repository.
+
     This replaces the rule of \code{\link{find_zscore_hit}} ("more than
     number_barcode barcodes below the median"), which flags about 17\% of
     the genes without any effect when genes have 10 barcodes and
@@ -109,9 +162,12 @@ table <- compute_metrics(object,
     day = "Time3"
 )
 find_gene_zscore_hit(table, fdr = 1, n_permutations = 1000, seed = 1)
+
+# Empirical null
+find_gene_zscore_hit(table, fdr = 1, reference = "empirical")
 }
 \seealso{
-\code{\link{compute_metrics}},
+\code{\link{plot_empirical_null}}, \code{\link{compute_metrics}},
     \code{\link{compute_barcode_statistics}},
     \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
     \code{\link{summarise_hits}}, \code{\link{find_discordant_barcodes}}

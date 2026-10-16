@@ -68,6 +68,20 @@
   by default they are equally spaced, as before).
 * `plot_trend()` and `plot_boxplot()` failed with several genes unless
   `nrow` or `ncol` was given; by default ggplot2 now chooses the layout.
+* `find_gene_zscore_hit(reference = "empirical")`: the gene scores are
+  compared with an empirical null, the distribution of the genes without
+  effect estimated from the centre of the distribution of the gene
+  statistics (`empirical_fit = "central"`, default, or `"one-sided"`). New
+  `plot_empirical_null()` shows the fit. The random barcode sets of the
+  default reference are conservative in dropout screens (the hits widen the
+  null) and ignore that the barcodes of a gene vary together, which gives
+  too small p-values in shRNA screens. In the genome-wide HAP1 CRISPR screen
+  the empirical null found 90% (central) and 94% (one-sided) of the core
+  essential genes at 5% FDR, against 58% with the default reference; in the
+  K562 shRNA screen it kept the share of non-essential genes with a p-value
+  below 0.05 under 4%, where the random barcodes reached 13% (default, with
+  genome-wide proportions of essential genes) and 20% (non-essential genes as
+  `control_genes`). See `benchmark/realdata/empirical_null.R`.
 
 # ScreenR 1.15.14
 
