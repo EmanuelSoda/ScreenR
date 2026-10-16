@@ -4,12 +4,13 @@ pkgdown_sha: ~
 articles:
   Analysis_Example: Analysis_Example.html
   Benchmark_MAGeCK: Benchmark_MAGeCK.html
+  Empirical_null: Empirical_null.html
   Improved_Statistics: Improved_Statistics.html
   Tutorial_1_Creating_the_object: Tutorial_1_Creating_the_object.html
   Tutorial_2_Quality_control: Tutorial_2_Quality_control.html
   Tutorial_3_Finding_hits: Tutorial_3_Finding_hits.html
   Tutorial_4_CRISPR_screens: Tutorial_4_CRISPR_screens.html
-last_built: 2026-10-15T15:24Z
+last_built: 2026-10-16T14:07Z
 urls:
   reference: https://emanuelsoda.github.io/ScreenR/reference
   article: https://emanuelsoda.github.io/ScreenR/articles

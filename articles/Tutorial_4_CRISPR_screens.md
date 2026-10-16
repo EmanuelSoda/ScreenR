@@ -550,10 +550,49 @@ called are not in the reference lists: HAP1 cells need many more genes
 than the core essential set, which contains only the genes essential in
 almost every cell line.
 
+### Without reference genes: the empirical null
+
+When no reference genes are available, `reference = "empirical"`
+estimates the scores of the genes without effect from the data. Most
+genes have no effect, so the centre of the distribution of the gene
+statistics is the null; a normal distribution is fitted there and gives
+the p-values. The hits, in the tail, do not widen it.
+`empirical_fit = "one-sided"` estimates the spread from the side without
+hits only (above the centre for depleted genes), which gives more power
+when the hits are well separated, as in CRISPR screens; the default,
+`"central"`, is the safer choice (see
+[`?find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)).
+
+``` r
+
+zscore_empirical <- find_gene_zscore_hit(statistics,
+    reference = "empirical", fdr = 1
+)
+zscore_one_sided <- find_gene_zscore_hit(statistics,
+    reference = "empirical", empirical_fit = "one-sided", fdr = 1
+)
+attr(zscore_one_sided, "null")
+#>      mean        sd 
+#> 0.5670556 0.6900248
+```
+
+[`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
+shows the gene statistics and the fitted null, which should follow the
+centre of the distribution; the depleted genes are in the tail on the
+left:
+
+``` r
+
+plot_empirical_null(statistics, empirical_fit = "one-sided")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/empirical-null-plot-1.png)
+
 ### Other methods and their consensus
 
-Without reference genes, use the default reference of the Z-score test,
-CAMERA and FRY. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
+The other methods need no reference genes either: the default reference
+of the Z-score test (random sets of sgRNAs of all the genes), CAMERA and
+FRY. `number_barcode = 2` keeps the genes with 3 or 4 sgRNAs.
 
 ``` r
 
@@ -564,24 +603,27 @@ camera <- find_camera_hit(object, design, contrast,
 fry <- find_roast_hit(object, design, contrast,
     method = "fry", number_barcode = 2, fdr = 1
 )
-hit_list <- list(zscore_reference = zscore, zscore = zscore_default,
+hit_list <- list(zscore_reference = zscore,
+    zscore_empirical = zscore_empirical,
+    zscore_one_sided = zscore_one_sided, zscore = zscore_default,
     camera = camera, fry = fry)
 hits <- summarise_hits(hit_list, fdr = 0.05)
 head(hits)
-#> # A tibble: 6 × 8
-#>   Gene    FDR_zscore_reference FDR_zscore FDR_camera FDR_fry NMethods  MaxFDR
-#>   <chr>                  <dbl>      <dbl>      <dbl>   <dbl>    <dbl>   <dbl>
-#> 1 ATP6V1F            0.0000476    0.00419 0.0000143  0.00117        4 0.00419
-#> 2 BUB3               0.0000476    0.00419 0.00000454 0.00104        4 0.00419
-#> 3 CPSF1              0.0000476    0.00419 0.000930   0.00214        4 0.00419
-#> 4 DHX15              0.0000476    0.00419 0.000290   0.00117        4 0.00419
-#> 5 DPAGT1             0.0000476    0.00419 0.000183   0.00311        4 0.00419
-#> 6 EIF3A              0.0000476    0.00419 0.000252   0.00214        4 0.00419
-#> # ℹ 1 more variable: Hit <lgl>
+#> # A tibble: 6 × 10
+#>   Gene    FDR_zscore_reference FDR_zscore_empirical FDR_zscore_one_sided
+#>   <chr>                  <dbl>                <dbl>                <dbl>
+#> 1 ATP6V1F            0.0000476         0.0000000236             4.47e-14
+#> 2 BUB3               0.0000476         0.0000000130             1.47e-14
+#> 3 CPSF1              0.0000476         0.0000000345             9.08e-14
+#> 4 DHX15              0.0000476         0.0000000102             8.10e-15
+#> 5 DPAGT1             0.0000476         0.0000000262             5.44e-14
+#> 6 EIF3A              0.0000476         0.0000000101             6.35e-15
+#> # ℹ 6 more variables: FDR_zscore <dbl>, FDR_camera <dbl>, FDR_fry <dbl>,
+#> #   NMethods <dbl>, MaxFDR <dbl>, Hit <lgl>
 table(hits$NMethods)
 #> 
-#>    0    1    2    3    4 
-#> 2434  203  313   69  332
+#>    0    1    2    3    4    5    6 
+#> 2415   22   98  121  294   69  332
 ```
 
 ``` r
@@ -601,21 +643,27 @@ knitr::kable(bind_rows(lapply(hit_list, evaluate_hits), .id = "Method"))
 | Method           | Genes called | Core essential | Held-out non-essential |
 |:-----------------|-------------:|---------------:|-----------------------:|
 | zscore_reference |          911 |            619 |                      5 |
+| zscore_empirical |          798 |            596 |                      3 |
+| zscore_one_sided |          932 |            619 |                      7 |
 | zscore           |          352 |            305 |                      0 |
 | camera           |          381 |            326 |                      0 |
 | fry              |          720 |            552 |                      1 |
 
-The two tests that compare each gene with all the others (the default
-Z-score test and CAMERA) are much more conservative than the test with
-the non-essential reference: they find less than half of the core
-essential genes, and the default Z-score test does not give a p-value
-below 0.05 to any of the held-out non-essential genes. Their reference
-is all the genes of the library, and here it is full of hits. This is
-partly an effect of the dataset: the subset keeps all the reference
-genes, so 19% of its genes are core essential, against about 4% in the
-complete TKOv3 library. On a genome-wide screen they should be less
-conservative. They need no reference genes, and their rankings are very
-close (Spearman correlation of the p-values above 0.99).
+The empirical null finds almost as many core essential genes as the
+non-essential reference, without reference genes and with very few
+held-out non-essential genes. The two tests that compare each gene with
+all the others (the default Z-score test and CAMERA) are much more
+conservative: they find less than half of the core essential genes, and
+the default Z-score test does not give a p-value below 0.05 to any of
+the held-out non-essential genes. Their reference is all the genes of
+the library, and here it is full of hits: the subset keeps all the
+reference genes, so 19% of its genes are core essential, against about
+4% in the complete TKOv3 library. They remain conservative on the
+complete library: there the default Z-score test found 58% of the core
+essential genes at 5% FDR, the empirical null 90% (`"central"`) and 94%
+(`"one-sided"`), and the non-essential reference 96%. The default
+Z-score test and CAMERA rank the genes almost in the same way (Spearman
+correlation of the p-values above 0.99).
 
 FRY
 ([`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md))
@@ -675,7 +723,7 @@ or control genes known to have no effect on the selection.
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md) |
 | Quality control | check the separation of essential and non-essential genes | [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md) |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md) |
-| Hits | use the non-essential genes as reference when available | `find_gene_zscore_hit(control_genes = )`, [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
+| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md), [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
 | Compare screens | scale to the reference genes | [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md) |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 

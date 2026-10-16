@@ -59,6 +59,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
+    <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul>
 </li>
@@ -96,7 +97,7 @@ Ceccacci</h4>
 Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2026-10-15</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/master/vignettes/Tutorial_3_Finding_hits.Rmd" class="external-link"><code>vignettes/Tutorial_3_Finding_hits.Rmd</code></a></small>
       <div class="d-none name"><code>Tutorial_3_Finding_hits.Rmd</code></div>
@@ -378,6 +379,15 @@ controls have the same scores as genes known to have no effect; when in
 doubt, keep the default. <code>statistic = "median"</code> uses the
 median instead of the mean, which is less affected by a single barcode
 with a strong (possibly off-target) effect.</p>
+<p>With <code>reference = "empirical"</code> the gene scores are
+compared with an empirical null instead: the distribution of the scores
+of the genes without effect, estimated from the centre of the
+distribution of all the genes (<code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code> shows
+it). The hits do not make it conservative, and it accounts for the
+barcodes of a gene varying together, which makes the random sets of
+barcodes give too small p-values, especially in shRNA screens (see
+<code><a href="../reference/find_gene_zscore_hit.html">?find_gene_zscore_hit</a></code> and <a href="Tutorial_4_CRISPR_screens.html">Tutorial 4</a>). It needs a
+library with hundreds of genes, most of them without effect.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gene_zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">metrics_time4</span>, fdr <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene_zscore</span><span class="op">)</span></span>

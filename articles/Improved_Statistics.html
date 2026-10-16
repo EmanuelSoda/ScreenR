@@ -59,6 +59,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
+    <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul>
 </li>
@@ -96,7 +97,7 @@ Ceccacci</h4>
 Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2026-10-15</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/master/vignettes/Improved_Statistics.Rmd" class="external-link"><code>vignettes/Improved_Statistics.Rmd</code></a></small>
       <div class="d-none name"><code>Improved_Statistics.Rmd</code></div>
@@ -432,6 +433,20 @@ in the K562 screen distributed with ScreenR they made hundreds of
 non-essential genes look like hits. Use them only after checking them,
 for example against known non-essential genes. The p-values are
 corrected with the Benjamini-Hochberg (or Storey) method.</p>
+<p>The random sets of barcodes assume that the barcodes of a gene
+without effect behave like barcodes taken at random. They often vary
+together (similar knockdown, same region of the genome), so the scores
+of the genes without effect vary more than those of random sets: in the
+K562 screen, with the non-essential genes as controls, 20% of the other
+non-essential genes had a p-value below 0.05.
+<code>reference = "empirical"</code> compares the gene scores with an
+empirical null estimated from the centre of the distribution of the gene
+statistics instead, which includes this variation and is not widened by
+the hits; <code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code> shows the fit. In the
+benchmarks it kept the false positives at or below the nominal rate in
+the HAP1 CRISPR and K562 shRNA screens and, in the genome-wide HAP1
+screen, found 90% of the core essential genes against 58% with the
+default reference.</p>
 <p>The log2 fold changes are now computed with a pseudocount
 (<code>compute_metrics(pseudocount = 0.5)</code>, in counts per
 million), so barcodes with zero reads in the treated samples get a

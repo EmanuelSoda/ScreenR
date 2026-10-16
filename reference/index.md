@@ -114,6 +114,8 @@ every gene.
 
 - [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
   : Find hits with a gene-level Z-score test
+- [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
+  : Plot the empirical null of the gene statistics
 - [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md)
   : Find hits with CAMERA
 - [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
@@ -138,7 +140,7 @@ Compare the methods and check the hits at the barcode level.
 - [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
   : Plot the trend of the barcodes of genes over time
 - [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-  : Plot the trend of genes over the samples
+  : Plot the trend of genes over time
 - [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
   : Plot the distribution of the barcode log2 fold changes
 - [`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)

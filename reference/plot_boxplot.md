@@ -13,8 +13,8 @@ plot_boxplot(
   genes,
   group_var,
   alpha = 0.5,
-  nrow = 1,
-  ncol = 1,
+  nrow = NULL,
+  ncol = NULL,
   fill_var = "Sample",
   type = "boxplot",
   scales = "free"
@@ -48,7 +48,8 @@ plot_boxplot(
 
 - ncol:
 
-  The number of columns of panels, when several genes are plotted.
+  The number of columns of panels, when several genes are plotted. By
+  default (NULL) ggplot2 chooses nrow and ncol.
 
 - fill_var:
 

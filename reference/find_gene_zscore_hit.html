@@ -46,6 +46,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
+    <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -87,7 +88,9 @@
 <span>  min_barcodes <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  fdr <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  fdr_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"storey"</span><span class="op">)</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random"</span>, <span class="st">"empirical"</span><span class="op">)</span>,</span>
+<span>  empirical_fit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"central"</span>, <span class="st">"one-sided"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,7 +131,8 @@ Details); the default (NULL) uses all the barcodes.</p></dd>
 
 <dt id="arg-n-permutations">n_permutations<a class="anchor" aria-label="anchor" href="#arg-n-permutations"></a></dt>
 <dd><p>The number of random barcode sets used to compute
-the p-values (default 1e5, at least 100).</p></dd>
+the p-values (default 1e5, at least 100). Not used with
+reference = "empirical".</p></dd>
 
 
 <dt id="arg-min-barcodes">min_barcodes<a class="anchor" aria-label="anchor" href="#arg-min-barcodes"></a></dt>
@@ -154,13 +158,27 @@ have an effect).</p></dd>
 reproducible. The random number state of the session is restored
 afterwards.</p></dd>
 
+
+<dt id="arg-reference">reference<a class="anchor" aria-label="anchor" href="#arg-reference"></a></dt>
+<dd><p>How the null is obtained: "random" (default), random
+sets of barcodes (from all the barcodes, or from those of
+control_genes), or "empirical", an empirical null of the gene
+statistics estimated from the data (see Details).</p></dd>
+
+
+<dt id="arg-empirical-fit">empirical_fit<a class="anchor" aria-label="anchor" href="#arg-empirical-fit"></a></dt>
+<dd><p>With reference = "empirical", how the null is
+fitted: "central" (default) or "one-sided" (see Details).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with one row for each hit and the columns Gene, NBarcodes
     (number of barcodes), Score (mean or median score of the barcodes),
     Log2FC (median log2 fold change of the barcodes), PValue and FDR,
-    ordered by p-value.</p>
+    ordered by p-value. With reference = "empirical" it also has the
+    column Statistic (the standardized gene score) and the attribute
+    "null", the mean and standard deviation of the fitted null.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -185,6 +203,47 @@ afterwards.</p></dd>
     not. Before using control genes, check that their scores match those
     of genes known to have no effect (for example the non-essential
     genes); otherwise use the default.</p>
+<p><strong>Empirical null (reference = "empirical").</strong> Instead of random
+    barcodes, the gene scores are compared with the distribution of the
+    scores of the genes without effect, estimated from the data (an
+    empirical null, as in Efron's locfdr). Each gene gets a statistic,
+    its score standardized by the median and the median absolute
+    deviation of all the barcode scores and by the square root of its
+    number of barcodes. Most genes have no effect, so the centre of the
+    distribution of these statistics is the null: a normal distribution is
+    fitted there (empirical_fit = "central": a parabola fitted to the log
+    density around its mode; "one-sided": the mode and the spread of the
+    statistics on the side without hits, above the mode for "Down"), and
+    the p-values come from it. Two things make it better than the random
+    barcodes in a dropout screen: the hits do not widen the null, and the
+    null includes the variation between genes. The barcodes of a gene
+    often vary together (the same knockdown efficiency, the same position
+    in the genome), so the scores of genes without effect vary more than
+    random sets of barcodes; the random barcodes ignore this and give too
+    small p-values. Use <code><a href="plot_empirical_null.html">plot_empirical_null</a></code> to check the fit.</p>
+<p>In the benchmarks (core essential and non-essential genes of Hart et
+    al., half of the non-essential genes kept out to count the false
+    calls), in the genome-wide HAP1 CRISPR screen (TKOv3) the default
+    found 58% of the core essential genes at 5% FDR and the empirical
+    null 90% ("central") and 94% ("one-sided"), with 2 and 5
+    non-essential genes called. In the K562 shRNA screen the random
+    barcodes gave too small p-values: with control_genes 20% of the
+    non-essential genes had a p-value below 0.05 (50 to 57 called), and
+    with the default 13% when the essential genes were as rare as in a
+    genome-wide library. The empirical null kept this below 4% (no
+    non-essential gene called) and found 30% of the essential genes: the
+    shRNAs of many essential genes do not separate them from the genes
+    without effect. "central" never gave too small p-values; "one-sided"
+    has more power when the hits are well separated (CRISPR screens) but
+    was too conservative in the shRNA screen.</p>
+<p>The empirical null needs most genes to be without effect, and enough
+    genes (hundreds) to estimate it. It is not used with control_genes.
+    The benchmark script is benchmark/realdata/empirical_null.R in the
+    GitHub repository. The vignette "Choosing the reference of the
+    gene-level test" (<code><a href="../articles/Empirical_null.html">vignette("Empirical_null", package =
+    "ScreenR")</a></code>) explains when to use each reference; we suggest
+    reference = "empirical" for libraries with hundreds of genes, most of
+    them without effect.</p>
 <p>This replaces the rule of <code><a href="find_zscore_hit.html">find_zscore_hit</a></code> ("more than
     number_barcode barcodes below the median"), which flags about 17% of
     the genes without any effect when genes have 10 barcodes and
@@ -192,7 +251,7 @@ afterwards.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="compute_metrics.html">compute_metrics</a></code>,
+    <div class="dont-index"><p><code><a href="plot_empirical_null.html">plot_empirical_null</a></code>, <code><a href="compute_metrics.html">compute_metrics</a></code>,
     <code><a href="compute_barcode_statistics.html">compute_barcode_statistics</a></code>,
     <code><a href="find_camera_hit.html">find_camera_hit</a></code>, <code><a href="find_roast_hit.html">find_roast_hit</a></code>,
     <code><a href="summarise_hits.html">summarise_hits</a></code>, <code><a href="find_discordant_barcodes.html">find_discordant_barcodes</a></code></p></div>
@@ -219,6 +278,23 @@ afterwards.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Gene_116        10 -<span style="color: #BB0000;">0.636</span> -<span style="color: #BB0000;">0.275</span>  0.025<span style="text-decoration: underline;">0</span>  0.839</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Gene_340        10 -<span style="color: #BB0000;">0.637</span> -<span style="color: #BB0000;">0.115</span>  0.025<span style="text-decoration: underline;">0</span>  0.839</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Gene_353        10 -<span style="color: #BB0000;">0.636</span> -<span style="color: #BB0000;">0.176</span>  0.025<span style="text-decoration: underline;">0</span>  0.839</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 524 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Empirical null</span></span></span>
+<span class="r-in"><span><span class="fu">find_gene_zscore_hit</span><span class="op">(</span><span class="va">table</span>, fdr <span class="op">=</span> <span class="fl">1</span>, reference <span class="op">=</span> <span class="st">"empirical"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 534 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Gene     NBarcodes  Score  Log2FC Statistic    PValue    FDR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Gene_377        10 -<span style="color: #BB0000;">1.11</span>  -<span style="color: #BB0000;">0.259</span>      -<span style="color: #BB0000;">4.86</span> 0.000<span style="text-decoration: underline;">096</span>3 0.026<span style="text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Gene_500         9 -<span style="color: #BB0000;">1.17</span>  -<span style="color: #BB0000;">0.152</span>      -<span style="color: #BB0000;">4.86</span> 0.000<span style="text-decoration: underline;">097</span>8 0.026<span style="text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Gene_511         9 -<span style="color: #BB0000;">0.906</span> -<span style="color: #BB0000;">0.203</span>      -<span style="color: #BB0000;">3.77</span> 0.001<span style="text-decoration: underline;">95</span>   0.274 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Gene_86         10 -<span style="color: #BB0000;">0.855</span> -<span style="color: #BB0000;">0.340</span>      -<span style="color: #BB0000;">3.75</span> 0.002<span style="text-decoration: underline;">05</span>   0.274 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Gene_173        10 -<span style="color: #BB0000;">0.724</span> -<span style="color: #BB0000;">0.221</span>      -<span style="color: #BB0000;">3.18</span> 0.007<span style="text-decoration: underline;">49</span>   0.668 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Gene_245        32 -<span style="color: #BB0000;">0.402</span> -<span style="color: #BB0000;">0.016</span><span style="color: #BB0000; text-decoration: underline;">2</span>     -<span style="color: #BB0000;">3.17</span> 0.007<span style="text-decoration: underline;">67</span>   0.668 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Gene_316        10 -<span style="color: #BB0000;">0.707</span> -<span style="color: #BB0000;">0.117</span>      -<span style="color: #BB0000;">3.10</span> 0.008<span style="text-decoration: underline;">75</span>   0.668 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Gene_438         9 -<span style="color: #BB0000;">0.675</span> -<span style="color: #BB0000;">0.099</span><span style="color: #BB0000; text-decoration: underline;">5</span>     -<span style="color: #BB0000;">2.81</span> 0.015<span style="text-decoration: underline;">7</span>    0.725 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Gene_340        10 -<span style="color: #BB0000;">0.637</span> -<span style="color: #BB0000;">0.115</span>      -<span style="color: #BB0000;">2.80</span> 0.016<span style="text-decoration: underline;">2</span>    0.725 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Gene_353        10 -<span style="color: #BB0000;">0.636</span> -<span style="color: #BB0000;">0.176</span>      -<span style="color: #BB0000;">2.79</span> 0.016<span style="text-decoration: underline;">3</span>    0.725 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 524 more rows</span></span>
 </code></pre></div>
     </div>

@@ -24,7 +24,9 @@ find_gene_zscore_hit(
   min_barcodes = 3,
   fdr = 0.05,
   fdr_method = c("BH", "storey"),
-  seed = NULL
+  seed = NULL,
+  reference = c("random", "empirical"),
+  empirical_fit = c("central", "one-sided")
 )
 ```
 
@@ -63,7 +65,7 @@ find_gene_zscore_hit(
 - n_permutations:
 
   The number of random barcode sets used to compute the p-values
-  (default 1e5, at least 100).
+  (default 1e5, at least 100). Not used with reference = "empirical".
 
 - min_barcodes:
 
@@ -87,12 +89,26 @@ find_gene_zscore_hit(
   An optional random seed, to make the permutations reproducible. The
   random number state of the session is restored afterwards.
 
+- reference:
+
+  How the null is obtained: "random" (default), random sets of barcodes
+  (from all the barcodes, or from those of control_genes), or
+  "empirical", an empirical null of the gene statistics estimated from
+  the data (see Details).
+
+- empirical_fit:
+
+  With reference = "empirical", how the null is fitted: "central"
+  (default) or "one-sided" (see Details).
+
 ## Value
 
 A tibble with one row for each hit and the columns Gene, NBarcodes
 (number of barcodes), Score (mean or median score of the barcodes),
 Log2FC (median log2 fold change of the barcodes), PValue and FDR,
-ordered by p-value.
+ordered by p-value. With reference = "empirical" it also has the column
+Statistic (the standardized gene score) and the attribute "null", the
+mean and standard deviation of the fitted null.
 
 ## Details
 
@@ -119,6 +135,49 @@ while the default reference did not. Before using control genes, check
 that their scores match those of genes known to have no effect (for
 example the non-essential genes); otherwise use the default.
 
+**Empirical null (reference = "empirical").** Instead of random
+barcodes, the gene scores are compared with the distribution of the
+scores of the genes without effect, estimated from the data (an
+empirical null, as in Efron's locfdr). Each gene gets a statistic, its
+score standardized by the median and the median absolute deviation of
+all the barcode scores and by the square root of its number of barcodes.
+Most genes have no effect, so the centre of the distribution of these
+statistics is the null: a normal distribution is fitted there
+(empirical_fit = "central": a parabola fitted to the log density around
+its mode; "one-sided": the mode and the spread of the statistics on the
+side without hits, above the mode for "Down"), and the p-values come
+from it. Two things make it better than the random barcodes in a dropout
+screen: the hits do not widen the null, and the null includes the
+variation between genes. The barcodes of a gene often vary together (the
+same knockdown efficiency, the same position in the genome), so the
+scores of genes without effect vary more than random sets of barcodes;
+the random barcodes ignore this and give too small p-values. Use
+[`plot_empirical_null`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
+to check the fit.
+
+In the benchmarks (core essential and non-essential genes of Hart et
+al., half of the non-essential genes kept out to count the false calls),
+in the genome-wide HAP1 CRISPR screen (TKOv3) the default found 58% of
+the core essential genes at 5% FDR and the empirical null 90%
+("central") and 94% ("one-sided"), with 2 and 5 non-essential genes
+called. In the K562 shRNA screen the random barcodes gave too small
+p-values: with control_genes 20% of the non-essential genes had a
+p-value below 0.05 (50 to 57 called), and with the default 13% when the
+essential genes were as rare as in a genome-wide library. The empirical
+null kept this below 4% (no non-essential gene called) and found 30% of
+the essential genes: the shRNAs of many essential genes do not separate
+them from the genes without effect. "central" never gave too small
+p-values; "one-sided" has more power when the hits are well separated
+(CRISPR screens) but was too conservative in the shRNA screen.
+
+The empirical null needs most genes to be without effect, and enough
+genes (hundreds) to estimate it. It is not used with control_genes. The
+benchmark script is benchmark/realdata/empirical_null.R in the GitHub
+repository. The vignette "Choosing the reference of the gene-level test"
+([`vignette("Empirical_null", package = "ScreenR")`](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.md))
+explains when to use each reference; we suggest reference = "empirical"
+for libraries with hundreds of genes, most of them without effect.
+
 This replaces the rule of
 [`find_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md)
 ("more than number_barcode barcodes below the median"), which flags
@@ -127,6 +186,7 @@ and number_barcode = 6.
 
 ## See also
 
+[`plot_empirical_null`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md),
 [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
 [`compute_barcode_statistics`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md),
 [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md),
@@ -156,5 +216,22 @@ find_gene_zscore_hit(table, fdr = 1, n_permutations = 1000, seed = 1)
 #>  8 Gene_116        10 -0.636 -0.275  0.0250  0.839
 #>  9 Gene_340        10 -0.637 -0.115  0.0250  0.839
 #> 10 Gene_353        10 -0.636 -0.176  0.0250  0.839
+#> # ℹ 524 more rows
+
+# Empirical null
+find_gene_zscore_hit(table, fdr = 1, reference = "empirical")
+#> # A tibble: 534 × 7
+#>    Gene     NBarcodes  Score  Log2FC Statistic    PValue    FDR
+#>    <chr>        <int>  <dbl>   <dbl>     <dbl>     <dbl>  <dbl>
+#>  1 Gene_377        10 -1.11  -0.259      -4.86 0.0000963 0.0261
+#>  2 Gene_500         9 -1.17  -0.152      -4.86 0.0000978 0.0261
+#>  3 Gene_511         9 -0.906 -0.203      -3.77 0.00195   0.274 
+#>  4 Gene_86         10 -0.855 -0.340      -3.75 0.00205   0.274 
+#>  5 Gene_173        10 -0.724 -0.221      -3.18 0.00749   0.668 
+#>  6 Gene_245        32 -0.402 -0.0162     -3.17 0.00767   0.668 
+#>  7 Gene_316        10 -0.707 -0.117      -3.10 0.00875   0.668 
+#>  8 Gene_438         9 -0.675 -0.0995     -2.81 0.0157    0.725 
+#>  9 Gene_340        10 -0.637 -0.115      -2.80 0.0162    0.725 
+#> 10 Gene_353        10 -0.636 -0.176      -2.79 0.0163    0.725 
 #> # ℹ 524 more rows
 ```

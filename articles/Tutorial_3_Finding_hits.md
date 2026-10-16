@@ -213,6 +213,19 @@ effect; when in doubt, keep the default. `statistic = "median"` uses the
 median instead of the mean, which is less affected by a single barcode
 with a strong (possibly off-target) effect.
 
+With `reference = "empirical"` the gene scores are compared with an
+empirical null instead: the distribution of the scores of the genes
+without effect, estimated from the centre of the distribution of all the
+genes
+([`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
+shows it). The hits do not make it conservative, and it accounts for the
+barcodes of a gene varying together, which makes the random sets of
+barcodes give too small p-values, especially in shRNA screens (see
+[`?find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
+and [Tutorial
+4](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.md)).
+It needs a library with hundreds of genes, most of them without effect.
+
 ``` r
 
 gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1, seed = 1)
