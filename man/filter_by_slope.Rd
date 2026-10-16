@@ -10,7 +10,9 @@ filter_by_slope(
   group_var_treatment,
   group_var_control,
   slope_control = NULL,
-  slope_treatment = NULL
+  slope_treatment = NULL,
+  time_column = "Day",
+  time = NULL
 )
 }
 \arguments{
@@ -36,6 +38,15 @@ threshold).}
 \item{slope_treatment}{An optional threshold: genes whose treatment slope
 is smaller than this in absolute value are removed. Default NULL (no
 threshold).}
+
+\item{time_column}{The column of the data table with the time point of
+each sample: "Day" (default) or, for example, "Treatment" when the
+time points are described there. See \code{\link{compute_slope}}.}
+
+\item{time}{An optional named numeric vector with the time of each time
+point, for example c(T0 = 0, T3 = 3, T18 = 18), so that the slopes
+are per unit of time. By default the time points are numbered 1, 2,
+... in the order of the samples. See \code{\link{compute_slope}}.}
 }
 \value{
 A tibble with the columns Gene, slope_control and slope_treatment,

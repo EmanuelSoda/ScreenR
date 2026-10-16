@@ -58,6 +58,16 @@
   been normalized).
 * `plot_barcode_lost()` drew the bars twice, an opaque layer under the one
   with `alpha`, so `alpha` had no visible effect; the bars are drawn once.
+* `plot_trend()` draws the samples at their time point instead of one
+  position per sample, so replicates share the same time and the line is
+  the one of `compute_slope()` (used by `filter_by_slope()`); before, the
+  line was fitted along the order of the samples. New arguments of
+  `plot_trend()`, `compute_slope()` and `filter_by_slope()`: `time_column`
+  (the column with the time points, "Day" by default) and `time` (the real
+  times of the time points, for example `c(T0 = 0, T3 = 3, T18 = 18)`;
+  by default they are equally spaced, as before).
+* `plot_trend()` and `plot_boxplot()` failed with several genes unless
+  `nrow` or `ncol` was given; by default ggplot2 now chooses the layout.
 
 # ScreenR 1.15.14
 

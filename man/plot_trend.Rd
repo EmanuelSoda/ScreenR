@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_trend.R
 \name{plot_trend}
 \alias{plot_trend}
-\title{Plot the trend of genes over the samples}
+\title{Plot the trend of genes over time}
 \usage{
 plot_trend(
   screenR_Object,
@@ -12,9 +12,11 @@ plot_trend(
   se = FALSE,
   point_size = 1,
   line_size = 1,
-  nrow = 1,
-  ncol = 1,
-  scales = "free"
+  nrow = NULL,
+  ncol = NULL,
+  scales = "free",
+  time_column = "Day",
+  time = NULL
 )
 }
 \arguments{
@@ -40,19 +42,35 @@ Default FALSE.}
 \item{nrow}{The number of rows of panels, when several genes are plotted.}
 
 \item{ncol}{The number of columns of panels, when several genes are
-plotted.}
+plotted. By default (NULL) ggplot2 chooses nrow and ncol.}
 
 \item{scales}{The scales of the panels: "free" (default), "fixed",
 "free_x" or "free_y".}
+
+\item{time_column}{The column of the data table with the time point of
+each sample: "Day" (default) or, for example, "Treatment" when the
+time points are described there.}
+
+\item{time}{An optional named numeric vector with the time of each time
+point (the names are the values of time_column), for example
+c(T0 = 0, T3 = 3, T18 = 18). By default the time points are equally
+spaced, in the order of the samples.}
 }
 \value{
 A ggplot object.
 }
 \description{
 Plots, for the given genes, the mean normalized count of their
-    barcodes in each sample (taken from the data table), with a regression
-    line. It shows whether a hit decreases (or increases) over time in the
-    selected samples.
+    barcodes in each sample (taken from the data table) against the time
+    point of the sample, with a regression line. It shows whether a hit
+    decreases (or increases) over time in the selected samples. The slope
+    of the line is the one computed by \code{\link{compute_slope}} and
+    used by \code{\link{filter_by_slope}}.
+}
+\details{
+Replicates of the same time point are drawn at the same time. By
+    default the time points are numbered 1, 2, ... in the order of the
+    samples (equally spaced); give time to place them at their real times.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -63,6 +81,12 @@ plot_trend(object,
     genes = c("Gene_42", "Gene_100"),
     group_var = c("T1", "T2", "TRT"),
     nrow = 2
+)
+
+# With the real times of the time points
+plot_trend(object,
+    genes = "Gene_42", group_var = c("T1", "T2", "TRT"),
+    time = c(T1 = 0, T2 = 2, Time3 = 7, Time4 = 14)
 )
 }
 \seealso{

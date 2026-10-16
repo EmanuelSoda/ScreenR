@@ -4,7 +4,13 @@
 \alias{compute_trend}
 \title{Compute the trend of genes}
 \usage{
-compute_trend(screenR_Object, genes, group_var)
+compute_trend(
+  screenR_Object,
+  genes,
+  group_var,
+  time_column = "Day",
+  time = NULL
+)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
@@ -13,12 +19,19 @@ compute_trend(screenR_Object, genes, group_var)
 \item{genes}{The names of the genes.}
 
 \item{group_var}{The values of the Treatment column of the samples to use.}
+
+\item{time_column}{The column of the data table with the time point of
+each sample.}
+
+\item{time}{NULL or a named numeric vector with the time of each time
+point.}
 }
 \value{
-A tibble with the columns Sample, Gene and Frequency.
+A tibble with the columns Sample, Gene, Frequency and Time.
 }
 \description{
 Internal function that computes, for each gene and sample, the
-    mean normalized count of the barcodes of the gene.
+    mean normalized count of the barcodes of the gene, and the time of the
+    sample (see \code{\link{encode_time}}).
 }
 \keyword{internal}

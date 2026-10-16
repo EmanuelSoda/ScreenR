@@ -313,3 +313,14 @@ test_that("plot_barcode_lost draws the bars once, with alpha", {
     expect_equal(sum(bars), 1)
     expect_equal(plot$layers[[which(bars)]]$aes_params$alpha, 0.3)
 })
+
+test_that("plot_boxplot and plot_trend draw several genes by default", {
+    object <- get0("object", envir = asNamespace("ScreenR"))
+    object <- compute_data_table(normalize_data(object))
+    genes <- c("Gene_1", "Gene_2", "Gene_3")
+    groups <- c("T1", "T2", "TRT")
+    expect_silent(ggplot2::ggplot_build(
+        plot_boxplot(object, genes = genes, group_var = groups)))
+    expect_silent(ggplot2::ggplot_build(
+        plot_trend(object, genes = genes, group_var = groups)))
+})

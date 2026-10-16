@@ -30,6 +30,13 @@
 #'     samples.
 #' @param group_var_control The values of the Treatment column of the data
 #'     table of the samples used for the control trend.
+#' @param time_column The column of the data table with the time point of
+#'     each sample: "Day" (default) or, for example, "Treatment" when the
+#'     time points are described there. See \code{\link{compute_slope}}.
+#' @param time An optional named numeric vector with the time of each time
+#'     point, for example c(T0 = 0, T3 = 3, T18 = 18), so that the slopes
+#'     are per unit of time. By default the time points are numbered 1, 2,
+#'     ... in the order of the samples. See \code{\link{compute_slope}}.
 #' @return A tibble with the columns Gene, slope_control and slope_treatment,
 #'     with one row for each gene that passes the filter.
 #' @seealso \code{\link{compute_slope}}, \code{\link{filter_by_variance}},
@@ -46,17 +53,20 @@
 #'     slope_control = 0.5, slope_treatment = 1
 #' )
 filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
-    group_var_control, slope_control = NULL, slope_treatment = NULL) {
+    group_var_control, slope_control = NULL, slope_treatment = NULL,
+    time_column = "Day", time = NULL) {
 
     # Compute the slope of the hits in the treatment Samples
     slope_trt <- ScreenR::compute_slope(screenR_Object, genes,
-        group_var = group_var_treatment
+        group_var = group_var_treatment, time_column = time_column,
+        time = time
     )
 
     
     # Compute the slope of the hits in the control Samples
     slope_contr <- ScreenR::compute_slope(screenR_Object, genes,
-        group_var = group_var_control
+        group_var = group_var_control, time_column = time_column,
+        time = time
     )
 
     data <- screenR_Object@data_table
@@ -103,11 +113,15 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @title Compute the slope of the trend of genes
 #' @description Computes, for each gene, the slope of a regression line of the
 #'     normalized counts (Frequency column of the data table) of its barcodes
-#'     over the time points. The time points (Day column of the data table)
-#'     are numbered 1, 2, ... in the order of the samples, so they are treated
-#'     as equally spaced, and replicates of the same time point share the same
-#'     number. Only the samples whose Treatment is in group_var are used. It
-#'     is used by \code{\link{filter_by_slope}}.
+#'     over time. Only the samples whose Treatment is in group_var are used.
+#'     It is used by \code{\link{filter_by_slope}}, and it is the slope of
+#'     the line drawn by \code{\link{plot_trend}}.
+#' @details The time of each sample is taken from its time point, in the
+#'     time_column column of the data table, so replicates of the same time
+#'     point share the same time. By default the time points are numbered 1,
+#'     2, ... in the order of the samples, so they are treated as equally
+#'     spaced; give time to use the real times (for example days 0, 3 and
+#'     18), and the slope is then per unit of time.
 #' @importFrom rlang .data
 #' @importFrom dplyr ungroup
 #' @param group_var The values of the Treatment column of the data table (see
@@ -115,6 +129,13 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param genes The genes for which the slope is computed.
+#' @param time_column The column of the data table with the time point of
+#'     each sample: "Day" (default) or, for example, "Treatment" when the
+#'     time points are described there.
+#' @param time An optional named numeric vector with the time of each time
+#'     point (the names are the values of time_column), for example
+#'     c(T0 = 0, T3 = 3, T18 = 18). By default the time points are numbered
+#'     1, 2, ... in the order of the samples.
 #' @return A row-wise tibble with the columns Gene and Slope, with one row for
 #'     each gene.
 #' @seealso \code{\link{filter_by_slope}}, \code{\link{plot_trend}}
@@ -127,28 +148,70 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #'     genes = c("Gene_42", "Gene_24"),
 #'     group_var = c("T1", "T2", "TRT")
 #' )
-compute_slope <- function(screenR_Object, genes, group_var) {
+#'
+#' # With the real times of the time points
+#' compute_slope(object,
+#'     genes = c("Gene_42", "Gene_24"),
+#'     group_var = c("T1", "T2", "TRT"),
+#'     time = c(T1 = 0, T2 = 2, Time3 = 7, Time4 = 14)
+#' )
+compute_slope <- function(screenR_Object, genes, group_var,
+    time_column = "Day", time = NULL) {
     data <- screenR_Object@data_table
     data <- dplyr::filter(data, .data$Gene %in% genes)
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
-
-    # In order to perform the linear regression as samples are a time series
-    # each time point (Day) is encoded as a number, following the order of
-    # the samples. Replicates of the same time point share the same number.
-    sample_rank <- if (is.factor(data$Sample)) {
-        as.integer(data$Sample)
-    } else {
-        match(data$Sample, unique(data$Sample))
-    }
-    days <- unique(as.character(data$Day[order(sample_rank)]))
-    data <- dplyr::mutate(data, encode = match(.data$Day, days))
+    data$Time <- encode_time(data, time_column, time)
 
     data <- dplyr::mutate(dplyr::nest_by(data, .data$Gene),
-        Slope = lm(Frequency ~ encode, data = data)$coefficients["encode"]
+        Slope = lm(Frequency ~ Time, data = data)$coefficients["Time"]
     )
-    slope_tibble <- select(data, .data$Gene, .data$Slope)
+    slope_tibble <- select(data, "Gene", "Slope")
 
     return(slope_tibble)
+}
+
+#' @title Encode the time of the samples
+#' @description Internal function that gives each row of the data table the
+#'     time of its sample, used by \code{\link{compute_slope}} and
+#'     \code{\link{plot_trend}}. Replicates of the same time point share the
+#'     same time.
+#' @param data The data table, or a part of it, with the columns Sample and
+#'     time_column.
+#' @param time_column The column with the time point of each sample.
+#' @param time NULL to number the time points 1, 2, ... in the order of the
+#'     samples, or a named numeric vector with the time of each time point.
+#' @return A numeric vector with one value for each row of data, with the
+#'     attribute "labels" (the time point of each distinct time, in order)
+#'     when time is NULL.
+#' @keywords internal
+encode_time <- function(data, time_column = "Day", time = NULL) {
+    if (!time_column %in% colnames(data)) {
+        stop("time_column must be a column of the data table: ",
+            paste(colnames(data), collapse = ", "), ".")
+    }
+    time_point <- as.character(data[[time_column]])
+    if (is.null(time)) {
+        # The time points in the order of the samples
+        sample_rank <- if (is.factor(data$Sample)) {
+            as.integer(data$Sample)
+        } else {
+            match(data$Sample, unique(data$Sample))
+        }
+        levels <- unique(time_point[order(sample_rank)])
+        encoded <- match(time_point, levels)
+        attr(encoded, "labels") <- levels
+        return(encoded)
+    }
+    if (!is.numeric(time) || is.null(names(time))) {
+        stop("time must be a named numeric vector, for example ",
+            "c(T0 = 0, T3 = 3, T18 = 18).")
+    }
+    missing_time <- setdiff(unique(time_point), names(time))
+    if (length(missing_time) > 0) {
+        stop("time has no value for the time point(s): ",
+            paste(missing_time, collapse = ", "), ".")
+    }
+    unname(time[time_point])
 }
 
 
