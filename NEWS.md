@@ -1,5 +1,24 @@
 # ScreenR 1.15.16
 
+* `plot_common_hit()` has been rewritten: it takes the results of any
+  number of methods, from any hit-finding function of ScreenR
+  (`find_gene_zscore_hit()`, `find_camera_hit()`, `find_roast_hit()`,
+  `find_time_hit()`, `find_zscore_hit()`, ...) or vectors of gene names, as
+  separate arguments or as one named list, with an optional `fdr` threshold
+  for results computed with `fdr = 1`. Up to three methods give a Venn
+  diagram, more an UpSet plot (`type` chooses). Both are drawn with ggplot2
+  and patchwork and apply no theme, so ScreenR no longer depends on ggvenn.
+  Barcode-level tables are refused. Calls of previous versions keep working
+  (unnamed results are now labelled with the expression given, except
+  `hit_zscore`, `hit_camera` and `hit_roast`, which keep their labels).
+* `find_common_hit()` takes the same input as `plot_common_hit()`: any number
+  of methods, with `common_in` (all the methods by default) and `fdr`.
+* The longitudinal vignette compares five methods at each time point with
+  UpSet plots, ranks the candidates with explicit rules (agreement of the
+  self-contained tests, number of shRNAs, discordant shRNAs, dependence on one
+  replicate, fitness, time trend) and ends with the hits to validate and their
+  plots at T3 and T4. It sets the ggplot2 theme with `theme_set()`.
+
 * `find_time_hit()` has a new argument `time`, the real time of each time
   point (for example `time = c(Time3 = 7, Time4 = 14)`), validated as in
   `compute_slope()` and `plot_trend()`. The model is then fitted against the

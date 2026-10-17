@@ -30,7 +30,6 @@ Imports:
     patchwork (>= 1.1),
     tibble (>= 3.1.6),
     scales (>= 1.1.1),
-    ggvenn (>= 0.1.9),
     purrr (>= 0.3.4),
     ggplot2 (>= 3.5.2),
     stats,

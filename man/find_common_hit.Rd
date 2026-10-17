@@ -4,31 +4,34 @@
 \alias{find_common_hit}
 \title{Find the hits in common between methods}
 \usage{
-find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 3)
+find_common_hit(..., common_in = NULL, fdr = NULL)
 }
 \arguments{
-\item{hit_zscore}{The hits of the Z-score method, a table with a Gene
-column (for example from \code{\link{find_gene_zscore_hit}} or
-\code{\link{find_zscore_hit}}).}
-
-\item{hit_camera}{The hits of \code{\link{find_camera_hit}}, a table with a
-Gene column.}
-
-\item{hit_roast}{The hits of \code{\link{find_roast_hit}}, a table with a
-Gene column.}
+\item{...}{The results of the methods: gene-level tables with a Gene
+column (for example from \code{\link{find_gene_zscore_hit}},
+\code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+\code{\link{find_time_hit}} or \code{\link{find_zscore_hit}}) or
+vectors of gene names, optionally named; or a single named list of
+them.}
 
 \item{common_in}{The minimum number of methods in which a gene has to be
-found to be returned. The default, 3, returns the genes found by all
-three methods.}
+found. By default (NULL) all the methods.}
+
+\item{fdr}{An optional FDR threshold: the genes of the results with an FDR
+column are kept only when their FDR is at most fdr (useful for results
+computed with fdr = 1). By default (NULL) all the genes of each result
+are used.}
 }
 \value{
-A character vector with the names of the common hits.
+A character vector with the names of the common hits, ordered by
+    the number of methods that find them.
 }
 \description{
 Returns the genes found as hits by at least common_in of the
-    three methods (Z-score, CAMERA and ROAST). Only the gene names are
-    used, so the tables can come from any method. To combine the methods
-    using their FDR, see \code{\link{summarise_hits}}.
+    given methods. The results can come from any hit-finding method of
+    ScreenR, and from any number of methods. To combine the methods using
+    their FDR, see \code{\link{summarise_hits}}; to plot the overlap, see
+    \code{\link{plot_common_hit}}.
 }
 \examples{
 hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -40,6 +43,15 @@ find_common_hit(hit_zscore, hit_camera, hit_roast)
 
 # Common to at least two of the three methods
 find_common_hit(hit_zscore, hit_camera, hit_roast, common_in = 2)
+
+# Any number of methods, filtered on their FDR
+results <- list(
+    FRY = data.frame(Gene = c("A", "B", "C"), FDR = c(0.01, 0.02, 0.3)),
+    CAMERA = data.frame(Gene = c("A", "C"), FDR = c(0.04, 0.01)),
+    Zscore = c("A", "B"),
+    ROAST = data.frame(Gene = c("A", "B"), FDR = c(0.01, 0.6))
+)
+find_common_hit(results, common_in = 3, fdr = 0.05)
 }
 \seealso{
 \code{\link{plot_common_hit}}, \code{\link{summarise_hits}}

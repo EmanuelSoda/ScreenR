@@ -61,6 +61,14 @@ library(ggplot2)
 library(patchwork)
 ```
 
+ScreenR does not impose a look on its plots: they use the current ggplot2
+theme, so a theme set once with `theme_set()` applies to every plot of the
+analysis. Here we use a light theme with slightly larger text:
+
+```{r theme}
+theme_set(theme_light(base_size = 12))
+```
+
 # The experiment
 
 ## Design
@@ -498,7 +506,7 @@ plot_zscore_distribution(metrics, alpha = 0.5)
 
 # Treatment-specific hits
 
-## At each time point
+## At each time point, with several methods
 
 ```{r time-point-hits}
 hits_t3 <- filter(tests$T3, FDR <= 0.05)
@@ -506,44 +514,96 @@ hits_t4 <- filter(tests$T4, FDR <= 0.05)
 hits_t4
 ```
 
-At 5% FDR, `r nrow(hits_t3)` genes are depleted at T3 and
+At 5% FDR, FRY finds `r nrow(hits_t3)` depleted genes at T3 and
 `r nrow(hits_t4)` at T4.
 
-**Are the T4 hits robust to the choice of the test?** CAMERA (a competitive
-test: is the gene more depleted than the other genes?) and the gene-level
-Z-score test with an empirical null (see the vignette
-[Choosing the reference of the gene-level test](Empirical_null.html)) look at
-the same barcodes with different assumptions. `summarise_hits()` combines
-them:
+ScreenR has other gene-level tests, which look at the same barcodes with
+different assumptions. Running them all on the same contrasts tells how much
+a hit depends on the choice of the method:
+
+* **FRY** and **ROAST** (`find_roast_hit()`) are *self-contained* tests:
+  are the shRNAs of the gene depleted, relative to the variability between
+  replicates? ROAST computes its p-values by random rotations, FRY with a
+  fast approximation of them.
+* **CAMERA** (`find_camera_hit()`) is a *competitive* test: is the gene more
+  depleted than the other genes of the library, allowing for the correlation
+  between the shRNAs of a gene?
+* The **gene-level Z-score test** (`find_gene_zscore_hit()`) compares the mean
+  Z-score of the shRNAs of a gene with a null distribution: random sets of
+  barcodes (the default) or an empirical null estimated from all the genes
+  (see [Choosing the reference of the gene-level test](Empirical_null.html)).
+  The Z-scores come from `compute_barcode_statistics()`, which tests every
+  barcode with the same edgeR model, so they include the replicate
+  variability. It is also a competitive test.
+
+```{r all-methods}
+run_methods <- function(contrast) {
+    statistics <- compute_barcode_statistics(object, design, contrast)
+    list(
+        FRY = find_roast_hit(object, design, contrast, method = "fry",
+            direction = "Down", fdr = 1),
+        ROAST = find_roast_hit(object, design, contrast, method = "roast",
+            nrot = 9999, seed = 1, direction = "Down", fdr = 1),
+        CAMERA = find_camera_hit(object, design, contrast,
+            direction = "Down", fdr = 1),
+        `Z-score, empirical null` = find_gene_zscore_hit(statistics,
+            reference = "empirical", fdr = 1),
+        `Z-score, random barcodes` = find_gene_zscore_hit(statistics,
+            n_permutations = 1e5, seed = 1, fdr = 1)
+    )
+}
+methods_t3 <- run_methods(contrasts$T3)
+methods_t4 <- run_methods(contrasts$T4)
+sapply(list(T3 = methods_t3, T4 = methods_t4), function(results) {
+    sapply(results, function(result) sum(result$FDR <= 0.05))
+})
+```
+
+`plot_common_hit()` shows how the hits of the methods overlap. With more than
+three methods it draws an UpSet plot: each column is a combination of methods
+(the dots below), and its bar counts the genes found by exactly those
+methods; the bars on the left are the hits of each method.
+
+```{r upset-t4, fig.height = 4.5, fig.width = 8}
+plot_common_hit(methods_t4, fdr = 0.05,
+    title = "Depleted genes at T4 (5% FDR)")
+```
+
+At T4 the two self-contained tests agree exactly, while the competitive tests
+find no gene at 5% FDR. At a looser threshold the overlap shows which genes
+come closest to the competitive tests as well:
+
+```{r upset-t4-relaxed, fig.height = 4.5, fig.width = 8}
+plot_common_hit(methods_t4, fdr = 0.25,
+    title = "Depleted genes at T4 (25% FDR)")
+```
+
+At T3 no method finds any depleted gene:
+
+```{r upset-t3, fig.height = 4.5, fig.width = 8}
+plot_common_hit(methods_t3, fdr = 0.05,
+    title = "Depleted genes at T3 (5% FDR)")
+```
+
+`summarise_hits()` puts the FDR of every method in one table:
 
 ```{r method-agreement}
-statistics_t4 <- compute_barcode_statistics(object, design, contrasts$T4)
-agreement <- summarise_hits(list(
-    FRY = tests$T4,
-    CAMERA = find_camera_hit(object, design, contrasts$T4, fdr = 1),
-    Zscore = find_gene_zscore_hit(statistics_t4, reference = "empirical",
-        fdr = 1)
-), fdr = 0.05)
+agreement <- summarise_hits(methods_t4, fdr = 0.05)
 agreement %>%
     filter(Gene %in% hits_t4$Gene) %>%
     select(Gene, NMethods, starts_with("FDR")) %>%
-    knitr::kable(digits = 4)
+    knitr::kable(digits = 3)
 ```
 
-`compute_barcode_statistics()` tests every barcode with the same edgeR model
-(quasi-likelihood F-test), so the Z-scores used here already include the
-replicate variability.
-
-The T4 hits are called by FRY only: none reaches 5% FDR with CAMERA or with
-the Z-score test, and a few are close (CAMERA FDR about 0.1). The tests ask
-different questions. FRY asks whether the shRNAs of the gene are depleted,
-relative to the variability between replicates; CAMERA and the Z-score test
-ask whether the gene is more depleted than the other genes of the library.
-The effects of the T4 hits are moderate (median log2 fold changes between
-`r round(min(hits_t4$Log2FC), 2)` and `r round(max(hits_t4$Log2FC), 2)`), so
-they are significant as depletions but do not stand out against all the
-other genes. They are **candidates with moderate effects** that need
-independent validation, not unambiguous hits.
+The two kinds of tests ask different questions. FRY and ROAST call a gene
+when its shRNAs are depleted more than the replicates vary; CAMERA and the
+Z-score tests call it only when it is more depleted than the other genes of
+the library. The effects at T4 are moderate (median log2 fold changes
+between `r round(min(hits_t4$Log2FC), 2)` and
+`r round(max(hits_t4$Log2FC), 2)`): they are reproducible depletions, but they
+do not stand out against all the other genes. These are **candidates with
+moderate effects**; the next sections collect the evidence needed to choose
+which of them to validate.
 
 ## Across the two time points: three different questions
 
@@ -737,138 +797,224 @@ genes have small treatment effects: they are lost in treated and control
 cultures alike, so treated and control samples of the same time point differ
 little even though both are strongly depleted over time.
 
-# Evidence for the candidate hits
+# From candidates to the hits to validate
 
-A gene-level p-value is only as good as the shRNAs behind it. For the top
-treatment-specific hit and the top essential gene, we look at the reagents and
-at the samples.
+A gene-level FDR is the starting point, not the end of the analysis. Before
+spending time on validation, each candidate is checked against the questions
+that make a hit credible:
 
-```{r candidates}
-top_hit <- hits_t4$Gene[1]
-top_essential <- essential$Gene[1]
-c(hit = top_hit, essential = top_essential)
-```
+1. **Is it found by more than one method?** Here: FRY and ROAST, the two
+   self-contained tests, both at 5% FDR.
+2. **Is it supported by several shRNAs?** The number of shRNAs of the gene
+   that are depleted on their own (barcode p-value below 0.05 in
+   `compute_barcode_statistics()`), and the number of shRNAs that behave very
+   differently from the others of the gene (`find_discordant_barcodes()`),
+   which may point to off-target effects.
+3. **Does it depend on a single sample?** The FRY FDR without T4_TRT_1, the
+   treated replicate that resembles the controls.
+4. **Is it treatment-specific?** Whether the gene is also lost in the control
+   cultures (fitness contrast against the baseline): then the treatment
+   enhances a loss of fitness rather than creating a new dependency.
+5. **How does it behave over time?** Its effect at T3 and the p-value of the
+   interaction, a stronger depletion at T4 than at T3.
 
-## Every shRNA of the gene
-
-`plot_barcode_hit()` ranks all the barcodes of the library by their log2 fold
-change in a contrast and marks the barcodes of the gene: most of them should
-be on the depleted side.
-
-```{r barcode-hit, fig.height = 5}
-plot_barcode_hit(object, design, contrasts$T4, gene = top_hit) +
-    plot_annotation(caption = "Treated vs control at T4")
-plot_barcode_hit(object, design, contrasts$T3, gene = top_hit) +
-    plot_annotation(caption = "Treated vs control at T3")
-```
-
-At T4 half of the shRNAs of the gene are among the most depleted barcodes of
-the library and the others are close to zero, as often happens with shRNAs of
-different knockdown efficiency; at T3 they lean slightly towards enrichment.
-`plot_barcode_trend()` follows each shRNA from T3 to T4 (log2 fold change of
-treated vs control):
-
-```{r barcode-trend, fig.height = 4}
-plot_barcode_trend(metrics, genes = top_hit)[[1]]
-```
-
-Several shRNAs go from no effect at T3 to a clear depletion at T4, while the
-others stay close to zero: the depletion of the gene appears between the two
-time points and is carried by its most effective shRNAs.
-
-`find_discordant_barcodes()` lists the shRNAs that behave very differently
-from the others of their gene, for example because of off-target effects (a
-deviation of more than 3 median absolute deviations from the median of the
-gene):
-
-```{r discordant}
-find_discordant_barcodes(metrics$T4, threshold = 3) %>%
-    filter(Gene %in% c(top_hit, hits_t4$Gene))
-```
-
-None of the shRNAs of the top hit is discordant. Gene_322 has two
-shRNAs much more depleted than its other shRNAs: its call depends more on a
-few reagents and deserves more caution.
-
-## Every sample
-
-The normalized counts of the shRNAs in every sample show the difference
-between a treatment-specific hit and an essential gene directly:
-
-```{r boxplots, fig.height = 4.5, fig.width = 8}
-plot_boxplot(object, genes = c(top_hit, top_essential),
-    group_var = c("Infected", "Baseline", "CTRL", "TRT"),
-    fill_var = "Treatment", ncol = 2) +
-    scale_y_continuous(transform = "log1p",
-        breaks = c(0, 10, 100, 1000, 10000)) +
-    scale_x_discrete(guide = guide_axis(angle = 60))
-```
-
-The essential gene decreases from the baseline in control and treated
-cultures alike. The treatment-specific hit stays close to its baseline level
-in the controls, while in the treated cultures it is lower at T4.
-
-`plot_trend()` summarizes the same data as a line over the stages of the
-screen, separately for the control and the treated cultures (the stages are
-taken as equally spaced; give their real times with `time` if known):
-
-The trend lines (mean normalized count of the shRNAs of the gene in each
-sample) show a slight decrease of the treatment-specific hit also in the
-controls, and a larger one in the treated cultures, which end lower at T4:
-the treatment effect adds to a small decrease shared by all the cultures.
-
-```{r trends, fig.height = 4, fig.width = 8}
-trend <- function(condition) {
-    plot_trend(object, genes = c(top_hit, top_essential),
-        group_var = c("Infected", "Baseline", condition), ncol = 2) +
-        ggtitle(condition)
-}
-trend("CTRL") / trend("TRT")
-```
-
-# Sensitivity analysis {#sensitivity}
-
-The quality control showed that T4_TRT_1 resembles the T3 samples. Refitting
-the model without it shows whether the conclusions depend on this sample:
+## Sensitivity to one replicate {#sensitivity}
 
 ```{r sensitivity}
 without <- object[, colnames(object) != "T4_TRT_1"]
 design_without <- create_design_matrix(without)
 t4_without <- find_roast_hit(without, design_without,
     create_contrast(design_without, "T4_TRT", "T4_CTRL"),
-    method = "fry", direction = "Down", fdr = 0.05)
-t3_without <- find_roast_hit(without, design_without,
-    create_contrast(design_without, "T3_TRT", "T3_CTRL"),
-    method = "fry", direction = "Down", fdr = 0.05)
-c(T3 = nrow(t3_without), T4 = nrow(t4_without),
-    `T4 hits also found with all samples` =
-        sum(t4_without$Gene %in% hits_t4$Gene))
+    method = "fry", direction = "Down", fdr = 1)
+c(`T4 hits without T4_TRT_1` = sum(t4_without$FDR <= 0.05),
+    `of which also hits with all the samples` =
+        sum(t4_without$Gene[t4_without$FDR <= 0.05] %in% hits_t4$Gene))
 ```
 
-Without T4_TRT_1 there are still no hits at T3 and a similar set of hits at
-T4, which includes most of the hits found with all the samples. The subset
-keeps the normalization of the full object: the retained samples keep their
-effective library sizes.
+Without T4_TRT_1 FRY finds a similar set of T4 hits, which includes most of
+the hits found with all the samples. The subset keeps the normalization of the
+full object (its samples keep their effective library sizes).
+
+## The evidence for each candidate
+
+```{r evidence}
+statistics_t4 <- compute_barcode_statistics(object, design, contrasts$T4)
+discordant <- find_discordant_barcodes(metrics$T4, threshold = 3)
+fdr_of <- function(result, genes) result$FDR[match(genes, result$Gene)]
+evidence <- tibble(Gene = hits_t4$Gene) %>%
+    mutate(
+        Log2FC_T4 = tests$T4$Log2FC[match(Gene, tests$T4$Gene)],
+        Log2FC_T3 = tests$T3$Log2FC[match(Gene, tests$T3$Gene)],
+        FDR_FRY = fdr_of(methods_t4$FRY, Gene),
+        FDR_ROAST = fdr_of(methods_t4$ROAST, Gene),
+        FDR_CAMERA = fdr_of(methods_t4$CAMERA, Gene),
+        shRNAs = vapply(Gene, function(gene) {
+            sum(statistics_t4$Gene == gene)
+        }, integer(1)),
+        Depleted_shRNAs = vapply(Gene, function(gene) {
+            sum(statistics_t4$Gene == gene & statistics_t4$Log2FC < 0 &
+                statistics_t4$PValue < 0.05)
+        }, integer(1)),
+        Discordant_shRNAs = vapply(Gene, function(gene) {
+            sum(discordant$Gene == gene)
+        }, integer(1)),
+        FDR_without_T4_TRT_1 = fdr_of(t4_without, Gene),
+        FDR_fitness_CTRL = tests$Fitness_CTRL$FDR[
+            match(Gene, tests$Fitness_CTRL$Gene)],
+        P_interaction = time_hits$PValue[match(Gene, time_hits$Gene)]
+    )
+```
+
+The candidates are ranked with explicit rules, written once in the code so
+that they can be read, discussed and changed:
+
+* **Priority 1**: found by FRY and ROAST, supported by at least three shRNAs
+  depleted on their own, with no discordant shRNA;
+* **Priority 2**: found by FRY and ROAST, but supported by fewer shRNAs;
+* **Not recommended**: the call relies on discordant shRNAs (more
+  discordant shRNAs than shRNAs depleted on their own).
+
+Caveats that do not change the priority but must be kept in mind are listed
+next to each gene.
+
+```{r priority}
+evidence <- evidence %>%
+    mutate(
+        Priority = factor(case_when(
+            Discordant_shRNAs > Depleted_shRNAs ~ "Not recommended",
+            FDR_FRY <= 0.05 & FDR_ROAST <= 0.05 & Depleted_shRNAs >= 3 &
+                Discordant_shRNAs == 0 ~ "Priority 1",
+            FDR_FRY <= 0.05 & FDR_ROAST <= 0.05 ~ "Priority 2",
+            TRUE ~ "Not recommended"
+        ), levels = c("Priority 1", "Priority 2", "Not recommended")),
+        Caveats = paste0(
+            ifelse(FDR_without_T4_TRT_1 > 0.05,
+                "depends on T4_TRT_1; ", ""),
+            ifelse(FDR_fitness_CTRL <= 0.05,
+                "also lost in the controls (fitness); ", ""),
+            ifelse(P_interaction > 0.05, "no clear increase from T3; ", ""),
+            ifelse(Depleted_shRNAs < 3,
+                paste(Depleted_shRNAs, "shRNA(s) depleted on their own; "),
+                "")
+        ),
+        Caveats = sub("; $", "", Caveats)
+    ) %>%
+    arrange(Priority, FDR_FRY, Log2FC_T4)
+evidence %>%
+    select(Gene, Priority, Log2FC_T3, Log2FC_T4, FDR_FRY, FDR_ROAST,
+        FDR_CAMERA, Depleted_shRNAs, shRNAs, Discordant_shRNAs,
+        FDR_without_T4_TRT_1, P_interaction) %>%
+    knitr::kable(digits = 3)
+```
+
+# Hits to validate
+
+```{r validate}
+to_validate <- filter(evidence, Priority == "Priority 1")
+also_consider <- filter(evidence, Priority == "Priority 2")
+evidence %>%
+    select(Gene, Priority, Log2FC_T4, FDR_FRY, Caveats) %>%
+    knitr::kable(digits = 3)
+```
+
+**The hits that should be validated first are
+`r paste(to_validate$Gene, collapse = ", ")`.** They are depleted in the
+treated cultures compared with the controls at T4 by the two self-contained
+tests at 5% FDR, with median log2 fold changes between
+`r round(min(to_validate$Log2FC_T4), 2)` and
+`r round(max(to_validate$Log2FC_T4), 2)`, and each of them is supported by at
+least three shRNAs depleted on their own and by no discordant shRNA. Their
+caveats are in the table: a gene that is also lost in the controls is a
+treatment-enhanced loss of fitness rather than a new dependency created by the
+treatment, and a gene that depends on T4_TRT_1 should be confirmed in a new
+experiment before anything else.
+
+`r paste(also_consider$Gene, collapse = ", ")` are also depleted at T4 by both
+tests, but fewer of their shRNAs support them: they are second-line
+candidates. Genes marked "Not recommended" rely on shRNAs that behave unlike
+the others of the gene.
+
+None of these genes is depleted at T3: these are **late treatment effects**,
+which validation experiments should measure at the later time point.
+
+## The hits at T3 and at T4
+
+The normalized counts of the shRNAs of the hits to validate in the control and
+treated cultures of the two time points show the treatment effect directly:
+at T4 the treated cultures have lower counts than the controls, while at T3
+the difference is small (the gene with a caveat on the time trend is the one
+already slightly lower at T3). The shRNAs of a gene have very different
+abundances, so each box spans a wide range: the comparison is between treated
+and control samples of the same time point.
+
+```{r validate-boxplots, fig.height = 4, fig.width = 9}
+plot_boxplot(object, genes = to_validate$Gene,
+    group_var = c("CTRL", "TRT"), fill_var = "Treatment",
+    ncol = nrow(to_validate)) +
+    scale_y_continuous(transform = "log1p",
+        breaks = c(0, 10, 100, 1000, 10000)) +
+    scale_x_discrete(guide = guide_axis(angle = 60))
+```
+
+`plot_barcode_trend()` follows each shRNA from T3 to T4 (log2 fold change of
+treated vs control). In each gene several shRNAs go from no effect at T3 to a
+depletion at T4:
+
+```{r validate-barcode-trend, fig.height = 4, fig.width = 10}
+plot_barcode_trend(metrics, genes = to_validate$Gene,
+    n_col = nrow(to_validate))
+```
+
+`plot_barcode_hit()` places the shRNAs of a gene among all the barcodes of the
+library, ranked by their log2 fold change. For the first hit to validate, at
+T3 and at T4:
+
+```{r validate-barcode-hit, fig.height = 5}
+top_hit <- to_validate$Gene[1]
+plot_barcode_hit(object, design, contrasts$T3, gene = top_hit) +
+    plot_annotation(caption = "Treated vs control at T3")
+plot_barcode_hit(object, design, contrasts$T4, gene = top_hit) +
+    plot_annotation(caption = "Treated vs control at T4")
+```
+
+At T3 the shRNAs of the gene are spread over the ranking; at T4 several of
+them are among the most depleted barcodes of the library.
+
+Over the whole screen, the trend lines (mean normalized count of the shRNAs
+of each gene) separate the hits to validate from an essential gene: the
+essential gene is lost in control and treated cultures alike, while the hits
+end lower in the treated cultures at T4.
+
+```{r validate-trends, fig.height = 4.5, fig.width = 10}
+top_essential <- essential$Gene[1]
+trend <- function(condition) {
+    plot_trend(object, genes = c(to_validate$Gene, top_essential),
+        group_var = c("Infected", "Baseline", condition),
+        ncol = nrow(to_validate) + 1) +
+        ggtitle(condition)
+}
+trend("CTRL") / trend("TRT")
+```
 
 # Conclusions
 
 * The screen is of good quality: deep sequencing, no bottleneck at infection
   or selection, and consistent replicates. The treated replicates at T4 are
-  heterogeneous (T4_TRT_1 is close to the controls), which does not change the
-  conclusions but limits the power.
+  heterogeneous (T4_TRT_1 is close to the controls), which limits the power
+  but does not change the conclusions.
 * The strongest depletion in the screen is a **loss of fitness** shared by
   control and treated cultures: `r nrow(essential)` genes behave like
-  essential genes and are not treatment-specific hits.
+  essential genes and are not treatment hits.
 * **Treatment-specific depletion appears at T4**, not at T3:
   `r nrow(hits_t4)` genes are depleted in treated compared with control
-  cultures at T4 (5% FDR), with moderate effects, while no gene is depleted at
-  T3 and none at both time points. They should be described as late treatment
-  effects, not as effects constant over time.
-* These candidates are supported by several shRNAs and by the replicate
-  variability (FRY), and some of them also by a trend towards a stronger
-  effect at T4, but not by the competitive tests (CAMERA, Z-score): they are
-  moderate effects to validate independently, for example with individual
-  shRNAs or another screen.
+  cultures at T4 by the self-contained tests (5% FDR), with moderate effects;
+  no gene is depleted at T3, and none at both time points.
+* **Hits to validate: `r paste(to_validate$Gene, collapse = ", ")`**, with
+  `r paste(also_consider$Gene, collapse = ", ")` as second-line candidates.
+  They should be validated as late effects of the treatment (at the later
+  time point), with individual shRNAs or other reagents against the same
+  genes; the competitive tests do not single them out, so independent
+  confirmation is essential.
 
 # Limitations {#limitations}
 
