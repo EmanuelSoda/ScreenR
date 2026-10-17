@@ -4,7 +4,7 @@
 \alias{plot_zscore_distribution}
 \title{Plot the distribution of the barcode log2 fold changes}
 \usage{
-plot_zscore_distribution(time_point_measure, alpha = 1)
+plot_zscore_distribution(time_point_measure, alpha = 1, palette = NULL)
 }
 \arguments{
 \item{time_point_measure}{A list with the tables of
@@ -13,6 +13,13 @@ single table). Each table contains, for each barcode, the columns
 Log2FC and Day.}
 
 \item{alpha}{The opacity of the densities, between 0 and 1. Default 1.}
+
+\item{palette}{An optional vector of colors for the time points (named
+by the values of the Day column, or one for each time point in
+order). The tables of \code{\link{compute_metrics}} do not carry the
+palettes of the object: to use the same colors as the other plots,
+give the Day palette of the object, \code{get_palettes(object)$Day}
+(see \code{\link{get_palettes}}). By default the colors of ggplot2.}
 }
 \value{
 A ggplot object.
@@ -37,6 +44,13 @@ table2 <- compute_metrics(object,
 )
 
 plot_zscore_distribution(list(table1, table2), alpha = 0.5)
+
+# The same colors as the other plots of the object
+object <- set_palettes(object,
+    list(Day = c(T1 = "grey70", T2 = "grey40", Time3 = "#1B9E77",
+        Time4 = "#D95F02")))
+plot_zscore_distribution(list(table1, table2), alpha = 0.5,
+    palette = get_palettes(object)$Day)
 }
 \seealso{
 \code{\link{compute_metrics}}, \code{\link{plot_barcode_trend}}

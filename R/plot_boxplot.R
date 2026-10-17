@@ -17,6 +17,11 @@
 #' @param type The type of plot: "boxplot" (default) or "violinplot".
 #' @param scales The scales of the panels: "free" (default), "fixed",
 #'     "free_x" or "free_y".
+#' @param palette An optional vector of colors for the values of fill_var,
+#'     which replaces the palette of the object. By default the palette of
+#'     the object for fill_var is used when it is set (see
+#'     \code{\link{get_palettes}}), otherwise the default colors of
+#'     ggplot2.
 #' @concept  plot
 #' @importFrom dplyr sym
 #' @importFrom ggplot2 geom_violin
@@ -33,9 +38,9 @@
 #' )
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     nrow = NULL, ncol = NULL, fill_var = "Sample",
-    type = "boxplot", scales = "free") {
-    data <- data_table_of(update_screenr_object(screenR_Object),
-        "plot_boxplot()")
+    type = "boxplot", scales = "free", palette = NULL) {
+    object <- update_screenr_object(screenR_Object)
+    data <- data_table_of(object, "plot_boxplot()")
 
     # Select only the hit gene
     data <- dplyr::filter(data, .data$Gene %in% genes)
@@ -61,7 +66,8 @@ plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
         stop("The only available type of plot are boxplot and violinplot")
     }
 
-    plot <- plot + ggplot2::labs(y = "Normalized counts")
+    plot <- plot + ggplot2::labs(y = "Normalized counts") +
+        palette_scale(object, fill_var, data[[fill_var]], palette)
 
     if (length(genes) > 1) {
         plot <- plot + facet_wrap("Gene",

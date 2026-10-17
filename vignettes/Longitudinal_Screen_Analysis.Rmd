@@ -120,8 +120,8 @@ ggplot(design_plot, aes(x, y)) +
     ), arrow = arrow(length = unit(2, "mm")), colour = "grey50") +
     geom_label(aes(label = paste0("n = ", Replicates), fill = Condition),
         show.legend = FALSE) +
-    scale_fill_manual(values = c(Treated = "#E7298A", Control = "#1B9E77",
-        Baseline = "grey80", Infected = "grey90")) +
+    scale_fill_manual(values = c(Treated = "#D95F02", Control = "#1B9E77",
+        Baseline = "#999999", Infected = "#CCCCCC")) +
     scale_x_continuous(breaks = seq_along(stages), labels = stages,
         expand = expansion(add = 0.4)) +
     scale_y_continuous(breaks = seq_along(conditions), labels = conditions,
@@ -184,6 +184,32 @@ variability.
 
 # The ScreenR object
 
+## Colors that mean the same thing in every plot
+
+When the object is created, a palette can be given for each sample variable
+(Treatment, Group, Day, Sample, ...). Every plot of ScreenR that colors the
+samples by one of these variables then uses it, so that, for example, the
+treated cultures have the same color in all the figures. Here the controls
+are green and the treated cultures orange, darker at the later time point,
+and the two reference samples are grey:
+
+```{r palettes}
+group_colors <- c(T0 = "#CCCCCC", Puro = "#999999",
+    T3_CTRL = "#66C2A5", T3_TRT = "#FC8D62",
+    T4_CTRL = "#1B9E77", T4_TRT = "#D95F02")
+palettes <- list(
+    Treatment = c(Infected = "#CCCCCC", Baseline = "#999999",
+        CTRL = "#1B9E77", TRT = "#D95F02"),
+    Group = group_colors,
+    Day = c(T0 = "#CCCCCC", Puro = "#999999", T3 = "#7570B3",
+        T4 = "#E7298A"),
+    # Each sample takes the color of its group
+    Sample = setNames(group_colors[samples$Group], samples$Sample)
+)
+```
+
+## Creating the object
+
 ```{r object}
 object <- create_screenr_object(
     table = counts,
@@ -191,10 +217,16 @@ object <- create_screenr_object(
     groups = factor(samples$Group,
         levels = c("T0", "Puro", "T3_CTRL", "T3_TRT", "T4_CTRL", "T4_TRT")),
     sample_table = samples[, c("Sample", "Day", "Treatment")],
-    replicates = samples$Replicate
+    replicates = samples$Replicate,
+    palettes = palettes
 )
 object
+names(get_palettes(object))
 ```
+
+The palettes are checked when they are set (every value of the variable must
+have a color) and can be changed later with `set_palettes()`. A palette given
+directly to a plot replaces the one of the object.
 
 The ScreenR object is a `SummarizedExperiment`, the standard Bioconductor
 container for assays with row and column annotation. Each piece of
@@ -273,11 +305,11 @@ would make the counts unreliable.
 
 The replicates of a condition should be more similar to each other than to
 the other samples. This and the following plots compare **normalized**
-counts, so the counts are normalized first (the choice of the normalization
-is discussed in the next section).
+counts, so the counts are normalized first, with the TMM method (see the
+next section).
 
 ```{r normalize-for-qc}
-object <- normalize_data(object, method = "cpm")
+object <- normalize_data(object, method = "tmm")
 ```
 
 ```{r replicates, fig.height = 5.5, fig.width = 7}
@@ -321,45 +353,34 @@ detect treatment effects.
 # Normalization
 
 Samples are sequenced at different depths, so counts are compared after
-dividing each sample by an **effective library size**. ScreenR offers three
-choices in `normalize_data()`:
+dividing each sample by an **effective library size**. This analysis uses the
+**TMM** normalization of edgeR (`normalize_data(method = "tmm")`): the
+effective library size of a sample is its total number of reads multiplied by
+a TMM factor, which corrects the total when many barcodes are depleted or
+enriched in some samples, as happens over the growth of the cultures and with
+the treatment.
 
-* `"cpm"`: the total number of reads of the sample;
-* `"tmm"`: the total corrected with the TMM factors of edgeR, which are more
-  robust when many barcodes are depleted in some samples;
-* `"control"`: the reads of control barcodes known to be without effect
-  (this library has none).
-
-The normalization matters when many barcodes change in the same samples,
-because they change the total. A simple check is to compare the effective
-library sizes of the two methods:
-
-```{r normalization-choice}
-tmm <- normalize_data(object, method = "tmm")
-ratio <- get_normalization(object)$effective_library_size /
-    get_normalization(tmm)$effective_library_size
-round(range(ratio), 3)
+```{r normalization}
+normalization <- get_normalization(object)
+normalization$method
+round(normalization$norm_factors, 3)
 ```
 
-The two methods differ by at most
-`r round(100 * max(abs(ratio - 1)))`% in any sample: the treatment and the
-growth do not change the composition of the library enough to bias the
-totals, so we keep counts per million. With a strong compositional
-imbalance, TMM (or control barcodes) would be the right choice.
+The TMM factors stay close to 1, but they differ between the time points:
+the factors correct the totals for the shRNAs that drop out over time.
 
 **One normalization for the whole analysis.** ScreenR records the
 normalization in the object (the effective library sizes in the colData, the
-method in the metadata) and never changes the raw counts. Every result below
-uses this same normalization: the normalized counts of the plots, the
-descriptive fold changes and the statistical models. The models use the raw
-counts, as negative binomial models require, with the effective library sizes
-as offsets:
+method and the TMM factors in the metadata) and never changes the raw counts.
+Every result below uses this same normalization: the normalized counts of the
+plots, the descriptive fold changes and the statistical models. The models use
+the raw counts, as negative binomial models require, with the effective
+library sizes as offsets, so the TMM factors are applied once:
 
 ```{r one-normalization}
-get_normalization(object)$method
 dge <- create_edger_obj(object)
 all.equal(dge$samples$lib.size * dge$samples$norm.factors,
-    unname(get_normalization(object)$effective_library_size))
+    unname(normalization$effective_library_size))
 ```
 
 Changing the normalization with `normalize_data()` would update all of them
@@ -492,7 +513,9 @@ About `r round(100 * with_effect(tests$T3))`% of the genes respond to the
 treatment at T3 and `r round(100 * with_effect(tests$T4))`% at T4: **at T3
 there is no detectable treatment effect**, while at T4 a group of genes
 changes. The same is visible in the distribution of the barcode log2 fold
-changes (treated vs control), which is wider at T4:
+changes (treated vs control), which is wider at T4. The tables of
+`compute_metrics()` do not carry the palettes of the object, so the Day
+palette is given to the plot:
 
 ```{r zscore-distribution, fig.height = 3.5}
 metrics <- list(
@@ -501,7 +524,8 @@ metrics <- list(
     T4 = compute_metrics(object, control = "CTRL", treatment = "TRT",
         day = "T4")
 )
-plot_zscore_distribution(metrics, alpha = 0.5)
+plot_zscore_distribution(metrics, alpha = 0.5,
+    palette = get_palettes(object)$Day)
 ```
 
 # Treatment-specific hits
@@ -831,9 +855,16 @@ c(`T4 hits without T4_TRT_1` = sum(t4_without$FDR <= 0.05),
         sum(t4_without$Gene[t4_without$FDR <= 0.05] %in% hits_t4$Gene))
 ```
 
-Without T4_TRT_1 FRY finds a similar set of T4 hits, which includes most of
-the hits found with all the samples. The subset keeps the normalization of the
-full object (its samples keep their effective library sizes).
+Without T4_TRT_1, `r sum(t4_without$FDR <= 0.05)` genes pass 5% FDR at T4,
+`r sum(t4_without$Gene[t4_without$FDR <= 0.05] %in% hits_t4$Gene)` of them
+among the `r nrow(hits_t4)` hits found with all the samples, and
+`r sum(t4_without$FDR[match(hits_t4$Gene, t4_without$Gene)] <= 0.10)` of these
+`r nrow(hits_t4)` hits keep an FDR of at most 10%. With one treated replicate
+fewer at T4 the test has less power: most hits fall just above the threshold
+rather than disappearing. The direction of the evidence does not depend on
+this replicate, but its strength does, which is one more reason to validate
+the hits independently. (The subset keeps the normalization of the full
+object: its samples keep their effective library sizes.)
 
 ## The evidence for each candidate
 
@@ -927,7 +958,8 @@ least three shRNAs depleted on their own and by no discordant shRNA. Their
 caveats are in the table: a gene that is also lost in the controls is a
 treatment-enhanced loss of fitness rather than a new dependency created by the
 treatment, and a gene that depends on T4_TRT_1 should be confirmed in a new
-experiment before anything else.
+experiment before anything else. `r paste(to_validate$Gene[to_validate$Caveats == ""], collapse = ", ")`
+has no caveat: it is the most robust candidate of the screen.
 
 `r paste(also_consider$Gene, collapse = ", ")` are also depleted at T4 by both
 tests, but fewer of their shRNAs support them: they are second-line
@@ -1000,8 +1032,9 @@ trend("CTRL") / trend("TRT")
 
 * The screen is of good quality: deep sequencing, no bottleneck at infection
   or selection, and consistent replicates. The treated replicates at T4 are
-  heterogeneous (T4_TRT_1 is close to the controls), which limits the power
-  but does not change the conclusions.
+  heterogeneous (T4_TRT_1 is close to the controls): without it the T4 hits
+  are weaker, most of them just above 5% FDR, so their strength depends on
+  this replicate.
 * The strongest depletion in the screen is a **loss of fitness** shared by
   control and treated cultures: `r nrow(essential)` genes behave like
   essential genes and are not treatment hits.

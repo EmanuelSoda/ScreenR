@@ -10,7 +10,11 @@ plot_gini(screenR_Object, palette = NULL, alpha = 1, legende_position = "none")
 \item{screenR_Object}{The ScreenR object obtained using
 \code{\link{create_screenr_object}}.}
 
-\item{palette}{An optional vector of colors, one for each sample.}
+\item{palette}{An optional vector of colors for the samples (named by
+sample, or one for each sample in order), which replaces the palette
+of the object. By default the Sample palette of the object is used
+when it is set (see \code{\link{get_palettes}}), otherwise the
+default colors of ggplot2.}
 
 \item{alpha}{The opacity of the bars, between 0 and 1. Default 1.}
 

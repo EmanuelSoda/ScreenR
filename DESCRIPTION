@@ -33,6 +33,7 @@ Imports:
     purrr (>= 0.3.4),
     ggplot2 (>= 3.5.2),
     stats,
+    grDevices,
     tidyr (>= 1.2),
     magrittr (>= 1.0),
     dplyr (>= 1.1.0),
@@ -80,6 +81,7 @@ Collate:
     'library_checks.R'
     'mapped_reads.R'
     'normalize_data.R'
+    'palettes.R'
     'plot_barcode_hit.R'
     'plot_barcode_trend.R'
     'plot_boxplot.R'

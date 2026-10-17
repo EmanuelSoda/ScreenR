@@ -1,5 +1,21 @@
 # ScreenR 1.15.16
 
+* Palettes: `create_screenr_object(palettes = )` and the new
+  `set_palettes()`/`get_palettes()` store colors for the values of the sample
+  variables (Treatment, Group, Day, Sample, ...), checked against the
+  object and kept when it is subset. Every plot that colors the samples by
+  one of these variables uses them: `plot_mapped_reads()`,
+  `plot_mapped_reads_distribution()`, `plot_barcode_lost()`,
+  `plot_barcode_lost_for_gene()`, `plot_gini()`, `plot_mds()`, `plot_pca()`
+  and `plot_boxplot()`. An explicit `palette` argument replaces the palette
+  of the object. `plot_mds()` and `plot_pca()` accept the name of a sample
+  variable in `groups` (for example `groups = "Treatment"`).
+  `plot_zscore_distribution()`, which receives the tables of
+  `compute_metrics()` rather than the object, has a new `palette` argument
+  (for example `palette = get_palettes(object)$Day`).
+* The longitudinal vignette sets palettes at the creation of the object and
+  uses TMM normalization throughout.
+
 * `plot_common_hit()` has been rewritten: it takes the results of any
   number of methods, from any hit-finding function of ScreenR
   (`find_gene_zscore_hit()`, `find_camera_hit()`, `find_roast_hit()`,
