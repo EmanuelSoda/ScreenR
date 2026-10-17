@@ -1,5 +1,16 @@
 # ScreenR 1.15.16
 
+* New vignette "Analysis of a longitudinal screen: from counts to
+  treatment-specific hits", a complete analysis of the example screen (T0,
+  post-puromycin baseline, control and treated cultures at two time points
+  with three replicates): quality control, one normalization for the whole
+  analysis, one edgeR model with all the samples, treatment effects at each
+  time point, the difference between depletion at both time points
+  (intersection-union test), on average and changing over time
+  (`find_time_hit()`), fitness genes shared by all the cultures, evidence at
+  the level of the shRNAs, a sensitivity analysis and the current
+  limitations of ScreenR for longitudinal designs.
+
 ## One source of truth for the data
 
 * The ScreenR object stores each piece of information once, in its

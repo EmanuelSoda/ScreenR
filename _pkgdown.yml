@@ -64,6 +64,8 @@ navbar:
         href: articles/Improved_Statistics.html
       - text: Choosing the reference of the gene-level test
         href: articles/Empirical_null.html
+      - text: Analysis of a longitudinal screen
+        href: articles/Longitudinal_Screen_Analysis.html
       - text: Benchmark against MAGeCK and other tools
         href: articles/Benchmark_MAGeCK.html
     github:
@@ -84,6 +86,7 @@ articles:
   - Analysis_Example
   - Improved_Statistics
   - Empirical_null
+  - Longitudinal_Screen_Analysis
   - Benchmark_MAGeCK
 
 reference:
