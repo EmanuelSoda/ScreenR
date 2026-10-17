@@ -4,7 +4,12 @@
 \alias{check_annotation_table}
 \title{Check the Annotation Table}
 \usage{
-check_annotation_table(annotation, barcode_column, gene_column)
+check_annotation_table(
+  annotation,
+  barcode_column,
+  gene_column,
+  duplicate_annotation = "error"
+)
 }
 \arguments{
 \item{annotation}{The annotation table.}
@@ -12,13 +17,16 @@ check_annotation_table(annotation, barcode_column, gene_column)
 \item{barcode_column}{The name of the barcode column.}
 
 \item{gene_column}{The name of the gene column.}
+
+\item{duplicate_annotation}{"error" or "first".}
 }
 \value{
 The checked annotation table.
 }
 \description{
 Internal function that finds and renames the barcode and
-             gene columns of the annotation table and warns about
-             duplicated barcodes.
+             gene columns of the annotation table, converts the
+             identifiers to character and resolves (or rejects) barcodes
+             annotated more than once.
 }
 \keyword{internal}

@@ -21,9 +21,11 @@ A tibble with one row for each barcode and sample and the columns
 }
 \description{
 Returns the data table of a ScreenR object, the tidy (long)
-    version of the normalized counts computed with
-    \code{\link{compute_data_table}}. A short summary of the size of the
-    table is printed.
+    version of the normalized counts. A short summary of the size of the
+    table is printed. The data table is not stored: it is computed from the
+    counts, the annotation (rowData), the sample table (colData) and the
+    normalization each time, so it always follows them. The object must be
+    normalized (\code{\link{normalize_data}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

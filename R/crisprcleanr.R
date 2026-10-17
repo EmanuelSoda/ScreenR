@@ -112,10 +112,16 @@ correct_crispr_bias <- function(screenR_Object, library_annotation, control,
     treatment, min_reads = 30, min_targeted_genes = 3, label = "screen",
     outdir = tempfile("crisprcleanr_"), verbose = FALSE) {
     ccr <- crisprcleanr_functions()
-    counts <- count_table_of(screenR_Object)
-    annotation <- annotation_of(screenR_Object)
+    object <- update_screenr_object(screenR_Object)
+    # Raw counts and genes of the observed barcodes
+    count_matrix <- SummarizedExperiment::assay(object, "counts",
+        withDimnames = TRUE)
+    counts <- data.frame(Barcode = rownames(object), count_matrix,
+        check.names = FALSE, stringsAsFactors = FALSE)
+    annotation <- as.data.frame(SummarizedExperiment::rowData(object),
+        optional = TRUE)
     samples <- c(control, treatment)
-    missing <- setdiff(samples, colnames(counts))
+    missing <- setdiff(samples, colnames(count_matrix))
     if (length(missing) > 0) {
         stop("Samples not found in the count table: ",
             paste(missing, collapse = ", "), call. = FALSE)
@@ -129,8 +135,7 @@ correct_crispr_bias <- function(screenR_Object, library_annotation, control,
     outdir <- paste0(normalizePath(outdir), .Platform$file.sep)
 
     # CRISPRcleanR input: sgRNA, gene, control columns, treated columns
-    gene <- as.character(annotation$Gene[match(counts$Barcode,
-        annotation$Barcode)])
+    gene <- genes_of(object)
     input <- data.frame(sgRNA = as.character(counts$Barcode), gene = gene,
         counts[, samples, drop = FALSE], check.names = FALSE,
         stringsAsFactors = FALSE)
@@ -156,11 +161,11 @@ correct_crispr_bias <- function(screenR_Object, library_annotation, control,
     corrected_counts <- data.frame(Barcode = corrected$sgRNA,
         round(as.matrix(corrected[, samples, drop = FALSE])),
         check.names = FALSE)
-    sample_table <- get_sample_table(screenR_Object)
+    sample_table <- sample_table_of(object)
     sample_table <- sample_table[match(samples, sample_table$Sample),
         c("Sample", "Day", "Treatment")]
-    groups <- droplevels(groups_of(screenR_Object)[match(samples,
-        colnames(counts)[-1])])
+    groups <- droplevels(groups_of(object)[match(samples,
+        colnames(count_matrix))])
     object <- create_screenr_object(
         table = corrected_counts,
         annotation = annotation[annotation$Barcode %in%

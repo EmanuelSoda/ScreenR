@@ -21,11 +21,16 @@ of normalized counts for each sample.}
 The ScreenR object with the new normalized count table.
 }
 \description{
-Replaces the normalized count table of a ScreenR object, for
-    example with counts normalized outside ScreenR. The table is matched to
-    the count table by barcode and sample; an empty table removes the
-    normalized counts. Usually the normalized counts are computed with
-    \code{\link{normalize_data}}.
+Sets the normalization of a ScreenR object from a table of
+    normalized counts, for example counts normalized outside ScreenR.
+    Usually the normalization is set with \code{\link{normalize_data}}.
+    ScreenR uses one normalization for the plots and the edgeR/limma
+    models, expressed as one effective library size for each sample, so
+    the table must be the raw counts divided by one factor for each sample
+    (times 1e6): the effective library sizes are computed from it and the
+    method is recorded as "custom". Any other table is an error. The table
+    is matched to the counts by barcode and sample; an empty table removes
+    the normalization.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

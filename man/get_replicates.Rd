@@ -18,7 +18,10 @@ get_replicates(object)
 The vector of replicate labels.
 }
 \description{
-Returns the replicate labels stored in a ScreenR object.
+Returns the replicate labels stored in a ScreenR object:
+    the Replicate column of the colData when one label was given for each
+    sample, otherwise the value given to
+    \code{\link{create_screenr_object}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

@@ -200,6 +200,15 @@ replicates should agree:
 plot_gini(object)
 ```
 
+The plots so far use the raw counts. The correlation between replicates and
+the sample plots below compare normalized counts, so the counts are
+normalized first (counts per million; the choice of the normalization is
+discussed below):
+
+```{r normalize}
+object <- normalize_data(object)
+```
+
 ```{r replicates, fig.height = 5, fig.width = 6}
 plot_replicate_correlation(object)
 ```
@@ -253,7 +262,6 @@ groups of samples (`control` and `treatment` are values of the Treatment
 column):
 
 ```{r quality, message = FALSE}
-object <- compute_data_table(normalize_data(object))
 day3 <- compute_metrics(object,
     control = "T0", treatment = "T3", day = "Screen"
 )
@@ -303,9 +311,9 @@ at 0:
 ```{r quality-control-normalization, message = FALSE}
 nonessential_sgrnas <- hap1_annotation_table$Barcode[
     hap1_annotation_table$Gene %in% nonessential]
-day18_control <- compute_data_table(normalize_data(object,
+day18_control <- normalize_data(object,
     method = "control", control_barcodes = nonessential_sgrnas
-)) %>%
+) %>%
     compute_metrics(control = "T0", treatment = "T18", day = "Screen")
 knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
     digits = 3)

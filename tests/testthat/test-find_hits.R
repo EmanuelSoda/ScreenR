@@ -1,6 +1,7 @@
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
-data <- count_table
+# The unmapped reads "*" appear several times: remove them
+data <- count_table[count_table$Barcode != "*", ]
 annotaion <- annotation_table
 
 groups <- factor(c(
@@ -30,18 +31,11 @@ create_test_object <- function() {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     obj <- normalize_data(obj)
-    obj <- compute_data_table(obj)
 
-    obj@data_table <- obj@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
-
-    # Keep only the barcodes of the data table (counts and normalized
-    # counts are subset together)
-    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
-        obj@data_table$Barcode, ]
-
-    obj@annotation_table <- obj@annotation_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the first 10 genes; the effective library
+    # sizes computed on all the barcodes are kept
+    obj <- obj[SummarizedExperiment::rowData(obj)$Gene %in%
+        paste0("Gene_", seq(1, 10)), ]
 
     return(obj)
 }
@@ -73,7 +67,7 @@ test_that("find_common_hit 3", {
 test_that("find_roast_hit", {
     set.seed(42)
     object <- get0("object", envir = asNamespace("ScreenR"))
-    matrix_model <- model.matrix(~ slot(object, "groups"))
+    matrix_model <- model.matrix(~ get_groups(object))
     colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
     expect_warning(find_roast_hit(object,
         matrix_model = matrix_model,

@@ -242,8 +242,10 @@ agree, the default is fine.
 
 ```{r normalization}
 object_tmm <- normalize_data(object, method = "tmm")
-ratio <- colMeans(SummarizedExperiment::assay(object_tmm, "normalized")) /
-    colMeans(SummarizedExperiment::assay(object, "normalized"))
+# The normalized counts are the raw counts divided by the effective library
+# sizes, so their ratio is the inverse ratio of the sizes
+ratio <- get_normalization(object)$effective_library_size /
+    get_normalization(object_tmm)$effective_library_size
 tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 ```
 
@@ -252,10 +254,11 @@ control barcodes the call would be
 `normalize_data(object, method = "control", control_barcodes = my_controls)`,
 where `my_controls` is the vector of their identifiers.
 
-The normalization affects the frequencies, the Z-scores and the plots. The
-edgeR-based methods of tutorial 3 (CAMERA, ROAST) always model the raw counts
-and do their own normalization. After changing the normalization, run
-`compute_data_table()` again.
+The normalization is used by the whole analysis: the frequencies, the
+Z-scores, the plots and the edgeR/limma based methods of tutorial 3 (CAMERA,
+ROAST, FRY), which model the raw counts with the effective library sizes as
+offsets. Changing it with `normalize_data()` takes effect at once everywhere.
+`get_normalization()` shows the method in use.
 
 # Checklist
 
@@ -263,8 +266,7 @@ and do their own normalization. After changing the normalization, run
 * [ ] Few barcodes were lost, especially in the control samples.
 * [ ] Replicates are highly correlated and close in the MDS plot.
 * [ ] The Gini index increases smoothly, with similar values for replicates.
-* [ ] You chose a normalization and re-computed the data table if you changed
-  it.
+* [ ] You chose a normalization (`get_normalization(object)$method`).
 
 The next tutorial, **3. Finding and validating hits**, uses this object.
 

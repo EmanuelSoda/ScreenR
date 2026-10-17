@@ -1,3 +1,97 @@
+# ScreenR 1.15.16
+
+## One source of truth for the data
+
+* The ScreenR object stores each piece of information once, in its
+  SummarizedExperiment parts: the raw counts in `assay(object, "counts")`
+  (one row per barcode, one column per sample, the barcode identifiers as
+  row names), the annotation of the barcodes in the rowData, the sample
+  information, groups and per-sample replicate labels in the colData. The
+  normalized counts and the data table are no longer stored: they are
+  computed from these parts when needed, so they cannot get out of date.
+  `compute_data_table()` only checks that the object is normalized and is no
+  longer necessary.
+* Barcode identifiers are always character and never become count columns:
+  numeric identifiers are converted to their decimal form (10208 and
+  "10208" are the same barcode, 1e5 is "100000"), in the count table, the
+  annotation and the control barcodes.
+* Stricter input checks in `create_screenr_object()` and `set_count_table()`:
+  missing identifiers, and missing, infinite or negative counts are errors;
+  duplicated barcodes are an error unless `duplicate_barcodes = "sum"` or
+  `"first"` (the example `count_table` has three "*" rows: remove them, as
+  the tutorials do); barcodes annotated more than once with different values
+  are an error unless `duplicate_annotation = "first"` (exact copies are
+  merged).
+* The object is checked (validity method): unique identifiers, a Barcode
+  column of the rowData equal to the row names, valid counts and a complete
+  normalization. `assay<-`, `assays<-`, `rowData<-`, `colData<-` (and `$<-`)
+  and `dimnames<-` keep these rules (see `?"screenr_object-replace"`).
+* Changes propagate: replacing the counts with different values (with
+  `set_count_table()` or `assay<-`) removes the normalization; normalizing
+  again changes every view at once; replacing the annotation
+  (`set_annotation_table()` or `rowData<-`) changes the gene of each barcode
+  in all the following analyses; subsetting and reordering keep the barcodes,
+  the annotation and the samples aligned by identifier.
+* `get_annotation_table()` returns the annotation of the barcodes of the
+  object (rowData) followed by the annotation rows of barcodes that are not
+  in the count table, which are kept apart. `barcodes_per_gene()` counts the
+  barcodes of the object.
+* `set_data_table()` is deprecated: the data table cannot be replaced (it
+  only accepts the current data table, with a warning).
+  `set_normalized_count_table()` only accepts tables that scale each sample
+  by one factor, stored as effective library sizes (method "custom").
+
+## One normalization for the whole analysis
+
+* `normalize_data()` no longer stores normalized counts: it records the
+  effective library size of each sample in `colData(object)$EffectiveLibSize`
+  and the method, the control barcodes and the provenance in
+  `metadata(object)$normalization` (see the new `get_normalization()`). The
+  raw counts are never changed.
+* The same normalization is used everywhere: the normalized counts, the data
+  table and everything computed from it (`compute_metrics()`, the plots,
+  `compute_slope()`, ...), `plot_mds()`, `plot_pca()`,
+  `plot_explained_variance()`, `plot_replicate_correlation()` and the edgeR
+  and limma models. `create_edger_obj()`, used by `find_camera_hit()`,
+  `find_roast_hit()` (ROAST and FRY), `compute_barcode_statistics()`,
+  `find_time_hit()`, `filter_by_variance()` and `plot_barcode_hit()`, builds
+  the DGEList from the raw counts with the effective library sizes as
+  library sizes (normalization factors 1), so the offsets of the models are
+  the same normalization as the plots and TMM is applied once.
+* Before, the edgeR/limma based methods always used the total counts of the
+  object (CPM), whatever the method of `normalize_data()`, and
+  `plot_replicate_correlation()` used CPM too. **Results change** with
+  `method = "tmm"` or `"control"`: in the HAP1 screen (day 18 vs T0) FRY
+  calls 694 genes with TMM and 979 with the non-essential sgRNAs as controls
+  at 5% FDR, where it called 721 with any method before. With the default
+  `"cpm"` the results are unchanged, except when the object was subset after
+  normalization: the models now use the library sizes of the normalization
+  instead of the totals of the retained barcodes (small changes, at most 0.09
+  in log10 p-value in a test on 300 genes).
+* Operations that need normalized counts (data table, metrics, trend and
+  sample plots, statistical methods) stop with an informative error when the
+  object is not normalized, instead of using empty tables or normalizing
+  silently (`plot_mds()`, `plot_pca()` and `plot_explained_variance()` used
+  CPM silently). Raw-count quality control (`compute_gini()`,
+  `mapped_reads()`, `barcode_lost()`, ...) does not need normalization.
+* Zero library sizes, and control barcodes that are missing (all of them) or
+  have no reads in a sample, are errors in `normalize_data()`; control
+  barcodes partly missing give a warning.
+* `?normalize_data` explains that TMM corrects only part of the compositional
+  bias when many barcodes change in the same direction (about half in a
+  simulation with 20% of the genes depleted 8 times), while control barcodes
+  remove it.
+
+## Objects of older versions
+
+* `update_screenr_object()` (called by all the functions) converts objects
+  created before 1.15.8 and objects of versions 1.15.8 to 1.15.15. Their
+  normalized counts and data table are not kept, because their
+  normalization was not recorded: run `normalize_data()` on the converted
+  object (a message says so). The internal example object has been
+  converted and normalized with "cpm" (its normalized counts are identical to
+  the old ones).
+
 # ScreenR 1.15.15
 
 * New tutorial "Tutorial 4: CRISPR-Cas9 screens": installing CRISPRcleanR,

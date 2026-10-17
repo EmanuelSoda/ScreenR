@@ -23,7 +23,10 @@ The ScreenR object with the new annotation table.
 \description{
 Replaces the annotation table of a ScreenR object. The
     annotation of the barcodes of the count table (the rowData of the
-    object) is updated by matching the Barcode column.
+    object) is updated by matching the Barcode column, so the new genes are
+    used by all the following analyses (data table, metrics, edgeR/limma
+    methods). Barcodes annotated more than once with different values are
+    an error.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

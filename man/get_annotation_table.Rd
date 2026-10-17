@@ -22,6 +22,12 @@ The annotation table, a data frame with at least the columns
 Returns the annotation table of a ScreenR object, with the
     gene (and any other information) of each barcode. A short summary of
     the size of the table is printed.
+
+    The annotation of the barcodes of the object is its rowData, which is
+    what the analyses use; the returned table has those rows first,
+    followed by the rows of the annotation given by the user whose barcodes
+    are not in the count table (barcodes of the library that were not
+    observed).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

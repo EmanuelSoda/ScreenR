@@ -23,17 +23,23 @@ The subset ScreenR object.
 Subsets the barcodes (rows) and the samples (columns) of a
              ScreenR object, like any
              \code{\link[SummarizedExperiment]{SummarizedExperiment}}.
-             The normalized counts and the data table are subset to the
-             same barcodes and samples.
+             The annotation (rowData) and the sample information
+             (colData) are subset with the counts, so they stay aligned by
+             identifier when the rows or the columns are reordered.
+}
+\details{
+The normalization is kept: the retained samples keep their
+         effective library sizes, which were computed on all the barcodes
+         when \code{\link{normalize_data}} was called. To normalize on the
+         retained barcodes only, call \code{\link{normalize_data}} again
+         after subsetting.
 }
 \examples{
-object <- update_screenr_object(
-    get0("object", envir = asNamespace("ScreenR"))
-)
+object <- get0("object", envir = asNamespace("ScreenR"))
 object[1:100, ]
 object[, object$Treatment == "TRT"]
 }
 \seealso{
-\code{\link{remove_all_zero_row}}
+\code{\link{remove_all_zero_row}}, \code{\link{normalize_data}}
 }
 \concept{objects}

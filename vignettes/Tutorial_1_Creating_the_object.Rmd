@@ -277,8 +277,10 @@ get_sample_table(object)
 
 # Looking inside the object
 
-The object has a slot for each table. Use the `get_` functions to read them
-and the `set_` functions to replace them.
+Use the `get_` functions to read the tables of the object and the `set_`
+functions to replace them. The tables are views of the object: the object
+stores each piece of information once (see below), and the tables are built
+from it when you ask for them.
 
 | Function | Returns |
 |----------|---------|
@@ -287,8 +289,9 @@ and the `set_` functions to replace them.
 | `get_groups()` | The groups |
 | `get_sample_table()` | Day and Treatment of each sample |
 | `get_column_names()` | The original column names |
+| `get_normalization()` | The normalization: method and effective library sizes |
 | `get_normalized_count_table()` | The normalized counts (after `normalize_data()`) |
-| `get_data_table()` | The tidy table used by most functions (after `compute_data_table()`) |
+| `get_data_table()` | The tidy table used by most functions (after `normalize_data()`) |
 
 ```{r getters}
 head(get_count_table(object)[, 1:4])
@@ -304,10 +307,16 @@ directly with the Bioconductor tools that accept one:
 
 | Part | Content |
 |------|---------|
-| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample |
-| `assay(object, "normalized")` | The normalized counts, after `normalize_data()` |
-| `rowData(object)` | The barcode and its annotation (Gene, ...) |
-| `colData(object)` | Sample, Day, Treatment and Group of each sample |
+| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample. The row names are the barcode identifiers |
+| `rowData(object)` | The annotation of each barcode (Gene, ...) |
+| `colData(object)` | Sample, Day, Treatment and Group of each sample and, after `normalize_data()`, its effective library size (`EffectiveLibSize`) |
+| `metadata(object)$normalization` | How the counts were normalized (method, control barcodes, ...) |
+
+These parts are the only storage of the object. The barcode identifiers are
+always text and are the row names of the counts, never a column of counts:
+numeric identifiers such as `10208` are stored as `"10208"`. The normalized
+counts and the data table are not stored: they are computed from these parts
+each time, so they cannot get out of date.
 
 ```{r summarized-experiment}
 object
@@ -323,8 +332,32 @@ treated <- object[, object$Treatment == "TRT"]
 treated
 ```
 
+## Keeping the object consistent
+
+Because each piece of information is stored once, changes propagate by
+themselves:
+
+* **Changing the counts** (`set_count_table()`, or
+  `assay(object, "counts") <- ...`) removes the normalization, which no longer
+  describes the counts: run `normalize_data()` again.
+* **Normalizing again** (for example with another method) changes at once
+  the normalized counts, the data table, the plots and the edgeR/limma models.
+* **Changing the annotation** (`set_annotation_table()`, or
+  `rowData(object) <- ...`) changes the gene of each barcode in all the
+  following analyses.
+* **Subsetting or reordering** the object keeps the barcodes, their
+  annotation and the samples aligned by identifier. A normalized object keeps
+  the effective library sizes of the retained samples, computed on all the
+  barcodes; to normalize on the retained barcodes, call `normalize_data()`
+  again after subsetting.
+* Inconsistent changes are refused: duplicated barcode identifiers, a
+  `Barcode` column of the rowData different from the row names, or invalid
+  effective library sizes give an error.
+
 Objects saved with older versions of ScreenR are converted automatically by
-all the functions; `update_screenr_object()` converts them explicitly.
+all the functions; `update_screenr_object()` converts them explicitly. Those
+versions did not record how the counts were normalized, so the converted
+object is not normalized: run `normalize_data()` on it.
 
 # Preparing the data for the analysis
 
@@ -340,19 +373,24 @@ object <- remove_all_zero_row(object)
 **2. Normalize the counts.** Samples are sequenced at different depths, so the
 counts are converted to counts per million (CPM). The default divides by the
 total number of reads of each sample; `method = "tmm"` and
-`method = "control"` are discussed in tutorial 2.
+`method = "control"` are discussed in tutorial 2. The raw counts are not
+changed: the normalization is the effective library size of each sample, and
+the same normalization is used by the plots, the data table and the
+statistical models.
 
 ```{r normalize}
 object <- normalize_data(object)
+get_normalization(object)$effective_library_size
 head(get_normalized_count_table(object)[, 1:4])
 ```
 
-**3. Build the data table.** This is a long ("tidy") table with one row per
+**3. Look at the data table.** This is a long ("tidy") table with one row per
 barcode and sample, and it is used by most of the plotting and analysis
-functions.
+functions. It is computed from the normalized object when needed
+(`compute_data_table()`, needed by older versions of ScreenR, is no longer
+necessary).
 
 ```{r data-table}
-object <- compute_data_table(object)
 data_table <- get_data_table(object)
 head(select(data_table, Barcode, Gene, Sample, Frequency, Day, Treatment))
 ```
@@ -376,8 +414,7 @@ Before moving on to the quality control:
 * [ ] `groups` has one value per sample, in the order of the columns.
 * [ ] `get_sample_table()` shows the right Day and Treatment for every sample
   (otherwise use `sample_table`).
-* [ ] You ran `remove_all_zero_row()`, `normalize_data()` and
-  `compute_data_table()`.
+* [ ] You ran `remove_all_zero_row()` and `normalize_data()`.
 
 The next tutorial, **2. Quality control**, continues from this object.
 

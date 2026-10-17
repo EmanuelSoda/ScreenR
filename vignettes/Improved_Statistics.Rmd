@@ -129,8 +129,10 @@ example non-targeting shRNAs), when the library has them.
 object_tmm <- normalize_data(object, method = "tmm")
 
 # Ratio between the TMM and the total-count normalized values of each sample
-ratio <- colMeans(SummarizedExperiment::assay(object_tmm, "normalized")) /
-    colMeans(SummarizedExperiment::assay(object, "normalized"))
+# The normalized counts are the raw counts divided by the effective library
+# sizes, so their ratio is the inverse ratio of the sizes
+ratio <- get_normalization(object)$effective_library_size /
+    get_normalization(object_tmm)$effective_library_size
 tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 ```
 

@@ -1,21 +1,18 @@
 #' @title Compute the data table
-#' @description Computes the data table, a tidy (long) version of the
-#'     normalized count table used by many functions of the analysis, such as
+#' @description Checks that the object is normalized and returns it. The data
+#'     table, the tidy (long) version of the normalized counts used by
 #'     \code{\link{compute_metrics}}, \code{\link{plot_boxplot}},
-#'     \code{\link{plot_trend}} and \code{\link{filter_by_slope}}. Run it
-#'     after \code{\link{normalize_data}}. The Day and Treatment of each
-#'     sample come from \code{\link{get_sample_table}}.
+#'     \code{\link{plot_trend}}, \code{\link{filter_by_slope}} and other
+#'     functions, is no longer stored in the object: it is computed from the
+#'     object when needed (see \code{\link{get_data_table}}), so it always
+#'     follows the counts, the annotation, the sample table and the
+#'     normalization. This function is kept so that existing code works; it
+#'     is not needed any more.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
-#' @return The ScreenR object with the data table filled. The data table has
-#'     one row for each barcode and sample and the columns Barcode, Gene,
-#'     Sample, Frequency (the normalized count), Day and Treatment, plus
-#'     Sequence, Library and Gene_ID when the annotation table has them. It
-#'     can be read with \code{\link{get_data_table}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}}.
+#' @return The ScreenR object. It is an error if it is not normalized.
 #' @export
-#' @importFrom rlang .data
-#' @importFrom  tidyr pivot_longer
-#' @importFrom  dplyr left_join
 #' @concept compute
 #' @seealso \code{\link{normalize_data}}, \code{\link{get_data_table}}
 #' @examples
@@ -24,34 +21,50 @@
 #' object <- compute_data_table(object)
 #' head(get_data_table(object))
 compute_data_table <- function(screenR_Object) {
-    # First the table is created with the join of the annotation and the count
-    # table
-    screenR_Object <- update_screenr_object(screenR_Object)
-    data <- normalized_table_of(screenR_Object)
-    # The Day and Treatment of each sample, given by the user or taken from
-    # the sample names
-    sample_table <- get_sample_table(screenR_Object)
-    sample_table <- sample_table[, c("Sample", "Day", "Treatment")]
-    table <- data %>%
-        tidyr::pivot_longer(!"Barcode",
-            names_to = "Sample",
-            values_to = "Frequency"
-        ) %>%
-        dplyr::mutate(Barcode = as.factor(.data$Barcode)) %>%
-        dplyr::left_join(annotation_of(screenR_Object), by = "Barcode") %>%
-        # Sequence, Library and Gene_ID are kept when the annotation has them
-        dplyr::select(
-            "Barcode", "Gene", "Sample", "Frequency",
-            dplyr::any_of(c("Sequence", "Library", "Gene_ID"))
-        ) %>%
-        dplyr::left_join(sample_table, by = "Sample")
+    object <- update_screenr_object(screenR_Object)
+    effective_lib_size(object, "compute_data_table()")
+    object
+}
 
-    table <- dplyr::mutate(table, Sample = factor(
-        x = .data$Sample,
-        levels = unique(.data$Sample)
-    ))
+#' @title Build the Data Table
+#' @description Internal function that builds the data table of a normalized
+#'              object: one row for each barcode and sample, with the columns
+#'              Barcode, Gene, Sample, Frequency (the normalized count, raw
+#'              count / effective library size * 1e6), the Sequence, Library
+#'              and Gene_ID columns of the annotation when present, Day and
+#'              Treatment. It is computed from the assays, rowData and
+#'              colData each time and never stored.
+#' @param object A ScreenR object of the current layout.
+#' @param what What needs the data table, for the error message.
+#' @importFrom rlang .data
+#' @return A tibble.
+#' @keywords internal
+data_table_of <- function(object, what = "This function") {
+    values <- normalized_counts(object, what)
+    n_barcodes <- nrow(values)
+    n_samples <- ncol(values)
+    identifiers <- rownames(object)
+    if (is.null(identifiers)) identifiers <- character()
+    samples <- colnames(object)
+    row_data <- SummarizedExperiment::rowData(object)
+    sample_table <- sample_table_of(object)
+    sample_rows <- match(samples, sample_table$Sample)
 
-    # Then the table is put into the object
-    screenR_Object@data_table <- table
-    return(screenR_Object)
+    # One row for each barcode and sample, barcode by barcode
+    barcode_index <- rep(seq_len(n_barcodes), each = n_samples)
+    sample_index <- rep(seq_len(n_samples), times = n_barcodes)
+    table <- tibble::tibble(
+        Barcode = factor(identifiers[barcode_index], levels = identifiers),
+        Gene = genes_of(object)[barcode_index],
+        Sample = factor(samples[sample_index], levels = samples),
+        Frequency = as.vector(t(values))
+    )
+    for (column in intersect(c("Sequence", "Library", "Gene_ID"),
+        colnames(row_data))) {
+        table[[column]] <- row_data[[column]][barcode_index]
+    }
+    table$Day <- as.character(sample_table$Day)[sample_rows][sample_index]
+    table$Treatment <-
+        as.character(sample_table$Treatment)[sample_rows][sample_index]
+    table
 }

@@ -1,6 +1,7 @@
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
-data <- count_table
+# The unmapped reads "*" appear several times: remove them
+data <- count_table[count_table$Barcode != "*", ]
 annotaion <- annotation_table
 
 groups <- factor(c(
@@ -30,18 +31,11 @@ create_test_object <- function() {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     obj <- normalize_data(obj)
-    obj <- compute_data_table(obj)
 
-    obj@data_table <- obj@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
-
-    # Keep only the barcodes of the data table (counts and normalized
-    # counts are subset together)
-    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
-        obj@data_table$Barcode, ]
-
-    obj@annotation_table <- obj@annotation_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the first 10 genes; the effective library
+    # sizes computed on all the barcodes are kept
+    obj <- obj[SummarizedExperiment::rowData(obj)$Gene %in%
+        paste0("Gene_", seq(1, 10)), ]
 
     return(obj)
 }
@@ -191,11 +185,14 @@ test_that("set_normalized_count_table NULL", {
 
 
 
-# Set data_table
-test_that("set_normalized_count_table", {
+# Set data_table: deprecated, it can only confirm the derived table
+test_that("set_data_table", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    data_table <- get_data_table(object)
-    expect_silent(set_data_table(object, data_table))
+    data_table <- suppressMessages(get_data_table(object))
+    expect_warning(same <- set_data_table(object, data_table), "deprecated")
+    expect_identical(same, object)
+    expect_error(set_data_table(object, data_table[1:10, ]),
+        "can no longer change")
 })
 
 test_that("set_normalized_count_table NULL", {

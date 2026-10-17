@@ -12,7 +12,9 @@ create_screenr_object(
   barcode_column = "Barcode",
   gene_column = "Gene",
   sample_table = NULL,
-  sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment")
+  sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment"),
+  duplicate_barcodes = c("error", "sum", "first"),
+  duplicate_annotation = c("error", "first")
 )
 }
 \arguments{
@@ -30,8 +32,9 @@ example "Control" and "Treated"), with one value for each sample
 by the edgeR/limma based methods, see
 \code{\link{create_design_matrix}}.}
 
-\item{replicates}{An optional vector with the replicate labels. Default
-c("").}
+\item{replicates}{An optional vector with the replicate labels. When it
+has one value for each sample, it is stored in the Replicate column of
+the colData. Default c("").}
 
 \item{barcode_column}{The name of the column containing the barcode
 identifiers, in both the count and the annotation table. Default
@@ -49,9 +52,20 @@ the ones derived from the sample names.}
 columns of sample_table that contain the sample names, the Day and the
 Treatment. Default c(Sample = "Sample", Day = "Day",
 Treatment = "Treatment").}
+
+\item{duplicate_barcodes}{What to do when a barcode appears more than once
+in the count table: "error" (default), "sum" (add up the counts of the
+copies) or "first" (keep the first copy).}
+
+\item{duplicate_annotation}{What to do when a barcode is annotated more
+than once with different values: "error" (default) or "first" (keep
+the first row).}
 }
 \value{
-A ScreenR object (class \code{\link[=screenr_object-class]{screenr_object}}).
+A ScreenR object (class
+    \code{\link[=screenr_object-class]{screenr_object}}), not normalized:
+    run \code{\link{normalize_data}} before the analyses that need
+    normalized counts.
 }
 \description{
 Creates the ScreenR object, the starting point of every
@@ -68,16 +82,31 @@ The tables can use any column names: the names of the barcode and
 
     The input is checked when the object is created:
     \itemize{
+      \item the barcode identifiers are converted to character (numbers
+            to their decimal form: 10208 and "10208" are the same barcode)
+            and become the row names of the counts; they never become a
+            count column. Missing or empty identifiers are an error;
       \item sample columns stored as text but containing only numbers are
             converted to numbers;
       \item other non-numeric columns of the count table (for example a
             gene column) are removed with a message, since they are not
             samples;
+      \item missing, infinite or negative counts are an error;
+      \item duplicated barcodes are an error, unless
+            duplicate_barcodes says how to combine them;
+      \item barcodes annotated more than once with different values are
+            an error, unless duplicate_annotation = "first" (rows that are
+            exact copies are merged silently);
       \item groups must have one value for each sample;
-      \item barcodes that are duplicated, or that are missing from the
-            annotation (for example the unmapped reads "*"), give a
-            warning.
+      \item barcodes missing from the annotation (for example the
+            unmapped reads "*") give a warning.
     }
+
+    The object stores the raw counts as \code{assay(object, "counts")},
+    the annotation of the barcodes in its rowData and the sample
+    information in its colData (see \code{\link{screenr_object-class}}).
+    Annotation rows of barcodes that are not in the count table are kept
+    apart and returned by \code{\link{get_annotation_table}}.
 
     The Day (time point) and the Treatment of each sample are used by
     several functions. By default they are taken from the sample names,

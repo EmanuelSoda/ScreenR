@@ -16,9 +16,10 @@ The ScreenR object without the barcodes with zero counts in all
 }
 \description{
 Removes the barcodes (rows) with zero counts in all the
-    samples from the count table, the annotation table and, when present,
-    the normalized count table and the data table. Run it before
-    \code{\link{normalize_data}}.
+    samples, with their annotation. Run it before
+    \code{\link{normalize_data}}. On a normalized object the
+    normalization is kept (barcodes without reads do not change the
+    library sizes; see \code{\link{screenr_object-class}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

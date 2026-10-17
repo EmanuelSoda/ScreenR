@@ -14,9 +14,9 @@ NULL, invisibly.
 }
 \description{
 Prints a summary of a ScreenR object: the
-             SummarizedExperiment summary and the size of the data table.
-             Objects created with older versions of ScreenR are converted
-             first (see \code{\link{update_screenr_object}}).
+             SummarizedExperiment summary and the normalization. Objects
+             created with older versions of ScreenR are converted first
+             (see \code{\link{update_screenr_object}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

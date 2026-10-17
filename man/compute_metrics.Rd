@@ -24,10 +24,12 @@ treated and control mean frequencies before computing the log2 fold
 change, so that barcodes with zero reads get a finite fold change:
 Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)).
 Default 0.5. Barcodes with zero reads in both treated and control are
-removed. The value is on the scale of the normalized count table, which
-is counts per million of all the reads for the "cpm" and "tmm" methods
-of \code{\link{normalize_data}}, but per million reads of the control
-barcodes for the "control" method.}
+removed. The value is on the scale of the normalized counts: per
+million reads of the effective library size of
+\code{\link{normalize_data}} (all the reads for "cpm", all the reads
+times the TMM factor for "tmm", the reads of the control barcodes for
+"control"). It is a display transformation that keeps the fold changes
+finite; it does not change the normalization.}
 }
 \value{
 A tibble with one row for each barcode and the columns Barcode,
@@ -44,8 +46,8 @@ Computes, for each barcode, the log2 fold change between the
     \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{paper}.
 }
 \details{
-The function uses the data table, so run
-    \code{\link{normalize_data}} and \code{\link{compute_data_table}}
+The function uses the normalized counts (see
+    \code{\link{get_data_table}}), so run \code{\link{normalize_data}}
     first. For each barcode the normalized counts of the treated and of the
     control samples of the given day are averaged, then
     Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)),

@@ -1,6 +1,7 @@
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
-data <- count_table
+# The unmapped reads "*" appear several times: remove them
+data <- count_table[count_table$Barcode != "*", ]
 annotaion <- annotation_table
 
 groups <- factor(c(
@@ -30,18 +31,11 @@ create_test_object <- function() {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     obj <- normalize_data(obj)
-    obj <- compute_data_table(obj)
 
-    obj@data_table <- obj@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
-
-    # Keep only the barcodes of the data table (counts and normalized
-    # counts are subset together)
-    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
-        obj@data_table$Barcode, ]
-
-    obj@annotation_table <- obj@annotation_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the first 10 genes; the effective library
+    # sizes computed on all the barcodes are kept
+    obj <- obj[SummarizedExperiment::rowData(obj)$Gene %in%
+        paste0("Gene_", seq(1, 10)), ]
 
     return(obj)
 }
@@ -95,8 +89,10 @@ test_that("the PCA does not depend on the sequencing depth", {
     }
     deeper <- hap1_count_table
     deeper$T0 <- deeper$T0 * 10
-    variance <- compute_explained_variance(make_object(hap1_count_table))
-    variance_deeper <- compute_explained_variance(make_object(deeper))
+    variance <- compute_explained_variance(
+        normalize_data(make_object(hap1_count_table)))
+    variance_deeper <- compute_explained_variance(
+        normalize_data(make_object(deeper)))
     # Sequencing T0 ten times more deeply barely changes the components (on
     # the raw counts PC1 would go from 71% to almost 100%)
     difference <- unlist(variance[2, -1]) - unlist(variance_deeper[2, -1])
@@ -126,10 +122,16 @@ test_that("the PCA and the MDS use the normalization of normalize_data()", {
     cpm <- normalize_data(object, method = "cpm")
     control <- normalize_data(object, method = "control",
         control_barcodes = controls)
-    # Without normalize_data() the counts per million are used
+    # The example object is normalized with "cpm"
     expect_equal(log_normalized_counts(object), log_normalized_counts(cpm))
     expect_equal(compute_explained_variance(object),
         compute_explained_variance(cpm))
+    # Without normalization the plots stop instead of normalizing silently
+    raw <- ScreenR:::remove_normalization(object)
+    expect_error(log_normalized_counts(raw), "normalize_data")
+    expect_error(plot_mds(raw), "normalize_data")
+    expect_error(plot_pca(raw), "normalize_data")
+    expect_error(plot_replicate_correlation(raw), "normalize_data")
     # Another normalization gives other values
     expect_false(isTRUE(all.equal(log_normalized_counts(cpm),
         log_normalized_counts(control))))

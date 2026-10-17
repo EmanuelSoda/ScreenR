@@ -11,16 +11,31 @@
 #'
 #'     The input is checked when the object is created:
 #'     \itemize{
+#'       \item the barcode identifiers are converted to character (numbers
+#'             to their decimal form: 10208 and "10208" are the same barcode)
+#'             and become the row names of the counts; they never become a
+#'             count column. Missing or empty identifiers are an error;
 #'       \item sample columns stored as text but containing only numbers are
 #'             converted to numbers;
 #'       \item other non-numeric columns of the count table (for example a
 #'             gene column) are removed with a message, since they are not
 #'             samples;
+#'       \item missing, infinite or negative counts are an error;
+#'       \item duplicated barcodes are an error, unless
+#'             duplicate_barcodes says how to combine them;
+#'       \item barcodes annotated more than once with different values are
+#'             an error, unless duplicate_annotation = "first" (rows that are
+#'             exact copies are merged silently);
 #'       \item groups must have one value for each sample;
-#'       \item barcodes that are duplicated, or that are missing from the
-#'             annotation (for example the unmapped reads "*"), give a
-#'             warning.
+#'       \item barcodes missing from the annotation (for example the
+#'             unmapped reads "*") give a warning.
 #'     }
+#'
+#'     The object stores the raw counts as \code{assay(object, "counts")},
+#'     the annotation of the barcodes in its rowData and the sample
+#'     information in its colData (see \code{\link{screenr_object-class}}).
+#'     Annotation rows of barcodes that are not in the count table are kept
+#'     apart and returned by \code{\link{get_annotation_table}}.
 #'
 #'     The Day (time point) and the Treatment of each sample are used by
 #'     several functions. By default they are taken from the sample names,
@@ -39,8 +54,9 @@
 #'     (column of the count table other than the barcode column). It is used
 #'     by the edgeR/limma based methods, see
 #'     \code{\link{create_design_matrix}}.
-#' @param replicates An optional vector with the replicate labels. Default
-#'     c("").
+#' @param replicates An optional vector with the replicate labels. When it
+#'     has one value for each sample, it is stored in the Replicate column of
+#'     the colData. Default c("").
 #' @param barcode_column The name of the column containing the barcode
 #'     identifiers, in both the count and the annotation table. Default
 #'     "Barcode".
@@ -54,11 +70,20 @@
 #'     columns of sample_table that contain the sample names, the Day and the
 #'     Treatment. Default c(Sample = "Sample", Day = "Day",
 #'     Treatment = "Treatment").
+#' @param duplicate_barcodes What to do when a barcode appears more than once
+#'     in the count table: "error" (default), "sum" (add up the counts of the
+#'     copies) or "first" (keep the first copy).
+#' @param duplicate_annotation What to do when a barcode is annotated more
+#'     than once with different values: "error" (default) or "first" (keep
+#'     the first row).
 #' @importFrom rlang .data
 #' @importFrom methods new
 #' @importFrom tibble tibble
 #' @concept objects
-#' @return A ScreenR object (class \code{\link[=screenr_object-class]{screenr_object}}).
+#' @return A ScreenR object (class
+#'     \code{\link[=screenr_object-class]{screenr_object}}), not normalized:
+#'     run \code{\link{normalize_data}} before the analyses that need
+#'     normalized counts.
 #' @seealso \code{\link{normalize_data}}, \code{\link{compute_data_table}},
 #'     \code{\link{get_sample_table}}, \code{\link{get_count_table}} and the
 #'     other accessors.
@@ -116,11 +141,18 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
                                   sample_columns = c(
                                       Sample = "Sample", Day = "Day",
                                       Treatment = "Treatment"
-                                  )) {
+                                  ),
+                                  duplicate_barcodes = c("error", "sum",
+                                      "first"),
+                                  duplicate_annotation = c("error",
+                                      "first")) {
+    duplicate_barcodes <- match.arg(duplicate_barcodes)
+    duplicate_annotation <- match.arg(duplicate_annotation)
     column_names <- list(Barcode = barcode_column, Gene = gene_column)
 
     if (!is.null(table)) {
-        table <- check_count_table(table, barcode_column)
+        table <- check_count_table(table, barcode_column,
+            duplicate_barcodes)
         samples <- setdiff(colnames(table), "Barcode")
 
         if (!is.null(groups) && length(groups) != length(samples)) {
@@ -135,7 +167,7 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
         }
         if (!is.null(annotation)) {
             annotation <- check_annotation_table(
-                annotation, barcode_column, gene_column
+                annotation, barcode_column, gene_column, duplicate_annotation
             )
             missing <- setdiff(
                 as.character(table$Barcode), as.character(annotation$Barcode)
@@ -196,7 +228,7 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' get_sample_table(object)
 get_sample_table <- function(screenR_Object) {
-    sample_table_of(screenR_Object)
+    sample_table_of(update_screenr_object(screenR_Object))
 }
 
 #' @title Get the original column names
@@ -337,14 +369,17 @@ rename_column <- function(table, from, to, table_name) {
 
 #' @title Check the Count Table
 #' @description Internal function that finds and renames the barcode column
-#'              of the count table, converts sample columns stored as text,
-#'              removes the other non-numeric columns and warns about
-#'              duplicated barcodes.
+#'              of the count table, converts the identifiers to character,
+#'              converts sample columns stored as text, removes the other
+#'              non-numeric columns, rejects invalid counts and resolves (or
+#'              rejects) duplicated barcodes.
 #' @param table The count table.
 #' @param barcode_column The name of the barcode column.
+#' @param duplicate_barcodes "error", "sum" or "first".
 #' @return The checked count table, with the barcode column first.
 #' @keywords internal
-check_count_table <- function(table, barcode_column) {
+check_count_table <- function(table, barcode_column,
+    duplicate_barcodes = "error") {
     if (!is.data.frame(table)) {
         stop("table must be a data frame.", call. = FALSE)
     }
@@ -354,6 +389,8 @@ check_count_table <- function(table, barcode_column) {
     )
     table <- rename_column(table, column, "Barcode", "count table")
     table <- table[, c("Barcode", setdiff(colnames(table), "Barcode"))]
+    table$Barcode <- as_barcode_id(table$Barcode,
+        "barcode identifiers of the count table")
 
     removed <- character()
     for (sample in setdiff(colnames(table), "Barcode")) {
@@ -382,31 +419,71 @@ check_count_table <- function(table, barcode_column) {
     if (ncol(table) < 2) {
         stop("The count table has no numeric sample columns.", call. = FALSE)
     }
-    if (any(as.matrix(table[, -1]) < 0, na.rm = TRUE)) {
-        warning("The count table contains negative values.", call. = FALSE)
+    counts <- as.matrix(table[, -1])
+    if (anyNA(counts)) {
+        stop("The count table contains missing values (NA): replace them ",
+            "with 0 if the barcodes were not observed.", call. = FALSE)
     }
+    if (any(!is.finite(counts))) {
+        stop("The count table contains infinite values.", call. = FALSE)
+    }
+    if (any(counts < 0)) {
+        stop("The count table contains negative values: ScreenR needs raw ",
+            "read counts.", call. = FALSE)
+    }
+    resolve_duplicated_barcodes(table, duplicate_barcodes)
+}
+
+#' @title Resolve Duplicated Barcodes
+#' @description Internal function that stops when barcodes appear more than
+#'              once in the count table, or combines their rows when a policy
+#'              is given.
+#' @param table The count table, with a character Barcode column.
+#' @param policy "error", "sum" (add up the counts) or "first".
+#' @return The count table without duplicated barcodes.
+#' @keywords internal
+resolve_duplicated_barcodes <- function(table, policy = "error") {
     duplicated_barcodes <- unique(table$Barcode[duplicated(table$Barcode)])
-    if (length(duplicated_barcodes) > 0) {
-        warning(
+    if (length(duplicated_barcodes) == 0) {
+        return(table)
+    }
+    if (policy == "error") {
+        stop(
             "The count table has duplicated barcodes (",
             paste(utils::head(duplicated_barcodes, 5), collapse = ", "),
-            if (length(duplicated_barcodes) > 5) ", ..." else "", ").",
+            if (length(duplicated_barcodes) > 5) ", ..." else "", "). ",
+            "Remove them (for example the unmapped reads \"*\"), or say how ",
+            "to combine them with duplicate_barcodes = \"sum\" or \"first\".",
             call. = FALSE
         )
     }
-    table
+    message(length(duplicated_barcodes), " duplicated barcode(s) (",
+        paste(utils::head(duplicated_barcodes, 5), collapse = ", "),
+        if (length(duplicated_barcodes) > 5) ", ..." else "",
+        ") have been combined (duplicate_barcodes = \"", policy, "\").")
+    if (policy == "first") {
+        return(table[!duplicated(table$Barcode), ])
+    }
+    order <- unique(table$Barcode)
+    summed <- rowsum(as.matrix(table[, -1]), table$Barcode, reorder = FALSE)
+    combined <- tibble::as_tibble(summed[order, , drop = FALSE],
+        .name_repair = "minimal")
+    dplyr::bind_cols(tibble::tibble(Barcode = order), combined)
 }
 
 #' @title Check the Annotation Table
 #' @description Internal function that finds and renames the barcode and
-#'              gene columns of the annotation table and warns about
-#'              duplicated barcodes.
+#'              gene columns of the annotation table, converts the
+#'              identifiers to character and resolves (or rejects) barcodes
+#'              annotated more than once.
 #' @param annotation The annotation table.
 #' @param barcode_column The name of the barcode column.
 #' @param gene_column The name of the gene column.
+#' @param duplicate_annotation "error" or "first".
 #' @return The checked annotation table.
 #' @keywords internal
-check_annotation_table <- function(annotation, barcode_column, gene_column) {
+check_annotation_table <- function(annotation, barcode_column, gene_column,
+    duplicate_annotation = "error") {
     if (!is.data.frame(annotation)) {
         stop("annotation must be a data frame.", call. = FALSE)
     }
@@ -426,20 +503,42 @@ check_annotation_table <- function(annotation, barcode_column, gene_column) {
     annotation <- rename_column(annotation, barcode, "Barcode",
         "annotation table")
     annotation <- rename_column(annotation, gene, "Gene", "annotation table")
-    duplicated_barcodes <- unique(
-        annotation$Barcode[duplicated(annotation$Barcode)]
-    )
-    if (length(duplicated_barcodes) > 0) {
-        warning(
-            "The annotation table has duplicated barcodes (",
-            paste(utils::head(duplicated_barcodes, 5), collapse = ", "),
-            if (length(duplicated_barcodes) > 5) ", ..." else "", "): ",
-            "only the first row of each barcode is kept.",
-            call. = FALSE
-        )
-        annotation <- annotation[!duplicated(annotation$Barcode), ]
+    annotation <- annotation_frame(annotation)
+    resolve_duplicated_annotation(annotation, duplicate_annotation)
+}
+
+#' @title Resolve Duplicated Annotation
+#' @description Internal function that merges the rows of the annotation
+#'              that are exact copies, and stops when a barcode is annotated
+#'              more than once with different values (unless policy is
+#'              "first", which keeps the first row of each barcode).
+#' @param annotation The annotation table, with a character Barcode column.
+#' @param policy "error" or "first".
+#' @return The annotation table with one row for each barcode.
+#' @keywords internal
+resolve_duplicated_annotation <- function(annotation, policy = "error") {
+    annotation <- annotation[!duplicated(as.data.frame(annotation)), ,
+        drop = FALSE]
+    conflicts <- unique(annotation$Barcode[duplicated(annotation$Barcode)])
+    if (length(conflicts) == 0) {
+        return(annotation)
     }
-    annotation
+    if (policy == "error") {
+        stop(
+            "The annotation table gives different annotations for the same ",
+            "barcode(s) (", paste(utils::head(conflicts, 5), collapse = ", "),
+            if (length(conflicts) > 5) ", ..." else "", "). Correct the ",
+            "table, or keep the first row of each barcode with ",
+            "duplicate_annotation = \"first\".", call. = FALSE
+        )
+    }
+    warning(
+        "The annotation table gives different annotations for the same ",
+        "barcode(s) (", paste(utils::head(conflicts, 5), collapse = ", "),
+        if (length(conflicts) > 5) ", ..." else "", "): only the first row ",
+        "of each barcode is kept.", call. = FALSE
+    )
+    annotation[!duplicated(annotation$Barcode), , drop = FALSE]
 }
 
 #' @title Check the Sample Table
@@ -499,44 +598,62 @@ check_sample_table <- function(sample_table, sample_columns, samples) {
 #' @title Create an edgeR object
 #' @description Converts a ScreenR object into an edgeR
 #'     \code{\link[edgeR]{DGEList}}, for example to use the object with edgeR
-#'     or limma functions directly. The edgeR/limma based functions of ScreenR
-#'     (such as \code{\link{find_camera_hit}} and
-#'     \code{\link{find_roast_hit}}) call it internally. The DGEList is built
-#'     from the raw counts (the count table), as required by the edgeR
-#'     negative binomial model, and the annotation is matched to the counts
-#'     by barcode; all the barcodes of the count table must be in the
-#'     annotation table.
+#'     or limma functions directly. All the edgeR/limma based functions of
+#'     ScreenR (\code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+#'     \code{\link{compute_barcode_statistics}}, \code{\link{find_time_hit}},
+#'     \code{\link{filter_by_variance}} and \code{\link{plot_barcode_hit}})
+#'     use it, so they all model the counts with the same normalization.
+#' @details The DGEList contains the raw counts, as required by the edgeR
+#'     negative binomial model (never normalized counts), and the
+#'     normalization of the object set by \code{\link{normalize_data}}: the
+#'     library sizes (lib.size) are the effective library sizes of the
+#'     samples and the normalization factors (norm.factors) are 1. The offsets
+#'     of the models, log(lib.size * norm.factors), are therefore the
+#'     logarithms of the effective library sizes, the same that give the
+#'     normalized counts of the plots and of the data table (raw count /
+#'     effective library size * 1e6). For the "tmm" method the effective
+#'     library size already includes the TMM factor, so it is not applied a
+#'     second time; do not call \code{\link[edgeR]{normLibSizes}} (or
+#'     calcNormFactors) on the result, which would change the normalization.
+#'
+#'     The object must be normalized, and every barcode must be annotated
+#'     with a gene. The genes table of the DGEList is the rowData of the
+#'     object.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}}.
 #' @importFrom  edgeR DGEList
-#' @return A \code{\link[edgeR]{DGEList}} with the raw counts, the groups of
-#'     the samples and the annotation of the barcodes (genes).
-#' @seealso \code{\link{create_design_matrix}}
+#' @return A \code{\link[edgeR]{DGEList}} with the raw counts, the effective
+#'     library sizes, the groups of the samples and the annotation of the
+#'     barcodes (genes).
+#' @seealso \code{\link{normalize_data}}, \code{\link{create_design_matrix}}
 #' @concept objects
 #' @export
 #' @examples
 #' object <- get0("object", envir = asNamespace("ScreenR"))
-#' create_edger_obj(object)
+#' dge <- create_edger_obj(object)
+#' dge$samples
 create_edger_obj <- function(screenR_Object) {
-    # edgeR models raw counts, so the count table (not the CPM) is used
-    count_table <- count_table_of(screenR_Object)
-    counts <- as.matrix(dplyr::select_if(count_table, is.numeric))
-    barcodes <- as.character(count_table$Barcode)
-    rownames(counts) <- barcodes
-    # The group for the treatment
-    groups <- groups_of(screenR_Object)
-
-    # The annotation, in the same order as the counts
-    genes <- annotation_of(screenR_Object)
-    genes <- genes[match(barcodes, as.character(genes$Barcode)), ]
-    if (anyNA(genes$Barcode)) {
-        stop("Some barcodes of the count table are not in the annotation ",
-            "table.")
+    object <- update_screenr_object(screenR_Object)
+    sizes <- effective_lib_size(object, "The edgeR/limma based analysis")
+    if (nrow(object) == 0 || ncol(object) == 0) {
+        stop("The object has no barcodes or no samples.", call. = FALSE)
     }
-
-    # Create the edgeR object
-    DGEList <- edgeR::DGEList(counts = counts,
-                              group = groups,
-                              genes = genes)
-    return(DGEList)
+    # edgeR models raw counts; the normalization enters through the library
+    # sizes (offsets)
+    counts <- SummarizedExperiment::assay(object, "counts",
+        withDimnames = TRUE)
+    genes <- as.data.frame(SummarizedExperiment::rowData(object),
+        optional = TRUE)
+    rownames(genes) <- rownames(object)
+    if (!"Gene" %in% colnames(genes) || anyNA(genes$Gene)) {
+        stop("Some barcodes of the count table are not in the annotation ",
+            "table (no gene).", call. = FALSE)
+    }
+    groups <- groups_of(object)
+    if (length(groups) != ncol(object)) {
+        groups <- NULL
+    }
+    edgeR::DGEList(counts = counts, lib.size = unname(sizes),
+        norm.factors = rep(1, ncol(object)), group = groups, genes = genes)
 }

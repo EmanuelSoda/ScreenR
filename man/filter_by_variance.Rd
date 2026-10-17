@@ -14,7 +14,10 @@ filter_by_variance(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
-\code{\link{create_screenr_object}}.}
+\code{\link{create_screenr_object}}, normalized with
+\code{\link{normalize_data}}. The model uses its raw counts with its
+effective library sizes as offsets, the same normalization as the plots
+and the data table (see \code{\link{create_edger_obj}}).}
 
 \item{genes}{The genes to filter, for example the hits found by
 \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or

@@ -94,6 +94,7 @@ reference:
   contents:
   - create_screenr_object
   - '`screenr_object-class`'
+  - '`screenr_object-replace`'
   - update_screenr_object
   - remove_all_zero_row
   - '`show,screenr_object-method`'
