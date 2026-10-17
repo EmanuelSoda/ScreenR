@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -111,10 +112,12 @@ treated and control mean frequencies before computing the log2 fold
 change, so that barcodes with zero reads get a finite fold change:
 Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)).
 Default 0.5. Barcodes with zero reads in both treated and control are
-removed. The value is on the scale of the normalized count table, which
-is counts per million of all the reads for the "cpm" and "tmm" methods
-of <code><a href="normalize_data.html">normalize_data</a></code>, but per million reads of the control
-barcodes for the "control" method.</p></dd>
+removed. The value is on the scale of the normalized counts: per
+million reads of the effective library size of
+<code><a href="normalize_data.html">normalize_data</a></code> (all the reads for "cpm", all the reads
+times the TMM factor for "tmm", the reads of the control barcodes for
+"control"). It is a display transformation that keeps the fold changes
+finite; it does not change the normalization.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -125,8 +128,8 @@ barcodes for the "control" method.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function uses the data table, so run
-    <code><a href="normalize_data.html">normalize_data</a></code> and <code><a href="compute_data_table.html">compute_data_table</a></code>
+    <p>The function uses the normalized counts (see
+    <code><a href="get_data_table.html">get_data_table</a></code>), so run <code><a href="normalize_data.html">normalize_data</a></code>
     first. For each barcode the normalized counts of the treated and of the
     control samples of the given day are averaged, then
     Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)),
@@ -155,14 +158,14 @@ barcodes for the "control" method.</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">metrics</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 9</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Barcode Gene     Treated Control  Log2FC Zscore ZscoreRobust Day   Treatment</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1       Gene_386   296.    326.  -<span style="color: #BB0000;">0.140</span>  -<span style="color: #BB0000;">0.394</span>       -<span style="color: #BB0000;">0.549</span> Time3 TRT      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 10      Gene_519   115.    110.   0.061<span style="text-decoration: underline;">8</span>  0.202        0.273 Time3 TRT      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 100     Gene_84     30.8    16.9  0.849   2.53         3.48  Time3 TRT      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 1000    Gene_350   130.    127.   0.034<span style="text-decoration: underline;">3</span>  0.120        0.161 Time3 TRT      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 10001   Gene_379   463.    492.  -<span style="color: #BB0000;">0.089</span><span style="color: #BB0000; text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.245</span>       -<span style="color: #BB0000;">0.343</span> Time3 TRT      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 10002   Gene_379   169.    147.   0.201   0.612        0.839 Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Barcode Gene     Treated Control  Log2FC  Zscore ZscoreRobust Day   Treatment</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 10208   Gene_380   372.    382.  -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">0</span> -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">2</span>       -<span style="color: #BB0000;">0.138</span> Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 10502   Gene_380    32.2    27.9  0.205   0.625         0.857 Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 10796   Gene_380   140.    123.   0.190   0.579         0.794 Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 11089   Gene_380   378.    365.   0.051<span style="text-decoration: underline;">0</span>  0.170         0.229 Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 11382   Gene_380    48.6    66.9 -<span style="color: #BB0000;">0.456</span>  -<span style="color: #BB0000;">1.33</span>         -<span style="color: #BB0000;">1.84</span>  Time3 TRT      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 11675   Gene_380   691.    829.  -<span style="color: #BB0000;">0.263</span>  -<span style="color: #BB0000;">0.759</span>        -<span style="color: #BB0000;">1.05</span>  Time3 TRT      </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

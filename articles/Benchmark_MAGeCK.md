@@ -53,8 +53,6 @@ interpretation:
 ``` r
 
 library(ScreenR)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -416,14 +414,14 @@ k562 <- compute_data_table(normalize_data(k562))
 k562
 #> class: screenr_object 
 #> dim: 67358 3 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(67358): 0_H01__01204 0_H01__01217 ... 9978_H02__24
 #>   9978_H02_~_25
 #> rowData names(4): Barcode Gene Gene_ID Class
 #> colnames(3): Plasmid T14_A T14_B
-#> colData names(4): Sample Day Treatment Group
-#> data table: 202074 rows, 7 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 ```
 
 ### Running the ScreenR methods
@@ -843,12 +841,12 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3    tidyr_1.3.2      dplyr_1.2.1      ScreenR_1.15.15 
+#> [1] ggplot2_4.0.3    tidyr_1.3.2      dplyr_1.2.1      ScreenR_1.15.16 
 #> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] Biobase_2.72.0              lattice_0.22-9             
 #>  [7] vctrs_0.7.3                 tools_4.6.1                
 #>  [9] generics_0.1.4              stats4_4.6.1               
@@ -872,7 +870,7 @@ sessionInfo()
 #> [45] cli_3.6.6                   SparseArray_1.12.3         
 #> [47] magrittr_2.0.5              patchwork_1.3.2            
 #> [49] S4Arrays_1.12.1             withr_3.0.3                
-#> [51] edgeR_4.10.5                scales_1.4.0               
+#> [51] edgeR_4.10.6                scales_1.4.0               
 #> [53] rmarkdown_2.32              XVector_0.52.0             
 #> [55] matrixStats_1.5.0           otel_0.2.0                 
 #> [57] ragg_1.5.2                  evaluate_1.0.5             

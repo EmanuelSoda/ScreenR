@@ -1,6 +1,9 @@
 # Get the replicates
 
-Returns the replicate labels stored in a ScreenR object.
+Returns the replicate labels stored in a ScreenR object: the Replicate
+column of the colData when one label was given for each sample,
+otherwise the value given to
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
 
 ## Usage
 

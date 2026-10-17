@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -77,7 +78,9 @@
 <span>  barcode_column <span class="op">=</span> <span class="st">"Barcode"</span>,</span>
 <span>  gene_column <span class="op">=</span> <span class="st">"Gene"</span>,</span>
 <span>  sample_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  sample_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Sample <span class="op">=</span> <span class="st">"Sample"</span>, Day <span class="op">=</span> <span class="st">"Day"</span>, Treatment <span class="op">=</span> <span class="st">"Treatment"</span><span class="op">)</span></span>
+<span>  sample_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Sample <span class="op">=</span> <span class="st">"Sample"</span>, Day <span class="op">=</span> <span class="st">"Day"</span>, Treatment <span class="op">=</span> <span class="st">"Treatment"</span><span class="op">)</span>,</span>
+<span>  duplicate_barcodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"sum"</span>, <span class="st">"first"</span><span class="op">)</span>,</span>
+<span>  duplicate_annotation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"first"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -106,8 +109,9 @@ by the edgeR/limma based methods, see
 
 
 <dt id="arg-replicates">replicates<a class="anchor" aria-label="anchor" href="#arg-replicates"></a></dt>
-<dd><p>An optional vector with the replicate labels. Default
-c("").</p></dd>
+<dd><p>An optional vector with the replicate labels. When it
+has one value for each sample, it is stored in the Replicate column of
+the colData. Default c("").</p></dd>
 
 
 <dt id="arg-barcode-column">barcode_column<a class="anchor" aria-label="anchor" href="#arg-barcode-column"></a></dt>
@@ -134,10 +138,25 @@ columns of sample_table that contain the sample names, the Day and the
 Treatment. Default c(Sample = "Sample", Day = "Day",
 Treatment = "Treatment").</p></dd>
 
+
+<dt id="arg-duplicate-barcodes">duplicate_barcodes<a class="anchor" aria-label="anchor" href="#arg-duplicate-barcodes"></a></dt>
+<dd><p>What to do when a barcode appears more than once
+in the count table: "error" (default), "sum" (add up the counts of the
+copies) or "first" (keep the first copy).</p></dd>
+
+
+<dt id="arg-duplicate-annotation">duplicate_annotation<a class="anchor" aria-label="anchor" href="#arg-duplicate-annotation"></a></dt>
+<dd><p>What to do when a barcode is annotated more
+than once with different values: "error" (default) or "first" (keep
+the first row).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A ScreenR object (class <code><a href="screenr_object-class.html">screenr_object</a></code>).</p>
+    <p>A ScreenR object (class
+    <code><a href="screenr_object-class.html">screenr_object</a></code>), not normalized:
+    run <code><a href="normalize_data.html">normalize_data</a></code> before the analyses that need
+    normalized counts.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -146,16 +165,30 @@ Treatment = "Treatment").</p></dd>
     object renames them internally to Barcode and Gene (the original names
     are kept, see <code><a href="get_column_names.html">get_column_names</a></code>). When a column is not
     found, the error suggests the most similar column name.</p>
-<p>The input is checked when the object is created:</p><ul><li><p>sample columns stored as text but containing only numbers are
+<p>The input is checked when the object is created:</p><ul><li><p>the barcode identifiers are converted to character (numbers
+            to their decimal form: 10208 and "10208" are the same barcode)
+            and become the row names of the counts; they never become a
+            count column. Missing or empty identifiers are an error;</p></li>
+<li><p>sample columns stored as text but containing only numbers are
             converted to numbers;</p></li>
 <li><p>other non-numeric columns of the count table (for example a
             gene column) are removed with a message, since they are not
             samples;</p></li>
+<li><p>missing, infinite or negative counts are an error;</p></li>
+<li><p>duplicated barcodes are an error, unless
+            duplicate_barcodes says how to combine them;</p></li>
+<li><p>barcodes annotated more than once with different values are
+            an error, unless duplicate_annotation = "first" (rows that are
+            exact copies are merged silently);</p></li>
 <li><p>groups must have one value for each sample;</p></li>
-<li><p>barcodes that are duplicated, or that are missing from the
-            annotation (for example the unmapped reads "*"), give a
-            warning.</p></li>
-</ul><p>The Day (time point) and the Treatment of each sample are used by
+<li><p>barcodes missing from the annotation (for example the
+            unmapped reads "*") give a warning.</p></li>
+</ul><p>The object stores the raw counts as <code>assay(object, "counts")</code>,
+    the annotation of the barcodes in its rowData and the sample
+    information in its colData (see <code><a href="screenr_object-class.html">screenr_object-class</a></code>).
+    Annotation rows of barcodes that are not in the count table are kept
+    apart and returned by <code><a href="get_annotation_table.html">get_annotation_table</a></code>.</p>
+<p>The Day (time point) and the Treatment of each sample are used by
     several functions. By default they are taken from the sample names,
     which must have the form Day_Treatment_Replicate (for example
     Time3_TRT_A). When the sample names have another form, give them
@@ -194,14 +227,14 @@ Treatment = "Treatment").</p></dd>
 <span class="r-in"><span><span class="va">obj</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: screenr_object </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> dim: 4 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(1): screenr_layout</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): counts</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rownames(4): Code_1 Code_2 Code_3 Code_4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(2): Barcode Gene</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colnames(4): Time3_CTRL_rep1 Time3_CTRL_rep2 Time3_TRT_rep1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Time3_TRT_rep2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colData names(4): Sample Day Treatment Group</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> data table: 0 rows, 0 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> normalization: none (run normalize_data())</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Tables with other column names and sample names without the</span></span></span>
 <span class="r-in"><span><span class="co"># Day_Treatment_Replicate form</span></span></span>

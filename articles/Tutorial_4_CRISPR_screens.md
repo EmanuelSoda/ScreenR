@@ -59,6 +59,10 @@ tells whether it is installed:
 library(ScreenR)
 library(dplyr)
 library(ggplot2)
+```
+
+``` r
+
 crisprcleanr_available()
 ```
 
@@ -137,14 +141,14 @@ object <- remove_all_zero_row(object)
 object
 #> class: screenr_object 
 #> dim: 13598 7 
-#> metadata(0):
+#> metadata(1): screenr_layout
 #> assays(1): counts
 #> rownames(13598): EGFP_TGGTTGTCGGGCAGCAGCAC EGFP_GGTTGTCGGGCAGCAGCACG
 #>   ... luciferase_GGCTATGAAGAGATACGCCC luciferase_GGCATGCGAGAATCTGACGC
 #> rowData names(7): Barcode Gene ... End Class
 #> colnames(7): T0 T3_A ... T18_B T18_C
 #> colData names(4): Sample Day Treatment Group
-#> data table: 0 rows, 0 columns
+#> normalization: none (run normalize_data())
 ```
 
 ## How many sgRNAs per gene?
@@ -236,6 +240,16 @@ plot_gini(object)
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/gini-1.png)
 
+The plots so far use the raw counts. The correlation between replicates
+and the sample plots below compare normalized counts, so the counts are
+normalized first (counts per million; the choice of the normalization is
+discussed below):
+
+``` r
+
+object <- normalize_data(object)
+```
+
 ``` r
 
 plot_replicate_correlation(object)
@@ -319,7 +333,6 @@ samples (`control` and `treatment` are values of the Treatment column):
 
 ``` r
 
-object <- compute_data_table(normalize_data(object))
 day3 <- compute_metrics(object,
     control = "T0", treatment = "T3", day = "Screen"
 )
@@ -381,10 +394,12 @@ non-essential genes (`method = "control"`) puts it back at 0:
 
 nonessential_sgrnas <- hap1_annotation_table$Barcode[
     hap1_annotation_table$Gene %in% nonessential]
-day18_control <- compute_data_table(normalize_data(object,
+day18_control <- normalize_data(object,
     method = "control", control_barcodes = nonessential_sgrnas
-)) %>%
+) %>%
     compute_metrics(control = "T0", treatment = "T18", day = "Screen")
+#> Warning: 1 of the 3067 control barcodes are not in the object
+#> (OTOP3_TCTCCGGAAAGCTTCACACG): the other 3066 are used.
 knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
     digits = 3)
 ```
@@ -764,11 +779,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0
+#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] Biobase_2.72.0              lattice_0.22-9             
 #>  [7] vctrs_0.7.3                 tools_4.6.1                
 #>  [9] generics_0.1.4              stats4_4.6.1               
@@ -792,7 +807,7 @@ sessionInfo()
 #> [45] cli_3.6.6                   SparseArray_1.12.3         
 #> [47] magrittr_2.0.5              patchwork_1.3.2            
 #> [49] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [51] withr_3.0.3                 edgeR_4.10.5               
+#> [51] withr_3.0.3                 edgeR_4.10.6               
 #> [53] scales_1.4.0                rmarkdown_2.32             
 #> [55] XVector_0.52.0              matrixStats_1.5.0          
 #> [57] otel_0.2.0                  ragg_1.5.2                 

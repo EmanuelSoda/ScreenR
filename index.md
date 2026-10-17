@@ -78,6 +78,9 @@ replicates.
 ``` r
 
 library(ScreenR)
+```
+
+``` r
 
 data(count_table)
 data(annotation_table)

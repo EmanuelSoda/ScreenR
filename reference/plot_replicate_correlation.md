@@ -1,9 +1,12 @@
 # Plot the correlation between samples
 
 Plots, as a heatmap, the correlation between all the pairs of samples,
-computed on log2(CPM + 1) of the raw counts. Replicates of the same
-condition are expected to be highly correlated; a replicate with a low
-correlation to the others may be an outlier.
+computed on log2(normalized count + 1), with the normalization set by
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+(the + 1 is a display transformation that keeps barcodes without reads
+finite). Replicates of the same condition are expected to be highly
+correlated; a replicate with a low correlation to the others may be an
+outlier. The object must be normalized.
 
 ## Usage
 

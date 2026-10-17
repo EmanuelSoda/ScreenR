@@ -4,6 +4,11 @@ Returns the raw count table of a ScreenR object, with one row for each
 barcode and one column for each sample. A short summary of the size of
 the table is printed.
 
+The table is a view of the counts assay (`assay(object, "counts")`): the
+Barcode column is made from the row names and is not a sample. Changing
+the returned table does not change the object; use
+[`set_count_table`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md).
+
 ## Usage
 
 ``` r
@@ -40,7 +45,7 @@ count_table <- get_count_table(object)
 head(count_table)
 #> # A tibble: 6 × 15
 #>   Barcode    T1    T2 Time3_TRT_A Time3_TRT_B Time3_TRT_C Time3_A Time3_B
-#>   <fct>   <int> <int>       <int>       <int>       <int>   <int>   <int>
+#>   <chr>   <int> <int>       <int>       <int>       <int>   <int>   <int>
 #> 1 10208    3520  4283        2493        3998        3018    3393    3829
 #> 2 10502     280   339         140         542         162     468     157
 #> 3 10796    1507  1533        1120        1125        1286    1136    1095

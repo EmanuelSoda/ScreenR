@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,7 @@
 <li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul>
 </li>
@@ -97,7 +98,7 @@ Ceccacci</h4>
 Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2026-10-16</h4>
+            <h4 data-toc-skip class="date">2026-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/master/vignettes/Tutorial_2_Quality_control.Rmd" class="external-link"><code>vignettes/Tutorial_2_Quality_control.Rmd</code></a></small>
       <div class="d-none name"><code>Tutorial_2_Quality_control.Rmd</code></div>
@@ -116,12 +117,10 @@ bottleneck) would otherwise produce false hits later.</p>
 built in <strong>1. Getting your data into ScreenR</strong>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/">ScreenR</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
-<span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">count_table</span></span>
@@ -146,7 +145,7 @@ built in <strong>1. Getting your data into ScreenR</strong>:</p>
 <span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p>Many plots accept a <code>palette</code>, one color per sample. Here
 replicates of the same condition share a color:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"#66c2a5"</span>, <span class="st">"#fc8d62"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#8da0cb"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#e78ac3"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#a6d854"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"#ffd92f"</span>, <span class="fl">3</span><span class="op">)</span></span>
@@ -215,7 +214,7 @@ replicates of the same condition share a color:</p>
 <h2 id="step-1-sequencing-depth">Step 1: sequencing depth<a class="anchor" aria-label="anchor" href="#step-1-sequencing-depth"></a>
 </h2>
 <p>The number of reads assigned to barcodes in each sample.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/mapped_reads.html">mapped_reads</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 2</span></span></span>
 <span><span class="co">#&gt;    Sample         Mapped</span></span>
@@ -250,13 +249,13 @@ more than 1000 per barcode, which is enough.</p>
 <div class="section level2">
 <h2 id="step-2-distribution-of-the-counts">Step 2: distribution of the counts<a class="anchor" aria-label="anchor" href="#step-2-distribution-of-the-counts"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mapped_reads_distribution.html">plot_mapped_reads_distribution</a></span><span class="op">(</span><span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span>,</span>
 <span>    alpha <span class="op">=</span> <span class="fl">0.8</span>, type <span class="op">=</span> <span class="st">"boxplot"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/distribution-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mapped_reads_distribution.html">plot_mapped_reads_distribution</a></span><span class="op">(</span><span class="va">object</span>, palette <span class="op">=</span> <span class="va">palette</span>,</span>
 <span>    alpha <span class="op">=</span> <span class="fl">0.4</span>, type <span class="op">=</span> <span class="st">"density"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -271,7 +270,7 @@ have had a technical problem (for example during PCR amplification).</p>
 <p>A barcode is lost in a sample when it has zero reads. Some loss over
 time is expected in a dropout screen; a large loss means that the
 library was not represented well enough (too few cells per barcode).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/barcode_lost.html">barcode_lost</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 2</span></span></span>
 <span><span class="co">#&gt;    Sample       LostBarcode</span></span>
@@ -294,7 +293,7 @@ library was not represented well enough (too few cells per barcode).</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/barcode-lost-1.png" class="r-plt" alt="" width="672"></p>
 <p>To see which genes lost barcodes in some samples:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_lost_for_gene.html">plot_barcode_lost_for_gene</a></span><span class="op">(</span><span class="va">object</span>, samples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time3_TRT_A"</span>, <span class="st">"Time4_TRT_A"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/barcode-lost-gene-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>What to look for.</strong> A few lost barcodes per sample are
@@ -307,7 +306,7 @@ unreliable.</p>
 </h2>
 <p><code><a href="../reference/plot_replicate_correlation.html">plot_replicate_correlation()</a></code> shows the correlation of
 the log2 counts per million between every pair of samples.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_replicate_correlation.html">plot_replicate_correlation</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/correlation-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>What to look for.</strong> Replicates of the same condition
@@ -321,7 +320,7 @@ check it in the next plots before deciding whether to remove it.</p>
 <p>The Gini index measures how unevenly the reads are spread over the
 barcodes: 0 means that every barcode has the same number of reads, 1
 that a single barcode has all of them.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/compute_gini.html">compute_gini</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 2</span></span></span>
 <span><span class="co">#&gt;    Sample        Gini</span></span>
@@ -353,17 +352,17 @@ from about 0.42 to 0.48: a normal trend.</p>
 </h2>
 <p>The multidimensional scaling (MDS) plot places similar samples close
 to each other. By default the points are labelled by sample:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/mds-1.png" class="r-plt" alt="" width="672"></p>
 <p>The <code>groups</code> argument colors the samples by any variable,
 for example by treatment or by time point:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_sample_table.html">get_sample_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Treatment</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/mds-groups-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Day</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/mds-groups-2.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/plot_pca.html">plot_pca()</a></code> shows the samples on the components of a
@@ -373,19 +372,19 @@ of the variability each component explains on the axes;
 <code>components</code> selects other components. Unlike the MDS, which
 uses the most variable barcodes, it uses all of them, so the two plots
 are a check of each other:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_pca.html">plot_pca</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/pca-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_pca.html">plot_pca</a></span><span class="op">(</span><span class="va">object</span>, groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Treatment</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/pca-2.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/plot_explained_variance.html">plot_explained_variance()</a></code> shows how much of the
 variability each principal component explains
 (<code>cumulative = TRUE</code> for the cumulative proportion).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/explained-variance-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span>, cumulative <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_2_Quality_control_files/figure-html/explained-variance-2.png" class="r-plt" alt="" width="672"></p>
 <p><strong>What to look for.</strong> Replicates should be close to each
@@ -441,10 +440,12 @@ treatment</td>
 <p>A quick way to decide between <code>"cpm"</code> and
 <code>"tmm"</code> is to compare them: if they agree, the default is
 fine.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object_tmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span>, method <span class="op">=</span> <span class="st">"tmm"</span><span class="op">)</span></span>
-<span><span class="va">ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">object_tmm</span>, <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">object</span>, <span class="st">"normalized"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># The normalized counts are the raw counts divided by the effective library</span></span>
+<span><span class="co"># sizes, so their ratio is the inverse ratio of the sizes</span></span>
+<span><span class="va">ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_normalization.html">get_normalization</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">effective_library_size</span> <span class="op">/</span></span>
+<span>    <span class="fu"><a href="../reference/get_normalization.html">get_normalization</a></span><span class="op">(</span><span class="va">object_tmm</span><span class="op">)</span><span class="op">$</span><span class="va">effective_library_size</span></span>
 <span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ratio</span><span class="op">)</span>, TMM_over_CPM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">ratio</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 2</span></span></span>
 <span><span class="co">#&gt;    Sample       TMM_over_CPM</span></span>
@@ -467,10 +468,12 @@ fine.</p>
 default. With control barcodes the call would be
 <code>normalize_data(object, method = "control", control_barcodes = my_controls)</code>,
 where <code>my_controls</code> is the vector of their identifiers.</p>
-<p>The normalization affects the frequencies, the Z-scores and the
-plots. The edgeR-based methods of tutorial 3 (CAMERA, ROAST) always
-model the raw counts and do their own normalization. After changing the
-normalization, run <code><a href="../reference/compute_data_table.html">compute_data_table()</a></code> again.</p>
+<p>The normalization is used by the whole analysis: the frequencies, the
+Z-scores, the plots and the edgeR/limma based methods of tutorial 3
+(CAMERA, ROAST, FRY), which model the raw counts with the effective
+library sizes as offsets. Changing it with <code><a href="../reference/normalize_data.html">normalize_data()</a></code>
+takes effect at once everywhere. <code><a href="../reference/get_normalization.html">get_normalization()</a></code> shows
+the method in use.</p>
 </div>
 <div class="section level2">
 <h2 id="checklist">Checklist<a class="anchor" aria-label="anchor" href="#checklist"></a>
@@ -484,12 +487,12 @@ in the control samples.</label></li>
 close in the MDS plot.</label></li>
 <li><label><input type="checkbox">The Gini index increases smoothly,
 with similar values for replicates.</label></li>
-<li><label><input type="checkbox">You chose a normalization and
-re-computed the data table if you changed it.</label></li>
+<li><label><input type="checkbox">You chose a normalization
+(<code>get_normalization(object)$method</code>).</label></li>
 </ul>
 <p>The next tutorial, <strong>3. Finding and validating hits</strong>,
 uses this object.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -512,11 +515,11 @@ uses this object.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0</span></span>
+<span><span class="co">#&gt; [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [3] xfun_0.61                   bslib_0.12.0               </span></span>
+<span><span class="co">#&gt;  [3] xfun_0.62                   bslib_0.12.0               </span></span>
 <span><span class="co">#&gt;  [5] Biobase_2.72.0              lattice_0.22-9             </span></span>
 <span><span class="co">#&gt;  [7] vctrs_0.7.3                 tools_4.6.1                </span></span>
 <span><span class="co">#&gt;  [9] generics_0.1.4              stats4_4.6.1               </span></span>
@@ -540,7 +543,7 @@ uses this object.</p>
 <span><span class="co">#&gt; [45] cli_3.6.6                   SparseArray_1.12.3         </span></span>
 <span><span class="co">#&gt; [47] magrittr_2.0.5              patchwork_1.3.2            </span></span>
 <span><span class="co">#&gt; [49] S4Arrays_1.12.1             utf8_1.2.6                 </span></span>
-<span><span class="co">#&gt; [51] withr_3.0.3                 edgeR_4.10.5               </span></span>
+<span><span class="co">#&gt; [51] withr_3.0.3                 edgeR_4.10.6               </span></span>
 <span><span class="co">#&gt; [53] scales_1.4.0                rmarkdown_2.32             </span></span>
 <span><span class="co">#&gt; [55] XVector_0.52.0              matrixStats_1.5.0          </span></span>
 <span><span class="co">#&gt; [57] otel_0.2.0                  ragg_1.5.2                 </span></span>

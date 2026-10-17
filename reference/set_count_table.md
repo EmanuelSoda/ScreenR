@@ -1,12 +1,16 @@
 # Set the count table
 
-Replaces the raw count table of a ScreenR object. The annotation, the
-groups and the normalized counts are kept (the normalized counts are
-matched to the new table by barcode and sample); the Day and Treatment
-of the samples are kept when the samples are the same, otherwise they
-are taken again from the sample names. Unlike
-[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md),
-the table is not checked.
+Replaces the raw count table of a ScreenR object. The annotation and the
+groups are kept (the annotation is matched to the new barcodes by
+identifier); the Day and Treatment of the samples are kept when the
+samples are the same, otherwise they are taken again from the sample
+names. The table is checked as in
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+(identifiers, invalid counts, duplicated barcodes). When the counts
+change, the normalization is removed (with a message): run
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+again. The same holds for `assay(object, "counts") <- ` (see
+[`screenr_object-replace`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)).
 
 ## Usage
 
@@ -47,11 +51,11 @@ counts <- get_count_table(object)
 set_count_table(object, counts)
 #> class: screenr_object 
 #> dim: 5320 14 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): T1 T2 ... Time4_B Time4_c
-#> colData names(4): Sample Day Treatment Group
-#> data table: 74480 rows, 9 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 ```

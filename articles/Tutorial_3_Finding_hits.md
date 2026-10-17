@@ -19,10 +19,11 @@ It continues from the object of the previous tutorials:
 ``` r
 
 library(ScreenR)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(dplyr)
 library(ggplot2)
+```
+
+``` r
 
 data(count_table)
 data(annotation_table)
@@ -164,14 +165,14 @@ metrics_time4 <- compute_metrics(object,
 )
 head(metrics_time4)
 #> # A tibble: 6 × 9
-#>   Barcode Gene     Treated Control Log2FC Zscore ZscoreRobust Day   Treatment
-#>   <fct>   <chr>      <dbl>   <dbl>  <dbl>  <dbl>        <dbl> <chr> <chr>    
-#> 1 1       Gene_386   245.    279.  -0.187 -0.303       -0.482 Time4 TRT      
-#> 2 10      Gene_519    74.3   118.  -0.665 -1.30        -1.85  Time4 TRT      
-#> 3 100     Gene_84     38.6    32.1  0.262  0.634        0.806 Time4 TRT      
-#> 4 1000    Gene_350   126.    115.   0.138  0.376        0.452 Time4 TRT      
-#> 5 10001   Gene_379   412.    453.  -0.138 -0.200       -0.340 Time4 TRT      
-#> 6 10002   Gene_379   191.    207.  -0.116 -0.155       -0.278 Time4 TRT
+#>   Barcode Gene     Treated Control  Log2FC Zscore ZscoreRobust Day   Treatment
+#>   <fct>   <chr>      <dbl>   <dbl>   <dbl>  <dbl>        <dbl> <chr> <chr>    
+#> 1 10208   Gene_380   387.    362.   0.0965  0.289        0.332 Time4 TRT      
+#> 2 10502   Gene_380    27.3    37.6 -0.458  -0.869       -1.26  Time4 TRT      
+#> 3 10796   Gene_380    35.0    58.4 -0.732  -1.44        -2.04  Time4 TRT      
+#> 4 11089   Gene_380   289.    324.  -0.167  -0.261       -0.424 Time4 TRT      
+#> 5 11382   Gene_380    26.3    42.6 -0.683  -1.34        -1.90  Time4 TRT      
+#> 6 11675   Gene_380   799.    974.  -0.286  -0.511       -0.766 Time4 TRT
 ```
 
 [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
@@ -231,14 +232,14 @@ It needs a library with hundreds of genes, most of them without effect.
 gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1, seed = 1)
 head(gene_zscore)
 #> # A tibble: 6 × 6
-#>   Gene     NBarcodes  Score Log2FC    PValue    FDR
-#>   <chr>        <int>  <dbl>  <dbl>     <dbl>  <dbl>
-#> 1 Gene_364        12 -1.55  -0.473 0.0000500 0.0267
-#> 2 Gene_296        10 -1.31  -0.499 0.000460  0.123 
-#> 3 Gene_322        10 -1.13  -0.386 0.00148   0.263 
-#> 4 Gene_419        10 -1.08  -0.311 0.00209   0.279 
-#> 5 Gene_352        10 -1.02  -0.455 0.00318   0.340 
-#> 6 Gene_422        10 -0.951 -0.430 0.00455   0.405
+#>   Gene     NBarcodes  Score Log2FC     PValue     FDR
+#>   <chr>        <int>  <dbl>  <dbl>      <dbl>   <dbl>
+#> 1 Gene_364        12 -1.55  -0.473 0.00001000 0.00534
+#> 2 Gene_296        10 -1.31  -0.499 0.000440   0.117  
+#> 3 Gene_322        10 -1.13  -0.386 0.00159    0.283  
+#> 4 Gene_419        10 -1.08  -0.311 0.00217    0.290  
+#> 5 Gene_352        10 -1.02  -0.455 0.00326    0.348  
+#> 6 Gene_422        10 -0.951 -0.430 0.00482    0.429
 ```
 
 | Column          | Meaning                                 |
@@ -694,11 +695,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0
+#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] Biobase_2.72.0              lattice_0.22-9             
 #>  [7] vctrs_0.7.3                 tools_4.6.1                
 #>  [9] generics_0.1.4              stats4_4.6.1               
@@ -724,7 +725,7 @@ sessionInfo()
 #> [49] SparseArray_1.12.3          magrittr_2.0.5             
 #> [51] patchwork_1.3.2             S4Arrays_1.12.1            
 #> [53] utf8_1.2.6                  withr_3.0.3                
-#> [55] edgeR_4.10.5                scales_1.4.0               
+#> [55] edgeR_4.10.6                scales_1.4.0               
 #> [57] rmarkdown_2.32              XVector_0.52.0             
 #> [59] matrixStats_1.5.0           otel_0.2.0                 
 #> [61] ragg_1.5.2                  evaluate_1.0.5             

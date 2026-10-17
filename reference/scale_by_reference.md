@@ -63,7 +63,6 @@ genes <- unique(as.character(metrics$Gene))
 scaled <- scale_by_reference(metrics,
     essential = genes[1:20], nonessential = genes[21:60]
 )
-#> Warning: The essential genes are not more depleted than the non-essential genes: the scaled scores are not meaningful.
 head(scaled$ScaledLog2FC)
-#> [1] -16.244149   6.332980  94.471041   3.249938 -10.591691  21.876512
+#> [1]   29.78713 -127.87003 -117.81213  -28.35987  299.05660  174.58973
 ```

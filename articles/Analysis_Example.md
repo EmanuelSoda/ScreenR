@@ -91,17 +91,6 @@ After installation, loading the package is simple as :
 ``` r
 
 library(ScreenR)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
-#> 
-#> Welcome to ScreenR
-#> --------------------------
-#> 
-#> See ?ScreenR for a list of
-#> available functions.
-#> 
-#> Enjoy!
-#> 
 ```
 
 ### Read Data
@@ -692,12 +681,12 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ScreenR_1.15.15  tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
+#> [1] ScreenR_1.15.16  tidyr_1.3.2      dplyr_1.2.1      ggplot2_4.0.3   
 #> [5] BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] Biobase_2.72.0              lattice_0.22-9             
 #>  [7] vctrs_0.7.3                 tools_4.6.1                
 #>  [9] generics_0.1.4              stats4_4.6.1               
@@ -722,7 +711,7 @@ sessionInfo()
 #> [47] cli_3.6.6                   SparseArray_1.12.3         
 #> [49] magrittr_2.0.5              patchwork_1.3.2            
 #> [51] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [53] edgeR_4.10.5                withr_3.0.3                
+#> [53] edgeR_4.10.6                withr_3.0.3                
 #> [55] scales_1.4.0                rmarkdown_2.32             
 #> [57] XVector_0.52.0              matrixStats_1.5.0          
 #> [59] otel_0.2.0                  ragg_1.5.2                 

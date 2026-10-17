@@ -1,8 +1,12 @@
 # Get the normalized count table
 
-Returns the normalized count table of a ScreenR object, computed with
-[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
-A short summary of the size of the table is printed.
+Returns the normalized count table of a ScreenR object. A short summary
+of the size of the table is printed. The normalized counts are not
+stored: they are computed from the raw counts and the effective library
+sizes set by
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+(raw count / effective library size \* 1e6), so they always follow the
+counts and the normalization.
 
 ## Usage
 
@@ -40,7 +44,7 @@ normalized_count_table <- get_normalized_count_table(object)
 normalized_count_table
 #> # A tibble: 5,320 × 15
 #>    Barcode    T1    T2 Time3_TRT_A Time3_TRT_B Time3_TRT_C Time3_A Time3_B
-#>    <fct>   <dbl> <dbl>       <dbl>       <dbl>       <dbl>   <dbl>   <dbl>
+#>    <chr>   <dbl> <dbl>       <dbl>       <dbl>       <dbl>   <dbl>   <dbl>
 #>  1 10208   330.  437.        365.        439.        311.    358.    425. 
 #>  2 10502    26.2  34.6        20.5        59.5        16.7    49.3    17.4
 #>  3 10796   141.  156.        164.        124.        132.    120.    121. 

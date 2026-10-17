@@ -1,5 +1,154 @@
 # Changelog
 
+## ScreenR 1.15.16
+
+- New vignette “Analysis of a longitudinal screen: from counts to
+  treatment-specific hits”, a complete analysis of the example screen
+  (T0, post-puromycin baseline, control and treated cultures at two time
+  points with three replicates): quality control, one normalization for
+  the whole analysis, one edgeR model with all the samples, treatment
+  effects at each time point, the difference between depletion at both
+  time points (intersection-union test), on average and changing over
+  time
+  ([`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)),
+  fitness genes shared by all the cultures, evidence at the level of the
+  shRNAs, a sensitivity analysis and the current limitations of ScreenR
+  for longitudinal designs.
+
+### One source of truth for the data
+
+- The ScreenR object stores each piece of information once, in its
+  SummarizedExperiment parts: the raw counts in
+  `assay(object, "counts")` (one row per barcode, one column per sample,
+  the barcode identifiers as row names), the annotation of the barcodes
+  in the rowData, the sample information, groups and per-sample
+  replicate labels in the colData. The normalized counts and the data
+  table are no longer stored: they are computed from these parts when
+  needed, so they cannot get out of date.
+  [`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
+  only checks that the object is normalized and is no longer necessary.
+- Barcode identifiers are always character and never become count
+  columns: numeric identifiers are converted to their decimal form
+  (10208 and “10208” are the same barcode, 1e5 is “100000”), in the
+  count table, the annotation and the control barcodes.
+- Stricter input checks in
+  [`create_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)
+  and
+  [`set_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md):
+  missing identifiers, and missing, infinite or negative counts are
+  errors; duplicated barcodes are an error unless
+  `duplicate_barcodes = "sum"` or `"first"` (the example `count_table`
+  has three “\*” rows: remove them, as the tutorials do); barcodes
+  annotated more than once with different values are an error unless
+  `duplicate_annotation = "first"` (exact copies are merged).
+- The object is checked (validity method): unique identifiers, a Barcode
+  column of the rowData equal to the row names, valid counts and a
+  complete normalization. `assay<-`, `assays<-`, `rowData<-`,
+  `colData<-` (and `$<-`) and `dimnames<-` keep these rules (see
+  [`?"screenr_object-replace"`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)).
+- Changes propagate: replacing the counts with different values (with
+  [`set_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md)
+  or `assay<-`) removes the normalization; normalizing again changes
+  every view at once; replacing the annotation
+  ([`set_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md)
+  or `rowData<-`) changes the gene of each barcode in all the following
+  analyses; subsetting and reordering keep the barcodes, the annotation
+  and the samples aligned by identifier.
+- [`get_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_annotation_table.md)
+  returns the annotation of the barcodes of the object (rowData)
+  followed by the annotation rows of barcodes that are not in the count
+  table, which are kept apart.
+  [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md)
+  counts the barcodes of the object.
+- [`set_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_data_table.md)
+  is deprecated: the data table cannot be replaced (it only accepts the
+  current data table, with a warning).
+  [`set_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_normalized_count_table.md)
+  only accepts tables that scale each sample by one factor, stored as
+  effective library sizes (method “custom”).
+
+### One normalization for the whole analysis
+
+- [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  no longer stores normalized counts: it records the effective library
+  size of each sample in `colData(object)$EffectiveLibSize` and the
+  method, the control barcodes and the provenance in
+  `metadata(object)$normalization` (see the new
+  [`get_normalization()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalization.md)).
+  The raw counts are never changed.
+- The same normalization is used everywhere: the normalized counts, the
+  data table and everything computed from it
+  ([`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
+  the plots,
+  [`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md),
+  …),
+  [`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
+  [`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md),
+  [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md),
+  [`plot_replicate_correlation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md)
+  and the edgeR and limma models.
+  [`create_edger_obj()`](https://emanuelsoda.github.io/ScreenR/reference/create_edger_obj.md),
+  used by
+  [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md),
+  [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
+  (ROAST and FRY),
+  [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md),
+  [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md),
+  [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md)
+  and
+  [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md),
+  builds the DGEList from the raw counts with the effective library
+  sizes as library sizes (normalization factors 1), so the offsets of
+  the models are the same normalization as the plots and TMM is applied
+  once.
+- Before, the edgeR/limma based methods always used the total counts of
+  the object (CPM), whatever the method of
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md),
+  and
+  [`plot_replicate_correlation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.md)
+  used CPM too. **Results change** with `method = "tmm"` or `"control"`:
+  in the HAP1 screen (day 18 vs T0) FRY calls 694 genes with TMM and 979
+  with the non-essential sgRNAs as controls at 5% FDR, where it called
+  721 with any method before. With the default `"cpm"` the results are
+  unchanged, except when the object was subset after normalization: the
+  models now use the library sizes of the normalization instead of the
+  totals of the retained barcodes (small changes, at most 0.09 in log10
+  p-value in a test on 300 genes).
+- Operations that need normalized counts (data table, metrics, trend and
+  sample plots, statistical methods) stop with an informative error when
+  the object is not normalized, instead of using empty tables or
+  normalizing silently
+  ([`plot_mds()`](https://emanuelsoda.github.io/ScreenR/reference/plot_mds.md),
+  [`plot_pca()`](https://emanuelsoda.github.io/ScreenR/reference/plot_pca.md)
+  and
+  [`plot_explained_variance()`](https://emanuelsoda.github.io/ScreenR/reference/plot_explained_variance.md)
+  used CPM silently). Raw-count quality control
+  ([`compute_gini()`](https://emanuelsoda.github.io/ScreenR/reference/compute_gini.md),
+  [`mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/mapped_reads.md),
+  [`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md),
+  …) does not need normalization.
+- Zero library sizes, and control barcodes that are missing (all of
+  them) or have no reads in a sample, are errors in
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md);
+  control barcodes partly missing give a warning.
+- [`?normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  explains that TMM corrects only part of the compositional bias when
+  many barcodes change in the same direction (about half in a simulation
+  with 20% of the genes depleted 8 times), while control barcodes remove
+  it.
+
+### Objects of older versions
+
+- [`update_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/update_screenr_object.md)
+  (called by all the functions) converts objects created before 1.15.8
+  and objects of versions 1.15.8 to 1.15.15. Their normalized counts and
+  data table are not kept, because their normalization was not recorded:
+  run
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  on the converted object (a message says so). The internal example
+  object has been converted and normalized with “cpm” (its normalized
+  counts are identical to the old ones).
+
 ## ScreenR 1.15.15
 
 - New tutorial “Tutorial 4: CRISPR-Cas9 screens”: installing
@@ -329,9 +478,12 @@ genes had p \< 0.05).
 
 - The `screenr_object` class now extends `SummarizedExperiment`: the raw
   and normalized counts are the assays `counts` and `normalized`, the
-  barcode annotation is in `rowData()` and Sample, Day, Treatment and
-  Group are in `colData()`. The object can be used with the Bioconductor
-  tools that accept a `SummarizedExperiment` and subset like one
+  barcode annotation is in
+  [`rowData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+  and Sample, Day, Treatment and Group are in
+  [`colData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html).
+  The object can be used with the Bioconductor tools that accept a
+  `SummarizedExperiment` and subset like one
   (`object[barcodes, samples]`), keeping counts, normalized counts and
   data table consistent.
 - All the ScreenR functions, including the `get_` and `set_` functions,
@@ -443,8 +595,8 @@ genes had p \< 0.05).
   reduced to their first row.
 - The annotation columns `Sequence`, `Library` and `Gene_ID` are now
   optional.
-- New `show()` method, so that objects saved with older versions of
-  ScreenR can still be printed.
+- New [`show()`](https://rdrr.io/r/methods/show.html) method, so that
+  objects saved with older versions of ScreenR can still be printed.
 
 ### New features
 

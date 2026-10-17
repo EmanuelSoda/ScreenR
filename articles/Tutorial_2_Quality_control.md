@@ -13,10 +13,11 @@ in **1. Getting your data into ScreenR**:
 ``` r
 
 library(ScreenR)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(dplyr)
 library(ggplot2)
+```
+
+``` r
 
 data(count_table)
 data(annotation_table)
@@ -332,8 +333,10 @@ they agree, the default is fine.
 ``` r
 
 object_tmm <- normalize_data(object, method = "tmm")
-ratio <- colMeans(SummarizedExperiment::assay(object_tmm, "normalized")) /
-    colMeans(SummarizedExperiment::assay(object, "normalized"))
+# The normalized counts are the raw counts divided by the effective library
+# sizes, so their ratio is the inverse ratio of the sizes
+ratio <- get_normalization(object)$effective_library_size /
+    get_normalization(object_tmm)$effective_library_size
 tibble(Sample = names(ratio), TMM_over_CPM = round(ratio, 3))
 #> # A tibble: 14 × 2
 #>    Sample       TMM_over_CPM
@@ -359,12 +362,14 @@ With control barcodes the call would be
 `normalize_data(object, method = "control", control_barcodes = my_controls)`,
 where `my_controls` is the vector of their identifiers.
 
-The normalization affects the frequencies, the Z-scores and the plots.
-The edgeR-based methods of tutorial 3 (CAMERA, ROAST) always model the
-raw counts and do their own normalization. After changing the
-normalization, run
-[`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
-again.
+The normalization is used by the whole analysis: the frequencies, the
+Z-scores, the plots and the edgeR/limma based methods of tutorial 3
+(CAMERA, ROAST, FRY), which model the raw counts with the effective
+library sizes as offsets. Changing it with
+[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+takes effect at once everywhere.
+[`get_normalization()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalization.md)
+shows the method in use.
 
 ## Checklist
 
@@ -376,8 +381,7 @@ Replicates are highly correlated and close in the MDS plot.
 
 The Gini index increases smoothly, with similar values for replicates.
 
-You chose a normalization and re-computed the data table if you changed
-it.
+You chose a normalization (`get_normalization(object)$method`).
 
 The next tutorial, **3. Finding and validating hits**, uses this object.
 
@@ -405,11 +409,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0
+#> [1] ggplot2_4.0.3    dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] Biobase_2.72.0              lattice_0.22-9             
 #>  [7] vctrs_0.7.3                 tools_4.6.1                
 #>  [9] generics_0.1.4              stats4_4.6.1               
@@ -433,7 +437,7 @@ sessionInfo()
 #> [45] cli_3.6.6                   SparseArray_1.12.3         
 #> [47] magrittr_2.0.5              patchwork_1.3.2            
 #> [49] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [51] withr_3.0.3                 edgeR_4.10.5               
+#> [51] withr_3.0.3                 edgeR_4.10.6               
 #> [53] scales_1.4.0                rmarkdown_2.32             
 #> [55] XVector_0.52.0              matrixStats_1.5.0          
 #> [57] otel_0.2.0                  ragg_1.5.2                 

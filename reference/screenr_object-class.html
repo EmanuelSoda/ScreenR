@@ -3,37 +3,51 @@
     it stores the data of a screen and is passed to the functions of the
     analysis. Create it with create_screenr_object.
 It extends SummarizedExperiment,
-    so it can be used with all the Bioconductor tools that work with that
-    class:
+    which is the single source of truth of the object:
 assay(object, "counts"): the raw counts, one row for
-            each barcode and one column for each sample;
-assay(object, "normalized"): the normalized counts,
-            after normalize_data;
-rowData(object): the barcode identifier (Barcode) and
-            its annotation (Gene, ...);
+            each barcode and one column for each sample. They are never
+            modified by the analysis. The row names are the barcode
+            identifiers (as character) and the column names the samples.
+rowData(object): the annotation of each barcode (Gene,
+            ...), aligned with the rows of the counts. Its Barcode column
+            is kept equal to the row names, for compatibility.
 colData(object): the Sample, Day and Treatment of each
-            sample (see get_sample_table) and its Group.
-The ScreenR accessors (get_count_table,
-    set_count_table, ...) work as in the previous versions
-    of the package. Objects created with versions older than 1.15.8 are
-    converted automatically (see update_screenr_object).'><meta property="og:description" content='The screenr_object class is the main object of the package:
+            sample (see get_sample_table), its Group, its
+            Replicate (when replicate labels were given for each sample)
+            and, after normalize_data, its effective library
+            size (EffectiveLibSize).
+metadata(object)$normalization: the method of the
+            normalization and its provenance (see
+            get_normalization).
+The normalized counts, the data table and the edgeR objects are not
+    stored: they are computed when needed from the raw counts, the
+    annotation, the sample information and the effective library sizes, so
+    they always agree with each other and with the counts (see
+    normalize_data).'><meta property="og:description" content='The screenr_object class is the main object of the package:
     it stores the data of a screen and is passed to the functions of the
     analysis. Create it with create_screenr_object.
 It extends SummarizedExperiment,
-    so it can be used with all the Bioconductor tools that work with that
-    class:
+    which is the single source of truth of the object:
 assay(object, "counts"): the raw counts, one row for
-            each barcode and one column for each sample;
-assay(object, "normalized"): the normalized counts,
-            after normalize_data;
-rowData(object): the barcode identifier (Barcode) and
-            its annotation (Gene, ...);
+            each barcode and one column for each sample. They are never
+            modified by the analysis. The row names are the barcode
+            identifiers (as character) and the column names the samples.
+rowData(object): the annotation of each barcode (Gene,
+            ...), aligned with the rows of the counts. Its Barcode column
+            is kept equal to the row names, for compatibility.
 colData(object): the Sample, Day and Treatment of each
-            sample (see get_sample_table) and its Group.
-The ScreenR accessors (get_count_table,
-    set_count_table, ...) work as in the previous versions
-    of the package. Objects created with versions older than 1.15.8 are
-    converted automatically (see update_screenr_object).'><meta property="og:image" content="https://emanuelsoda.github.io/ScreenR/logo.png"><style>
+            sample (see get_sample_table), its Group, its
+            Replicate (when replicate labels were given for each sample)
+            and, after normalize_data, its effective library
+            size (EffectiveLibSize).
+metadata(object)$normalization: the method of the
+            normalization and its provenance (see
+            get_normalization).
+The normalized counts, the data table and the edgeR objects are not
+    stored: they are computed when needed from the raw counts, the
+    annotation, the sample information and the effective library sizes, so
+    they always agree with each other and with the counts (see
+    normalize_data).'><meta property="og:image" content="https://emanuelsoda.github.io/ScreenR/logo.png"><style>
   .navbar-dark .navbar-nav .nav-link, .navbar-dark .navbar-brand { color: rgba(255,255,255,.88); }
   .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link.active { color: #fff; }
   .navbar-dark .nav-text.text-muted { color: rgba(255,255,255,.65) !important; }
@@ -48,7 +62,7 @@ The ScreenR accessors (get_count_table,
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,6 +83,7 @@ The ScreenR accessors (get_count_table,
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -93,19 +108,26 @@ The ScreenR accessors (get_count_table,
     it stores the data of a screen and is passed to the functions of the
     analysis. Create it with <code><a href="create_screenr_object.html">create_screenr_object</a></code>.</p>
 <p>It extends <code><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">SummarizedExperiment</a></code>,
-    so it can be used with all the Bioconductor tools that work with that
-    class:</p><ul><li><p><code>assay(object, "counts")</code>: the raw counts, one row for
-            each barcode and one column for each sample;</p></li>
-<li><p><code>assay(object, "normalized")</code>: the normalized counts,
-            after <code><a href="normalize_data.html">normalize_data</a></code>;</p></li>
-<li><p><code>rowData(object)</code>: the barcode identifier (Barcode) and
-            its annotation (Gene, ...);</p></li>
+    which is the single source of truth of the object:</p><ul><li><p><code>assay(object, "counts")</code>: the raw counts, one row for
+            each barcode and one column for each sample. They are never
+            modified by the analysis. The row names are the barcode
+            identifiers (as character) and the column names the samples.</p></li>
+<li><p><code>rowData(object)</code>: the annotation of each barcode (Gene,
+            ...), aligned with the rows of the counts. Its Barcode column
+            is kept equal to the row names, for compatibility.</p></li>
 <li><p><code>colData(object)</code>: the Sample, Day and Treatment of each
-            sample (see <code><a href="get_sample_table.html">get_sample_table</a></code>) and its Group.</p></li>
-</ul><p>The ScreenR accessors (<code><a href="get_count_table.html">get_count_table</a></code>,
-    <code><a href="set_count_table.html">set_count_table</a></code>, ...) work as in the previous versions
-    of the package. Objects created with versions older than 1.15.8 are
-    converted automatically (see <code><a href="update_screenr_object.html">update_screenr_object</a></code>).</p>
+            sample (see <code><a href="get_sample_table.html">get_sample_table</a></code>), its Group, its
+            Replicate (when replicate labels were given for each sample)
+            and, after <code><a href="normalize_data.html">normalize_data</a></code>, its effective library
+            size (EffectiveLibSize).</p></li>
+<li><p><code>metadata(object)$normalization</code>: the method of the
+            normalization and its provenance (see
+            <code><a href="get_normalization.html">get_normalization</a></code>).</p></li>
+</ul><p>The normalized counts, the data table and the edgeR objects are not
+    stored: they are computed when needed from the raw counts, the
+    annotation, the sample information and the effective library sizes, so
+    they always agree with each other and with the counts (see
+    <code><a href="normalize_data.html">normalize_data</a></code>).</p>
     </div>
 
 
@@ -116,21 +138,52 @@ The ScreenR accessors (get_count_table,
     <code><a href="create_screenr_object.html">create_screenr_object</a></code> to build one from your data.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><strong>Changing the object.</strong> The ScreenR setters
+    (<code><a href="set_count_table.html">set_count_table</a></code>, <code><a href="set_annotation_table.html">set_annotation_table</a></code>,
+    <code><a href="set_groups.html">set_groups</a></code>, ...) and the replacement functions of
+    SummarizedExperiment keep the object consistent:</p><ul><li><p>replacing the counts (<code>set_count_table</code>,
+            <code>assay(object, "counts") &lt;- </code>, <code>assays(object) &lt;- </code>)
+            with different values removes the normalization, which must be
+            computed again with <code><a href="normalize_data.html">normalize_data</a></code>;</p></li>
+<li><p>replacing the annotation (<code>set_annotation_table</code>,
+            <code>rowData(object) &lt;- </code>) changes the gene of each barcode
+            used by all the following analyses;</p></li>
+<li><p><code>rowData&lt;-</code>, <code>colData&lt;-</code> (and <code>$&lt;-</code>) and
+            <code>dimnames&lt;-</code> check the object, and renaming the barcodes
+            updates the Barcode column of the rowData;</p></li>
+<li><p>subsetting and reordering (<code>object[i, j]</code>) keep the
+            effective library sizes of the retained samples: the
+            normalization is not computed again on the retained barcodes.
+            Call <code><a href="normalize_data.html">normalize_data</a></code> after filtering to normalize
+            on the retained barcodes.</p></li>
+</ul><p>Modifying the slots directly (<code>object@assays &lt;- ...</code>) bypasses
+    these safeguards and is not supported. Combining objects with
+    <code>cbind</code> or <code>rbind</code> is only meaningful between objects
+    normalized in the same way; the result is checked by
+    <code>validObject()</code>.</p>
+    </div>
+    <div class="section level2">
     <h2 id="slots">Slots<a class="anchor" aria-label="anchor" href="#slots"></a></h2>
 
 
 <dl><dt><code>annotation_table</code></dt>
-<dd><p>The annotation table as given by the user (it can
-contain barcodes that are not in the count table).</p></dd>
+<dd><p>The rows of the annotation table given by the user
+whose barcodes are not in the count table (barcodes of the library that
+were not observed). The annotation of the observed barcodes is in the
+rowData. <code><a href="get_annotation_table.html">get_annotation_table</a></code> returns both.</p></dd>
 
 
 <dt><code>replicates</code></dt>
-<dd><p>The replicate labels.</p></dd>
+<dd><p>The replicate labels, when they were not given for each
+sample (sample-specific labels are in the Replicate column of the
+colData).</p></dd>
 
 
 <dt><code>data_table</code></dt>
-<dd><p>The data table, a tidy (long) version of the normalized
-counts (see <code><a href="compute_data_table.html">compute_data_table</a></code>).</p></dd>
+<dd><p>Not used any more (the data table is computed when
+needed, see <code><a href="get_data_table.html">get_data_table</a></code>); kept, empty, so that saved
+objects can be read.</p></dd>
 
 
 <dt><code>column_names</code></dt>
@@ -142,6 +195,7 @@ the user (see <code><a href="get_column_names.html">get_column_names</a></code>)
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="create_screenr_object.html">create_screenr_object</a></code>,
+    <code><a href="normalize_data.html">normalize_data</a></code>, <code><a href="get_normalization.html">get_normalization</a></code>,
     <code><a href="update_screenr_object.html">update_screenr_object</a></code></p></div>
     </div>
 
@@ -156,25 +210,54 @@ the user (see <code><a href="get_column_names.html">get_column_names</a></code>)
 <span class="r-in"><span>    <span class="st">"Treated"</span>, <span class="st">"Control"</span>, <span class="st">"Control"</span>, <span class="st">"Control"</span></span></span>
 <span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The unmapped reads ("*") appear several times: remove them</span></span></span>
+<span class="r-in"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">count_table</span><span class="op">[</span><span class="va">count_table</span><span class="op">$</span><span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_screenr_object.html">create_screenr_object</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    table <span class="op">=</span> <span class="va">count_table</span>,</span></span>
+<span class="r-in"><span>    table <span class="op">=</span> <span class="va">counts</span>,</span></span>
 <span class="r-in"><span>    annotation <span class="op">=</span> <span class="va">annotation_table</span>,</span></span>
-<span class="r-in"><span>    groups <span class="op">=</span> <span class="va">groups</span>,</span></span>
-<span class="r-in"><span>    replicates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    groups <span class="op">=</span> <span class="va">groups</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The count table has duplicated barcodes (*).</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>1 barcode(s) of the count table are not in the annotation table (*). Remove them (for example the unmapped reads "*") before the edgeR based analyses.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The Day and the Treatment of each sample are taken from the sample names (Day_Treatment_Replicate). For 2 sample(s) (Time_1, Time_2) they cannot be separated and are both set to the first part of the name. If this is not intended, give them with the sample_table argument. Check them with get_sample_table().</span>
 <span class="r-in"><span><span class="va">obj</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: screenr_object </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dim: 5323 14 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> dim: 5320 14 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(1): screenr_layout</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): counts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rownames(5323): 10208 10502 ... 13995 *.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rownames(5320): 10208 10502 ... 13876 13995</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(5): Barcode Gene Gene_ID Sequence Library</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colnames(14): Time_1 Time_2 ... Time_4_rep2 Time_4_rep3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> colData names(4): Sample Day Treatment Group</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> data table: 0 rows, 0 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> normalization: none (run normalize_data())</span>
+<span class="r-in"><span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">obj</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Time_1 Time_2 Time_3_TRT_rep1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10208   3520   4283            2493</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10502    280    339             140</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10796   1507   1533            1120</span>
+<span class="r-in"><span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DataFrame with 5320 rows and 5 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Barcode        Gene   Gene_ID  Sequence   Library</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       &lt;character&gt; &lt;character&gt; &lt;logical&gt; &lt;logical&gt; &lt;logical&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10208       10208    Gene_380        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10502       10502    Gene_380        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10796       10796    Gene_380        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11089       11089    Gene_380        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11382       11382    Gene_380        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...           ...         ...       ...       ...       ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13520       13520    Gene_534        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13638       13638    Gene_534        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13757       13757    Gene_534        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13876       13876    Gene_534        NA        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13995       13995    Gene_534        NA        NA        NA</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Normalized values are derived from the counts and the normalization</span></span></span>
+<span class="r-in"><span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">obj</span>, method <span class="op">=</span> <span class="st">"tmm"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="get_normalization.html">get_normalization</a></span><span class="op">(</span><span class="va">obj</span><span class="op">)</span><span class="op">$</span><span class="va">effective_library_size</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Time_1          Time_2 Time_3_TRT_rep1 Time_3_TRT_rep2 Time_3_TRT_rep3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        10853404         9827013         6840595         9229604         9737088 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Time_3_rep1     Time_3_rep2     Time_3_rep3 Time_4_TRT_rep1 Time_4_TRT_rep2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         9647737         9179789         9641856         8799318         9717098 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time_4_TRT_rep3     Time_4_rep1     Time_4_rep2     Time_4_rep3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        12044656        10302865         9128760         9182589 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

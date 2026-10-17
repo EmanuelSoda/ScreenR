@@ -16,7 +16,9 @@ create_screenr_object(
   barcode_column = "Barcode",
   gene_column = "Gene",
   sample_table = NULL,
-  sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment")
+  sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment"),
+  duplicate_barcodes = c("error", "sum", "first"),
+  duplicate_annotation = c("error", "first")
 )
 ```
 
@@ -42,7 +44,9 @@ create_screenr_object(
 
 - replicates:
 
-  An optional vector with the replicate labels. Default c("").
+  An optional vector with the replicate labels. When it has one value
+  for each sample, it is stored in the Replicate column of the colData.
+  Default c("").
 
 - barcode_column:
 
@@ -67,10 +71,24 @@ create_screenr_object(
   sample_table that contain the sample names, the Day and the Treatment.
   Default c(Sample = "Sample", Day = "Day", Treatment = "Treatment").
 
+- duplicate_barcodes:
+
+  What to do when a barcode appears more than once in the count table:
+  "error" (default), "sum" (add up the counts of the copies) or "first"
+  (keep the first copy).
+
+- duplicate_annotation:
+
+  What to do when a barcode is annotated more than once with different
+  values: "error" (default) or "first" (keep the first row).
+
 ## Value
 
 A ScreenR object (class
-[`screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)).
+[`screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)),
+not normalized: run
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+before the analyses that need normalized counts.
 
 ## Details
 
@@ -84,16 +102,38 @@ name.
 
 The input is checked when the object is created:
 
+- the barcode identifiers are converted to character (numbers to their
+  decimal form: 10208 and "10208" are the same barcode) and become the
+  row names of the counts; they never become a count column. Missing or
+  empty identifiers are an error;
+
 - sample columns stored as text but containing only numbers are
   converted to numbers;
 
 - other non-numeric columns of the count table (for example a gene
   column) are removed with a message, since they are not samples;
 
+- missing, infinite or negative counts are an error;
+
+- duplicated barcodes are an error, unless duplicate_barcodes says how
+  to combine them;
+
+- barcodes annotated more than once with different values are an error,
+  unless duplicate_annotation = "first" (rows that are exact copies are
+  merged silently);
+
 - groups must have one value for each sample;
 
-- barcodes that are duplicated, or that are missing from the annotation
-  (for example the unmapped reads "\*"), give a warning.
+- barcodes missing from the annotation (for example the unmapped reads
+  "\*") give a warning.
+
+The object stores the raw counts as `assay(object, "counts")`, the
+annotation of the barcodes in its rowData and the sample information in
+its colData (see
+[`screenr_object-class`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)).
+Annotation rows of barcodes that are not in the count table are kept
+apart and returned by
+[`get_annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/get_annotation_table.md).
 
 The Day (time point) and the Treatment of each sample are used by
 several functions. By default they are taken from the sample names,
@@ -136,14 +176,14 @@ obj <- create_screenr_object(
 obj
 #> class: screenr_object 
 #> dim: 4 4 
-#> metadata(0):
+#> metadata(1): screenr_layout
 #> assays(1): counts
 #> rownames(4): Code_1 Code_2 Code_3 Code_4
 #> rowData names(2): Barcode Gene
 #> colnames(4): Time3_CTRL_rep1 Time3_CTRL_rep2 Time3_TRT_rep1
 #>   Time3_TRT_rep2
 #> colData names(4): Sample Day Treatment Group
-#> data table: 0 rows, 0 columns
+#> normalization: none (run normalize_data())
 
 # Tables with other column names and sample names without the
 # Day_Treatment_Replicate form

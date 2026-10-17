@@ -1,16 +1,17 @@
 # Compute the data table
 
-Computes the data table, a tidy (long) version of the normalized count
-table used by many functions of the analysis, such as
+Checks that the object is normalized and returns it. The data table, the
+tidy (long) version of the normalized counts used by
 [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
 [`plot_boxplot`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md),
-[`plot_trend`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-and
-[`filter_by_slope`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md).
-Run it after
-[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
-The Day and Treatment of each sample come from
-[`get_sample_table`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md).
+[`plot_trend`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md),
+[`filter_by_slope`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)
+and other functions, is no longer stored in the object: it is computed
+from the object when needed (see
+[`get_data_table`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md)),
+so it always follows the counts, the annotation, the sample table and
+the normalization. This function is kept so that existing code works; it
+is not needed any more.
 
 ## Usage
 
@@ -23,16 +24,13 @@ compute_data_table(screenR_Object)
 - screenR_Object:
 
   The ScreenR object obtained using
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md),
+  normalized with
+  [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
 
 ## Value
 
-The ScreenR object with the data table filled. The data table has one
-row for each barcode and sample and the columns Barcode, Gene, Sample,
-Frequency (the normalized count), Day and Treatment, plus Sequence,
-Library and Gene_ID when the annotation table has them. It can be read
-with
-[`get_data_table`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md).
+The ScreenR object. It is an error if it is not normalized.
 
 ## See also
 

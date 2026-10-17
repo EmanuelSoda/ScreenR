@@ -1,9 +1,11 @@
 # Remove the barcodes with zero counts in all samples
 
-Removes the barcodes (rows) with zero counts in all the samples from the
-count table, the annotation table and, when present, the normalized
-count table and the data table. Run it before
+Removes the barcodes (rows) with zero counts in all the samples, with
+their annotation. Run it before
 [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
+On a normalized object the normalization is kept (barcodes without reads
+do not change the library sizes; see
+[`screenr_object-class`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)).
 
 ## Usage
 

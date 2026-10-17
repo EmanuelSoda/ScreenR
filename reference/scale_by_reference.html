@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -130,9 +131,8 @@ column).</p></dd>
 <span class="r-in"><span><span class="va">scaled</span> <span class="op">&lt;-</span> <span class="fu">scale_by_reference</span><span class="op">(</span><span class="va">metrics</span>,</span></span>
 <span class="r-in"><span>    essential <span class="op">=</span> <span class="va">genes</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span>, nonessential <span class="op">=</span> <span class="va">genes</span><span class="op">[</span><span class="fl">21</span><span class="op">:</span><span class="fl">60</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The essential genes are not more depleted than the non-essential genes: the scaled scores are not meaningful.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scaled</span><span class="op">$</span><span class="va">ScaledLog2FC</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -16.244149   6.332980  94.471041   3.249938 -10.591691  21.876512</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   29.78713 -127.87003 -117.81213  -28.35987  299.05660  174.58973</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

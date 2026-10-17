@@ -44,11 +44,13 @@ compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
   barcodes with zero reads get a finite fold change: Log2FC =
   log2((Treated + pseudocount) / (Control + pseudocount)). Default 0.5.
   Barcodes with zero reads in both treated and control are removed. The
-  value is on the scale of the normalized count table, which is counts
-  per million of all the reads for the "cpm" and "tmm" methods of
-  [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md),
-  but per million reads of the control barcodes for the "control"
-  method.
+  value is on the scale of the normalized counts: per million reads of
+  the effective library size of
+  [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  (all the reads for "cpm", all the reads times the TMM factor for
+  "tmm", the reads of the control barcodes for "control"). It is a
+  display transformation that keeps the fold changes finite; it does not
+  change the normalization.
 
 ## Value
 
@@ -58,10 +60,10 @@ ZscoreRobust, Day and Treatment.
 
 ## Details
 
-The function uses the data table, so run
+The function uses the normalized counts (see
+[`get_data_table`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md)),
+so run
 [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
-and
-[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)
 first. For each barcode the normalized counts of the treated and of the
 control samples of the given day are averaged, then Log2FC =
 log2((Treated + pseudocount) / (Control + pseudocount)), Zscore =
@@ -90,12 +92,12 @@ metrics <- compute_metrics(object,
 )
 head(metrics)
 #> # A tibble: 6 × 9
-#>   Barcode Gene     Treated Control  Log2FC Zscore ZscoreRobust Day   Treatment
-#>   <fct>   <chr>      <dbl>   <dbl>   <dbl>  <dbl>        <dbl> <chr> <chr>    
-#> 1 1       Gene_386   296.    326.  -0.140  -0.394       -0.549 Time3 TRT      
-#> 2 10      Gene_519   115.    110.   0.0618  0.202        0.273 Time3 TRT      
-#> 3 100     Gene_84     30.8    16.9  0.849   2.53         3.48  Time3 TRT      
-#> 4 1000    Gene_350   130.    127.   0.0343  0.120        0.161 Time3 TRT      
-#> 5 10001   Gene_379   463.    492.  -0.0894 -0.245       -0.343 Time3 TRT      
-#> 6 10002   Gene_379   169.    147.   0.201   0.612        0.839 Time3 TRT      
+#>   Barcode Gene     Treated Control  Log2FC  Zscore ZscoreRobust Day   Treatment
+#>   <fct>   <chr>      <dbl>   <dbl>   <dbl>   <dbl>        <dbl> <chr> <chr>    
+#> 1 10208   Gene_380   372.    382.  -0.0390 -0.0962       -0.138 Time3 TRT      
+#> 2 10502   Gene_380    32.2    27.9  0.205   0.625         0.857 Time3 TRT      
+#> 3 10796   Gene_380   140.    123.   0.190   0.579         0.794 Time3 TRT      
+#> 4 11089   Gene_380   378.    365.   0.0510  0.170         0.229 Time3 TRT      
+#> 5 11382   Gene_380    48.6    66.9 -0.456  -1.33         -1.84  Time3 TRT      
+#> 6 11675   Gene_380   691.    829.  -0.263  -0.759        -1.05  Time3 TRT      
 ```

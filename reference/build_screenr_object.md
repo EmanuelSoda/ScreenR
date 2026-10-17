@@ -1,8 +1,11 @@
 # Build a ScreenR Object
 
-Internal function that builds a screenr_object from the tables, without
-checking them (the checks are done by
-[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md)).
+Internal function that builds a screenr_object from tables already
+checked by
+[`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md):
+the counts become the counts assay (with the barcode identifiers as row
+names), the annotation of the observed barcodes the rowData and the
+sample information the colData.
 
 ## Usage
 
@@ -12,8 +15,6 @@ build_screenr_object(
   annotation_table = NULL,
   groups = NULL,
   replicates = c(""),
-  normalized_count_table = NULL,
-  data_table = NULL,
   sample_table = NULL,
   column_names = list()
 )
@@ -23,12 +24,13 @@ build_screenr_object(
 
 - count_table:
 
-  A table with a Barcode column and one column for each sample.
-  Non-numeric columns other than Barcode are ignored.
+  A table with a Barcode column and one numeric column for each sample,
+  without duplicated barcodes.
 
 - annotation_table:
 
-  The annotation table, with a Barcode column.
+  The annotation table, with a Barcode column and no conflicting
+  duplicated barcodes, or NULL.
 
 - groups:
 
@@ -36,16 +38,8 @@ build_screenr_object(
 
 - replicates:
 
-  The replicates.
-
-- normalized_count_table:
-
-  An optional normalized count table, with a Barcode column; it is
-  matched to the count table by barcode and sample.
-
-- data_table:
-
-  The data table.
+  The replicate labels: one for each sample, or any other value (kept
+  for compatibility).
 
 - sample_table:
 

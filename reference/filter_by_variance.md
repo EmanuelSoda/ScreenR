@@ -23,7 +23,12 @@ filter_by_variance(
 - screenR_Object:
 
   The ScreenR object obtained using
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md),
+  normalized with
+  [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
+  The model uses its raw counts with its effective library sizes as
+  offsets, the same normalization as the plots and the data table (see
+  [`create_edger_obj`](https://emanuelsoda.github.io/ScreenR/reference/create_edger_obj.md)).
 
 - genes:
 

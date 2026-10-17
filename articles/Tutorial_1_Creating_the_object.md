@@ -21,8 +21,6 @@ will know how to build it from your own data.
 ``` r
 
 library(ScreenR)
-#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
-#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 library(dplyr)
 ```
 
@@ -359,8 +357,10 @@ get_sample_table(object)
 
 ## Looking inside the object
 
-The object has a slot for each table. Use the `get_` functions to read
-them and the `set_` functions to replace them.
+Use the `get_` functions to read the tables of the object and the `set_`
+functions to replace them. The tables are views of the object: the
+object stores each piece of information once (see below), and the tables
+are built from it when you ask for them.
 
 | Function | Returns |
 |----|----|
@@ -369,8 +369,9 @@ them and the `set_` functions to replace them.
 | [`get_groups()`](https://emanuelsoda.github.io/ScreenR/reference/get_groups.md) | The groups |
 | [`get_sample_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md) | Day and Treatment of each sample |
 | [`get_column_names()`](https://emanuelsoda.github.io/ScreenR/reference/get_column_names.md) | The original column names |
+| [`get_normalization()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalization.md) | The normalization: method and effective library sizes |
 | [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md) | The normalized counts (after [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)) |
-| [`get_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md) | The tidy table used by most functions (after [`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md)) |
+| [`get_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md) | The tidy table used by most functions (after [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)) |
 
 ``` r
 
@@ -378,7 +379,7 @@ head(get_count_table(object)[, 1:4])
 #> ScreenR count table: 5320 rows, 15 columns
 #> # A tibble: 6 × 4
 #>   Barcode Time1 Time2 Time3_TRT_A
-#>   <fct>   <int> <int>       <int>
+#>   <chr>   <int> <int>       <int>
 #> 1 10208    3520  4283        2493
 #> 2 10502     280   339         140
 #> 3 10796    1507  1533        1120
@@ -401,33 +402,39 @@ used directly with the Bioconductor tools that accept one:
 
 | Part | Content |
 |----|----|
-| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample |
-| `assay(object, "normalized")` | The normalized counts, after [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md) |
-| `rowData(object)` | The barcode and its annotation (Gene, …) |
-| `colData(object)` | Sample, Day, Treatment and Group of each sample |
+| `assay(object, "counts")` | The raw counts: one row per barcode, one column per sample. The row names are the barcode identifiers |
+| `rowData(object)` | The annotation of each barcode (Gene, …) |
+| `colData(object)` | Sample, Day, Treatment and Group of each sample and, after [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md), its effective library size (`EffectiveLibSize`) |
+| `metadata(object)$normalization` | How the counts were normalized (method, control barcodes, …) |
+
+These parts are the only storage of the object. The barcode identifiers
+are always text and are the row names of the counts, never a column of
+counts: numeric identifiers such as `10208` are stored as `"10208"`. The
+normalized counts and the data table are not stored: they are computed
+from these parts each time, so they cannot get out of date.
 
 ``` r
 
 object
 #> class: screenr_object 
 #> dim: 5320 14 
-#> metadata(0):
+#> metadata(1): screenr_layout
 #> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C
 #> colData names(4): Sample Day Treatment Group
-#> data table: 0 rows, 0 columns
+#> normalization: none (run normalize_data())
 head(SummarizedExperiment::rowData(object))
 #> DataFrame with 6 rows and 5 columns
-#>        Barcode        Gene   Gene_ID  Sequence   Library
-#>       <factor> <character> <logical> <logical> <logical>
-#> 10208    10208    Gene_380        NA        NA        NA
-#> 10502    10502    Gene_380        NA        NA        NA
-#> 10796    10796    Gene_380        NA        NA        NA
-#> 11089    11089    Gene_380        NA        NA        NA
-#> 11382    11382    Gene_380        NA        NA        NA
-#> 11675    11675    Gene_380        NA        NA        NA
+#>           Barcode        Gene   Gene_ID  Sequence   Library
+#>       <character> <character> <logical> <logical> <logical>
+#> 10208       10208    Gene_380        NA        NA        NA
+#> 10502       10502    Gene_380        NA        NA        NA
+#> 10796       10796    Gene_380        NA        NA        NA
+#> 11089       11089    Gene_380        NA        NA        NA
+#> 11382       11382    Gene_380        NA        NA        NA
+#> 11675       11675    Gene_380        NA        NA        NA
 SummarizedExperiment::colData(object)
 #> DataFrame with 14 rows and 4 columns
 #>                    Sample         Day   Treatment      Group
@@ -454,19 +461,50 @@ treated <- object[, object$Treatment == "TRT"]
 treated
 #> class: screenr_object 
 #> dim: 5320 6 
-#> metadata(0):
+#> metadata(1): screenr_layout
 #> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(6): Time3_TRT_A Time3_TRT_B ... Time4_TRT_B Time4_TRT_C
 #> colData names(4): Sample Day Treatment Group
-#> data table: 0 rows, 0 columns
+#> normalization: none (run normalize_data())
 ```
+
+### Keeping the object consistent
+
+Because each piece of information is stored once, changes propagate by
+themselves:
+
+- **Changing the counts**
+  ([`set_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_count_table.md),
+  or `assay(object, "counts") <- ...`) removes the normalization, which
+  no longer describes the counts: run
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  again.
+- **Normalizing again** (for example with another method) changes at
+  once the normalized counts, the data table, the plots and the
+  edgeR/limma models.
+- **Changing the annotation**
+  ([`set_annotation_table()`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md),
+  or `rowData(object) <- ...`) changes the gene of each barcode in all
+  the following analyses.
+- **Subsetting or reordering** the object keeps the barcodes, their
+  annotation and the samples aligned by identifier. A normalized object
+  keeps the effective library sizes of the retained samples, computed on
+  all the barcodes; to normalize on the retained barcodes, call
+  [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  again after subsetting.
+- Inconsistent changes are refused: duplicated barcode identifiers, a
+  `Barcode` column of the rowData different from the row names, or
+  invalid effective library sizes give an error.
 
 Objects saved with older versions of ScreenR are converted automatically
 by all the functions;
 [`update_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/update_screenr_object.md)
-converts them explicitly.
+converts them explicitly. Those versions did not record how the counts
+were normalized, so the converted object is not normalized: run
+[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+on it.
 
 ## Preparing the data for the analysis
 
@@ -483,16 +521,26 @@ object <- remove_all_zero_row(object)
 **2. Normalize the counts.** Samples are sequenced at different depths,
 so the counts are converted to counts per million (CPM). The default
 divides by the total number of reads of each sample; `method = "tmm"`
-and `method = "control"` are discussed in tutorial 2.
+and `method = "control"` are discussed in tutorial 2. The raw counts are
+not changed: the normalization is the effective library size of each
+sample, and the same normalization is used by the plots, the data table
+and the statistical models.
 
 ``` r
 
 object <- normalize_data(object)
+get_normalization(object)$effective_library_size
+#>        Time1        Time2  Time3_TRT_A  Time3_TRT_B  Time3_TRT_C Time3_CTRL_A 
+#>     10671757      9799724      6824877      9107354      9717868      9485195 
+#> Time3_CTRL_B Time3_CTRL_C  Time4_TRT_A  Time4_TRT_B  Time4_TRT_C Time4_CTRL_A 
+#>      9016812      9568624      8933915      9883209     12325124     10351136 
+#> Time4_CTRL_B Time4_CTRL_C 
+#>      9180192      9315365
 head(get_normalized_count_table(object)[, 1:4])
 #> ScreenR normalized count table: 5317 rows, 15 columns
 #> # A tibble: 6 × 4
 #>   Barcode Time1 Time2 Time3_TRT_A
-#>   <fct>   <dbl> <dbl>       <dbl>
+#>   <chr>   <dbl> <dbl>       <dbl>
 #> 1 10208   330.  437.        365. 
 #> 2 10502    26.2  34.6        20.5
 #> 3 10796   141.  156.        164. 
@@ -501,13 +549,15 @@ head(get_normalized_count_table(object)[, 1:4])
 #> 6 11675   687.  775.        722.
 ```
 
-**3. Build the data table.** This is a long (“tidy”) table with one row
-per barcode and sample, and it is used by most of the plotting and
-analysis functions.
+**3. Look at the data table.** This is a long (“tidy”) table with one
+row per barcode and sample, and it is used by most of the plotting and
+analysis functions. It is computed from the normalized object when
+needed
+([`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md),
+needed by older versions of ScreenR, is no longer necessary).
 
 ``` r
 
-object <- compute_data_table(object)
 data_table <- get_data_table(object)
 #> ScreenR normalized data table: 74438 rows, 9 columns
 head(select(data_table, Barcode, Gene, Sample, Frequency, Day, Treatment))
@@ -547,10 +597,9 @@ shows the right Day and Treatment for every sample (otherwise use
 `sample_table`).
 
 You ran
-[`remove_all_zero_row()`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md),
-[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+[`remove_all_zero_row()`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md)
 and
-[`compute_data_table()`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md).
+[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md).
 
 The next tutorial, **2. Quality control**, continues from this object.
 
@@ -578,11 +627,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0
+#> [1] dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
-#>  [3] xfun_0.61                   bslib_0.12.0               
+#>  [3] xfun_0.62                   bslib_0.12.0               
 #>  [5] ggplot2_4.0.3               Biobase_2.72.0             
 #>  [7] lattice_0.22-9              vctrs_0.7.3                
 #>  [9] tools_4.6.1                 generics_0.1.4             
@@ -606,7 +655,7 @@ sessionInfo()
 #> [45] cli_3.6.6                   SparseArray_1.12.3         
 #> [47] magrittr_2.0.5              patchwork_1.3.2            
 #> [49] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [51] withr_3.0.3                 edgeR_4.10.5               
+#> [51] withr_3.0.3                 edgeR_4.10.6               
 #> [53] scales_1.4.0                rmarkdown_2.32             
 #> [55] XVector_0.52.0              matrixStats_1.5.0          
 #> [57] otel_0.2.0                  ragg_1.5.2                 

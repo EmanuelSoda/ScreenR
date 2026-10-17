@@ -1,9 +1,12 @@
 # Get the data table
 
 Returns the data table of a ScreenR object, the tidy (long) version of
-the normalized counts computed with
-[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md).
-A short summary of the size of the table is printed.
+the normalized counts. A short summary of the size of the table is
+printed. The data table is not stored: it is computed from the counts,
+the annotation (rowData), the sample table (colData) and the
+normalization each time, so it always follows them. The object must be
+normalized
+([`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)).
 
 ## Usage
 

@@ -1,8 +1,15 @@
 # Set the data table
 
-Replaces the data table of a ScreenR object. Usually the data table is
-computed with
-[`compute_data_table`](https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.md).
+Deprecated. The data table is no longer stored: it is computed from the
+counts, the annotation, the sample table and the normalization of the
+object when needed (see
+[`get_data_table`](https://emanuelsoda.github.io/ScreenR/reference/get_data_table.md)),
+so it cannot be replaced. Given the current data table, the object is
+returned unchanged with a deprecation warning; any other table is an
+error. To change the data table, change the object (subset it, or use
+[`set_annotation_table`](https://emanuelsoda.github.io/ScreenR/reference/set_annotation_table.md)
+or
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)).
 
 ## Usage
 
@@ -27,7 +34,7 @@ set_data_table(object, data_table)
 
 ## Value
 
-The ScreenR object with the new data table.
+The unchanged ScreenR object (with a warning).
 
 ## See also
 
@@ -41,13 +48,14 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 data_table <- get_data_table(object)
 #> ScreenR normalized data table: 74480 rows, 9 columns
 set_data_table(object, data_table)
+#> Warning: set_data_table() is deprecated: the data table is computed from the object when needed.
 #> class: screenr_object 
 #> dim: 5320 14 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): T1 T2 ... Time4_B Time4_c
-#> colData names(4): Sample Day Treatment Group
-#> data table: 74480 rows, 9 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 ```

@@ -1,7 +1,10 @@
 # Count the barcodes of each gene
 
-Counts the barcodes (shRNAs or sgRNAs) of each gene in the annotation of
-a ScreenR object. Use it to choose `number_barcode` (in
+Counts the barcodes (shRNAs or sgRNAs) of each gene among the barcodes
+of a ScreenR object (the rows of the counts, with the gene given by the
+rowData), which are the barcodes used by the analyses. Annotated
+barcodes that are not in the count table are not counted. Use it to
+choose `number_barcode` (in
 [`find_camera_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md),
 [`find_roast_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md),
 [`find_time_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)

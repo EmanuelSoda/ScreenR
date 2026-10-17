@@ -40,7 +40,7 @@ object <- get0("object", envir = asNamespace("ScreenR"))
 head(count_mapped_reads(object))
 #> # A tibble: 6 × 3
 #>   Barcode Sample Mapped
-#>   <fct>   <fct>   <int>
+#>   <chr>   <fct>   <int>
 #> 1 10208   T1       3520
 #> 2 10502   T1        280
 #> 3 10796   T1       1507

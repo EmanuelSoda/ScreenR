@@ -3,8 +3,9 @@
 Subsets the barcodes (rows) and the samples (columns) of a ScreenR
 object, like any
 [`SummarizedExperiment`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html).
-The normalized counts and the data table are subset to the same barcodes
-and samples.
+The annotation (rowData) and the sample information (colData) are subset
+with the counts, so they stay aligned by identifier when the rows or the
+columns are reordered.
 
 ## Usage
 
@@ -35,34 +36,42 @@ x[i, j, ..., drop = TRUE]
 
 The subset ScreenR object.
 
+## Details
+
+The normalization is kept: the retained samples keep their effective
+library sizes, which were computed on all the barcodes when
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+was called. To normalize on the retained barcodes only, call
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+again after subsetting.
+
 ## See also
 
-[`remove_all_zero_row`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md)
+[`remove_all_zero_row`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md),
+[`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
 
 ## Examples
 
 ``` r
-object <- update_screenr_object(
-    get0("object", envir = asNamespace("ScreenR"))
-)
+object <- get0("object", envir = asNamespace("ScreenR"))
 object[1:100, ]
 #> class: screenr_object 
 #> dim: 100 14 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(100): 10208 10502 ... 12359 12651
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): T1 T2 ... Time4_B Time4_c
-#> colData names(4): Sample Day Treatment Group
-#> data table: 1400 rows, 9 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 object[, object$Treatment == "TRT"]
 #> class: screenr_object 
 #> dim: 5320 6 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(6): Time3_TRT_A Time3_TRT_B ... Time4_TRT_B Time4_TRT_C
-#> colData names(4): Sample Day Treatment Group
-#> data table: 31920 rows, 9 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 ```

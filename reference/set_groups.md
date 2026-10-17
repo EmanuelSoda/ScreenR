@@ -42,11 +42,11 @@ groups <- get_groups(object)
 set_groups(object, groups)
 #> class: screenr_object 
 #> dim: 5320 14 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(2): screenr_layout normalization
+#> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): T1 T2 ... Time4_B Time4_c
-#> colData names(4): Sample Day Treatment Group
-#> data table: 74480 rows, 9 columns
+#> colData names(5): Sample Day Treatment EffectiveLibSize Group
+#> normalization: cpm (effective library sizes in colData(object)$EffectiveLibSize)
 ```

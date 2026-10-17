@@ -4,6 +4,11 @@ Returns the annotation table of a ScreenR object, with the gene (and any
 other information) of each barcode. A short summary of the size of the
 table is printed.
 
+The annotation of the barcodes of the object is its rowData, which is
+what the analyses use; the returned table has those rows first, followed
+by the rows of the annotation given by the user whose barcodes are not
+in the count table (barcodes of the library that were not observed).
+
 ## Usage
 
 ``` r
@@ -38,12 +43,12 @@ annotation_table <- get_annotation_table(object)
 #> ScreenR annotation table: 5320 rows, 5 columns
 head(annotation_table)
 #> # A tibble: 6 × 5
-#>   Gene     Barcode Gene_ID Sequence Library
-#>   <chr>    <fct>   <lgl>   <lgl>    <lgl>  
-#> 1 Gene_380 10208   NA      NA       NA     
-#> 2 Gene_380 10502   NA      NA       NA     
-#> 3 Gene_380 10796   NA      NA       NA     
-#> 4 Gene_380 11089   NA      NA       NA     
-#> 5 Gene_380 11382   NA      NA       NA     
-#> 6 Gene_380 11675   NA      NA       NA     
+#>   Barcode Gene     Gene_ID Sequence Library
+#>   <chr>   <chr>    <lgl>   <lgl>    <lgl>  
+#> 1 10208   Gene_380 NA      NA       NA     
+#> 2 10502   Gene_380 NA      NA       NA     
+#> 3 10796   Gene_380 NA      NA       NA     
+#> 4 11089   Gene_380 NA      NA       NA     
+#> 5 11382   Gene_380 NA      NA       NA     
+#> 6 11675   Gene_380 NA      NA       NA     
 ```

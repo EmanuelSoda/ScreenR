@@ -10,6 +10,15 @@ objects saved with older versions of ScreenR.
 - [`screenr_object-class`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)
   [`screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.md)
   : The ScreenR object class
+- [`` `assay<-`( ``*`<screenr_object>`*`,`*`<missing>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `assay<-`( ``*`<screenr_object>`*`,`*`<character>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `assay<-`( ``*`<screenr_object>`*`,`*`<numeric>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `assays<-`( ``*`<screenr_object>`*`,`*`<list>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `assays<-`( ``*`<screenr_object>`*`,`*`<SimpleList>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `rowData<-`( ``*`<screenr_object>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `colData<-`( ``*`<screenr_object>`*`,`*`<DataFrame>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  [`` `dimnames<-`( ``*`<screenr_object>`*`,`*`<list>`*`)`](https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.md)
+  : Replacement Methods of a ScreenR Object
 - [`update_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/update_screenr_object.md)
   : Update a ScreenR object
 - [`remove_all_zero_row()`](https://emanuelsoda.github.io/ScreenR/reference/remove_all_zero_row.md)
@@ -33,6 +42,8 @@ Getter and setter functions for the content of the ScreenR object.
   : Get the data table
 - [`get_groups()`](https://emanuelsoda.github.io/ScreenR/reference/get_groups.md)
   : Get the groups
+- [`get_normalization()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalization.md)
+  : Get the normalization
 - [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md)
   : Get the normalized count table
 - [`get_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/get_replicates.md)

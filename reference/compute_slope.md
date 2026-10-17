@@ -25,7 +25,10 @@ compute_slope(
 - screenR_Object:
 
   The ScreenR object obtained using
-  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md).
+  [`create_screenr_object`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md),
+  normalized with
+  [`normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+  (its normalized counts are used).
 
 - genes:
 

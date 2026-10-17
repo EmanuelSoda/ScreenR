@@ -21,5 +21,7 @@ Step-by-step guides, from the count table to the list of hits.
   ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.md):
 - [Choosing the reference of the gene-level
   test](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.md):
+- [Analysis of a longitudinal screen: from counts to treatment-specific
+  hits](https://emanuelsoda.github.io/ScreenR/articles/Longitudinal_Screen_Analysis.md):
 - [Benchmark against MAGeCK and other
   tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.md):

@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ScreenR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.15.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,7 @@
 <li><a class="dropdown-item" href="../articles/Analysis_Example.html">Complete analysis example</a></li>
     <li><a class="dropdown-item" href="../articles/Improved_Statistics.html">Statistics in ScreenR</a></li>
     <li><a class="dropdown-item" href="../articles/Empirical_null.html">Choosing the reference of the gene-level test</a></li>
+    <li><a class="dropdown-item" href="../articles/Longitudinal_Screen_Analysis.html">Analysis of a longitudinal screen</a></li>
     <li><a class="dropdown-item" href="../articles/Benchmark_MAGeCK.html">Benchmark against MAGeCK and other tools</a></li>
   </ul>
 </li>
@@ -97,7 +98,7 @@ Ceccacci</h4>
 Italy<br><a class="author_email" href="mailto:#"></a><a href="mailto:elena.ceccacci@ieo.it" class="email">elena.ceccacci@ieo.it</a>
       </address>
                   
-            <h4 data-toc-skip class="date">2026-10-16</h4>
+            <h4 data-toc-skip class="date">2026-10-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/EmanuelSoda/ScreenR/blob/master/vignettes/Tutorial_1_Creating_the_object.Rmd" class="external-link"><code>vignettes/Tutorial_1_Creating_the_object.Rmd</code></a></small>
       <div class="d-none name"><code>Tutorial_1_Creating_the_object.Rmd</code></div>
@@ -128,8 +129,6 @@ which keeps all the tables of your experiment together. At the end of
 this tutorial you will know how to build it from your own data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/">ScreenR</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
-<span><span class="co">#&gt; 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -494,9 +493,10 @@ want for these early samples.</p>
 <div class="section level2">
 <h2 id="looking-inside-the-object">Looking inside the object<a class="anchor" aria-label="anchor" href="#looking-inside-the-object"></a>
 </h2>
-<p>The object has a slot for each table. Use the <code>get_</code>
-functions to read them and the <code>set_</code> functions to replace
-them.</p>
+<p>Use the <code>get_</code> functions to read the tables of the object
+and the <code>set_</code> functions to replace them. The tables are
+views of the object: the object stores each piece of information once
+(see below), and the tables are built from it when you ask for them.</p>
 <table class="table">
 <colgroup>
 <col width="52%">
@@ -528,13 +528,17 @@ them.</p>
 <td>The original column names</td>
 </tr>
 <tr class="even">
+<td><code><a href="../reference/get_normalization.html">get_normalization()</a></code></td>
+<td>The normalization: method and effective library sizes</td>
+</tr>
+<tr class="odd">
 <td><code><a href="../reference/get_normalized_count_table.html">get_normalized_count_table()</a></code></td>
 <td>The normalized counts (after <code><a href="../reference/normalize_data.html">normalize_data()</a></code>)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/get_data_table.html">get_data_table()</a></code></td>
 <td>The tidy table used by most functions (after
-<code><a href="../reference/compute_data_table.html">compute_data_table()</a></code>)</td>
+<code><a href="../reference/normalize_data.html">normalize_data()</a></code>)</td>
 </tr>
 </tbody>
 </table>
@@ -543,7 +547,7 @@ them.</p>
 <span><span class="co">#&gt; ScreenR count table: 5320 rows, 15 columns</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   Barcode Time1 Time2 Time3_TRT_A</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208    <span style="text-decoration: underline;">3</span>520  <span style="text-decoration: underline;">4</span>283        <span style="text-decoration: underline;">2</span>493</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502     280   339         140</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796    <span style="text-decoration: underline;">1</span>507  <span style="text-decoration: underline;">1</span>533        <span style="text-decoration: underline;">1</span>120</span></span>
@@ -573,44 +577,52 @@ used directly with the Bioconductor tools that accept one:</p>
 <tbody>
 <tr class="odd">
 <td><code>assay(object, "counts")</code></td>
-<td>The raw counts: one row per barcode, one column per sample</td>
+<td>The raw counts: one row per barcode, one column per sample. The row
+names are the barcode identifiers</td>
 </tr>
 <tr class="even">
-<td><code>assay(object, "normalized")</code></td>
-<td>The normalized counts, after <code><a href="../reference/normalize_data.html">normalize_data()</a></code>
-</td>
+<td><code>rowData(object)</code></td>
+<td>The annotation of each barcode (Gene, …)</td>
 </tr>
 <tr class="odd">
-<td><code>rowData(object)</code></td>
-<td>The barcode and its annotation (Gene, …)</td>
+<td><code>colData(object)</code></td>
+<td>Sample, Day, Treatment and Group of each sample and, after
+<code><a href="../reference/normalize_data.html">normalize_data()</a></code>, its effective library size
+(<code>EffectiveLibSize</code>)</td>
 </tr>
 <tr class="even">
-<td><code>colData(object)</code></td>
-<td>Sample, Day, Treatment and Group of each sample</td>
+<td><code>metadata(object)$normalization</code></td>
+<td>How the counts were normalized (method, control barcodes, …)</td>
 </tr>
 </tbody>
 </table>
+<p>These parts are the only storage of the object. The barcode
+identifiers are always text and are the row names of the counts, never a
+column of counts: numeric identifiers such as <code>10208</code> are
+stored as <code>"10208"</code>. The normalized counts and the data table
+are not stored: they are computed from these parts each time, so they
+cannot get out of date.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object</span></span>
 <span><span class="co">#&gt; class: screenr_object </span></span>
 <span><span class="co">#&gt; dim: 5320 14 </span></span>
-<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; metadata(1): screenr_layout</span></span>
 <span><span class="co">#&gt; assays(1): counts</span></span>
 <span><span class="co">#&gt; rownames(5320): 10208 10502 ... 13876 13995</span></span>
 <span><span class="co">#&gt; rowData names(5): Barcode Gene Gene_ID Sequence Library</span></span>
 <span><span class="co">#&gt; colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C</span></span>
 <span><span class="co">#&gt; colData names(4): Sample Day Treatment Group</span></span>
-<span><span class="co">#&gt; data table: 0 rows, 0 columns</span></span>
+<span><span class="co">#&gt; normalization: none (run normalize_data())</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; DataFrame with 6 rows and 5 columns</span></span>
-<span><span class="co">#&gt;        Barcode        Gene   Gene_ID  Sequence   Library</span></span>
-<span><span class="co">#&gt;       &lt;factor&gt; &lt;character&gt; &lt;logical&gt; &lt;logical&gt; &lt;logical&gt;</span></span>
-<span><span class="co">#&gt; 10208    10208    Gene_380        NA        NA        NA</span></span>
-<span><span class="co">#&gt; 10502    10502    Gene_380        NA        NA        NA</span></span>
-<span><span class="co">#&gt; 10796    10796    Gene_380        NA        NA        NA</span></span>
-<span><span class="co">#&gt; 11089    11089    Gene_380        NA        NA        NA</span></span>
-<span><span class="co">#&gt; 11382    11382    Gene_380        NA        NA        NA</span></span>
-<span><span class="co">#&gt; 11675    11675    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt;           Barcode        Gene   Gene_ID  Sequence   Library</span></span>
+<span><span class="co">#&gt;       &lt;character&gt; &lt;character&gt; &lt;logical&gt; &lt;logical&gt; &lt;logical&gt;</span></span>
+<span><span class="co">#&gt; 10208       10208    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt; 10502       10502    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt; 10796       10796    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt; 11089       11089    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt; 11382       11382    Gene_380        NA        NA        NA</span></span>
+<span><span class="co">#&gt; 11675       11675    Gene_380        NA        NA        NA</span></span>
 <span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="co">#&gt; DataFrame with 14 rows and 4 columns</span></span>
 <span><span class="co">#&gt;                    Sample         Day   Treatment      Group</span></span>
@@ -633,16 +645,51 @@ used directly with the Bioconductor tools that accept one:</p>
 <span><span class="va">treated</span></span>
 <span><span class="co">#&gt; class: screenr_object </span></span>
 <span><span class="co">#&gt; dim: 5320 6 </span></span>
-<span><span class="co">#&gt; metadata(0):</span></span>
+<span><span class="co">#&gt; metadata(1): screenr_layout</span></span>
 <span><span class="co">#&gt; assays(1): counts</span></span>
 <span><span class="co">#&gt; rownames(5320): 10208 10502 ... 13876 13995</span></span>
 <span><span class="co">#&gt; rowData names(5): Barcode Gene Gene_ID Sequence Library</span></span>
 <span><span class="co">#&gt; colnames(6): Time3_TRT_A Time3_TRT_B ... Time4_TRT_B Time4_TRT_C</span></span>
 <span><span class="co">#&gt; colData names(4): Sample Day Treatment Group</span></span>
-<span><span class="co">#&gt; data table: 0 rows, 0 columns</span></span></code></pre></div>
+<span><span class="co">#&gt; normalization: none (run normalize_data())</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="keeping-the-object-consistent">Keeping the object consistent<a class="anchor" aria-label="anchor" href="#keeping-the-object-consistent"></a>
+</h3>
+<p>Because each piece of information is stored once, changes propagate
+by themselves:</p>
+<ul>
+<li>
+<strong>Changing the counts</strong>
+(<code><a href="../reference/set_count_table.html">set_count_table()</a></code>, or
+<code>assay(object, "counts") &lt;- ...</code>) removes the
+normalization, which no longer describes the counts: run
+<code><a href="../reference/normalize_data.html">normalize_data()</a></code> again.</li>
+<li>
+<strong>Normalizing again</strong> (for example with another method)
+changes at once the normalized counts, the data table, the plots and the
+edgeR/limma models.</li>
+<li>
+<strong>Changing the annotation</strong>
+(<code><a href="../reference/set_annotation_table.html">set_annotation_table()</a></code>, or
+<code>rowData(object) &lt;- ...</code>) changes the gene of each barcode
+in all the following analyses.</li>
+<li>
+<strong>Subsetting or reordering</strong> the object keeps the
+barcodes, their annotation and the samples aligned by identifier. A
+normalized object keeps the effective library sizes of the retained
+samples, computed on all the barcodes; to normalize on the retained
+barcodes, call <code><a href="../reference/normalize_data.html">normalize_data()</a></code> again after
+subsetting.</li>
+<li>Inconsistent changes are refused: duplicated barcode identifiers, a
+<code>Barcode</code> column of the rowData different from the row names,
+or invalid effective library sizes give an error.</li>
+</ul>
 <p>Objects saved with older versions of ScreenR are converted
 automatically by all the functions; <code><a href="../reference/update_screenr_object.html">update_screenr_object()</a></code>
-converts them explicitly.</p>
+converts them explicitly. Those versions did not record how the counts
+were normalized, so the converted object is not normalized: run
+<code><a href="../reference/normalize_data.html">normalize_data()</a></code> on it.</p>
 </div>
 </div>
 <div class="section level2">
@@ -657,26 +704,37 @@ sample.</strong> They carry no information.</p>
 different depths, so the counts are converted to counts per million
 (CPM). The default divides by the total number of reads of each sample;
 <code>method = "tmm"</code> and <code>method = "control"</code> are
-discussed in tutorial 2.</p>
+discussed in tutorial 2. The raw counts are not changed: the
+normalization is the effective library size of each sample, and the same
+normalization is used by the plots, the data table and the statistical
+models.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/get_normalization.html">get_normalization</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">effective_library_size</span></span>
+<span><span class="co">#&gt;        Time1        Time2  Time3_TRT_A  Time3_TRT_B  Time3_TRT_C Time3_CTRL_A </span></span>
+<span><span class="co">#&gt;     10671757      9799724      6824877      9107354      9717868      9485195 </span></span>
+<span><span class="co">#&gt; Time3_CTRL_B Time3_CTRL_C  Time4_TRT_A  Time4_TRT_B  Time4_TRT_C Time4_CTRL_A </span></span>
+<span><span class="co">#&gt;      9016812      9568624      8933915      9883209     12325124     10351136 </span></span>
+<span><span class="co">#&gt; Time4_CTRL_B Time4_CTRL_C </span></span>
+<span><span class="co">#&gt;      9180192      9315365</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_normalized_count_table.html">get_normalized_count_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ScreenR normalized count table: 5317 rows, 15 columns</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   Barcode Time1 Time2 Time3_TRT_A</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208   330.  437.        365. </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502    26.2  34.6        20.5</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796   141.  156.        164. </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 11089   356.  424.        336. </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 11382    67.2  65.7        82.6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11675   687.  775.        722.</span></span></code></pre></div>
-<p><strong>3. Build the data table.</strong> This is a long (“tidy”)
+<p><strong>3. Look at the data table.</strong> This is a long (“tidy”)
 table with one row per barcode and sample, and it is used by most of the
-plotting and analysis functions.</p>
+plotting and analysis functions. It is computed from the normalized
+object when needed (<code><a href="../reference/compute_data_table.html">compute_data_table()</a></code>, needed by older
+versions of ScreenR, is no longer necessary).</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
-<span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data_table.html">get_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_data_table.html">get_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ScreenR normalized data table: 74438 rows, 9 columns</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">data_table</span>, <span class="va">Barcode</span>, <span class="va">Gene</span>, <span class="va">Sample</span>, <span class="va">Frequency</span>, <span class="va">Day</span>, <span class="va">Treatment</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
@@ -745,8 +803,8 @@ per sample, in the order of the columns.</label></li>
 shows the right Day and Treatment for every sample (otherwise use
 <code>sample_table</code>).</label></li>
 <li><label><input type="checkbox">You ran
-<code><a href="../reference/remove_all_zero_row.html">remove_all_zero_row()</a></code>, <code><a href="../reference/normalize_data.html">normalize_data()</a></code> and
-<code><a href="../reference/compute_data_table.html">compute_data_table()</a></code>.</label></li>
+<code><a href="../reference/remove_all_zero_row.html">remove_all_zero_row()</a></code> and
+<code><a href="../reference/normalize_data.html">normalize_data()</a></code>.</label></li>
 </ul>
 <p>The next tutorial, <strong>2. Quality control</strong>, continues
 from this object.</p>
@@ -773,11 +831,11 @@ from this object.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] dplyr_1.2.1      ScreenR_1.15.15  BiocStyle_2.40.0</span></span>
+<span><span class="co">#&gt; [1] dplyr_1.2.1      ScreenR_1.15.16  BiocStyle_2.40.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [3] xfun_0.61                   bslib_0.12.0               </span></span>
+<span><span class="co">#&gt;  [3] xfun_0.62                   bslib_0.12.0               </span></span>
 <span><span class="co">#&gt;  [5] ggplot2_4.0.3               Biobase_2.72.0             </span></span>
 <span><span class="co">#&gt;  [7] lattice_0.22-9              vctrs_0.7.3                </span></span>
 <span><span class="co">#&gt;  [9] tools_4.6.1                 generics_0.1.4             </span></span>
@@ -801,7 +859,7 @@ from this object.</p>
 <span><span class="co">#&gt; [45] cli_3.6.6                   SparseArray_1.12.3         </span></span>
 <span><span class="co">#&gt; [47] magrittr_2.0.5              patchwork_1.3.2            </span></span>
 <span><span class="co">#&gt; [49] S4Arrays_1.12.1             utf8_1.2.6                 </span></span>
-<span><span class="co">#&gt; [51] withr_3.0.3                 edgeR_4.10.5               </span></span>
+<span><span class="co">#&gt; [51] withr_3.0.3                 edgeR_4.10.6               </span></span>
 <span><span class="co">#&gt; [53] scales_1.4.0                rmarkdown_2.32             </span></span>
 <span><span class="co">#&gt; [55] XVector_0.52.0              matrixStats_1.5.0          </span></span>
 <span><span class="co">#&gt; [57] otel_0.2.0                  ragg_1.5.2                 </span></span>
