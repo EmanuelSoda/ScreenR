@@ -4,11 +4,13 @@
 \alias{log_normalized_counts}
 \title{Log2 normalized counts}
 \usage{
-log_normalized_counts(screenR_Object)
+log_normalized_counts(screenR_Object, what = "This function")
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
 \code{\link{create_screenr_object}}.}
+
+\item{what}{What needs the normalized counts, for the error message.}
 }
 \value{
 A numeric matrix with one row for each barcode and one column for
@@ -18,12 +20,11 @@ A numeric matrix with one row for each barcode and one column for
 Internal function that returns the log2 of the normalized
     counts plus 1, used by \code{\link{plot_pca}},
     \code{\link{plot_explained_variance}} and \code{\link{plot_mds}}.
-    The normalized counts are those computed by
-    \code{\link{normalize_data}}, with the method chosen there ("cpm",
-    "tmm" or "control"); if the counts have not been normalized, counts per
-    million are used, as \code{\link{normalize_data}} does by default.
-    On the raw counts the first principal component would mostly follow
-    the sequencing depth of the samples. Barcodes with no reads in any
-    sample are left out.
+    The normalized counts are the raw counts divided by the effective
+    library sizes set by \code{\link{normalize_data}} ("cpm", "tmm" or
+    "control"), so the object must be normalized; the log and the + 1 are
+    display transformations. On the raw counts the first principal
+    component would mostly follow the sequencing depth of the samples.
+    Barcodes with no reads in any sample are left out.
 }
 \keyword{internal}

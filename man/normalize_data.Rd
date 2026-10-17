@@ -17,44 +17,87 @@ normalize_data(
 \item{method}{The normalization method: "cpm" (default), "tmm" or
 "control".}
 
-\item{control_barcodes}{The barcodes to use for the "control" method
-(required by that method, ignored by the others).}
+\item{control_barcodes}{The identifiers of the control barcodes for the
+"control" method (required by that method, ignored by the others).
+Identifiers that are not in the object give a warning; if none is in
+the object, it is an error.}
 }
 \value{
-The ScreenR object with the normalized count table (see
-    \code{\link{get_normalized_count_table}}).
+The normalized ScreenR object.
 }
 \description{
-Normalizes the counts to counts per million (CPM), so that
-    samples sequenced at different depths can be compared. Run it before
-    \code{\link{compute_data_table}}. Three methods are available:
+Sets the normalization of a ScreenR object, so that samples
+    sequenced at different depths can be compared. The raw counts are not
+    changed: the normalization is the effective library size of each
+    sample, and the normalized count of a barcode is its raw count divided
+    by the effective library size of its sample, times 1e6 (counts per
+    million). Three methods are available:
     \itemize{
-      \item "cpm" (default): each count is divided by the total number of
-            reads of its sample and multiplied by 1e6.
-      \item "tmm": as "cpm", but the library sizes are corrected with the
-            trimmed mean of M-values (TMM) normalization factors of edgeR
+      \item "cpm" (default): the effective library size is the total
+            number of reads of the sample;
+      \item "tmm": the total number of reads multiplied by the trimmed
+            mean of M-values (TMM) normalization factor of edgeR
             (\code{\link[edgeR]{normLibSizes}}). This is more robust when
-            strong hits deplete a large part of the library.
-      \item "control": each count is divided by the number of reads of the
-            control barcodes (for example non-targeting shRNAs) of its
-            sample and multiplied by 1e6. This assumes that the control
-            barcodes are not affected by the treatment.
+            strong hits deplete a large part of the library;
+      \item "control": the number of reads of the control barcodes (for
+            example non-targeting shRNAs, or the sgRNAs of non-essential
+            genes) of the sample. This assumes that the control barcodes
+            are not affected by the treatment.
     }
-    The normalization only affects the normalized count table (and so the
-    data table, the Z-score and the plots). The edgeR based methods
-    (CAMERA, ROAST) always model the raw counts.
+}
+\details{
+The normalization is used consistently by the whole analysis:
+    the normalized counts (\code{\link{get_normalized_count_table}}), the
+    data table (\code{\link{get_data_table}}) and everything computed from
+    it (\code{\link{compute_metrics}}, \code{\link{plot_trend}},
+    \code{\link{plot_boxplot}}, \code{\link{compute_slope}}, ...), the
+    sample plots (\code{\link{plot_mds}}, \code{\link{plot_pca}},
+    \code{\link{plot_replicate_correlation}}) and the edgeR and limma
+    models (\code{\link{create_edger_obj}}, used by
+    \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+    \code{\link{compute_barcode_statistics}}, \code{\link{find_time_hit}},
+    \code{\link{filter_by_variance}} and \code{\link{plot_barcode_hit}}),
+    whose offsets are the logarithms of the effective library sizes. The
+    models always use the raw counts. Logarithms and pseudocounts used by
+    the plots (for example log2(normalized + 1) in \code{\link{plot_pca}})
+    are display transformations: they do not change the normalization.
+
+    It is stored in the object: the effective library sizes in the
+    EffectiveLibSize column of the colData, the method and its provenance
+    in the metadata (see \code{\link{get_normalization}}). Replacing the
+    counts removes it; subsetting the object keeps the effective library
+    sizes of the retained samples (call normalize_data() again to
+    normalize on the retained barcodes only). Calling normalize_data()
+    again replaces the normalization, and every view of the object follows
+    immediately.
+
+    Every sample must have reads (and, for "control", reads of the control
+    barcodes): a sample with an effective library size of zero cannot be
+    normalized and is an error.
+
+    \strong{Choosing the method.} In a dropout screen many barcodes are
+    depleted, so with "cpm" all the other barcodes look enriched. "tmm"
+    reduces this bias, but it assumes that most barcodes do not change and
+    that the changes go in both directions: when many barcodes change in
+    the same direction it corrects only part of the bias (in a simulation
+    with 20\% of the genes depleted 8 times it removed about half of it).
+    "control" removes it when control barcodes known to be without effect
+    are available (for example the sgRNAs of non-essential genes).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- normalize_data(object)
-
+get_normalization(object)$method
 get_normalized_count_table(object)
 
-# TMM normalization
+# TMM normalization: the same effective library sizes are used by the
+# plots and by the edgeR models
 object <- normalize_data(object, method = "tmm")
+get_normalization(object)$effective_library_size
+create_edger_obj(object)$samples
 }
 \seealso{
-\code{\link{compute_data_table}},
+\code{\link{get_normalization}}, \code{\link{create_edger_obj}},
     \code{\link{get_normalized_count_table}},
     \code{\link{remove_all_zero_row}}
 }

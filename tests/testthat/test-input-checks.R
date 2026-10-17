@@ -27,7 +27,7 @@ test_that("the standard input gives the same data table as before", {
         table = clean_counts(), annotation = annotation_table,
         groups = input_groups
     ))
-    data_table <- build(object)@data_table
+    data_table <- ScreenR:::data_table_of(build(object))
 
     expect_equal(
         colnames(data_table),
@@ -62,14 +62,15 @@ test_that("other barcode and gene column names are mapped", {
         groups = input_groups
     ))
 
-    expect_equal(build(object)@data_table, build(reference)@data_table)
+    expect_equal(ScreenR:::data_table_of(build(object)),
+        ScreenR:::data_table_of(build(reference)))
     expect_equal(
         get_column_names(object),
         c(Barcode = "shRNA_ID", Gene = "gene_symbol")
     )
     expect_equal(
-        create_edger_obj(object)$samples$lib.size,
-        create_edger_obj(reference)$samples$lib.size
+        create_edger_obj(build(object))$samples$lib.size,
+        create_edger_obj(build(reference))$samples$lib.size
     )
 })
 
@@ -98,7 +99,7 @@ test_that("Sequence, Library and Gene_ID are optional", {
         annotation = annotation_table[, c("Gene", "Barcode")],
         groups = input_groups
     ))
-    data_table <- build(object)@data_table
+    data_table <- ScreenR:::data_table_of(build(object))
     expect_equal(
         colnames(data_table),
         c("Barcode", "Gene", "Sample", "Frequency", "Day", "Treatment")
@@ -194,30 +195,41 @@ test_that("text counts are converted and other text columns removed", {
     expect_false("Gene" %in% colnames(ScreenR:::count_table_of(object)))
 })
 
-test_that("unmapped and duplicated barcodes give warnings", {
+test_that("duplicated barcodes are an error unless combined", {
     counts <- count_table
     colnames(counts) <- c("Barcode", sample_names)
+    expect_error(
+        suppressMessages(create_screenr_object(
+            table = counts, annotation = annotation_table,
+            groups = input_groups
+        )),
+        "duplicated barcodes \\(\\*\\).*duplicate_barcodes"
+    )
+    # The three "*" rows are combined into one, which is not annotated
     expect_warning(
-        expect_warning(
-            suppressMessages(create_screenr_object(
-                table = counts, annotation = annotation_table,
-                groups = input_groups
-            )),
-            "duplicated"
-        ),
+        object <- suppressMessages(create_screenr_object(
+            table = counts, annotation = annotation_table,
+            groups = input_groups, duplicate_barcodes = "sum"
+        )),
         "not in the annotation"
     )
+    expect_equal(sum(rownames(object) == "*"), 1L)
+    expect_equal(nrow(object), nrow(clean_counts()) + 1L)
 })
 
 test_that("objects created before the new slots still work", {
-    object <- get0("object", envir = asNamespace("ScreenR"))
+    object <- readRDS(test_path("fixtures", "legacy_object.rds"))
     expect_false(methods::.hasSlot(object, "sample_table"))
     expect_output(show(object), "screenr_object")
-    object <- set_annotation_table(object, object@annotation_table)
+    annotation <- suppressMessages(get_annotation_table(object))
+    object <- suppressMessages(set_annotation_table(object, annotation))
     expect_equal(get_column_names(object), c(Barcode = "Barcode",
         Gene = "Gene"))
-    expect_equal(nrow(get_sample_table(object)), ncol(ScreenR:::count_table_of(object)) - 1)
-    expect_s3_class(compute_data_table(object)@data_table, "tbl_df")
+    expect_equal(nrow(get_sample_table(object)),
+        ncol(ScreenR:::count_table_of(object)) - 1)
+    expect_s3_class(
+        ScreenR:::data_table_of(compute_data_table(normalize_data(object))),
+        "tbl_df")
 })
 
 test_that("the object is a SummarizedExperiment with consistent parts", {
@@ -239,8 +251,9 @@ test_that("the object is a SummarizedExperiment with consistent parts", {
     expect_equal(object$Group, input_groups)
 
     object <- compute_data_table(normalize_data(object))
-    expect_equal(SummarizedExperiment::assayNames(object),
-        c("counts", "normalized"))
+    # The normalized counts are not stored: only the raw counts are an assay
+    expect_equal(SummarizedExperiment::assayNames(object), "counts")
+    expect_false(is.null(object$EffectiveLibSize))
 
     # Subsetting keeps counts, normalized counts and data table together
     treated <- object[1:50, object$Treatment == "TRT"]
@@ -255,16 +268,31 @@ test_that("the object is a SummarizedExperiment with consistent parts", {
 })
 
 test_that("old objects are converted with the same content", {
-    legacy <- get0("object", envir = asNamespace("ScreenR"))
-    object <- update_screenr_object(legacy)
+    legacy <- readRDS(test_path("fixtures", "legacy_object.rds"))
+    expect_message(object <- update_screenr_object(legacy),
+        "normalize_data")
     expect_s4_class(object, "SummarizedExperiment")
     expect_identical(update_screenr_object(object), object)
-    expect_equal(
-        ScreenR:::count_table_of(object),
-        tibble::as_tibble(attr(legacy, "count_table"))
-    )
+    expected_counts <- tibble::as_tibble(attr(legacy, "count_table"))
+    expected_counts$Barcode <- as.character(expected_counts$Barcode)
+    expect_equal(ScreenR:::count_table_of(object), expected_counts)
     expect_equal(get_groups(object), attr(legacy, "groups"))
-    expect_equal(get_data_table(object), attr(legacy, "data_table"))
+    # The legacy normalization is not recorded, so it is not kept ...
+    expect_null(get_normalization(object))
+    expect_error(get_data_table(object), "normalize_data")
+    # ... and normalizing again with "cpm" gives the legacy values up to one
+    # factor per sample (the fixture keeps 300 of the barcodes, while the
+    # legacy values are per million reads of all of them)
+    data_table <- ScreenR:::data_table_of(normalize_data(object))
+    legacy_table <- attr(legacy, "data_table")
+    key <- function(table) paste(table$Barcode, table$Sample)
+    matched <- match(key(data_table), key(legacy_table))
+    expect_false(anyNA(matched))
+    ratio <- legacy_table$Frequency[matched] / data_table$Frequency
+    used <- data_table$Frequency > 0
+    per_sample <- tapply(ratio[used], data_table$Sample[used],
+        function(x) diff(range(x)) / mean(x))
+    expect_true(all(per_sample < 1e-8))
 })
 
 test_that("the setters keep working", {
@@ -280,9 +308,18 @@ test_that("the setters keep working", {
     object <- set_groups(object, rev(input_groups))
     expect_equal(get_groups(object), as.factor(rev(input_groups)))
 
+    # A normalized table that scales each sample by one factor is stored as
+    # effective library sizes ...
     normalized <- counts
-    normalized[, -1] <- 1
+    normalized[, -1] <- as.matrix(counts[, -1]) * 2
     object <- set_normalized_count_table(object, normalized)
     expect_equal(ScreenR:::normalized_table_of(object), normalized,
         ignore_attr = TRUE)
+    expect_equal(get_normalization(object)$method, "custom")
+    expect_equal(unname(get_normalization(object)$effective_library_size),
+        rep(5e5, length(sample_names)))
+    # ... any other table is refused
+    normalized[1, 2] <- normalized[1, 2] + 1
+    expect_error(set_normalized_count_table(object, normalized),
+        "single factor")
 })

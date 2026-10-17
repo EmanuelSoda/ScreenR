@@ -266,7 +266,10 @@ random_set_scores <- function(reference, size, n, statistic) {
 #'     can be used with \code{\link{find_gene_zscore_hit}} and
 #'     \code{\link{find_discordant_barcodes}}.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}}. The model uses its raw counts with its
+#'     effective library sizes as offsets, the same normalization as the plots
+#'     and the data table (see \code{\link{create_edger_obj}}).
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
@@ -336,7 +339,10 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'     then tested together with \code{\link[limma]{camera}}, as in
 #'     \code{\link{find_camera_hit}}.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}}. The model uses its raw counts with its
+#'     effective library sizes as offsets, the same normalization as the plots
+#'     and the data table (see \code{\link{create_edger_obj}}).
 #' @param treatment The value(s) of the Treatment column of
 #'     \code{\link{get_sample_table}} for the treated samples.
 #' @param control The value(s) of the Treatment column of

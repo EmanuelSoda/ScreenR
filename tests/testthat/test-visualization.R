@@ -1,6 +1,7 @@
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
-data <- count_table
+# The unmapped reads "*" appear several times: remove them
+data <- count_table[count_table$Barcode != "*", ]
 annotaion <- annotation_table
 
 groups <- factor(c(
@@ -30,18 +31,11 @@ create_test_object <- function() {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     obj <- normalize_data(obj)
-    obj <- compute_data_table(obj)
 
-    obj@data_table <- obj@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
-
-    # Keep only the barcodes of the data table (counts and normalized
-    # counts are subset together)
-    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
-        obj@data_table$Barcode, ]
-
-    obj@annotation_table <- obj@annotation_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the first 10 genes; the effective library
+    # sizes computed on all the barcodes are kept
+    obj <- obj[SummarizedExperiment::rowData(obj)$Gene %in%
+        paste0("Gene_", seq(1, 10)), ]
 
     return(obj)
 }
@@ -111,7 +105,7 @@ test_that("plot_barcode_trend", {
     object <- create_test_object()
 
     genes <- c("Gene_1", "Gene_5")
-    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
+    object <- object[SummarizedExperiment::rowData(object)$Gene %in% genes, ]
 
     metrics <- dplyr::bind_rows(
         compute_metrics(object,
@@ -161,7 +155,7 @@ test_that("plot_barcode_trend color", {
 test_that("plot_zscore_distribution", {
     object <- create_test_object()
     genes <- c("Gene_1", "Gene_5")
-    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
+    object <- object[SummarizedExperiment::rowData(object)$Gene %in% genes, ]
 
     tables <- list(
         compute_metrics(object,
@@ -181,9 +175,8 @@ test_that("plot_zscore_distribution", {
 test_that("plot_barcode_hit", {
     object <- get0("object", envir = asNamespace("ScreenR"))
 
-    object@data_table <-
-        object@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 20)))
+    object <- object[SummarizedExperiment::rowData(object)$Gene %in%
+        paste0("Gene_", seq(1, 20)), ]
 
     matrix_model <- create_design_matrix(object)
     contrast <- create_contrast(matrix_model,

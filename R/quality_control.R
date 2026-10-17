@@ -16,9 +16,11 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' compute_gini(object)
 compute_gini <- function(screenR_Object) {
-    count_table <- count_table_of(screenR_Object)
-    numeric_columns <- vapply(count_table, is.numeric, logical(1))
-    counts <- as.matrix(count_table[, numeric_columns])
+    # Raw-count quality control: the Gini index does not depend on the
+    # library size, so no normalization is needed
+    object <- update_screenr_object(screenR_Object)
+    counts <- SummarizedExperiment::assay(object, "counts",
+        withDimnames = TRUE)
     gini <- apply(counts, 2, function(x) {
         # as.numeric() avoids integer overflow with large counts
         x <- sort(as.numeric(x))
@@ -82,9 +84,12 @@ plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
 
 #' @title Plot the correlation between samples
 #' @description Plots, as a heatmap, the correlation between all the pairs of
-#'     samples, computed on log2(CPM + 1) of the raw counts. Replicates of the
-#'     same condition are expected to be highly correlated; a replicate with a
-#'     low correlation to the others may be an outlier.
+#'     samples, computed on log2(normalized count + 1), with the normalization
+#'     set by \code{\link{normalize_data}} (the + 1 is a display
+#'     transformation that keeps barcodes without reads finite). Replicates of
+#'     the same condition are expected to be highly correlated; a replicate
+#'     with a low correlation to the others may be an outlier. The object
+#'     must be normalized.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param method The correlation method: "pearson" (default) or "spearman".
@@ -103,11 +108,10 @@ plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
 plot_replicate_correlation <- function(screenR_Object,
     method = c("pearson", "spearman"), label = TRUE) {
     method <- match.arg(method)
-    count_table <- count_table_of(screenR_Object)
-    numeric_columns <- vapply(count_table, is.numeric, logical(1))
-    counts <- as.matrix(count_table[, numeric_columns])
-    log_cpm <- log2(sweep(counts, 2, colSums(counts), "/") * 1e6 + 1)
-    correlation <- stats::cor(log_cpm, method = method)
+    object <- update_screenr_object(screenR_Object)
+    log_normalized <- log2(normalized_counts(object,
+        "plot_replicate_correlation()") + 1)
+    correlation <- stats::cor(log_normalized, method = method)
 
     samples <- colnames(correlation)
     data <- tibble::tibble(

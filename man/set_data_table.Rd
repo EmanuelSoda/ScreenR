@@ -18,11 +18,18 @@ set_data_table(object, data_table)
 described in \code{\link{get_data_table}}.}
 }
 \value{
-The ScreenR object with the new data table.
+The unchanged ScreenR object (with a warning).
 }
 \description{
-Replaces the data table of a ScreenR object. Usually the data
-    table is computed with \code{\link{compute_data_table}}.
+Deprecated. The data table is no longer stored: it is
+    computed from the counts, the annotation, the sample table and the
+    normalization of the object when needed (see
+    \code{\link{get_data_table}}), so it cannot be replaced. Given the
+    current data table, the object is returned unchanged with a
+    deprecation warning; any other table is an error. To change the data
+    table, change the object (subset it, or use
+    \code{\link{set_annotation_table}} or
+    \code{\link{normalize_data}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

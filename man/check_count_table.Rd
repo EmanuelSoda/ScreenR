@@ -4,20 +4,23 @@
 \alias{check_count_table}
 \title{Check the Count Table}
 \usage{
-check_count_table(table, barcode_column)
+check_count_table(table, barcode_column, duplicate_barcodes = "error")
 }
 \arguments{
 \item{table}{The count table.}
 
 \item{barcode_column}{The name of the barcode column.}
+
+\item{duplicate_barcodes}{"error", "sum" or "first".}
 }
 \value{
 The checked count table, with the barcode column first.
 }
 \description{
 Internal function that finds and renames the barcode column
-             of the count table, converts sample columns stored as text,
-             removes the other non-numeric columns and warns about
-             duplicated barcodes.
+             of the count table, converts the identifiers to character,
+             converts sample columns stored as text, removes the other
+             non-numeric columns, rejects invalid counts and resolves (or
+             rejects) duplicated barcodes.
 }
 \keyword{internal}

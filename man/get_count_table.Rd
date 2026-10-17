@@ -22,6 +22,11 @@ A tibble with the Barcode column and one column of counts for each
 Returns the raw count table of a ScreenR object, with one row
     for each barcode and one column for each sample. A short summary of the
     size of the table is printed.
+
+    The table is a view of the counts assay
+    (\code{assay(object, "counts")}): the Barcode column is made from the
+    row names and is not a sample. Changing the returned table does not
+    change the object; use \code{\link{set_count_table}}.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

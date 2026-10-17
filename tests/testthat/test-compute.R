@@ -1,6 +1,7 @@
 data("count_table", package = "ScreenR")
 data("annotation_table", package = "ScreenR")
-data <- count_table
+# The unmapped reads "*" appear several times: remove them
+data <- count_table[count_table$Barcode != "*", ]
 annotaion <- annotation_table
 
 groups <- factor(c(
@@ -30,18 +31,11 @@ create_test_object <- function() {
         annotation = annotaion, groups = groups, replicates = c("")
     )
     obj <- normalize_data(obj)
-    obj <- compute_data_table(obj)
 
-    obj@data_table <- obj@data_table %>%
-        dplyr::filter(Gene %in% paste0("Gene_", seq(1, 10)))
-
-    # Keep only the barcodes of the data table (counts and normalized
-    # counts are subset together)
-    obj <- obj[SummarizedExperiment::rowData(obj)$Barcode %in%
-        obj@data_table$Barcode, ]
-
-    obj@annotation_table <- obj@annotation_table %>%
-        dplyr::filter(Barcode %in% obj@data_table$Barcode)
+    # Keep only the barcodes of the first 10 genes; the effective library
+    # sizes computed on all the barcodes are kept
+    obj <- obj[SummarizedExperiment::rowData(obj)$Gene %in%
+        paste0("Gene_", seq(1, 10)), ]
 
     return(obj)
 }
@@ -52,7 +46,7 @@ test_that("Compute Metrics ", {
     # In order to speed up the test we will compute the metrics only for a
     # subset of the genes
     genes <- c("Gene_1", "Gene_5")
-    object@data_table <- object@data_table[object@data_table$Gene %in% genes, ]
+    object <- object[SummarizedExperiment::rowData(object)$Gene %in% genes, ]
     table <- compute_metrics(object,
         treatment = "TRT", control = "Time3",
         day = "Time3"
@@ -95,7 +89,7 @@ test_that("Create data_table", {
 
 
     object <- compute_data_table(object)
-    expect_equal(class(object@data_table)[1], "tbl_df")
+    expect_equal(class(suppressMessages(get_data_table(object)))[1], "tbl_df")
 })
 
 

@@ -34,7 +34,8 @@
 plot_boxplot <- function(screenR_Object, genes, group_var, alpha = 0.5,
     nrow = NULL, ncol = NULL, fill_var = "Sample",
     type = "boxplot", scales = "free") {
-    data <- screenR_Object@data_table
+    data <- data_table_of(update_screenr_object(screenR_Object),
+        "plot_boxplot()")
 
     # Select only the hit gene
     data <- dplyr::filter(data, .data$Gene %in% genes)

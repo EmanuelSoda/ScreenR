@@ -14,7 +14,8 @@ compute_slope(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
-\code{\link{create_screenr_object}}.}
+\code{\link{create_screenr_object}}, normalized with
+\code{\link{normalize_data}} (its normalized counts are used).}
 
 \item{genes}{The genes for which the slope is computed.}
 

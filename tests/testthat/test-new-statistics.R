@@ -323,6 +323,7 @@ test_that("find_time_hit does not call a constant effect a growing one", {
         table = count_table, annotation = annotation,
         groups = factor(sub("_[0-9]$", "", samples))
     ))
+    object <- normalize_data(object)
     hits <- find_time_hit(object, treatment = "TRT", control = "CTRL",
         days = c("D1", "D2"), fdr = 1)
     expect_false(any(hits$FDR[hits$Gene %in% paste0("G", 1:10)] <= 0.05))
@@ -338,7 +339,7 @@ test_that("find_camera_hit works when a single gene can be tested", {
     object <- get_object()
     design <- create_design_matrix(object)
     contrast <- create_contrast(design, "Treated", "Control")
-    counts <- table(object@annotation_table$Gene)
+    counts <- table(SummarizedExperiment::rowData(object)$Gene)
     skip_if(sum(counts == max(counts)) != 1, "No gene with a unique maximum")
     threshold <- max(counts) - 1
     result <- suppressWarnings(find_camera_hit(object, design, contrast,

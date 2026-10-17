@@ -4,11 +4,14 @@ test_that("create_edger_obj uses raw counts aligned to the annotation", {
 
     # Shuffle the annotation: genes must still be matched by Barcode
     set.seed(1)
-    object@annotation_table <-
-        object@annotation_table[sample(nrow(object@annotation_table)), ]
+    annotation <- suppressMessages(get_annotation_table(object))
+    object <- set_annotation_table(object,
+        annotation[sample(nrow(annotation)), ])
 
     dge <- create_edger_obj(object)
-    raw_lib_sizes <- colSums(dplyr::select_if(counts, is.numeric))
+    # The object is normalized with "cpm": the effective library sizes are
+    # the raw library sizes
+    raw_lib_sizes <- colSums(as.matrix(counts[, -1]))
 
     expect_equal(unname(dge$samples$lib.size), unname(raw_lib_sizes))
     expect_equal(
@@ -19,7 +22,8 @@ test_that("create_edger_obj uses raw counts aligned to the annotation", {
 
 test_that("create_edger_obj fails when barcodes are missing", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    object@annotation_table <- object@annotation_table[-1, ]
+    annotation <- suppressMessages(get_annotation_table(object))
+    object <- set_annotation_table(object, annotation[-1, ])
     expect_error(create_edger_obj(object), "not in the annotation")
 })
 
@@ -61,8 +65,7 @@ test_that("compute_slope regresses on time points, not row order", {
         Frequency = rep(10 * match(days, unique(days)), 2) +
             rep(c(0, 100), each = length(samples))
     )
-    object <- create_screenr_object()
-    object@data_table <- data_table
+    object <- object_from_frequencies(data_table)
 
     slope <- compute_slope(object, genes = "G", group_var = "TRT")
     expect_equal(unname(slope$Slope), 10)
@@ -96,7 +99,7 @@ test_that("find_robust_zscore_hit has a default number_barcode", {
 
 test_that("find_camera_hit warns only when thresh or lfc are given", {
     object <- get0("object", envir = asNamespace("ScreenR"))
-    matrix <- model.matrix(~ slot(object, "groups"))
+    matrix <- model.matrix(~ get_groups(object))
     colnames(matrix) <- c("Control", "T1_T2", "Treated")
 
     deprecation <- "'thresh' and 'lfc' arguments"
@@ -143,12 +146,11 @@ test_that("compute_slope uses the real times when time is given", {
     data_table <- tibble::tibble(
         Barcode = "b1", Gene = "G",
         Sample = factor(samples, levels = samples), Day = days,
-        Treatment = "TRT", Frequency = c(0, 10, 100)
+        Treatment = "TRT", Frequency = c(1, 11, 101)
     )
-    object <- create_screenr_object()
-    object@data_table <- data_table
+    object <- object_from_frequencies(data_table)
 
-    # Equally spaced: 0, 10, 100 at 1, 2, 3
+    # Equally spaced: 1, 11, 101 at 1, 2, 3
     expect_equal(unname(compute_slope(object, "G", "TRT")$Slope), 50)
     # Linear in time at days 0, 1, 10: slope 10 per day
     slope <- compute_slope(object, "G", "TRT",

@@ -6,8 +6,8 @@
 #'     of several plots. More information about the Z-score and other metrics
 #'     used in genetic screens can be found in this
 #'     \href{https://pubmed.ncbi.nlm.nih.gov/21515799/}{paper}.
-#' @details The function uses the data table, so run
-#'     \code{\link{normalize_data}} and \code{\link{compute_data_table}}
+#' @details The function uses the normalized counts (see
+#'     \code{\link{get_data_table}}), so run \code{\link{normalize_data}}
 #'     first. For each barcode the normalized counts of the treated and of the
 #'     control samples of the given day are averaged, then
 #'     Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)),
@@ -30,10 +30,12 @@
 #'     change, so that barcodes with zero reads get a finite fold change:
 #'     Log2FC = log2((Treated + pseudocount) / (Control + pseudocount)).
 #'     Default 0.5. Barcodes with zero reads in both treated and control are
-#'     removed. The value is on the scale of the normalized count table, which
-#'     is counts per million of all the reads for the "cpm" and "tmm" methods
-#'     of \code{\link{normalize_data}}, but per million reads of the control
-#'     barcodes for the "control" method.
+#'     removed. The value is on the scale of the normalized counts: per
+#'     million reads of the effective library size of
+#'     \code{\link{normalize_data}} (all the reads for "cpm", all the reads
+#'     times the TMM factor for "tmm", the reads of the control barcodes for
+#'     "control"). It is a display transformation that keeps the fold changes
+#'     finite; it does not change the normalization.
 #' @importFrom rlang .data
 #' @importFrom tidyr spread pivot_wider
 #' @importFrom dplyr mutate filter summarise if_else pull
@@ -61,19 +63,21 @@ compute_metrics <- function(screenR_Object, control,
         pseudocount <= 0) {
         stop("pseudocount must be a single positive number.")
     }
-    control <- screenR_Object@data_table %>%
+    data_table <- data_table_of(update_screenr_object(screenR_Object),
+        "compute_metrics()")
+    control <- data_table %>%
         filter(.data$Treatment %in% control) %>%
         dplyr::pull(.data$Sample) %>%
         unique() %>%
         as.character()
 
-    treated <- screenR_Object@data_table %>%
+    treated <- data_table %>%
         filter(.data$Treatment %in% treatment) %>%
         dplyr::pull(.data$Sample) %>%
         unique() %>%
         as.character()
 
-    data_trt <- screenR_Object@data_table %>%
+    data_trt <- data_table %>%
         dplyr::filter(.data$Sample %in% c(control, treated)) %>%
         dplyr::mutate(Group = factor(if_else(condition = .data$Sample %in%
             treated, true = "Treated", false = "Control"),

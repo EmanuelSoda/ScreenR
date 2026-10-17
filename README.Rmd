@@ -90,9 +90,11 @@ BiocManager::install("EmanuelSoda/ScreenR")
 The package includes an example screen: shRNA counts for treated (`TRT`) and
 control (`CTRL`) cells at several time points, with three replicates.
 
-```{r quick-start, message = FALSE}
+```{r packages, message = FALSE, warning = FALSE}
 library(ScreenR)
+```
 
+```{r quick-start, message = FALSE}
 data(count_table)
 data(annotation_table)
 counts <- count_table[count_table$Barcode != "*", ]

@@ -22,11 +22,15 @@ The ScreenR object with the new count table.
 }
 \description{
 Replaces the raw count table of a ScreenR object. The
-    annotation, the groups and the normalized counts are kept (the
-    normalized counts are matched to the new table by barcode and sample);
-    the Day and Treatment of the samples are kept when the samples are the
-    same, otherwise they are taken again from the sample names. Unlike
-    \code{\link{create_screenr_object}}, the table is not checked.
+    annotation and the groups are kept (the annotation is matched to the
+    new barcodes by identifier); the Day and Treatment of the samples are
+    kept when the samples are the same, otherwise they are taken again from
+    the sample names. The table is checked as in
+    \code{\link{create_screenr_object}} (identifiers, invalid counts,
+    duplicated barcodes). When the counts change, the normalization is
+    removed (with a message): run \code{\link{normalize_data}} again. The
+    same holds for \code{assay(object, "counts") <- } (see
+    \code{\link{screenr_object-replace}}).
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

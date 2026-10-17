@@ -14,8 +14,11 @@ barcodes_per_gene(screenR_Object)
 A tibble with the columns Gene and NBarcodes, ordered by gene.
 }
 \description{
-Counts the barcodes (shRNAs or sgRNAs) of each gene in the
-    annotation of a ScreenR object. Use it to choose \code{number_barcode}
+Counts the barcodes (shRNAs or sgRNAs) of each gene among
+    the barcodes of a ScreenR object (the rows of the counts, with the gene
+    given by the rowData), which are the barcodes used by the analyses.
+    Annotated barcodes that are not in the count table are not counted.
+    Use it to choose \code{number_barcode}
     (in \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
     \code{\link{find_time_hit}} and \code{\link{plot_barcode_hit}}) and
     \code{min_barcodes} (in \code{\link{find_gene_zscore_hit}}): shRNA

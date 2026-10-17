@@ -16,33 +16,73 @@ The screenr_object class is the main object of the package:
     analysis. Create it with \code{\link{create_screenr_object}}.
 
     It extends \code{\link[SummarizedExperiment]{SummarizedExperiment}},
-    so it can be used with all the Bioconductor tools that work with that
-    class:
+    which is the single source of truth of the object:
     \itemize{
       \item \code{assay(object, "counts")}: the raw counts, one row for
-            each barcode and one column for each sample;
-      \item \code{assay(object, "normalized")}: the normalized counts,
-            after \code{\link{normalize_data}};
-      \item \code{rowData(object)}: the barcode identifier (Barcode) and
-            its annotation (Gene, ...);
+            each barcode and one column for each sample. They are never
+            modified by the analysis. The row names are the barcode
+            identifiers (as character) and the column names the samples.
+      \item \code{rowData(object)}: the annotation of each barcode (Gene,
+            ...), aligned with the rows of the counts. Its Barcode column
+            is kept equal to the row names, for compatibility.
       \item \code{colData(object)}: the Sample, Day and Treatment of each
-            sample (see \code{\link{get_sample_table}}) and its Group.
+            sample (see \code{\link{get_sample_table}}), its Group, its
+            Replicate (when replicate labels were given for each sample)
+            and, after \code{\link{normalize_data}}, its effective library
+            size (EffectiveLibSize).
+      \item \code{metadata(object)$normalization}: the method of the
+            normalization and its provenance (see
+            \code{\link{get_normalization}}).
     }
-    The ScreenR accessors (\code{\link{get_count_table}},
-    \code{\link{set_count_table}}, ...) work as in the previous versions
-    of the package. Objects created with versions older than 1.15.8 are
-    converted automatically (see \code{\link{update_screenr_object}}).
+    The normalized counts, the data table and the edgeR objects are not
+    stored: they are computed when needed from the raw counts, the
+    annotation, the sample information and the effective library sizes, so
+    they always agree with each other and with the counts (see
+    \code{\link{normalize_data}}).
+}
+\details{
+\strong{Changing the object.} The ScreenR setters
+    (\code{\link{set_count_table}}, \code{\link{set_annotation_table}},
+    \code{\link{set_groups}}, ...) and the replacement functions of
+    SummarizedExperiment keep the object consistent:
+    \itemize{
+      \item replacing the counts (\code{set_count_table},
+            \code{assay(object, "counts") <- }, \code{assays(object) <- })
+            with different values removes the normalization, which must be
+            computed again with \code{\link{normalize_data}};
+      \item replacing the annotation (\code{set_annotation_table},
+            \code{rowData(object) <- }) changes the gene of each barcode
+            used by all the following analyses;
+      \item \code{rowData<-}, \code{colData<-} (and \code{$<-}) and
+            \code{dimnames<-} check the object, and renaming the barcodes
+            updates the Barcode column of the rowData;
+      \item subsetting and reordering (\code{object[i, j]}) keep the
+            effective library sizes of the retained samples: the
+            normalization is not computed again on the retained barcodes.
+            Call \code{\link{normalize_data}} after filtering to normalize
+            on the retained barcodes.
+    }
+    Modifying the slots directly (\code{object@assays <- ...}) bypasses
+    these safeguards and is not supported. Combining objects with
+    \code{cbind} or \code{rbind} is only meaningful between objects
+    normalized in the same way; the result is checked by
+    \code{validObject()}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{annotation_table}}{The annotation table as given by the user (it can
-contain barcodes that are not in the count table).}
+\item{\code{annotation_table}}{The rows of the annotation table given by the user
+whose barcodes are not in the count table (barcodes of the library that
+were not observed). The annotation of the observed barcodes is in the
+rowData. \code{\link{get_annotation_table}} returns both.}
 
-\item{\code{replicates}}{The replicate labels.}
+\item{\code{replicates}}{The replicate labels, when they were not given for each
+sample (sample-specific labels are in the Replicate column of the
+colData).}
 
-\item{\code{data_table}}{The data table, a tidy (long) version of the normalized
-counts (see \code{\link{compute_data_table}}).}
+\item{\code{data_table}}{Not used any more (the data table is computed when
+needed, see \code{\link{get_data_table}}); kept, empty, so that saved
+objects can be read.}
 
 \item{\code{column_names}}{The names that the columns had in the tables given by
 the user (see \code{\link{get_column_names}}).}
@@ -58,16 +98,24 @@ groups <- factor(c(
     "Treated", "Control", "Control", "Control"
 ))
 
+# The unmapped reads ("*") appear several times: remove them
+counts <- count_table[count_table$Barcode != "*", ]
 obj <- create_screenr_object(
-    table = count_table,
+    table = counts,
     annotation = annotation_table,
-    groups = groups,
-    replicates = c("")
+    groups = groups
 )
 obj
+SummarizedExperiment::assay(obj, "counts")[1:3, 1:3]
+SummarizedExperiment::rowData(obj)
+
+# Normalized values are derived from the counts and the normalization
+obj <- normalize_data(obj, method = "tmm")
+get_normalization(obj)$effective_library_size
 }
 \seealso{
 \code{\link{create_screenr_object}},
+    \code{\link{normalize_data}}, \code{\link{get_normalization}},
     \code{\link{update_screenr_object}}
 }
 \concept{objects}

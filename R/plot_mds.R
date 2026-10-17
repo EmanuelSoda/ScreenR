@@ -25,11 +25,9 @@
 #' plot_mds(object)
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     color = "black") {
-    # The groups of the samples, from the edgeR object
-    DGEList <- create_edger_obj(screenR_Object)
-
+    object <- update_screenr_object(screenR_Object)
     # MDS of the log2 normalized counts
-    plotMDS <- limma::plotMDS(log_normalized_counts(screenR_Object),
+    plotMDS <- limma::plotMDS(log_normalized_counts(object, "plot_mds()"),
         plot = FALSE, ndim = 2)
 
     # Create the Updated plot MDS
@@ -39,7 +37,7 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
     )
 
     if (is.null(groups)) {
-        PLTdata$group <- DGEList$samples$group
+        PLTdata$group <- groups_of(object)
     } else {
         PLTdata$group <- groups
     }
@@ -193,35 +191,30 @@ compute_explained_variance <- function(screenR_Object) {
 #' @keywords internal
 compute_pca <- function(screenR_Object) {
     # The samples are the observations, the barcodes the variables
-    stats::prcomp(t(log_normalized_counts(screenR_Object)))
+    stats::prcomp(t(log_normalized_counts(screenR_Object,
+        "The principal component analysis")))
 }
 
 #' @title Log2 normalized counts
 #' @description Internal function that returns the log2 of the normalized
 #'     counts plus 1, used by \code{\link{plot_pca}},
 #'     \code{\link{plot_explained_variance}} and \code{\link{plot_mds}}.
-#'     The normalized counts are those computed by
-#'     \code{\link{normalize_data}}, with the method chosen there ("cpm",
-#'     "tmm" or "control"); if the counts have not been normalized, counts per
-#'     million are used, as \code{\link{normalize_data}} does by default.
-#'     On the raw counts the first principal component would mostly follow
-#'     the sequencing depth of the samples. Barcodes with no reads in any
-#'     sample are left out.
+#'     The normalized counts are the raw counts divided by the effective
+#'     library sizes set by \code{\link{normalize_data}} ("cpm", "tmm" or
+#'     "control"), so the object must be normalized; the log and the + 1 are
+#'     display transformations. On the raw counts the first principal
+#'     component would mostly follow the sequencing depth of the samples.
+#'     Barcodes with no reads in any sample are left out.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
+#' @param what What needs the normalized counts, for the error message.
 #' @return A numeric matrix with one row for each barcode and one column for
 #'     each sample.
 #' @keywords internal
-log_normalized_counts <- function(screenR_Object) {
-    table <- normalized_table_of(screenR_Object)
-    if (nrow(table) == 0) {
-        table <- normalized_table_of(normalize_data(screenR_Object))
-    }
-    numeric_col <- vapply(table, is.numeric, logical(1))
-    counts <- as.matrix(table[, numeric_col])
-    rownames(counts) <- table$Barcode
-    keep <- rowSums(counts, na.rm = TRUE) > 0 & !apply(is.na(counts), 1, any)
-    log2(counts[keep, , drop = FALSE] + 1)
+log_normalized_counts <- function(screenR_Object, what = "This function") {
+    object <- update_screenr_object(screenR_Object)
+    counts <- normalized_counts(object, what)
+    log2(counts[rowSums(counts) > 0, , drop = FALSE] + 1)
 }
 
 #' @title Plot a principal component analysis of the samples
@@ -261,7 +254,7 @@ plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
             " (the number of principal components).")
     }
     if (is.null(groups)) {
-        groups <- create_edger_obj(screenR_Object)$samples$group
+        groups <- groups_of(update_screenr_object(screenR_Object))
     }
     if (length(groups) != nrow(pca$x)) {
         stop("groups must have one value for each sample (", nrow(pca$x),

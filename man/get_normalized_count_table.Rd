@@ -20,9 +20,12 @@ A tibble with the Barcode column and one column of normalized
     normalized).
 }
 \description{
-Returns the normalized count table of a ScreenR object,
-    computed with \code{\link{normalize_data}}. A short summary of the size
-    of the table is printed.
+Returns the normalized count table of a ScreenR object. A
+    short summary of the size of the table is printed. The normalized
+    counts are not stored: they are computed from the raw counts and the
+    effective library sizes set by \code{\link{normalize_data}} (raw count
+    / effective library size * 1e6), so they always follow the counts and
+    the normalization.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

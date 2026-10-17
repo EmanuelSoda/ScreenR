@@ -60,7 +60,7 @@ analyses do not change.
 
 Always look at `plot_empirical_null()` (see [Checking the fit](#checking-the-fit)).
 
-```{r packages, message = FALSE}
+```{r packages, message = FALSE, warning = FALSE}
 library(ScreenR)
 library(dplyr)
 library(ggplot2)

@@ -8,28 +8,47 @@ create_edger_obj(screenR_Object)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
-\code{\link{create_screenr_object}}.}
+\code{\link{create_screenr_object}}, normalized with
+\code{\link{normalize_data}}.}
 }
 \value{
-A \code{\link[edgeR]{DGEList}} with the raw counts, the groups of
-    the samples and the annotation of the barcodes (genes).
+A \code{\link[edgeR]{DGEList}} with the raw counts, the effective
+    library sizes, the groups of the samples and the annotation of the
+    barcodes (genes).
 }
 \description{
 Converts a ScreenR object into an edgeR
     \code{\link[edgeR]{DGEList}}, for example to use the object with edgeR
-    or limma functions directly. The edgeR/limma based functions of ScreenR
-    (such as \code{\link{find_camera_hit}} and
-    \code{\link{find_roast_hit}}) call it internally. The DGEList is built
-    from the raw counts (the count table), as required by the edgeR
-    negative binomial model, and the annotation is matched to the counts
-    by barcode; all the barcodes of the count table must be in the
-    annotation table.
+    or limma functions directly. All the edgeR/limma based functions of
+    ScreenR (\code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+    \code{\link{compute_barcode_statistics}}, \code{\link{find_time_hit}},
+    \code{\link{filter_by_variance}} and \code{\link{plot_barcode_hit}})
+    use it, so they all model the counts with the same normalization.
+}
+\details{
+The DGEList contains the raw counts, as required by the edgeR
+    negative binomial model (never normalized counts), and the
+    normalization of the object set by \code{\link{normalize_data}}: the
+    library sizes (lib.size) are the effective library sizes of the
+    samples and the normalization factors (norm.factors) are 1. The offsets
+    of the models, log(lib.size * norm.factors), are therefore the
+    logarithms of the effective library sizes, the same that give the
+    normalized counts of the plots and of the data table (raw count /
+    effective library size * 1e6). For the "tmm" method the effective
+    library size already includes the TMM factor, so it is not applied a
+    second time; do not call \code{\link[edgeR]{normLibSizes}} (or
+    calcNormFactors) on the result, which would change the normalization.
+
+    The object must be normalized, and every barcode must be annotated
+    with a gene. The genes table of the DGEList is the rowData of the
+    object.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
-create_edger_obj(object)
+dge <- create_edger_obj(object)
+dge$samples
 }
 \seealso{
-\code{\link{create_design_matrix}}
+\code{\link{normalize_data}}, \code{\link{create_design_matrix}}
 }
 \concept{objects}

@@ -4,29 +4,46 @@
 \alias{update_screenr_object}
 \title{Update a ScreenR object}
 \usage{
-update_screenr_object(object)
+update_screenr_object(object, verbose = TRUE)
 }
 \arguments{
 \item{object}{A ScreenR object.}
+
+\item{verbose}{Whether to give a message when the object is converted.
+Default TRUE.}
 }
 \value{
-A ScreenR object of the current class.
+A ScreenR object of the current layout.
 }
 \description{
-Converts a ScreenR object created with a version of ScreenR
-    older than 1.15.8 to the current class, which extends
-    \code{\link[SummarizedExperiment]{SummarizedExperiment}}. All the
-    ScreenR functions do this automatically, so it is only needed to use
-    the object with other Bioconductor tools. Objects of the current class
-    are returned unchanged.
+Converts a ScreenR object created with an older version of
+    ScreenR to the current layout. All the ScreenR functions do this
+    automatically (with a message), so it is only needed to save the
+    converted object, or to use it with other Bioconductor tools.
+}
+\details{
+Two kinds of older objects are converted:
+    \itemize{
+      \item objects created before version 1.15.8, which were not
+            SummarizedExperiment objects;
+      \item objects created by versions 1.15.8 to 1.15.15, which stored
+            the normalized counts as an assay and the data table as a
+            slot.
+    }
+    The counts, the annotation, the groups and the sample information are
+    kept. The normalized counts and the data table of older objects are
+    \strong{not} kept: those versions did not record how the counts were
+    normalized, and the edgeR based methods ignored the normalization, so
+    it cannot be recovered reliably. Run \code{\link{normalize_data}} on
+    the converted object (with the method used originally, "cpm" by
+    default). Objects of the current layout are returned unchanged.
 }
 \examples{
-# The example object of the package was saved with an older version
 object <- get0("object", envir = asNamespace("ScreenR"))
 object <- update_screenr_object(object)
 object
 }
 \seealso{
-\code{\link{create_screenr_object}}
+\code{\link{create_screenr_object}}, \code{\link{normalize_data}}
 }
 \concept{objects}

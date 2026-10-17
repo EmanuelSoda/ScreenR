@@ -8,22 +8,22 @@ compute_data_table(screenR_Object)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
-\code{\link{create_screenr_object}}.}
+\code{\link{create_screenr_object}}, normalized with
+\code{\link{normalize_data}}.}
 }
 \value{
-The ScreenR object with the data table filled. The data table has
-    one row for each barcode and sample and the columns Barcode, Gene,
-    Sample, Frequency (the normalized count), Day and Treatment, plus
-    Sequence, Library and Gene_ID when the annotation table has them. It
-    can be read with \code{\link{get_data_table}}.
+The ScreenR object. It is an error if it is not normalized.
 }
 \description{
-Computes the data table, a tidy (long) version of the
-    normalized count table used by many functions of the analysis, such as
+Checks that the object is normalized and returns it. The data
+    table, the tidy (long) version of the normalized counts used by
     \code{\link{compute_metrics}}, \code{\link{plot_boxplot}},
-    \code{\link{plot_trend}} and \code{\link{filter_by_slope}}. Run it
-    after \code{\link{normalize_data}}. The Day and Treatment of each
-    sample come from \code{\link{get_sample_table}}.
+    \code{\link{plot_trend}}, \code{\link{filter_by_slope}} and other
+    functions, is no longer stored in the object: it is computed from the
+    object when needed (see \code{\link{get_data_table}}), so it always
+    follows the counts, the annotation, the sample table and the
+    normalization. This function is kept so that existing code works; it
+    is not needed any more.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

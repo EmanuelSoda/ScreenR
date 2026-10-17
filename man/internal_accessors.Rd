@@ -6,6 +6,7 @@
 \alias{normalized_table_of}
 \alias{assay_table}
 \alias{annotation_of}
+\alias{genes_of}
 \alias{groups_of}
 \alias{sample_table_of}
 \title{Internal Accessors}
@@ -14,9 +15,11 @@ count_table_of(object)
 
 normalized_table_of(object)
 
-assay_table(object, assay_name)
+assay_table(object, assay_name, column_names = NULL)
 
 annotation_of(object)
+
+genes_of(object)
 
 groups_of(object)
 
@@ -26,14 +29,18 @@ sample_table_of(object)
 \item{object}{A ScreenR object.}
 
 \item{assay_name}{The name of the assay.}
+
+\item{column_names}{Ignored (kept for older objects).}
 }
 \value{
-A tibble (count_table_of, normalized_table_of, sample_table_of), a
-        data frame (annotation_of) or a factor (groups_of).
+A tibble (count_table_of, normalized_table_of, sample_table_of,
+        annotation_of), or a factor (groups_of).
 }
 \description{
-Internal functions that return the tables of a ScreenR object
-             in the format used by the rest of the package, for objects of
-             the current and of older versions.
+Internal functions that return views of a ScreenR object as
+             tables: they are built from the assays, rowData and colData
+             each time and are never stored. \code{count_table_of} and
+             \code{normalized_table_of} are for export and the public
+             getters: the computations use the assays directly.
 }
 \keyword{internal}

@@ -4,6 +4,11 @@
 #' @description Returns the raw count table of a ScreenR object, with one row
 #'     for each barcode and one column for each sample. A short summary of the
 #'     size of the table is printed.
+#'
+#'     The table is a view of the counts assay
+#'     (\code{assay(object, "counts")}): the Barcode column is made from the
+#'     row names and is not a sample. Changing the returned table does not
+#'     change the object; use \code{\link{set_count_table}}.
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @return A tibble with the Barcode column and one column of counts for each
@@ -31,6 +36,12 @@ setGeneric(
 #' @description Returns the annotation table of a ScreenR object, with the
 #'     gene (and any other information) of each barcode. A short summary of
 #'     the size of the table is printed.
+#'
+#'     The annotation of the barcodes of the object is its rowData, which is
+#'     what the analyses use; the returned table has those rows first,
+#'     followed by the rows of the annotation given by the user whose barcodes
+#'     are not in the count table (barcodes of the library that were not
+#'     observed).
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @return The annotation table, a data frame with at least the columns
@@ -76,7 +87,10 @@ setGeneric(
 
 
 #' @title Get the replicates
-#' @description Returns the replicate labels stored in a ScreenR object.
+#' @description Returns the replicate labels stored in a ScreenR object:
+#'     the Replicate column of the colData when one label was given for each
+#'     sample, otherwise the value given to
+#'     \code{\link{create_screenr_object}}.
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @return The vector of replicate labels.
@@ -96,9 +110,12 @@ setGeneric(
 )
 
 #' @title Get the normalized count table
-#' @description Returns the normalized count table of a ScreenR object,
-#'     computed with \code{\link{normalize_data}}. A short summary of the size
-#'     of the table is printed.
+#' @description Returns the normalized count table of a ScreenR object. A
+#'     short summary of the size of the table is printed. The normalized
+#'     counts are not stored: they are computed from the raw counts and the
+#'     effective library sizes set by \code{\link{normalize_data}} (raw count
+#'     / effective library size * 1e6), so they always follow the counts and
+#'     the normalization.
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @return A tibble with the Barcode column and one column of normalized
@@ -124,9 +141,11 @@ setGeneric(
 
 #' @title Get the data table
 #' @description Returns the data table of a ScreenR object, the tidy (long)
-#'     version of the normalized counts computed with
-#'     \code{\link{compute_data_table}}. A short summary of the size of the
-#'     table is printed.
+#'     version of the normalized counts. A short summary of the size of the
+#'     table is printed. The data table is not stored: it is computed from the
+#'     counts, the annotation (rowData), the sample table (colData) and the
+#'     normalization each time, so it always follows them. The object must be
+#'     normalized (\code{\link{normalize_data}}).
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @return A tibble with one row for each barcode and sample and the columns
@@ -154,11 +173,15 @@ setGeneric(
 
 #' @title Set the count table
 #' @description Replaces the raw count table of a ScreenR object. The
-#'     annotation, the groups and the normalized counts are kept (the
-#'     normalized counts are matched to the new table by barcode and sample);
-#'     the Day and Treatment of the samples are kept when the samples are the
-#'     same, otherwise they are taken again from the sample names. Unlike
-#'     \code{\link{create_screenr_object}}, the table is not checked.
+#'     annotation and the groups are kept (the annotation is matched to the
+#'     new barcodes by identifier); the Day and Treatment of the samples are
+#'     kept when the samples are the same, otherwise they are taken again from
+#'     the sample names. The table is checked as in
+#'     \code{\link{create_screenr_object}} (identifiers, invalid counts,
+#'     duplicated barcodes). When the counts change, the normalization is
+#'     removed (with a message): run \code{\link{normalize_data}} again. The
+#'     same holds for \code{assay(object, "counts") <- } (see
+#'     \code{\link{screenr_object-replace}}).
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param count_table A count table with a Barcode column and one column of
@@ -183,7 +206,10 @@ setGeneric(
 #' @title Set the annotation table
 #' @description Replaces the annotation table of a ScreenR object. The
 #'     annotation of the barcodes of the count table (the rowData of the
-#'     object) is updated by matching the Barcode column.
+#'     object) is updated by matching the Barcode column, so the new genes are
+#'     used by all the following analyses (data table, metrics, edgeR/limma
+#'     methods). Barcodes annotated more than once with different values are
+#'     an error.
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param annotation_table A data frame with the annotation of each barcode,
@@ -253,11 +279,16 @@ setGeneric(
 )
 
 #' @title Set the normalized count table
-#' @description Replaces the normalized count table of a ScreenR object, for
-#'     example with counts normalized outside ScreenR. The table is matched to
-#'     the count table by barcode and sample; an empty table removes the
-#'     normalized counts. Usually the normalized counts are computed with
-#'     \code{\link{normalize_data}}.
+#' @description Sets the normalization of a ScreenR object from a table of
+#'     normalized counts, for example counts normalized outside ScreenR.
+#'     Usually the normalization is set with \code{\link{normalize_data}}.
+#'     ScreenR uses one normalization for the plots and the edgeR/limma
+#'     models, expressed as one effective library size for each sample, so
+#'     the table must be the raw counts divided by one factor for each sample
+#'     (times 1e6): the effective library sizes are computed from it and the
+#'     method is recorded as "custom". Any other table is an error. The table
+#'     is matched to the counts by barcode and sample; an empty table removes
+#'     the normalization.
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param normalized_count_table A table with a Barcode column and one column
@@ -280,13 +311,20 @@ setGeneric(
 )
 
 #' @title Set the data table
-#' @description Replaces the data table of a ScreenR object. Usually the data
-#'     table is computed with \code{\link{compute_data_table}}.
+#' @description Deprecated. The data table is no longer stored: it is
+#'     computed from the counts, the annotation, the sample table and the
+#'     normalization of the object when needed (see
+#'     \code{\link{get_data_table}}), so it cannot be replaced. Given the
+#'     current data table, the object is returned unchanged with a
+#'     deprecation warning; any other table is an error. To change the data
+#'     table, change the object (subset it, or use
+#'     \code{\link{set_annotation_table}} or
+#'     \code{\link{normalize_data}}).
 #' @param object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @param data_table A data table in tidy (long) format, with the columns
 #'     described in \code{\link{get_data_table}}.
-#' @return The ScreenR object with the new data table.
+#' @return The unchanged ScreenR object (with a warning).
 #' @seealso \code{\link{compute_data_table}}, \code{\link{get_data_table}}
 #' @export
 #' @rdname set_data_table

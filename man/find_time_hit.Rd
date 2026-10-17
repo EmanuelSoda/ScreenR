@@ -18,7 +18,10 @@ find_time_hit(
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
-\code{\link{create_screenr_object}}.}
+\code{\link{create_screenr_object}}, normalized with
+\code{\link{normalize_data}}. The model uses its raw counts with its
+effective library sizes as offsets, the same normalization as the plots
+and the data table (see \code{\link{create_edger_obj}}).}
 
 \item{treatment}{The value(s) of the Treatment column of
 \code{\link{get_sample_table}} for the treated samples.}

@@ -9,28 +9,21 @@ build_screenr_object(
   annotation_table = NULL,
   groups = NULL,
   replicates = c(""),
-  normalized_count_table = NULL,
-  data_table = NULL,
   sample_table = NULL,
   column_names = list()
 )
 }
 \arguments{
-\item{count_table}{A table with a Barcode column and one column for each
-sample. Non-numeric columns other than Barcode are
-ignored.}
+\item{count_table}{A table with a Barcode column and one numeric column
+for each sample, without duplicated barcodes.}
 
-\item{annotation_table}{The annotation table, with a Barcode column.}
+\item{annotation_table}{The annotation table, with a Barcode column and no
+conflicting duplicated barcodes, or NULL.}
 
 \item{groups}{The groups of the samples.}
 
-\item{replicates}{The replicates.}
-
-\item{normalized_count_table}{An optional normalized count table, with a
-Barcode column; it is matched to the count
-table by barcode and sample.}
-
-\item{data_table}{The data table.}
+\item{replicates}{The replicate labels: one for each sample, or any other
+value (kept for compatibility).}
 
 \item{sample_table}{An optional sample table with the columns Sample, Day
 and Treatment, in the order of the samples; when NULL
@@ -42,8 +35,10 @@ the sample names are parsed.}
 A screenr_object.
 }
 \description{
-Internal function that builds a screenr_object from the
-             tables, without checking them (the checks are done by
-             \code{\link{create_screenr_object}}).
+Internal function that builds a screenr_object from tables
+             already checked by \code{\link{create_screenr_object}}: the
+             counts become the counts assay (with the barcode identifiers
+             as row names), the annotation of the observed barcodes the
+             rowData and the sample information the colData.
 }
 \keyword{internal}

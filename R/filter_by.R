@@ -14,7 +14,8 @@
 #' @importFrom stats lm
 #' @importFrom dplyr rename
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}} (its normalized counts are used).
 #' @param genes The genes to filter, for example the hits found by
 #'     \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
 #'     \code{\link{find_roast_hit}}.
@@ -69,7 +70,8 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
         time = time
     )
 
-    data <- screenR_Object@data_table
+    data <- data_table_of(update_screenr_object(screenR_Object),
+        "filter_by_slope()")
 
     data <- dplyr::left_join(data, slope_trt, by = "Gene")
     data <- dplyr::rename(data, slope_treatment = .data$Slope)
@@ -127,7 +129,8 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' @param group_var The values of the Treatment column of the data table (see
 #'     \code{\link{get_sample_table}}) of the samples to use.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}} (its normalized counts are used).
 #' @param genes The genes for which the slope is computed.
 #' @param time_column The column of the data table with the time point of
 #'     each sample: "Day" (default) or, for example, "Treatment" when the
@@ -157,7 +160,8 @@ filter_by_slope <- function(screenR_Object, genes, group_var_treatment,
 #' )
 compute_slope <- function(screenR_Object, genes, group_var,
     time_column = "Day", time = NULL) {
-    data <- screenR_Object@data_table
+    data <- data_table_of(update_screenr_object(screenR_Object),
+        "compute_slope()")
     data <- dplyr::filter(data, .data$Gene %in% genes)
     data <- dplyr::filter(data, .data$Treatment %in% group_var)
     data$Time <- encode_time(data, time_column, time)
@@ -222,7 +226,10 @@ encode_time <- function(data, time_column = "Day", time = NULL) {
 #'     and keeps the genes whose variance is at most the given threshold:
 #'     a gene whose barcodes disagree is a less reliable hit.
 #' @param screenR_Object The ScreenR object obtained using
-#'     \code{\link{create_screenr_object}}.
+#'     \code{\link{create_screenr_object}}, normalized with
+#'     \code{\link{normalize_data}}. The model uses its raw counts with its
+#'     effective library sizes as offsets, the same normalization as the plots
+#'     and the data table (see \code{\link{create_edger_obj}}).
 #' @param genes The genes to filter, for example the hits found by
 #'     \code{\link{find_gene_zscore_hit}}, \code{\link{find_camera_hit}} or
 #'     \code{\link{find_roast_hit}}.
@@ -256,8 +263,8 @@ encode_time <- function(data, time_column = "Day", time = NULL) {
 #' head(data)
 filter_by_variance <- function(screenR_Object, genes, matrix_model,
     variance = 0.5, contrast) {
-    # Save the data_table in a temporary variable
-    data <- screenR_Object@data_table
+    data <- data_table_of(update_screenr_object(screenR_Object),
+        "filter_by_variance()")
 
     # Create the edgeR object and computing the LogFC
     contrast <- as_contrast(contrast, matrix_model)
@@ -286,13 +293,12 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 
 #' @title Remove the barcodes with zero counts in all samples
 #' @description Removes the barcodes (rows) with zero counts in all the
-#'     samples from the count table, the annotation table and, when present,
-#'     the normalized count table and the data table. Run it before
-#'     \code{\link{normalize_data}}.
+#'     samples, with their annotation. Run it before
+#'     \code{\link{normalize_data}}. On a normalized object the
+#'     normalization is kept (barcodes without reads do not change the
+#'     library sizes; see \code{\link{screenr_object-class}}).
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
-#' @importFrom dplyr if_all
-#' @importFrom tidyselect vars_select_helpers
 #' @return The ScreenR object without the barcodes with zero counts in all
 #'     samples.
 #' @seealso \code{\link{normalize_data}}, \code{\link{barcode_lost}}
@@ -306,37 +312,8 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
 #' counts <- get_count_table(object)
 #' nrow(counts)
 remove_all_zero_row <- function(screenR_Object) {
-    screenR_Object <- update_screenr_object(screenR_Object)
-    counts <- count_table_of(screenR_Object)
-
-    # First of all all the row with zero counts are founded
-    counts_zeros <- filter(
-        counts,
-        if_all(
-            vars_select_helpers$where(is.numeric),
-            ~ .x == 0
-        )
-    )
-
-    # Then there are filtered (with the normalized counts and the data
-    # table, which are subset together with the object)
-    screenR_Object <- screenR_Object[
-        !counts$Barcode %in% counts_zeros$Barcode,
-    ]
-
-
-    # The same procedure as to be done for the annotation_table table
-    # in order to keep thigs working
-
-    anno_table <- annotation_of(screenR_Object)
-
-    anno_table <-
-        filter(
-            anno_table,
-            !.data$Barcode %in% counts_zeros$Barcode
-        )
-
-    screenR_Object@annotation_table <- anno_table
-
-    return(screenR_Object)
+    object <- update_screenr_object(screenR_Object)
+    counts <- SummarizedExperiment::assay(object, "counts",
+        withDimnames = FALSE)
+    object[rowSums(counts) > 0, ]
 }
