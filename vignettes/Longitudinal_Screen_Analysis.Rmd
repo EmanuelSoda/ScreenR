@@ -617,6 +617,24 @@ time_hits %>%
     select(Gene, Log2FC, PValue, FDR)
 ```
 
+By default `find_time_hit()` numbers the time points 0, 1, 2, ..., as if
+they were equally spaced. With the real times (here we assume 7 and 14 days
+after the end of the selection, the usual schedule of this protocol), the
+`Log2FC` column becomes the change of the treatment effect per day. With two
+time points the model is saturated, so the p-values do not change; with
+three or more time points that are not equally spaced, the real times fit
+the change of the treatment effect against the actual time and do change the
+results.
+
+```{r time-hits-days}
+time_hits_days <- find_time_hit(object, treatment = "TRT", control = "CTRL",
+    days = c("T3", "T4"), time = c(T3 = 7, T4 = 14), direction = "Down",
+    fdr = 1)
+same_genes <- match(time_hits$Gene, time_hits_days$Gene)
+all.equal(time_hits_days$PValue[same_genes], time_hits$PValue)
+head(select(time_hits_days, Gene, Log2FC, PValue))
+```
+
 No gene passes the FDR threshold. `r sum(time_hits$PValue[time_hits$Gene %in% hits_t4$Gene] < 0.01)`
 of the `r nrow(hits_t4)` T4 hits have p-values below 0.01 for a stronger
 depletion at T4 than at T3, which agrees with an effect that develops over

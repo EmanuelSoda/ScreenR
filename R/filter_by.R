@@ -206,9 +206,10 @@ encode_time <- function(data, time_column = "Day", time = NULL) {
         attr(encoded, "labels") <- levels
         return(encoded)
     }
-    if (!is.numeric(time) || is.null(names(time))) {
-        stop("time must be a named numeric vector, for example ",
-            "c(T0 = 0, T3 = 3, T18 = 18).")
+    if (!is.numeric(time) || is.null(names(time)) ||
+        any(!is.finite(time))) {
+        stop("time must be a named numeric vector of finite values, for ",
+            "example c(T0 = 0, T3 = 3, T18 = 18).")
     }
     missing_time <- setdiff(unique(time_point), names(time))
     if (length(missing_time) > 0) {

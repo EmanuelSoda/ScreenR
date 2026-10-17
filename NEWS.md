@@ -1,5 +1,15 @@
 # ScreenR 1.15.16
 
+* `find_time_hit()` has a new argument `time`, the real time of each time
+  point (for example `time = c(Time3 = 7, Time4 = 14)`), validated as in
+  `compute_slope()` and `plot_trend()`. The model is then fitted against the
+  actual time and `Log2FC` is the change of the treatment effect per unit of
+  time. By default (`time = NULL`) the time points are numbered 0, 1, 2,
+  ... as before, so existing results do not change; with two time points
+  the p-values are the same with or without real times.
+* `compute_slope()`, `filter_by_slope()` and `plot_trend()` reject times
+  that are not finite.
+
 * New vignette "Analysis of a longitudinal screen: from counts to
   treatment-specific hits", a complete analysis of the example screen (T0,
   post-puromycin baseline, control and treated cultures at two time points
