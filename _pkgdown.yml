@@ -22,10 +22,10 @@ template:
       </style>
 
 home:
-  title: "ScreenR: hit identification in pooled shRNA screens"
+  title: "ScreenR: hit identification in pooled shRNA and CRISPR-Cas9 screens"
   description: >
-    Find the genes that matter in pooled shRNA screens with calibrated
-    statistics, quality control and publication-ready plots.
+    Find the genes that matter in pooled shRNA and CRISPR-Cas9 screens with
+    calibrated statistics, quality control and publication-ready plots.
   sidebar:
     structure: [links, license, community, citation, authors, dev]
   links:

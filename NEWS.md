@@ -1,5 +1,12 @@
 # ScreenR 1.15.16
 
+* The README, the pkgdown home page, the DESCRIPTION and the package help
+  describe shRNA and CRISPR-Cas9 screens. The README quick start uses a
+  sample table, palettes, `theme_set()`, FRY, CAMERA and the empirical null,
+  and adds a CRISPR dropout example; its method table follows Tutorial 3. The
+  workflow diagram shows the CRISPR steps and the tests across time points.
+* `plot_mds()` and `plot_pca()` leave room for the labels of the samples at
+  the edges of the plot.
 * `plot_treatment_separation()` plots a time course: when
   `condition_column` and `time_column` are the same variable (for example
   "Day" in a dropout screen), `treatment` can be several time points and each
