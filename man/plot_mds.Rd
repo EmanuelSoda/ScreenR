@@ -9,21 +9,31 @@ plot_mds(
   groups = NULL,
   alpha = 0.8,
   size = 2.5,
-  color = "black"
+  color = "black",
+  palette = NULL
 )
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
 \code{\link{create_screenr_object}}.}
 
-\item{groups}{An optional vector, with one value for each sample, used to
-fill the labels. By default the groups of the ScreenR object are used.}
+\item{groups}{What fills the labels: the name of a sample variable (for
+example "Treatment" or "Day", see \code{\link{get_sample_table}}), or
+a vector with one value for each sample. By default the groups of the
+ScreenR object (Group).}
 
 \item{alpha}{The opacity of the labels, between 0 and 1. Default 0.8.}
 
 \item{size}{The size of the labels. Default 2.5.}
 
 \item{color}{The color of the label text. Default "black".}
+
+\item{palette}{An optional vector of colors for the values of groups,
+which replaces the palette of the object. By default, when groups is
+the name of a sample variable (or NULL, for Group), the palette of the
+object for that variable is used when it is set (see
+\code{\link{get_palettes}}), otherwise the default colors of
+ggplot2.}
 }
 \value{
 A ggplot object.

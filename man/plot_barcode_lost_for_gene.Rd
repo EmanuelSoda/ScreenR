@@ -4,7 +4,12 @@
 \alias{plot_barcode_lost_for_gene}
 \title{Plot the number of barcodes lost for each gene}
 \usage{
-plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
+plot_barcode_lost_for_gene(
+  screenR_Object,
+  facet = TRUE,
+  samples,
+  palette = NULL
+)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
@@ -14,6 +19,12 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 default) or a single panel.}
 
 \item{samples}{The names of the samples to plot (required).}
+
+\item{palette}{An optional vector of colors for the samples (named by
+sample, or one for each sample in order), which replaces the palette
+of the object. By default the Sample palette of the object is used
+when it is set (see \code{\link{get_palettes}}), otherwise the
+default colors of ggplot2.}
 }
 \value{
 A ggplot object with the number of lost barcodes on the x axis and

@@ -45,7 +45,11 @@ compute_gini <- function(screenR_Object) {
 #'     bottleneck.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
-#' @param palette An optional vector of colors, one for each sample.
+#' @param palette An optional vector of colors for the samples (named by
+#'     sample, or one for each sample in order), which replaces the palette
+#'     of the object. By default the Sample palette of the object is used
+#'     when it is set (see \code{\link{get_palettes}}), otherwise the
+#'     default colors of ggplot2.
 #' @param alpha The opacity of the bars, between 0 and 1. Default 1.
 #' @param legende_position The position of the legend: "none" (default),
 #'     "top", "bottom", "right" or "left".
@@ -60,7 +64,8 @@ compute_gini <- function(screenR_Object) {
 #' plot_gini(object)
 plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
     legende_position = "none") {
-    gini <- compute_gini(screenR_Object)
+    object <- update_screenr_object(screenR_Object)
+    gini <- compute_gini(object)
     plot <- ggplot2::ggplot(gini, ggplot2::aes(
         x = .data$Sample, y = .data$Gini, fill = .data$Sample
     )) +
@@ -76,9 +81,7 @@ plot_gini <- function(screenR_Object, palette = NULL, alpha = 1,
             legend.position = legende_position,
             axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
         )
-    if (!is.null(palette)) {
-        plot <- plot + ggplot2::scale_fill_manual(values = palette)
-    }
+    plot <- plot + palette_scale(object, "Sample", gini$Sample, palette)
     return(plot)
 }
 

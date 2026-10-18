@@ -8,6 +8,14 @@
 #'     between groups is expressed with a contrast created by
 #'     \code{\link{create_contrast}}. The column names are syntactically valid
 #'     versions of the group names (for example "T1/T2" becomes "T1.T2").
+#'     Row names are sample identifiers in the order of the object. All
+#'     model-based ScreenR functions check that this order matches the
+#'     object. Recreate the design after subsetting or reordering samples.
+#'     For a custom design from model.matrix(), explicitly set its row names
+#'     to the identifiers of the samples used to construct its rows; unnamed
+#'     rows or default numeric row names do not establish sample alignment.
+#'     Named contrast vectors are aligned to the design columns; unnamed
+#'     vectors are interpreted in column order.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
 #' @importFrom stats model.matrix
@@ -20,13 +28,19 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' create_design_matrix(object)
 create_design_matrix <- function(screenR_Object) {
-    groups <- groups_of(update_screenr_object(screenR_Object))
+    object <- update_screenr_object(screenR_Object)
+    groups <- groups_of(object)
     if (length(groups) == 0) {
         stop("The ScreenR object has no groups.")
+    }
+    if (length(groups) != ncol(object) || anyNA(groups)) {
+        stop("groups must have one non-missing value per sample.", call. = FALSE)
     }
     groups <- droplevels(as.factor(groups))
     design <- stats::model.matrix(~ 0 + groups)
     colnames(design) <- make.names(levels(groups))
+    rownames(design) <- colnames(object)
+    check_design_columns(design)
     return(design)
 }
 
@@ -54,6 +68,7 @@ create_design_matrix <- function(screenR_Object) {
 #' design <- create_design_matrix(object)
 #' create_contrast(design, treatment = "Treated", control = "Control")
 create_contrast <- function(design, treatment, control) {
+    check_design_columns(design)
     treatment <- make.names(treatment)
     control <- make.names(control)
     not_found <- setdiff(c(treatment, control), colnames(design))
@@ -83,27 +98,109 @@ create_contrast <- function(design, treatment, control) {
 #' @return The contrast as a single name/index or a numeric vector.
 #' @keywords internal
 as_contrast <- function(contrast, design) {
-    if (is.matrix(contrast)) {
-        if (ncol(contrast) != 1) {
-            stop("Only one contrast at a time is supported.")
+    check_design_columns(design)
+    from_matrix <- is.matrix(contrast)
+    if (from_matrix) {
+        if (ncol(contrast) != 1L) {
+            stop("Only one contrast at a time is supported.", call. = FALSE)
         }
+        identifiers <- rownames(contrast)
         contrast <- contrast[, 1]
+        names(contrast) <- identifiers
     }
-    if (length(contrast) == 1) {
-        if (is.character(contrast) && !contrast %in% colnames(design)) {
-            stop(
-                "Contrast '", contrast, "' is not a column of the design ",
+    if (is.character(contrast) && length(contrast) == 1L &&
+        !is.na(contrast)) {
+        if (!contrast %in% colnames(design)) {
+            stop("Contrast '", contrast, "' is not a column of the design ",
                 "matrix. Available columns: ",
-                paste(colnames(design), collapse = ", ")
-            )
+                paste(colnames(design), collapse = ", "), call. = FALSE)
         }
-    } else if (length(contrast) != ncol(design)) {
-        stop(
-            "The contrast must have one value for each column of the ",
-            "design matrix (", ncol(design), ")."
-        )
+        return(contrast)
     }
-    return(contrast)
+    if (!is.numeric(contrast) || !is.null(dim(contrast)) ||
+        any(!is.finite(contrast))) {
+        stop("contrast must be a column name or index, or a finite numeric ",
+            "contrast vector.", call. = FALSE)
+    }
+    if (length(contrast) == 1L && is.null(names(contrast)) && !from_matrix) {
+        if (contrast != round(contrast) || contrast < 1 ||
+            contrast > ncol(design)) {
+            stop("The contrast column index must be an integer between 1 ",
+                "and ", ncol(design), ".", call. = FALSE)
+        }
+        return(contrast)
+    }
+    if (length(contrast) != ncol(design)) {
+        stop("The contrast must have one value for each column of the ",
+            "design matrix (", ncol(design), ").", call. = FALSE)
+    }
+    if (!is.null(names(contrast))) {
+        ids <- names(contrast)
+        if (anyNA(ids) || any(ids == "") || anyDuplicated(ids) ||
+            !setequal(ids, colnames(design))) {
+            stop("Named contrast coefficients must have unique, non-missing ",
+                "names matching every design column exactly.", call. = FALSE)
+        }
+        contrast <- contrast[colnames(design)]
+    }
+    if (!any(contrast != 0)) {
+        stop("The contrast must have at least one non-zero coefficient.",
+            call. = FALSE)
+    }
+    contrast
+}
+
+#' @title Check Design Column Identifiers
+#' @description Internal validation of a finite numeric design matrix and
+#'     its coefficient identifiers.
+#' @param design A design matrix.
+#' @return NULL, invisibly.
+#' @keywords internal
+check_design_columns <- function(design) {
+    if (!is.matrix(design) || !is.numeric(design) || ncol(design) == 0L ||
+        any(!is.finite(design))) {
+        stop("The design must be a finite numeric matrix with columns.",
+            call. = FALSE)
+    }
+    ids <- colnames(design)
+    if (is.null(ids) || anyNA(ids) || any(ids == "") || anyDuplicated(ids)) {
+        stop("Design column names must be unique and non-missing.",
+            call. = FALSE)
+    }
+    invisible(NULL)
+}
+
+#' @title Check Design Sample Alignment
+#' @description Internal validation that model rows identify the samples of
+#'     the object in exactly the same order. No positional guessing is used.
+#' @param design A design matrix with sample identifiers as row names.
+#' @param object A ScreenR object.
+#' @return The validated design matrix.
+#' @keywords internal
+check_design_samples <- function(design, object) {
+    check_design_columns(design)
+    samples <- colnames(update_screenr_object(object))
+    ids <- rownames(design)
+    if (nrow(design) != length(samples)) {
+        stop("The design must have one row per sample in the object.",
+            call. = FALSE)
+    }
+    if (is.null(ids) || anyNA(ids) || any(ids == "") || anyDuplicated(ids)) {
+        stop("Design row names must be unique, non-missing sample identifiers. ",
+            "Use create_design_matrix(), or name the rows of a custom ",
+            "design using the samples used to construct it.", call. = FALSE)
+    }
+    if (!setequal(ids, samples)) {
+        stop("Design row names must match the sample identifiers of the ",
+            "object exactly. Recreate the design for this object.",
+            call. = FALSE)
+    }
+    if (!identical(ids, samples)) {
+        stop("The design sample order differs from the object. Recreate the ",
+            "design, or explicitly reorder its rows to colnames(object).",
+            call. = FALSE)
+    }
+    design
 }
 
 #' @title Barcode Log2 Fold Change
@@ -213,11 +310,13 @@ adjust_p <- function(p, method = c("BH", "storey")) {
 #'               Direction and PValue.
 #' @param direction The requested direction ("Down" or "Up").
 #' @param fdr_method "BH" or "storey".
+#' @param keep_all Whether to retain both observed directions.
 #' @return The result with one-sided PValue and FDR, only for the genes in
-#'         the requested direction.
+#'         the requested direction unless keep_all is TRUE.
 #' @keywords internal
-one_direction <- function(result, direction, fdr_method) {
+one_direction <- function(result, direction, fdr_method, keep_all = FALSE) {
     result$PValue <- one_sided_p(result$PValue, result$Direction, direction)
     result$FDR <- adjust_p(result$PValue, fdr_method)
+    if (keep_all) return(result)
     result[as.character(result$Direction) == direction, ]
 }

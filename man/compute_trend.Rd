@@ -9,7 +9,9 @@ compute_trend(
   genes,
   group_var,
   time_column = "Day",
-  time = NULL
+  time = NULL,
+  color_by = NULL,
+  reference_groups = NULL
 )
 }
 \arguments{
@@ -25,9 +27,13 @@ each sample.}
 
 \item{time}{NULL or a named numeric vector with the time of each time
 point.}
+
+\item{color_by}{An optional colData column for condition trends.}
+
+\item{reference_groups}{Treatment values excluded from trend fitting.}
 }
 \value{
-A tibble with the columns Sample, Gene, Frequency and Time.
+A tibble with Sample, Gene, Frequency, Time, Condition and Reference.
 }
 \description{
 Internal function that computes, for each gene and sample, the

@@ -24,6 +24,14 @@ Creates the design matrix used by the edgeR/limma based
     between groups is expressed with a contrast created by
     \code{\link{create_contrast}}. The column names are syntactically valid
     versions of the group names (for example "T1/T2" becomes "T1.T2").
+    Row names are sample identifiers in the order of the object. All
+    model-based ScreenR functions check that this order matches the
+    object. Recreate the design after subsetting or reordering samples.
+    For a custom design from model.matrix(), explicitly set its row names
+    to the identifiers of the samples used to construct its rows; unnamed
+    rows or default numeric row names do not establish sample alignment.
+    Named contrast vectors are aligned to the design columns; unnamed
+    vectors are interpreted in column order.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))

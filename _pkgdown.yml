@@ -148,6 +148,8 @@ reference:
   - plot_empirical_null
   - find_camera_hit
   - find_roast_hit
+  - find_consistent_hit
+  - combine_consistent_hits
   - find_time_hit
 
 - title: Combine and validate hits
@@ -160,6 +162,8 @@ reference:
   - plot_barcode_hit
   - plot_barcode_trend
   - plot_trend
+  - plot_treatment_separation
+  - plot_barcode_heatmap
   - plot_zscore_distribution
   - filter_by_slope
   - filter_by_variance

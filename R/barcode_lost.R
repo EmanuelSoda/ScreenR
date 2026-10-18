@@ -40,8 +40,11 @@ barcode_lost <- function(screenR_Object) {
 #'     lost many more barcodes than the others usually has a low quality.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
-#' @param palette An optional vector of colors, one for each sample, used to
-#'     fill the bars. By default the ggplot2 colors are used.
+#' @param palette An optional vector of colors for the samples (named by
+#'     sample, or one for each sample in order), which replaces the palette
+#'     of the object. By default the Sample palette of the object is used
+#'     when it is set (see \code{\link{get_palettes}}), otherwise the
+#'     default colors of ggplot2.
 #' @param alpha The opacity of the bars, between 0 and 1. Default 1.
 #' @param legende_position The position of the legend: "none" (default),
 #'     "top", "bottom", "right" or "left".
@@ -58,7 +61,8 @@ barcode_lost <- function(screenR_Object) {
 #' @export
 plot_barcode_lost <- function(screenR_Object, palette = NULL,
     alpha = 1, legende_position = "none") {
-    table <- ScreenR::barcode_lost(screenR_Object)
+    object <- update_screenr_object(screenR_Object)
+    table <- ScreenR::barcode_lost(object)
 
     plot <- ggplot(table, aes(
         x = .data$Sample, y = .data$LostBarcode,
@@ -72,9 +76,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
         ) +
         ggplot2::labs(y = "Lost barcodes")
 
-    if (!is.null(palette)) {
-        plot <- plot + scale_fill_manual(values = palette)
-    }
+    plot <- plot + palette_scale(object, "Sample", table$Sample, palette)
     return(plot)
 }
 
@@ -89,6 +91,11 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' @param facet Whether to draw a separate panel for each sample (TRUE,
 #'     default) or a single panel.
 #' @param samples The names of the samples to plot (required).
+#' @param palette An optional vector of colors for the samples (named by
+#'     sample, or one for each sample in order), which replaces the palette
+#'     of the object. By default the Sample palette of the object is used
+#'     when it is set (see \code{\link{get_palettes}}), otherwise the
+#'     default colors of ggplot2.
 #' @importFrom magrittr %>%
 #' @importFrom rlang .data
 #' @importFrom dplyr select_if
@@ -110,7 +117,7 @@ plot_barcode_lost <- function(screenR_Object, palette = NULL,
 #' )
 #' @export
 plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
-    samples) {
+    samples, palette = NULL) {
     object <- update_screenr_object(screenR_Object)
     table <- count_mapped_reads(object)
     # The gene of each barcode, from the rowData
@@ -139,7 +146,9 @@ plot_barcode_lost_for_gene <- function(screenR_Object, facet = TRUE,
     )) +
         geom_point(show.legend = FALSE) +
         scale_x_continuous(breaks = seq(0, max(table$barcode_lost), 1)) +
-        ggplot2::labs(x = "Lost barcodes")
+        ggplot2::labs(x = "Lost barcodes") +
+        palette_scale(object, "Sample", table$Sample, palette,
+            aesthetic = "colour")
 
     if (facet) {
         plot <- plot + ggplot2::facet_wrap(vars(.data$Sample), scales = "free")

@@ -68,6 +68,7 @@ test_that("find_roast_hit", {
     set.seed(42)
     object <- get0("object", envir = asNamespace("ScreenR"))
     matrix_model <- model.matrix(~ get_groups(object))
+    rownames(matrix_model) <- colnames(object)
     colnames(matrix_model) <- c("Control", "T1_T2", "Treated")
     expect_warning(find_roast_hit(object,
         matrix_model = matrix_model,

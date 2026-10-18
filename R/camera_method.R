@@ -29,6 +29,9 @@
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
+#'     Rows must be named with sample identifiers in object order (see
+#'     \code{\link{create_design_matrix}}); mismatched names or order
+#'     are errors. Named contrast coefficients are aligned to design columns.
 #' @param contrast The comparison to test: the name or index of a column of
 #'     matrix_model, a numeric contrast vector (for example created with
 #'     \code{\link{create_contrast}}) or a one-column matrix created with
@@ -49,11 +52,17 @@
 #'     default) or "storey" (Benjamini-Hochberg multiplied by the estimated
 #'     proportion of genes without effect, less conservative when many genes
 #'     have an effect).
+#' @param keep_all Keep genes with either observed direction (default FALSE).
+#'     Their PValue still tests the requested direction. Use keep_all = TRUE
+#'     and fdr = 1 to obtain complete tables for
+#'     \code{\link{combine_consistent_hits}}. Direction records the observed
+#'     direction; it does not change the direction of the one-sided test.
 #' @importFrom edgeR estimateDisp
 #' @importFrom tibble rownames_to_column
 #' @importFrom limma camera
 #' @importFrom purrr map_lgl
-#' @return A tibble with one row for each hit in the requested direction and
+#' @return A tibble with one row for each hit (restricted to the observed
+#'     requested direction unless keep_all = TRUE) and
 #'     the columns Gene, NGenes (the number of barcodes of the gene),
 #'     Direction, PValue (the one-sided p-value for the requested direction),
 #'     FDR and Log2FC (the median log2 fold change of the barcodes of the
@@ -79,7 +88,10 @@
 find_camera_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, thresh = 1e-04, lfc = 1,
     direction = c("Down", "Up"), fdr = 0.05,
-    fdr_method = c("BH", "storey")) {
+    fdr_method = c("BH", "storey"), keep_all = FALSE) {
+    if (!is.logical(keep_all) || length(keep_all) != 1L || is.na(keep_all)) {
+        stop("keep_all must be TRUE or FALSE.", call. = FALSE)
+    }
     direction <- match.arg(direction)
     fdr_method <- match.arg(fdr_method)
     if (!missing(thresh) || !missing(lfc)) {
@@ -87,6 +99,7 @@ find_camera_hit <- function(screenR_Object, matrix_model,
             "deprecated and ignored. Filter the result on the FDR column ",
             "instead.", call. = FALSE)
     }
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
     contrast <- as_contrast(contrast, matrix_model)
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- ScreenR::create_edger_obj(screenR_Object)
@@ -105,7 +118,7 @@ find_camera_hit <- function(screenR_Object, matrix_model,
         dplyr::tibble() %>%
         dplyr::left_join(effect, by = "Gene") %>%
         dplyr::mutate(Direction = factor(.data$Direction)) %>%
-        one_direction(direction, fdr_method) %>%
+        one_direction(direction, fdr_method, keep_all) %>%
         dplyr::filter(.data$FDR <= fdr)
 
     return(camera_hit)
@@ -121,6 +134,10 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @keywords internal
 compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     number_barcode = 3) {
+    if (!identical(rownames(matrix_model), colnames(DGEList))) {
+        stop("The design sample order differs from the DGEList.", call. = FALSE)
+    }
+    contrast <- as_contrast(contrast, matrix_model)
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 

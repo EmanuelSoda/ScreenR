@@ -4,7 +4,7 @@
 \alias{one_direction}
 \title{Gene Set Test Result in One Direction}
 \usage{
-one_direction(result, direction, fdr_method)
+one_direction(result, direction, fdr_method, keep_all = FALSE)
 }
 \arguments{
 \item{result}{The data frame of the test, with the columns Gene,
@@ -13,10 +13,12 @@ Direction and PValue.}
 \item{direction}{The requested direction ("Down" or "Up").}
 
 \item{fdr_method}{"BH" or "storey".}
+
+\item{keep_all}{Whether to retain both observed directions.}
 }
 \value{
 The result with one-sided PValue and FDR, only for the genes in
-        the requested direction.
+        the requested direction unless keep_all is TRUE.
 }
 \description{
 Internal function that turns the result of a gene set test

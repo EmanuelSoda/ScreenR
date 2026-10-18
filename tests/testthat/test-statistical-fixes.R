@@ -100,6 +100,7 @@ test_that("find_robust_zscore_hit has a default number_barcode", {
 test_that("find_camera_hit warns only when thresh or lfc are given", {
     object <- get0("object", envir = asNamespace("ScreenR"))
     matrix <- model.matrix(~ get_groups(object))
+    rownames(matrix) <- colnames(object)
     colnames(matrix) <- c("Control", "T1_T2", "Treated")
 
     deprecation <- "'thresh' and 'lfc' arguments"

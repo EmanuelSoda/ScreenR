@@ -5,57 +5,95 @@
 \title{Plot the hits in common between methods}
 \usage{
 plot_common_hit(
-  hit_zscore,
-  hit_camera,
-  hit_roast,
+  ...,
+  fdr = NULL,
+  type = c("auto", "venn", "upset"),
+  show_elements = TRUE,
+  show_percentage = TRUE,
+  max_elements = 6,
+  n_intersections = 20,
   alpha = 0.5,
   stroke_size = 0.5,
   set_name_size = 4,
   text_color = "black",
   text_size = 4,
-  show_percentage = TRUE,
   title = "",
-  color = c("#1B9E77", "#D95F02", "#7570B3"),
-  show_elements = TRUE
+  color = c("#1B9E77", "#D95F02", "#7570B3")
 )
 }
 \arguments{
-\item{hit_zscore}{The hits of the Z-score method, a table with a Gene
-column (for example from \code{\link{find_gene_zscore_hit}}).}
+\item{...}{The results of the methods: gene-level tables with a Gene
+column (for example from \code{\link{find_gene_zscore_hit}},
+\code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
+\code{\link{find_time_hit}} or \code{\link{find_zscore_hit}}) or
+vectors of gene names. Name them to label the methods (for example
+\code{FRY = fry_result}); unnamed results are labelled with the
+expression given (for example \code{fry_result}). A single named list
+of results can also be given. Tables with one row for each barcode (such as
+\code{\link{compute_barcode_statistics}}) are not accepted. For
+compatibility, the names hit_zscore, hit_camera and hit_roast are
+labelled as in previous versions.}
 
-\item{hit_camera}{The hits of \code{\link{find_camera_hit}}, a table with a
-Gene column.}
+\item{fdr}{An optional FDR threshold applied to the results with an FDR
+column. By default (NULL) all the genes of each result are used.}
 
-\item{hit_roast}{The hits of \code{\link{find_roast_hit}}, a table with a
-Gene column.}
+\item{type}{"auto" (default): a Venn diagram for up to three methods and an
+UpSet plot for more; "venn" (at most three methods) or "upset".}
 
-\item{alpha}{The opacity of the circles, between 0 and 1. Default 0.5.}
+\item{show_elements}{In the Venn diagram, whether to show the gene names
+instead of the counts (default TRUE). When a region has more than
+max_elements genes, its count is shown.}
+
+\item{show_percentage}{In the Venn diagram, whether to add the percentage
+of all the hits to the counts (default TRUE).}
+
+\item{max_elements}{The largest number of gene names written in a region
+of the Venn diagram (default 6).}
+
+\item{n_intersections}{The largest number of combinations of methods shown
+in the UpSet plot, the largest ones first (default 20).}
+
+\item{alpha}{The opacity of the circles of the Venn diagram. Default 0.5.}
 
 \item{stroke_size}{The width of the circle borders.}
 
-\item{set_name_size}{The text size of the set names.}
+\item{set_name_size}{The text size of the method names in the Venn
+diagram.}
 
-\item{text_color}{The text color of the contents of the intersections.}
+\item{text_color}{The color of the counts or gene names.}
 
-\item{text_size}{The text size of the contents of the intersections.}
+\item{text_size}{The text size of the counts or gene names.}
 
-\item{show_percentage}{Whether to show the percentage of each set (used
-when show_elements is FALSE).}
+\item{title}{The title of the plot.}
 
-\item{title}{The title displayed above the plot.}
-
-\item{color}{The three colors used to fill the circles.}
-
-\item{show_elements}{Whether to show the gene names instead of the
-counts (default TRUE).}
+\item{color}{The fill colors of the circles of the Venn diagram (one for
+each method) or, for the UpSet plot, the color of the bars and dots.}
 }
 \value{
-A ggplot object.
+A ggplot object (for the UpSet plot, a patchwork of ggplot
+    objects).
 }
 \description{
-Draws a Venn diagram of the hits of the three methods
-    (Z-score, CAMERA and ROAST), to see how many hits they have in common.
-    It is a wrapper around \code{\link[ggvenn]{ggvenn}}.
+Shows how the hits of several methods overlap: a Venn
+    diagram for up to three methods, an UpSet plot for more. The results
+    can come from any hit-finding method of ScreenR, and from any number of
+    methods.
+}
+\details{
+The UpSet plot has one column for each combination of methods
+    that has hits: the dots below show the methods of the combination and
+    the bar above the number of genes found by exactly those methods. The
+    bars on the left give the number of hits of each method. Unlike a Venn
+    diagram, it stays readable with many methods.
+
+    Use fdr to plot the hits at a common threshold when the results were
+    computed with fdr = 1 (all the genes). Results without an FDR column
+    (for example of \code{\link{find_zscore_hit}}) and vectors of gene
+    names are taken as lists of hits.
+
+    No ggplot2 theme is applied: set it with
+    \code{\link[ggplot2]{theme_set}} or add one (with \code{&} for the
+    UpSet plot, which is a patchwork of several plots).
 }
 \examples{
 hit_zscore <- data.frame(Gene = c("A", "B", "C", "D", "E"))
@@ -65,7 +103,17 @@ plot_common_hit(hit_zscore, hit_camera, hit_roast)
 
 # Number of genes instead of their names
 plot_common_hit(hit_zscore, hit_camera, hit_roast, show_elements = FALSE)
+
+# More than three methods: UpSet plot, at an FDR of 5\%
+results <- list(
+    FRY = data.frame(Gene = c("A", "B", "C"), FDR = c(0.01, 0.02, 0.3)),
+    CAMERA = data.frame(Gene = c("A", "C"), FDR = c(0.04, 0.01)),
+    Zscore = c("A", "B", "D"),
+    ROAST = data.frame(Gene = c("A", "B"), FDR = c(0.01, 0.6))
+)
+plot_common_hit(results, fdr = 0.05)
 }
 \seealso{
 \code{\link{find_common_hit}}, \code{\link{summarise_hits}}
 }
+\concept{plot}

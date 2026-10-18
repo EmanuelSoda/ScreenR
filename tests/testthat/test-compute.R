@@ -58,6 +58,7 @@ test_that("Camera", {
     object <- create_test_object()
 
     matrix <- model.matrix(~ get_groups(object))
+    rownames(matrix) <- colnames(object)
     colnames(matrix) <- c("Control", "T1/T2", "Treated")
     camera_hit <- suppressWarnings(find_camera_hit(
         screenR_Object = object,

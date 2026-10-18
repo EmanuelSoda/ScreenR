@@ -13,7 +13,8 @@ plot_boxplot(
   ncol = NULL,
   fill_var = "Sample",
   type = "boxplot",
-  scales = "free"
+  scales = "free",
+  palette = NULL
 )
 }
 \arguments{
@@ -39,6 +40,12 @@ example "Sample" (default), "Day" or "Treatment".}
 
 \item{scales}{The scales of the panels: "free" (default), "fixed",
 "free_x" or "free_y".}
+
+\item{palette}{An optional vector of colors for the values of fill_var,
+which replaces the palette of the object. By default the palette of
+the object for fill_var is used when it is set (see
+\code{\link{get_palettes}}), otherwise the default colors of
+ggplot2.}
 }
 \value{
 A ggplot object.

@@ -1,5 +1,89 @@
 # ScreenR 1.15.16
 
+* `plot_treatment_separation()` plots descriptive treatment/control abundance
+  ratios for any two condition labels and configurable time metadata. It
+  retains all selected stages, supports real times and sample subsets, and
+  inherits the user theme. Missing comparisons are never assigned zero effects.
+
+* `plot_trend(color_by = "Treatment")` overlays separate condition trends
+  with biological sample points and lines joining time-point means. The
+  original ungrouped regression remains the default without color_by;
+  `trend = "lm"` explicitly fits separate regressions. Object palettes are
+  used, and `reference_groups` shows shared baselines once as neutral points.
+  `connect_reference` joins the shared reference history to condition means;
+  `highlight_difference` shades the observed gap between two conditions.
+  No theme is applied by these new plots; use `theme_set()` in user code.
+* `plot_barcode_heatmap()` shows individual barcode abundances across samples,
+  with gene and sample-variable panels. Display log2 normalized counts,
+  barcode-centered values or values relative to explicit reference samples.
+
+
+* Model designs now carry sample identifiers and are checked against the
+  object before fitting. Custom designs must have sample identifiers as row
+  names in object order. Named contrast vectors and one-column contrast
+  matrices are aligned to coefficient names; missing, duplicated and unknown
+  names are rejected. Unnamed numeric contrast vectors remain positional.
+* Package checks, coverage and website builds now run on pushes and pull
+  requests to devel. Website builds on devel do not deploy GitHub Pages.
+
+
+* `find_consistent_hit()` tests directional effects shared by all supplied
+  contrasts using FRY, ROAST, CAMERA or gene-level Z-scores (random or
+  empirical reference). `combine_consistent_hits()` accepts complete
+  one-sided gene-level p-value tables, combines their raw p-values with an
+  intersection-union test and applies BH or BY correction across genes.
+  Missing or duplicated genes and invalid p-values are errors.
+* `find_camera_hit()` and `find_roast_hit()` gain `keep_all = TRUE` to retain
+  opposite observed directions with their requested one-sided p-values;
+  defaults are unchanged. The longitudinal vignette uses the built-in
+  consistency test.
+
+
+* Palettes: `create_screenr_object(palettes = )` and the new
+  `set_palettes()`/`get_palettes()` store colors for the values of the sample
+  variables (Treatment, Group, Day, Sample, ...), checked against the
+  object and kept when it is subset. Every plot that colors the samples by
+  one of these variables uses them: `plot_mapped_reads()`,
+  `plot_mapped_reads_distribution()`, `plot_barcode_lost()`,
+  `plot_barcode_lost_for_gene()`, `plot_gini()`, `plot_mds()`, `plot_pca()`
+  and `plot_boxplot()`. An explicit `palette` argument replaces the palette
+  of the object. `plot_mds()` and `plot_pca()` accept the name of a sample
+  variable in `groups` (for example `groups = "Treatment"`).
+  `plot_zscore_distribution()`, which receives the tables of
+  `compute_metrics()` rather than the object, has a new `palette` argument
+  (for example `palette = get_palettes(object)$Day`).
+* The longitudinal vignette sets palettes at the creation of the object and
+  uses TMM normalization throughout.
+
+* `plot_common_hit()` has been rewritten: it takes the results of any
+  number of methods, from any hit-finding function of ScreenR
+  (`find_gene_zscore_hit()`, `find_camera_hit()`, `find_roast_hit()`,
+  `find_time_hit()`, `find_zscore_hit()`, ...) or vectors of gene names, as
+  separate arguments or as one named list, with an optional `fdr` threshold
+  for results computed with `fdr = 1`. Up to three methods give a Venn
+  diagram, more an UpSet plot (`type` chooses). Both are drawn with ggplot2
+  and patchwork and apply no theme, so ScreenR no longer depends on ggvenn.
+  Barcode-level tables are refused. Calls of previous versions keep working
+  (unnamed results are now labelled with the expression given, except
+  `hit_zscore`, `hit_camera` and `hit_roast`, which keep their labels).
+* `find_common_hit()` takes the same input as `plot_common_hit()`: any number
+  of methods, with `common_in` (all the methods by default) and `fdr`.
+* The longitudinal vignette compares five methods at each time point with
+  UpSet plots, ranks the candidates with explicit rules (agreement of the
+  self-contained tests, number of shRNAs, discordant shRNAs, dependence on one
+  replicate, fitness, time trend) and ends with the hits to validate and their
+  plots at T3 and T4. It sets the ggplot2 theme with `theme_set()`.
+
+* `find_time_hit()` has a new argument `time`, the real time of each time
+  point (for example `time = c(Time3 = 7, Time4 = 14)`), validated as in
+  `compute_slope()` and `plot_trend()`. The model is then fitted against the
+  actual time and `Log2FC` is the change of the treatment effect per unit of
+  time. By default (`time = NULL`) the time points are numbered 0, 1, 2,
+  ... as before, so existing results do not change; with two time points
+  the p-values are the same with or without real times.
+* `compute_slope()`, `filter_by_slope()` and `plot_trend()` reject times
+  that are not finite.
+
 * New vignette "Analysis of a longitudinal screen: from counts to
   treatment-specific hits", a complete analysis of the example screen (T0,
   post-puromycin baseline, control and treated cultures at two time points

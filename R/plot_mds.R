@@ -7,8 +7,16 @@
 #'     Replicates should cluster together and the groups should separate.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
-#' @param groups An optional vector, with one value for each sample, used to
-#'     fill the labels. By default the groups of the ScreenR object are used.
+#' @param groups What fills the labels: the name of a sample variable (for
+#'     example "Treatment" or "Day", see \code{\link{get_sample_table}}), or
+#'     a vector with one value for each sample. By default the groups of the
+#'     ScreenR object (Group).
+#' @param palette An optional vector of colors for the values of groups,
+#'     which replaces the palette of the object. By default, when groups is
+#'     the name of a sample variable (or NULL, for Group), the palette of the
+#'     object for that variable is used when it is set (see
+#'     \code{\link{get_palettes}}), otherwise the default colors of
+#'     ggplot2.
 #' @param alpha The opacity of the labels, between 0 and 1. Default 0.8.
 #' @param size The size of the labels. Default 2.5.
 #' @param color The color of the label text. Default "black".
@@ -24,7 +32,7 @@
 #'
 #' plot_mds(object)
 plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
-    color = "black") {
+    color = "black", palette = NULL) {
     object <- update_screenr_object(screenR_Object)
     # MDS of the log2 normalized counts
     plotMDS <- limma::plotMDS(log_normalized_counts(object, "plot_mds()"),
@@ -36,11 +44,8 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
         x = plotMDS$x, y = plotMDS$y
     )
 
-    if (is.null(groups)) {
-        PLTdata$group <- groups_of(object)
-    } else {
-        PLTdata$group <- groups
-    }
+    groups <- sample_groups(object, groups)
+    PLTdata$group <- groups$values
 
     plot <- ggplot2::ggplot(PLTdata, aes(
         x = .data$x, y = .data$y,
@@ -50,8 +55,10 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
             color = color, size = size, alpha = alpha
         ) +
         ggplot2::labs(
-            x = mds_axis_label(plotMDS, 1), y = mds_axis_label(plotMDS, 2)
-        )
+            x = mds_axis_label(plotMDS, 1), y = mds_axis_label(plotMDS, 2),
+            fill = groups$label
+        ) +
+        palette_scale(object, groups$variable, groups$values, palette)
 
     return(plot)
 }
@@ -228,8 +235,16 @@ log_normalized_counts <- function(screenR_Object, what = "This function") {
 #'     barcodes.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}.
-#' @param groups An optional vector, with one value for each sample, used to
-#'     fill the labels. By default the groups of the ScreenR object are used.
+#' @param groups What fills the labels: the name of a sample variable (for
+#'     example "Treatment" or "Day", see \code{\link{get_sample_table}}), or
+#'     a vector with one value for each sample. By default the groups of the
+#'     ScreenR object (Group).
+#' @param palette An optional vector of colors for the values of groups,
+#'     which replaces the palette of the object. By default, when groups is
+#'     the name of a sample variable (or NULL, for Group), the palette of the
+#'     object for that variable is used when it is set (see
+#'     \code{\link{get_palettes}}), otherwise the default colors of
+#'     ggplot2.
 #' @param components The two principal components to plot. Default c(1, 2).
 #' @param alpha The opacity of the labels, between 0 and 1. Default 0.8.
 #' @param size The size of the labels. Default 2.5.
@@ -246,17 +261,16 @@ log_normalized_counts <- function(screenR_Object, what = "This function") {
 #' # Second and third components
 #' plot_pca(object, components = c(2, 3))
 plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
-    alpha = 0.8, size = 2.5, color = "black") {
-    pca <- compute_pca(screenR_Object)
+    alpha = 0.8, size = 2.5, color = "black", palette = NULL) {
+    object <- update_screenr_object(screenR_Object)
+    pca <- compute_pca(object)
     if (length(components) != 2 || !is.numeric(components) ||
         any(components < 1) || any(components > ncol(pca$x))) {
         stop("components must be two numbers between 1 and ", ncol(pca$x),
             " (the number of principal components).")
     }
-    if (is.null(groups)) {
-        groups <- groups_of(update_screenr_object(screenR_Object))
-    }
-    if (length(groups) != nrow(pca$x)) {
+    groups <- sample_groups(object, groups)
+    if (length(groups$values) != nrow(pca$x)) {
         stop("groups must have one value for each sample (", nrow(pca$x),
             ").")
     }
@@ -267,7 +281,7 @@ plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
     data <- data.frame(
         Sample = rownames(pca$x),
         x = pca$x[, components[1]], y = pca$x[, components[2]],
-        group = groups
+        group = groups$values
     )
 
     ggplot2::ggplot(data, aes(x = .data$x, y = .data$y,
@@ -276,7 +290,37 @@ plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
             color = color, size = size, alpha = alpha
         ) +
         ggplot2::labs(x = axis_label(components[1]),
-            y = axis_label(components[2]), fill = "group")
+            y = axis_label(components[2]), fill = groups$label) +
+        palette_scale(object, groups$variable, groups$values, palette)
+}
+
+#' @title Groups of the Samples of a Plot
+#' @description Internal function used by \code{\link{plot_mds}} and
+#'     \code{\link{plot_pca}}: it returns the values that fill the labels of
+#'     the samples, and the sample variable they come from (whose palette is
+#'     used).
+#' @param object A ScreenR object.
+#' @param groups NULL (the Group of the samples), the name of a sample
+#'     variable, or a vector with one value for each sample.
+#' @return A list with values, variable (NULL for a vector) and label (the
+#'     title of the legend).
+#' @keywords internal
+sample_groups <- function(object, groups) {
+    col_data <- SummarizedExperiment::colData(object)
+    if (is.null(groups)) {
+        return(list(values = groups_of(object), variable = "Group",
+            label = "group"))
+    }
+    if (is.character(groups) && length(groups) == 1 && ncol(object) != 1) {
+        if (!groups %in% colnames(col_data)) {
+            stop("There is no sample variable '", groups, "'. The ",
+                "variables are: ", paste(setdiff(colnames(col_data),
+                "EffectiveLibSize"), collapse = ", "), ".", call. = FALSE)
+        }
+        return(list(values = col_data[[groups]], variable = groups,
+            label = groups))
+    }
+    list(values = groups, variable = NULL, label = "group")
 }
 
 

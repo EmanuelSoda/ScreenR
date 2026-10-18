@@ -16,7 +16,10 @@ compute_camera(xglm, DGEList, matrix_model, contrast, number_barcode = 3)
   \describe{
     \item{\code{matrix_model}}{The design matrix of the linear model, for example
 created with \code{\link{create_design_matrix}} (or with
-\code{\link[stats]{model.matrix}}).}
+\code{\link[stats]{model.matrix}}).
+Rows must be named with sample identifiers in object order (see
+\code{\link{create_design_matrix}}); mismatched names or order
+are errors. Named contrast coefficients are aligned to design columns.}
     \item{\code{contrast}}{The comparison to test: the name or index of a column of
 matrix_model, a numeric contrast vector (for example created with
 \code{\link{create_contrast}}) or a one-column matrix created with

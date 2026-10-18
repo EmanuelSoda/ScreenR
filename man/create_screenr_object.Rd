@@ -14,7 +14,8 @@ create_screenr_object(
   sample_table = NULL,
   sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment"),
   duplicate_barcodes = c("error", "sum", "first"),
-  duplicate_annotation = c("error", "first")
+  duplicate_annotation = c("error", "first"),
+  palettes = NULL
 )
 }
 \arguments{
@@ -60,6 +61,15 @@ copies) or "first" (keep the first copy).}
 \item{duplicate_annotation}{What to do when a barcode is annotated more
 than once with different values: "error" (default) or "first" (keep
 the first row).}
+
+\item{palettes}{Optional colors for the values of the sample variables
+(Sample, Day, Treatment, Group, Replicate or other columns of
+sample_table): a named list with one vector of colors for each
+variable, for example
+\code{list(Treatment = c(CTRL = "#1B9E77", TRT = "#D95F02"))}. All the
+plots that color the samples by one of these variables then use these
+colors, so that they are consistent across the analysis (see
+\code{\link{get_palettes}}).}
 }
 \value{
 A ScreenR object (class

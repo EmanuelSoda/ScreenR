@@ -13,7 +13,8 @@ find_time_hit(
   number_barcode = 3,
   direction = c("Down", "Up"),
   fdr = 0.05,
-  fdr_method = c("BH", "storey")
+  fdr_method = c("BH", "storey"),
+  time = NULL
 )
 }
 \arguments{
@@ -51,6 +52,12 @@ the genes with the given direction.}
 \item{fdr_method}{How the FDR is computed: "BH" (Benjamini-Hochberg, the
 default) or "storey" (Benjamini-Hochberg multiplied by the estimated
 proportion of genes without effect).}
+
+\item{time}{An optional named numeric vector with the real time of each
+time point of days (and of the days of the baseline samples), named by
+the values of the Day column, for example c(Time3 = 7, Time4 = 14).
+By default (NULL) the time points are numbered 0, 1, 2, ... in the
+order of days.}
 }
 \value{
 A tibble with one row for each hit in the requested direction and
@@ -58,7 +65,7 @@ A tibble with one row for each hit in the requested direction and
     PValue, FDR), where PValue is the one-sided p-value for the requested
     direction and FDR is computed from it, plus Log2FC: the median over the
     barcodes of the gene of c, the change of the treatment log2 fold change
-    per time point.
+    per time point (or per unit of time when time is given).
 }
 \description{
 Finds the genes whose depletion (or enrichment) caused by the
@@ -69,15 +76,28 @@ Finds the genes whose depletion (or enrichment) caused by the
 \details{
 The barcode counts are modelled with edgeR as
     log(abundance) = a + b * time + d * treated + c * time * treated,
-    where time is the index of the time point (0 for the first element of
-    days, 1 for the second, ...; the time points are treated as equally
-    spaced) and treated is 1 for the treated samples and 0 for the control
-    and baseline samples. The untreated samples and the treated samples
+    where time is the time of the sample and treated is 1 for the treated
+    samples and 0 for the control and baseline samples. By default the
+    time is the index of the time point (0 for the first element of days,
+    1 for the second, ...), so the time points are treated as equally
+    spaced; give their real times with the time argument (for example
+    days after selection) to fit the model against the actual time. The untreated samples and the treated samples
     each follow their own line; the coefficient c is the difference between
     the slopes, i.e. how much the treatment effect changes per time point.
     A constant treatment effect gives c = 0. The barcodes of each gene are
     then tested together with \code{\link[limma]{camera}}, as in
     \code{\link{find_camera_hit}}.
+
+    With real times, c (and the Log2FC column) is the change of the
+    treatment log2 fold change per unit of time. With two time points the
+    model is saturated: c is the difference between the treatment effects
+    at the two time points divided by the time between them, so the
+    p-values do not depend on the times. With three or more time points
+    that are not equally spaced, the times matter: the model assumes that
+    the treatment effect changes linearly with time, and real times fit
+    that line against the actual time instead of the order of the samples.
+    A treatment effect that does not change linearly (for example one that
+    reaches a plateau) is not described well by this model.
 }
 \examples{
 object <- get0("object", envir = asNamespace("ScreenR"))
@@ -85,6 +105,13 @@ get_sample_table(object)
 find_time_hit(object,
     treatment = "TRT", control = c("Time3", "Time4"),
     days = c("Time3", "Time4"), fdr = 1
+)
+
+# With the real times (days after selection): with two time points the
+# p-values are the same, and Log2FC is per day
+find_time_hit(object,
+    treatment = "TRT", control = c("Time3", "Time4"),
+    days = c("Time3", "Time4"), time = c(Time3 = 7, Time4 = 14), fdr = 1
 )
 }
 \seealso{

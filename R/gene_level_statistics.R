@@ -273,6 +273,9 @@ random_set_scores <- function(reference, size, n, statistic) {
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
+#'     Rows must be named with sample identifiers in object order (see
+#'     \code{\link{create_design_matrix}}); mismatched names or order
+#'     are errors. Named contrast coefficients are aligned to design columns.
 #' @param contrast The comparison to test: the name or index of a column of
 #'     matrix_model, a numeric contrast vector (for example created with
 #'     \code{\link{create_contrast}}) or a one-column matrix created with
@@ -297,6 +300,7 @@ random_set_scores <- function(reference, size, n, statistic) {
 #' head(statistics)
 compute_barcode_statistics <- function(screenR_Object, matrix_model,
     contrast) {
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
     contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
@@ -329,15 +333,28 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'     treated and the untreated samples must cover at least two time points.
 #' @details The barcode counts are modelled with edgeR as
 #'     log(abundance) = a + b * time + d * treated + c * time * treated,
-#'     where time is the index of the time point (0 for the first element of
-#'     days, 1 for the second, ...; the time points are treated as equally
-#'     spaced) and treated is 1 for the treated samples and 0 for the control
-#'     and baseline samples. The untreated samples and the treated samples
+#'     where time is the time of the sample and treated is 1 for the treated
+#'     samples and 0 for the control and baseline samples. By default the
+#'     time is the index of the time point (0 for the first element of days,
+#'     1 for the second, ...), so the time points are treated as equally
+#'     spaced; give their real times with the time argument (for example
+#'     days after selection) to fit the model against the actual time. The untreated samples and the treated samples
 #'     each follow their own line; the coefficient c is the difference between
 #'     the slopes, i.e. how much the treatment effect changes per time point.
 #'     A constant treatment effect gives c = 0. The barcodes of each gene are
 #'     then tested together with \code{\link[limma]{camera}}, as in
 #'     \code{\link{find_camera_hit}}.
+#'
+#'     With real times, c (and the Log2FC column) is the change of the
+#'     treatment log2 fold change per unit of time. With two time points the
+#'     model is saturated: c is the difference between the treatment effects
+#'     at the two time points divided by the time between them, so the
+#'     p-values do not depend on the times. With three or more time points
+#'     that are not equally spaced, the times matter: the model assumes that
+#'     the treatment effect changes linearly with time, and real times fit
+#'     that line against the actual time instead of the order of the samples.
+#'     A treatment effect that does not change linearly (for example one that
+#'     reaches a plateau) is not described well by this model.
 #' @param screenR_Object The ScreenR object obtained using
 #'     \code{\link{create_screenr_object}}, normalized with
 #'     \code{\link{normalize_data}}. The model uses its raw counts with its
@@ -349,6 +366,11 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'     \code{\link{get_sample_table}} for the control samples.
 #' @param days The time points to use, in temporal order, as in the Day column
 #'     of \code{\link{get_sample_table}}.
+#' @param time An optional named numeric vector with the real time of each
+#'     time point of days (and of the days of the baseline samples), named by
+#'     the values of the Day column, for example c(Time3 = 7, Time4 = 14).
+#'     By default (NULL) the time points are numbered 0, 1, 2, ... in the
+#'     order of days.
 #' @param baseline Optional value(s) of the Treatment column of samples taken
 #'     before the treatment (for example the first time points), which are
 #'     used as untreated samples.
@@ -371,7 +393,7 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'     PValue, FDR), where PValue is the one-sided p-value for the requested
 #'     direction and FDR is computed from it, plus Log2FC: the median over the
 #'     barcodes of the gene of c, the change of the treatment log2 fold change
-#'     per time point.
+#'     per time point (or per unit of time when time is given).
 #' @seealso \code{\link{find_camera_hit}}, \code{\link{summarise_hits}},
 #'     \code{\link{plot_barcode_trend}}, \code{\link{get_sample_table}}
 #' @concept find
@@ -383,9 +405,16 @@ compute_barcode_statistics <- function(screenR_Object, matrix_model,
 #'     treatment = "TRT", control = c("Time3", "Time4"),
 #'     days = c("Time3", "Time4"), fdr = 1
 #' )
+#'
+#' # With the real times (days after selection): with two time points the
+#' # p-values are the same, and Log2FC is per day
+#' find_time_hit(object,
+#'     treatment = "TRT", control = c("Time3", "Time4"),
+#'     days = c("Time3", "Time4"), time = c(Time3 = 7, Time4 = 14), fdr = 1
+#' )
 find_time_hit <- function(screenR_Object, treatment, control, days,
     baseline = NULL, number_barcode = 3, direction = c("Down", "Up"),
-    fdr = 0.05, fdr_method = c("BH", "storey")) {
+    fdr = 0.05, fdr_method = c("BH", "storey"), time = NULL) {
     direction <- match.arg(direction)
     fdr_method <- match.arg(fdr_method)
     if (length(days) < 2) {
@@ -402,7 +431,12 @@ find_time_hit <- function(screenR_Object, treatment, control, days,
     if (sum(treated == 0) == 0) {
         stop("No control or baseline samples found for the given days.")
     }
-    time <- match(info$Day, days) - 1
+    time <- if (is.null(time)) {
+        match(info$Day, days) - 1
+    } else {
+        # The real time of each sample, from its time point
+        encode_time(info, "Day", time)
+    }
     if (length(unique(time[treated == 1])) < 2) {
         stop("The treated samples must cover at least two time points.")
     }

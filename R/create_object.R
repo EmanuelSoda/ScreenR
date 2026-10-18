@@ -76,6 +76,14 @@
 #' @param duplicate_annotation What to do when a barcode is annotated more
 #'     than once with different values: "error" (default) or "first" (keep
 #'     the first row).
+#' @param palettes Optional colors for the values of the sample variables
+#'     (Sample, Day, Treatment, Group, Replicate or other columns of
+#'     sample_table): a named list with one vector of colors for each
+#'     variable, for example
+#'     \code{list(Treatment = c(CTRL = "#1B9E77", TRT = "#D95F02"))}. All the
+#'     plots that color the samples by one of these variables then use these
+#'     colors, so that they are consistent across the analysis (see
+#'     \code{\link{get_palettes}}).
 #' @importFrom rlang .data
 #' @importFrom methods new
 #' @importFrom tibble tibble
@@ -145,7 +153,8 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
                                   duplicate_barcodes = c("error", "sum",
                                       "first"),
                                   duplicate_annotation = c("error",
-                                      "first")) {
+                                      "first"),
+                                  palettes = NULL) {
     duplicate_barcodes <- match.arg(duplicate_barcodes)
     duplicate_annotation <- match.arg(duplicate_annotation)
     column_names <- list(Barcode = barcode_column, Gene = gene_column)
@@ -206,6 +215,9 @@ create_screenr_object <- function(table = NULL, annotation = NULL,
         sample_table = sample_table,
         column_names = column_names
     )
+    if (!is.null(palettes)) {
+        object <- set_palettes(object, palettes)
+    }
     return(object)
 }
 
