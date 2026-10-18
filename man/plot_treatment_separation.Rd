@@ -28,7 +28,10 @@ plot_treatment_separation(
 
 \item{genes}{Gene identifiers to show, in panel order.}
 
-\item{treatment, control}{The two distinct values of condition_column to compare.}
+\item{treatment, control}{The two distinct values of condition_column to compare.
+When condition_column and time_column are the same variable (a time
+course without treatment, such as a dropout screen), control is the
+reference time point and treatment one or more later time points.}
 
 \item{condition_column}{The colData variable identifying conditions (default
 "Treatment"). Names such as CTRL or TRT are not required.}
@@ -72,7 +75,13 @@ selected genes. Each biological sample is first summarized over its barcodes,
 then samples are averaged within condition and time point.
 }
 \details{
-Only stages with both conditions have a comparison. Other stages
+When condition_column and time_column are the same variable,
+    every selected time point (control and treatment) is on the x axis and
+    is compared with the control time point: the control is the reference,
+    at 0, and is not labelled. Points are colored by time point and joined
+    by a grey line.
+
+    Otherwise only stages with both conditions have a comparison. Other stages
     have missing values, never fabricated zero effects; lines break at missing
     comparisons. A single comparable stage can also be plotted.
     This is a descriptive ratio of arithmetic means, not the median barcode
@@ -86,6 +95,10 @@ Only stages with both conditions have a comparison. Other stages
 object <- get0("object", envir = asNamespace("ScreenR"))
 plot_treatment_separation(object, "Gene_42", treatment = "TRT",
     control = "Time3", time_column = "Day")
+
+# A time course: each time point compared with the first one
+plot_treatment_separation(object, "Gene_42", treatment = "Time4",
+    control = "Time3", condition_column = "Day", time_column = "Day")
 }
 \seealso{
 \code{\link{plot_trend}}, \code{\link{plot_barcode_heatmap}}

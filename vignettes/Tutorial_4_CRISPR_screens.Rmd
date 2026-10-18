@@ -413,17 +413,16 @@ compute_slope(object,
 
 `plot_treatment_separation()` shows how much a gene changes between two
 conditions, as the log2 ratio of their mean normalized counts labelled with
-the percentage difference. Here the two conditions are time points, day 18
-and T0 (`condition_column = "Day"`), and the stage of the comparison is the
-only treatment (`time_column = "Treatment"`), so there is a single point per
-gene:
+the percentage difference. Here the conditions are the time points
+(`condition_column = "Day"`, the same column as `time_column`), so every time
+point is compared with T0 and placed at its real day:
 
 ```{r treatment-separation, fig.height = 3.5}
 plot_treatment_separation(object, genes = c("POLR2L", "RPL14", "EGFP"),
-    treatment = "T18", control = "T0", condition_column = "Day",
-    time_column = "Treatment", nrow = 1
+    treatment = c("T3", "T18"), control = "T0", condition_column = "Day",
+    time = c(T0 = 0, T3 = 3, T18 = 18), nrow = 1
 ) +
-    labs(x = NULL)
+    labs(x = "Days")
 ```
 
 `plot_barcode_heatmap()` shows each sgRNA in each sample (log2 normalized

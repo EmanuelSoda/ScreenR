@@ -108,3 +108,41 @@ test_that("separation leaves themes to the caller", {
     expect_identical(ggplot2::theme_get(), ggplot2::theme_void())
     expect_true("plot_treatment_separation" %in% getNamespaceExports("ScreenR"))
 })
+
+test_that("a time course compares every time point with the control", {
+    counts <- rbind(c(100, 60, 50, 20, 10), c(80, 40, 50, 10, 30),
+        rep(100, 5), rep(100, 5))
+    samples <- c("T0", "T3_A", "T3_B", "T18_A", "T18_B")
+    colnames(counts) <- samples
+    object <- create_screenr_object(
+        data.frame(Barcode = paste0("b", 1:4), counts),
+        data.frame(Barcode = paste0("b", 1:4), Gene = rep(c("G1", "G2"), each = 2)),
+        sample_table = data.frame(Sample = samples,
+            Day = c("T0", "T3", "T3", "T18", "T18"), Treatment = "Untreated"),
+        palettes = list(Day = c(T0 = "grey", T3 = "purple", T18 = "orange")))
+    object <- normalize_data(object, "control", control_barcodes = "b4")
+    values <- get_normalized_count_table(object)
+    g1 <- colMeans(as.matrix(values[1:2, samples]))
+    p <- plot_treatment_separation(object, "G1", treatment = c("T3", "T18"),
+        control = "T0", condition_column = "Day", time_column = "Day")
+    expect_equal(p$scales$get_scales("x")$labels, c("T0", "T3", "T18"))
+    expect_equal(p$data$Ratio, c(1, mean(g1[2:3]) / g1[[1]],
+        mean(g1[4:5]) / g1[[1]]), ignore_attr = TRUE)
+    expect_equal(p$data$NTreatment, c(1L, 2L, 2L))
+    expect_equal(p$data$NControl, c(1L, 1L, 1L))
+    expect_true(is.na(p$data$Label[1]))
+    expect_identical(as.character(p$data$Condition), c("T0", "T3", "T18"))
+    expect_setequal(ggplot2::layer_data(p, 3)$colour, c("grey", "purple", "orange"))
+    expect_setequal(ggplot2::layer_data(p, 2)$colour, "grey60")
+    expect_equal(p$labels$y, "Log2 ratio to T0")
+    # Only the selected time points, at their real times
+    late <- plot_treatment_separation(object, "G1", treatment = "T18",
+        control = "T0", condition_column = "Day", time_column = "Day",
+        time = c(T0 = 0, T3 = 3, T18 = 18))
+    expect_equal(late$data$Time, c(0, 18))
+    expect_error(plot_treatment_separation(object, "G1", c("T3", "T0"), "T0",
+        condition_column = "Day", time_column = "Day"), "distinct")
+    # Several treatments are only accepted in a time course
+    expect_error(plot_treatment_separation(object, "G1", c("T3", "T18"), "T0",
+        condition_column = "Day", time_column = "Treatment"), "condition")
+})

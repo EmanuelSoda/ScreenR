@@ -1,5 +1,11 @@
 # ScreenR 1.15.16
 
+* `plot_treatment_separation()` plots a time course: when
+  `condition_column` and `time_column` are the same variable (for example
+  "Day" in a dropout screen), `treatment` can be several time points and each
+  is compared with the `control` time point, with every time point on the x
+  axis. Previously this found no shared stage and gave an error. With real
+  `time` the labels of the first and last time points are no longer clipped.
 * `compute_metrics(condition_column = "Day")` compares two time points
   (`control = "T0", treatment = "T18"`), for dropout screens without a
   treatment; `day` is then not used. The default compares a treatment and a
