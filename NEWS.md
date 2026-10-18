@@ -1,5 +1,18 @@
 # ScreenR 1.15.16
 
+* Tutorial 3 (finding and validating hits) uses the current functions: a
+  sample table and palettes at creation, `theme_set()`, TMM normalization,
+  FRY as the recommended test, the empirical null, `plot_common_hit()` with
+  any number of methods (UpSet plot), `find_consistent_hit()`,
+  `find_time_hit()` with real times, and `plot_trend(color_by = )`,
+  `plot_treatment_separation()` and `plot_barcode_heatmap()` to check the
+  candidates.
+* Tutorial 4 (CRISPR-Cas9 screens) uses palettes, `theme_set()`, the trend of
+  the reference genes over the real days, their sgRNAs with
+  `plot_barcode_heatmap()`, the overlap of the methods with
+  `plot_common_hit()`, and explains how the baseline of the normalization
+  affects the self-contained tests.
+
 * `plot_treatment_separation()` plots descriptive treatment/control abundance
   ratios for any two condition labels and configurable time metadata. It
   retains all selected stages, supports real times and sample subsets, and
