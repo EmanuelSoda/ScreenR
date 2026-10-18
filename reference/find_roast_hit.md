@@ -24,7 +24,8 @@ find_roast_hit(
   fdr = 0.05,
   seed = NULL,
   method = c("roast", "fry"),
-  fdr_method = c("BH", "storey")
+  fdr_method = c("BH", "storey"),
+  keep_all = FALSE
 )
 ```
 
@@ -45,6 +46,10 @@ find_roast_hit(
   The design matrix of the linear model, for example created with
   [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
   (or with [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)).
+  Rows must be named with sample identifiers in object order (see
+  [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md));
+  mismatched names or order are errors. Named contrast coefficients are
+  aligned to design columns.
 
 - contrast:
 
@@ -104,17 +109,27 @@ find_roast_hit(
   genes without effect, less conservative when many genes have an
   effect).
 
+- keep_all:
+
+  Keep genes with either observed direction (default FALSE). Their
+  PValue still tests the requested direction. Use keep_all = TRUE and
+  fdr = 1 to obtain complete tables for
+  [`combine_consistent_hits`](https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.md).
+  Direction records the observed direction; it does not change the
+  direction of the one-sided test.
+
 ## Value
 
-A tibble with one row for each hit in the requested direction and the
-columns returned by [`mroast`](https://rdrr.io/pkg/limma/man/roast.html)
-(Gene, NGenes, PropDown, PropUp, Direction, PValue, FDR, PValue.Mixed,
-FDR.Mixed) or by [`fry`](https://rdrr.io/pkg/limma/man/roast.html)
-(without PropDown and PropUp), plus Log2FC, the median log2 fold change
-of the barcodes of the gene. NGenes is the number of barcodes of the
-gene. PValue is the one-sided p-value for the requested direction and
-FDR is computed from it over all the genes; PValue.Mixed and FDR.Mixed
-are those of limma (a change in either direction).
+A tibble with one row for each hit (restricted to the observed requested
+direction unless keep_all = TRUE) and the columns returned by
+[`mroast`](https://rdrr.io/pkg/limma/man/roast.html) (Gene, NGenes,
+PropDown, PropUp, Direction, PValue, FDR, PValue.Mixed, FDR.Mixed) or by
+[`fry`](https://rdrr.io/pkg/limma/man/roast.html) (without PropDown and
+PropUp), plus Log2FC, the median log2 fold change of the barcodes of the
+gene. NGenes is the number of barcodes of the gene. PValue is the
+one-sided p-value for the requested direction and FDR is computed from
+it over all the genes; PValue.Mixed and FDR.Mixed are those of limma (a
+change in either direction).
 
 ## Details
 

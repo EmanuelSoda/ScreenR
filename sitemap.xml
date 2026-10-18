@@ -30,9 +30,13 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_annotation_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_barcode_threshold.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_count_table.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_design_columns.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_design_samples.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_library_annotation.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_palettes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_sample_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/check_screenr_object.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_camera.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/compute_data_table.html</loc></url>
@@ -62,6 +66,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_column.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.html</loc></url>
@@ -78,11 +83,14 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_groups.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_normalization.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_palettes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_replicates.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/hap1_annotation_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/hap1_count_table.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/hart_reference_genes.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/hit_membership.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/hit_sets.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/index.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/internal_accessors.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/is_legacy_screenr.html</loc></url>
@@ -97,7 +105,9 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/normalize_data.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/one_direction.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/one_sided_p.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/palette_scale.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/parse_sample_names.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.html</loc></url>
@@ -113,6 +123,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_pca.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_trend.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/random_set_scores.html</loc></url>
@@ -124,6 +135,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/resolve_duplicated_barcodes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/restore_random_state.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/run_camera.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/sample_groups.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/screenr_object-replace.html</loc></url>
@@ -141,5 +153,8 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/unique_gene_symbols.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/update_screenr_object.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/upset_plot.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/variable_values.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/venn_plot.html</loc></url>
 </urlset>
 

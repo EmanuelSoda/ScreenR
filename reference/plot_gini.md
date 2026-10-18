@@ -22,7 +22,12 @@ plot_gini(screenR_Object, palette = NULL, alpha = 1, legende_position = "none")
 
 - palette:
 
-  An optional vector of colors, one for each sample.
+  An optional vector of colors for the samples (named by sample, or one
+  for each sample in order), which replaces the palette of the object.
+  By default the Sample palette of the object is used when it is set
+  (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)),
+  otherwise the default colors of ggplot2.
 
 - alpha:
 

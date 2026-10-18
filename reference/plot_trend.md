@@ -2,9 +2,9 @@
 
 Plots, for the given genes, the mean normalized count of their barcodes
 in each sample (taken from the data table) against the time point of the
-sample, with a regression line. It shows whether a hit decreases (or
-increases) over time in the selected samples. The slope of the line is
-the one computed by
+sample, with a mean trajectory or regression line. It shows whether a
+hit decreases (or increases) over time in the selected samples. The
+slope of an ungrouped regression line is computed by
 [`compute_slope`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md)
 and used by
 [`filter_by_slope`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md).
@@ -24,7 +24,13 @@ plot_trend(
   ncol = NULL,
   scales = "free",
   time_column = "Day",
-  time = NULL
+  time = NULL,
+  color_by = NULL,
+  trend = NULL,
+  reference_groups = NULL,
+  palette = NULL,
+  connect_reference = FALSE,
+  highlight_difference = FALSE
 )
 ```
 
@@ -90,6 +96,46 @@ plot_trend(
   T18 = 18). By default the time points are equally spaced, in the order
   of the samples.
 
+- color_by:
+
+  An optional categorical colData variable, for example "Treatment", to
+  overlay a separate trend for each condition. NULL preserves the
+  original single trend per gene. Color and shape both identify
+  conditions; object palettes are used unless palette is given.
+
+- trend:
+
+  NULL (default), "mean", or "lm". NULL selects a line joining
+  time-point means when color_by is supplied, and the original linear
+  regression otherwise. Mean lines connect condition means across
+  biological samples; they do not connect individual cultures.
+
+- reference_groups:
+
+  Optional Treatment values to show as neutral reference points,
+  excluded from trend summaries and regressions. They must also be
+  selected in group_var. Shared baseline observations are drawn once,
+  not duplicated into both conditions.
+
+- palette:
+
+  Optional colors for the levels of color_by, overriding the stored
+  palette.
+
+- connect_reference:
+
+  With mean trajectories and color_by, connect the shared reference
+  sequence to each condition using its latest reference before that
+  condition's first observation (default FALSE). Reference observations
+  are still displayed once; these connecting segments are descriptive
+  and do not add independent samples or enter regressions.
+
+- highlight_difference:
+
+  Shade the gap between two condition means at their shared time points
+  (default FALSE, requires mean trajectories). This band shows the
+  observed separation, not a confidence interval.
+
 ## Value
 
 A ggplot object.
@@ -99,6 +145,14 @@ A ggplot object.
 Replicates of the same time point are drawn at the same time. By default
 the time points are numbered 1, 2, ... in the order of the samples
 (equally spaced); give time to place them at their real times.
+
+Each small point is one biological sample, summarized across its
+barcodes. Larger points on mean trajectories summarize those samples at
+each time point. The se argument is supported only for trend = "lm"; its
+band is the ordinary regression confidence band, not an interval for the
+edgeR/limma gene-level treatment effect. With color_by, each condition
+is fitted separately. Actual times are recommended when known. No theme
+is applied; choose appearance in user code with theme_set().
 
 ## See also
 

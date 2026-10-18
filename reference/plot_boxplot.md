@@ -17,7 +17,8 @@ plot_boxplot(
   ncol = NULL,
   fill_var = "Sample",
   type = "boxplot",
-  scales = "free"
+  scales = "free",
+  palette = NULL
 )
 ```
 
@@ -64,6 +65,14 @@ plot_boxplot(
 
   The scales of the panels: "free" (default), "fixed", "free_x" or
   "free_y".
+
+- palette:
+
+  An optional vector of colors for the values of fill_var, which
+  replaces the palette of the object. By default the palette of the
+  object for fill_var is used when it is set (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)),
+  otherwise the default colors of ggplot2.
 
 ## Value
 

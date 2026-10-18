@@ -43,6 +43,10 @@ filter_by_variance(
   The design matrix of the linear model, for example created with
   [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
   (or with [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html)).
+  Rows must be named with sample identifiers in object order (see
+  [`create_design_matrix`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md));
+  mismatched names or order are errors. Named contrast coefficients are
+  aligned to design columns.
 
 - variance:
 

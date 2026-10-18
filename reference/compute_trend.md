@@ -13,7 +13,9 @@ compute_trend(
   genes,
   group_var,
   time_column = "Day",
-  time = NULL
+  time = NULL,
+  color_by = NULL,
+  reference_groups = NULL
 )
 ```
 
@@ -40,6 +42,14 @@ compute_trend(
 
   NULL or a named numeric vector with the time of each time point.
 
+- color_by:
+
+  An optional colData column for condition trends.
+
+- reference_groups:
+
+  Treatment values excluded from trend fitting.
+
 ## Value
 
-A tibble with the columns Sample, Gene, Frequency and Time.
+A tibble with Sample, Gene, Frequency, Time, Condition and Reference.

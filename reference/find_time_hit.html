@@ -79,7 +79,8 @@
 <span>  number_barcode <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  direction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Down"</span>, <span class="st">"Up"</span><span class="op">)</span>,</span>
 <span>  fdr <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  fdr_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"storey"</span><span class="op">)</span></span>
+<span>  fdr_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BH"</span>, <span class="st">"storey"</span><span class="op">)</span>,</span>
+<span>  time <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -139,6 +140,14 @@ the genes with the given direction.</p></dd>
 default) or "storey" (Benjamini-Hochberg multiplied by the estimated
 proportion of genes without effect).</p></dd>
 
+
+<dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
+<dd><p>An optional named numeric vector with the real time of each
+time point of days (and of the days of the baseline samples), named by
+the values of the Day column, for example c(Time3 = 7, Time4 = 14).
+By default (NULL) the time points are numbered 0, 1, 2, ... in the
+order of days.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -147,21 +156,33 @@ proportion of genes without effect).</p></dd>
     PValue, FDR), where PValue is the one-sided p-value for the requested
     direction and FDR is computed from it, plus Log2FC: the median over the
     barcodes of the gene of c, the change of the treatment log2 fold change
-    per time point.</p>
+    per time point (or per unit of time when time is given).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The barcode counts are modelled with edgeR as
     log(abundance) = a + b * time + d * treated + c * time * treated,
-    where time is the index of the time point (0 for the first element of
-    days, 1 for the second, ...; the time points are treated as equally
-    spaced) and treated is 1 for the treated samples and 0 for the control
-    and baseline samples. The untreated samples and the treated samples
+    where time is the time of the sample and treated is 1 for the treated
+    samples and 0 for the control and baseline samples. By default the
+    time is the index of the time point (0 for the first element of days,
+    1 for the second, ...), so the time points are treated as equally
+    spaced; give their real times with the time argument (for example
+    days after selection) to fit the model against the actual time. The untreated samples and the treated samples
     each follow their own line; the coefficient c is the difference between
     the slopes, i.e. how much the treatment effect changes per time point.
     A constant treatment effect gives c = 0. The barcodes of each gene are
     then tested together with <code><a href="https://rdrr.io/pkg/limma/man/camera.html" class="external-link">camera</a></code>, as in
     <code><a href="find_camera_hit.html">find_camera_hit</a></code>.</p>
+<p>With real times, c (and the Log2FC column) is the change of the
+    treatment log2 fold change per unit of time. With two time points the
+    model is saturated: c is the difference between the treatment effects
+    at the two time points divided by the time between them, so the
+    p-values do not depend on the times. With three or more time points
+    that are not equally spaced, the times matter: the model assumes that
+    the treatment effect changes linearly with time, and real times fit
+    that line against the actual time instead of the order of the samples.
+    A treatment effect that does not change linearly (for example one that
+    reaches a plateau) is not described well by this model.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -209,6 +230,29 @@ proportion of genes without effect).</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Gene_292     10 Down      0.009<span style="text-decoration: underline;">29</span>  0.544 -<span style="color: #BB0000;">0.327</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Gene_370     10 Down      0.009<span style="text-decoration: underline;">73</span>  0.544 -<span style="color: #BB0000;">0.282</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Gene_325     10 Down      0.010<span style="text-decoration: underline;">2</span>   0.544 -<span style="color: #BB0000;">0.231</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 248 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># With the real times (days after selection): with two time points the</span></span></span>
+<span class="r-in"><span><span class="co"># p-values are the same, and Log2FC is per day</span></span></span>
+<span class="r-in"><span><span class="fu">find_time_hit</span><span class="op">(</span><span class="va">object</span>,</span></span>
+<span class="r-in"><span>    treatment <span class="op">=</span> <span class="st">"TRT"</span>, control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time3"</span>, <span class="st">"Time4"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    days <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time3"</span>, <span class="st">"Time4"</span><span class="op">)</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="fl">7</span>, Time4 <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>, fdr <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>3rows with all zero counts</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Zero sample variances detected, have been offset away from zero</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 258 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Gene     NGenes Direction   PValue   FDR  Log2FC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">661</span> 0.336 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Gene_372     12 Down      0.001<span style="text-decoration: underline;">66</span>  0.336 -<span style="color: #BB0000;">0.104</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Gene_422     10 Down      0.001<span style="text-decoration: underline;">89</span>  0.336 -<span style="color: #BB0000;">0.067</span><span style="color: #BB0000; text-decoration: underline;">5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Gene_87      10 Down      0.005<span style="text-decoration: underline;">68</span>  0.510 -<span style="color: #BB0000;">0.058</span><span style="color: #BB0000; text-decoration: underline;">8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Gene_412     10 Down      0.005<span style="text-decoration: underline;">72</span>  0.510 -<span style="color: #BB0000;">0.081</span><span style="color: #BB0000; text-decoration: underline;">3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Gene_419     10 Down      0.005<span style="text-decoration: underline;">73</span>  0.510 -<span style="color: #BB0000;">0.083</span><span style="color: #BB0000; text-decoration: underline;">1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Gene_349     10 Down      0.007<span style="text-decoration: underline;">05</span>  0.538 -<span style="color: #BB0000;">0.038</span><span style="color: #BB0000; text-decoration: underline;">6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Gene_292     10 Down      0.009<span style="text-decoration: underline;">29</span>  0.544 -<span style="color: #BB0000;">0.046</span><span style="color: #BB0000; text-decoration: underline;">8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Gene_370     10 Down      0.009<span style="text-decoration: underline;">73</span>  0.544 -<span style="color: #BB0000;">0.040</span><span style="color: #BB0000; text-decoration: underline;">4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Gene_325     10 Down      0.010<span style="text-decoration: underline;">2</span>   0.544 -<span style="color: #BB0000;">0.033</span><span style="color: #BB0000; text-decoration: underline;">0</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 248 more rows</span></span>
 </code></pre></div>
     </div>

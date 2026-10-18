@@ -8,7 +8,7 @@ time points.
 ## Usage
 
 ``` r
-plot_zscore_distribution(time_point_measure, alpha = 1)
+plot_zscore_distribution(time_point_measure, alpha = 1, palette = NULL)
 ```
 
 ## Arguments
@@ -23,6 +23,17 @@ plot_zscore_distribution(time_point_measure, alpha = 1)
 - alpha:
 
   The opacity of the densities, between 0 and 1. Default 1.
+
+- palette:
+
+  An optional vector of colors for the time points (named by the values
+  of the Day column, or one for each time point in order). The tables of
+  [`compute_metrics`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
+  do not carry the palettes of the object: to use the same colors as the
+  other plots, give the Day palette of the object,
+  `get_palettes(object)$Day` (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)).
+  By default the colors of ggplot2.
 
 ## Value
 
@@ -49,4 +60,12 @@ table2 <- compute_metrics(object,
 )
 
 plot_zscore_distribution(list(table1, table2), alpha = 0.5)
+
+
+# The same colors as the other plots of the object
+object <- set_palettes(object,
+    list(Day = c(T1 = "grey70", T2 = "grey40", Time3 = "#1B9E77",
+        Time4 = "#D95F02")))
+plot_zscore_distribution(list(table1, table2), alpha = 0.5,
+    palette = get_palettes(object)$Day)
 ```

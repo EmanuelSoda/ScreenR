@@ -21,7 +21,8 @@ plot_pca(
   components = c(1, 2),
   alpha = 0.8,
   size = 2.5,
-  color = "black"
+  color = "black",
+  palette = NULL
 )
 ```
 
@@ -34,8 +35,11 @@ plot_pca(
 
 - groups:
 
-  An optional vector, with one value for each sample, used to fill the
-  labels. By default the groups of the ScreenR object are used.
+  What fills the labels: the name of a sample variable (for example
+  "Treatment" or "Day", see
+  [`get_sample_table`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md)),
+  or a vector with one value for each sample. By default the groups of
+  the ScreenR object (Group).
 
 - components:
 
@@ -52,6 +56,15 @@ plot_pca(
 - color:
 
   The color of the label text. Default "black".
+
+- palette:
+
+  An optional vector of colors for the values of groups, which replaces
+  the palette of the object. By default, when groups is the name of a
+  sample variable (or NULL, for Group), the palette of the object for
+  that variable is used when it is set (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)),
+  otherwise the default colors of ggplot2.
 
 ## Value
 

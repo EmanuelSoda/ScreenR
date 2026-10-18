@@ -72,7 +72,9 @@
 <span>  <span class="va">genes</span>,</span>
 <span>  <span class="va">group_var</span>,</span>
 <span>  time_column <span class="op">=</span> <span class="st">"Day"</span>,</span>
-<span>  time <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  color_by <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reference_groups <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,10 +104,18 @@ each sample.</p></dd>
 <dd><p>NULL or a named numeric vector with the time of each time
 point.</p></dd>
 
+
+<dt id="arg-color-by">color_by<a class="anchor" aria-label="anchor" href="#arg-color-by"></a></dt>
+<dd><p>An optional colData column for condition trends.</p></dd>
+
+
+<dt id="arg-reference-groups">reference_groups<a class="anchor" aria-label="anchor" href="#arg-reference-groups"></a></dt>
+<dd><p>Treatment values excluded from trend fitting.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with the columns Sample, Gene, Frequency and Time.</p>
+    <p>A tibble with Sample, Gene, Frequency, Time, Condition and Reference.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

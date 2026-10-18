@@ -9,7 +9,12 @@ genes that lost at least one barcode are shown.
 ## Usage
 
 ``` r
-plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
+plot_barcode_lost_for_gene(
+  screenR_Object,
+  facet = TRUE,
+  samples,
+  palette = NULL
+)
 ```
 
 ## Arguments
@@ -27,6 +32,15 @@ plot_barcode_lost_for_gene(screenR_Object, facet = TRUE, samples)
 - samples:
 
   The names of the samples to plot (required).
+
+- palette:
+
+  An optional vector of colors for the samples (named by sample, or one
+  for each sample in order), which replaces the palette of the object.
+  By default the Sample palette of the object is used when it is set
+  (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)),
+  otherwise the default colors of ggplot2.
 
 ## Value
 

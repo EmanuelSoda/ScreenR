@@ -8,7 +8,7 @@ direction.
 ## Usage
 
 ``` r
-one_direction(result, direction, fdr_method)
+one_direction(result, direction, fdr_method, keep_all = FALSE)
 ```
 
 ## Arguments
@@ -26,7 +26,11 @@ one_direction(result, direction, fdr_method)
 
   "BH" or "storey".
 
+- keep_all:
+
+  Whether to retain both observed directions.
+
 ## Value
 
 The result with one-sided PValue and FDR, only for the genes in the
-requested direction.
+requested direction unless keep_all is TRUE.

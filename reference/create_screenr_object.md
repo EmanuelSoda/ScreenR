@@ -18,7 +18,8 @@ create_screenr_object(
   sample_table = NULL,
   sample_columns = c(Sample = "Sample", Day = "Day", Treatment = "Treatment"),
   duplicate_barcodes = c("error", "sum", "first"),
-  duplicate_annotation = c("error", "first")
+  duplicate_annotation = c("error", "first"),
+  palettes = NULL
 )
 ```
 
@@ -81,6 +82,16 @@ create_screenr_object(
 
   What to do when a barcode is annotated more than once with different
   values: "error" (default) or "first" (keep the first row).
+
+- palettes:
+
+  Optional colors for the values of the sample variables (Sample, Day,
+  Treatment, Group, Replicate or other columns of sample_table): a named
+  list with one vector of colors for each variable, for example
+  `list(Treatment = c(CTRL = "#1B9E77", TRT = "#D95F02"))`. All the
+  plots that color the samples by one of these variables then use these
+  colors, so that they are consistent across the analysis (see
+  [`get_palettes`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)).
 
 ## Value
 

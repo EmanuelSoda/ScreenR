@@ -80,7 +80,8 @@
 <span>  sample_table <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample_columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Sample <span class="op">=</span> <span class="st">"Sample"</span>, Day <span class="op">=</span> <span class="st">"Day"</span>, Treatment <span class="op">=</span> <span class="st">"Treatment"</span><span class="op">)</span>,</span>
 <span>  duplicate_barcodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"sum"</span>, <span class="st">"first"</span><span class="op">)</span>,</span>
-<span>  duplicate_annotation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"first"</span><span class="op">)</span></span>
+<span>  duplicate_annotation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"first"</span><span class="op">)</span>,</span>
+<span>  palettes <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -149,6 +150,17 @@ copies) or "first" (keep the first copy).</p></dd>
 <dd><p>What to do when a barcode is annotated more
 than once with different values: "error" (default) or "first" (keep
 the first row).</p></dd>
+
+
+<dt id="arg-palettes">palettes<a class="anchor" aria-label="anchor" href="#arg-palettes"></a></dt>
+<dd><p>Optional colors for the values of the sample variables
+(Sample, Day, Treatment, Group, Replicate or other columns of
+sample_table): a named list with one vector of colors for each
+variable, for example
+<code>list(Treatment = c(CTRL = "#1B9E77", TRT = "#D95F02"))</code>. All the
+plots that color the samples by one of these variables then use these
+colors, so that they are consistent across the analysis (see
+<code><a href="get_palettes.html">get_palettes</a></code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

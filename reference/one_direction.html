@@ -70,7 +70,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">one_direction</span><span class="op">(</span><span class="va">result</span>, <span class="va">direction</span>, <span class="va">fdr_method</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">one_direction</span><span class="op">(</span><span class="va">result</span>, <span class="va">direction</span>, <span class="va">fdr_method</span>, keep_all <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -89,11 +89,15 @@ Direction and PValue.</p></dd>
 <dt id="arg-fdr-method">fdr_method<a class="anchor" aria-label="anchor" href="#arg-fdr-method"></a></dt>
 <dd><p>"BH" or "storey".</p></dd>
 
+
+<dt id="arg-keep-all">keep_all<a class="anchor" aria-label="anchor" href="#arg-keep-all"></a></dt>
+<dd><p>Whether to retain both observed directions.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The result with one-sided PValue and FDR, only for the genes in
-        the requested direction.</p>
+        the requested direction unless keep_all is TRUE.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

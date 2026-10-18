@@ -83,7 +83,10 @@
 <dd><p>Arguments passed on to <code><a href="find_camera_hit.html">find_camera_hit</a></code></p><dl><dt><code>matrix_model</code></dt>
 <dd><p>The design matrix of the linear model, for example
 created with <code><a href="create_design_matrix.html">create_design_matrix</a></code> (or with
-<code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></code>).</p></dd>
+<code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></code>).
+Rows must be named with sample identifiers in object order (see
+<code><a href="create_design_matrix.html">create_design_matrix</a></code>); mismatched names or order
+are errors. Named contrast coefficients are aligned to design columns.</p></dd>
 
     <dt><code>contrast</code></dt>
 <dd><p>The comparison to test: the name or index of a column of

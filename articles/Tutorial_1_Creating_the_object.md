@@ -406,6 +406,7 @@ used directly with the Bioconductor tools that accept one:
 | `rowData(object)` | The annotation of each barcode (Gene, …) |
 | `colData(object)` | Sample, Day, Treatment and Group of each sample and, after [`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md), its effective library size (`EffectiveLibSize`) |
 | `metadata(object)$normalization` | How the counts were normalized (method, control barcodes, …) |
+| `metadata(object)$palettes` | Optional colors of the sample variables, used by all the plots (`create_screenr_object(palettes = )`, [`set_palettes()`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)) |
 
 These parts are the only storage of the object. The barcode identifiers
 are always text and are the row names of the counts, never a column of

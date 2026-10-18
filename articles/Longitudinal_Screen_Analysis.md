@@ -38,6 +38,17 @@ library(ggplot2)
 library(patchwork)
 ```
 
+ScreenR does not impose a look on its plots: they use the current
+ggplot2 theme, so a theme set once with
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html)
+applies to every plot of the analysis. Here we use a light theme with
+slightly larger text:
+
+``` r
+
+theme_set(theme_light(base_size = 12))
+```
+
 ## The experiment
 
 ### Design
@@ -158,6 +169,33 @@ the biological variability.
 
 ## The ScreenR object
 
+### Colors that mean the same thing in every plot
+
+When the object is created, a palette can be given for each sample
+variable (Treatment, Group, Day, Sample, …). Every plot of ScreenR that
+colors the samples by one of these variables then uses it, so that, for
+example, the treated cultures have the same color in all the figures.
+Here the controls are green and the treated cultures orange, darker at
+the later time point, and the two reference samples are grey:
+
+``` r
+
+group_colors <- c(T0 = "#CCCCCC", Puro = "#999999",
+    T3_CTRL = "#66C2A5", T3_TRT = "#FC8D62",
+    T4_CTRL = "#1B9E77", T4_TRT = "#D95F02")
+palettes <- list(
+    Treatment = c(Infected = "#CCCCCC", Baseline = "#999999",
+        CTRL = "#1B9E77", TRT = "#D95F02"),
+    Group = group_colors,
+    Day = c(T0 = "#CCCCCC", Puro = "#999999", T3 = "#7570B3",
+        T4 = "#E7298A"),
+    # Each sample takes the color of its group
+    Sample = setNames(group_colors[samples$Group], samples$Sample)
+)
+```
+
+### Creating the object
+
 ``` r
 
 object <- create_screenr_object(
@@ -166,19 +204,27 @@ object <- create_screenr_object(
     groups = factor(samples$Group,
         levels = c("T0", "Puro", "T3_CTRL", "T3_TRT", "T4_CTRL", "T4_TRT")),
     sample_table = samples[, c("Sample", "Day", "Treatment")],
-    replicates = samples$Replicate
+    replicates = samples$Replicate,
+    palettes = palettes
 )
 object
 #> class: screenr_object 
 #> dim: 5320 14 
-#> metadata(1): screenr_layout
+#> metadata(2): screenr_layout palettes
 #> assays(1): counts
 #> rownames(5320): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): T0_Infected Puro_Baseline ... T4_CTRL_2 T4_CTRL_3
 #> colData names(5): Sample Day Treatment Group Replicate
 #> normalization: none (run normalize_data())
+names(get_palettes(object))
+#> [1] "Treatment" "Group"     "Day"       "Sample"
 ```
+
+The palettes are checked when they are set (every value of the variable
+must have a color) and can be changed later with
+[`set_palettes()`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md).
+A palette given directly to a plot replaces the one of the object.
 
 The ScreenR object is a `SummarizedExperiment`, the standard
 Bioconductor container for assays with row and column annotation. Each
@@ -285,12 +331,12 @@ caused a bottleneck that would make the counts unreliable.
 
 The replicates of a condition should be more similar to each other than
 to the other samples. This and the following plots compare
-**normalized** counts, so the counts are normalized first (the choice of
-the normalization is discussed in the next section).
+**normalized** counts, so the counts are normalized first, with the TMM
+method (see the next section).
 
 ``` r
 
-object <- normalize_data(object, method = "cpm")
+object <- normalize_data(object, method = "tmm")
 ```
 
 ``` r
@@ -350,49 +396,46 @@ heterogeneous, which limits the power to detect treatment effects.
 ## Normalization
 
 Samples are sequenced at different depths, so counts are compared after
-dividing each sample by an **effective library size**. ScreenR offers
-three choices in
-[`normalize_data()`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md):
-
-- `"cpm"`: the total number of reads of the sample;
-- `"tmm"`: the total corrected with the TMM factors of edgeR, which are
-  more robust when many barcodes are depleted in some samples;
-- `"control"`: the reads of control barcodes known to be without effect
-  (this library has none).
-
-The normalization matters when many barcodes change in the same samples,
-because they change the total. A simple check is to compare the
-effective library sizes of the two methods:
+dividing each sample by an **effective library size**. This analysis
+uses the **TMM** normalization of edgeR
+(`normalize_data(method = "tmm")`): the effective library size of a
+sample is its total number of reads multiplied by a TMM factor, which
+corrects the total when many barcodes are depleted or enriched in some
+samples, as happens over the growth of the cultures and with the
+treatment.
 
 ``` r
 
-tmm <- normalize_data(object, method = "tmm")
-ratio <- get_normalization(object)$effective_library_size /
-    get_normalization(tmm)$effective_library_size
-round(range(ratio), 3)
-#> [1] 0.982 1.023
+normalization <- get_normalization(object)
+normalization$method
+#> [1] "tmm"
+round(normalization$norm_factors, 3)
+#>   T0_Infected Puro_Baseline      T3_TRT_1      T3_TRT_2      T3_TRT_3 
+#>         1.017         1.003         1.002         1.013         1.002 
+#>     T3_CTRL_1     T3_CTRL_2     T3_CTRL_3      T4_TRT_1      T4_TRT_2 
+#>         1.017         1.018         1.008         0.985         0.983 
+#>      T4_TRT_3     T4_CTRL_1     T4_CTRL_2     T4_CTRL_3 
+#>         0.977         0.995         0.994         0.986
 ```
 
-The two methods differ by at most 2% in any sample: the treatment and
-the growth do not change the composition of the library enough to bias
-the totals, so we keep counts per million. With a strong compositional
-imbalance, TMM (or control barcodes) would be the right choice.
+The TMM factors stay close to 1, but they differ between the time
+points: the factors correct the totals for the shRNAs that drop out over
+time.
 
 **One normalization for the whole analysis.** ScreenR records the
 normalization in the object (the effective library sizes in the colData,
-the method in the metadata) and never changes the raw counts. Every
-result below uses this same normalization: the normalized counts of the
-plots, the descriptive fold changes and the statistical models. The
-models use the raw counts, as negative binomial models require, with the
-effective library sizes as offsets:
+the method and the TMM factors in the metadata) and never changes the
+raw counts. Every result below uses this same normalization: the
+normalized counts of the plots, the descriptive fold changes and the
+statistical models. The models use the raw counts, as negative binomial
+models require, with the effective library sizes as offsets, so the TMM
+factors are applied once:
 
 ``` r
 
-get_normalization(object)$method
-#> [1] "cpm"
 dge <- create_edger_obj(object)
 all.equal(dge$samples$lib.size * dge$samples$norm.factors,
-    unname(get_normalization(object)$effective_library_size))
+    unname(normalization$effective_library_size))
 #> [1] TRUE
 ```
 
@@ -494,12 +537,12 @@ head(tests$T4)
 #> # A tibble: 6 × 5
 #>   Gene     NBarcodes Log2FC   PValue    FDR
 #>   <chr>        <int>  <dbl>    <dbl>  <dbl>
-#> 1 Gene_412        10 -0.325 0.000110 0.0254
-#> 2 Gene_422        10 -0.433 0.000133 0.0254
-#> 3 Gene_173        10 -0.515 0.000188 0.0254
-#> 4 Gene_15         10 -0.325 0.000218 0.0254
-#> 5 Gene_296        10 -0.508 0.000266 0.0254
-#> 6 Gene_349        10 -0.182 0.000285 0.0254
+#> 1 Gene_422        10 -0.419 0.000179 0.0318
+#> 2 Gene_173        10 -0.500 0.000190 0.0318
+#> 3 Gene_412        10 -0.311 0.000218 0.0318
+#> 4 Gene_15         10 -0.310 0.000305 0.0318
+#> 5 Gene_349        10 -0.167 0.000312 0.0318
+#> 6 Gene_296        10 -0.491 0.000357 0.0318
 ```
 
 The FDR column corrects for testing all the genes (Benjamini-Hochberg):
@@ -513,8 +556,8 @@ sapply(tests, function(result) c(
     `FDR <= 0.10` = sum(result$FDR <= 0.10)
 ))
 #>             T3 T4 Average Fitness_CTRL Fitness_TRT
-#> FDR <= 0.05  0  7       0           24          38
-#> FDR <= 0.10  0 12       1           36          83
+#> FDR <= 0.05  0  7       0           18          33
+#> FDR <= 0.10  0 11       1           29          48
 ```
 
 ### How much signal is there?
@@ -547,13 +590,17 @@ with_effect <- function(result) {
 }
 round(sapply(tests[c("T3", "T4", "Average")], with_effect), 2)
 #>      T3      T4 Average 
-#>    0.00    0.21    0.10
+#>    0.00    0.18    0.09
 ```
 
-About 0% of the genes respond to the treatment at T3 and 21% at T4: **at
+About 0% of the genes respond to the treatment at T3 and 18% at T4: **at
 T3 there is no detectable treatment effect**, while at T4 a group of
 genes changes. The same is visible in the distribution of the barcode
-log2 fold changes (treated vs control), which is wider at T4:
+log2 fold changes (treated vs control), which is wider at T4. The tables
+of
+[`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
+do not carry the palettes of the object, so the Day palette is given to
+the plot:
 
 ``` r
 
@@ -563,14 +610,15 @@ metrics <- list(
     T4 = compute_metrics(object, control = "CTRL", treatment = "TRT",
         day = "T4")
 )
-plot_zscore_distribution(metrics, alpha = 0.5)
+plot_zscore_distribution(metrics, alpha = 0.5,
+    palette = get_palettes(object)$Day)
 ```
 
 ![](Longitudinal_Screen_Analysis_files/figure-html/zscore-distribution-1.png)
 
 ## Treatment-specific hits
 
-### At each time point
+### At each time point, with several methods
 
 ``` r
 
@@ -580,65 +628,139 @@ hits_t4
 #> # A tibble: 7 × 5
 #>   Gene     NBarcodes Log2FC   PValue    FDR
 #>   <chr>        <int>  <dbl>    <dbl>  <dbl>
-#> 1 Gene_412        10 -0.325 0.000110 0.0254
-#> 2 Gene_422        10 -0.433 0.000133 0.0254
-#> 3 Gene_173        10 -0.515 0.000188 0.0254
-#> 4 Gene_15         10 -0.325 0.000218 0.0254
-#> 5 Gene_296        10 -0.508 0.000266 0.0254
-#> 6 Gene_349        10 -0.182 0.000285 0.0254
-#> 7 Gene_322        10 -0.393 0.000442 0.0337
+#> 1 Gene_422        10 -0.419 0.000179 0.0318
+#> 2 Gene_173        10 -0.500 0.000190 0.0318
+#> 3 Gene_412        10 -0.311 0.000218 0.0318
+#> 4 Gene_15         10 -0.310 0.000305 0.0318
+#> 5 Gene_349        10 -0.167 0.000312 0.0318
+#> 6 Gene_296        10 -0.491 0.000357 0.0318
+#> 7 Gene_322        10 -0.380 0.000533 0.0407
 ```
 
-At 5% FDR, 0 genes are depleted at T3 and 7 at T4.
+At 5% FDR, FRY finds 0 depleted genes at T3 and 7 at T4.
 
-**Are the T4 hits robust to the choice of the test?** CAMERA (a
-competitive test: is the gene more depleted than the other genes?) and
-the gene-level Z-score test with an empirical null (see the vignette
-[Choosing the reference of the gene-level
-test](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.md))
-look at the same barcodes with different assumptions.
-[`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
-combines them:
+ScreenR has other gene-level tests, which look at the same barcodes with
+different assumptions. Running them all on the same contrasts tells how
+much a hit depends on the choice of the method:
+
+- **FRY** and **ROAST**
+  ([`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md))
+  are *self-contained* tests: are the shRNAs of the gene depleted,
+  relative to the variability between replicates? ROAST computes its
+  p-values by random rotations, FRY with a fast approximation of them.
+- **CAMERA**
+  ([`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md))
+  is a *competitive* test: is the gene more depleted than the other
+  genes of the library, allowing for the correlation between the shRNAs
+  of a gene?
+- The **gene-level Z-score test**
+  ([`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md))
+  compares the mean Z-score of the shRNAs of a gene with a null
+  distribution: random sets of barcodes (the default) or an empirical
+  null estimated from all the genes (see [Choosing the reference of the
+  gene-level
+  test](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.md)).
+  The Z-scores come from
+  [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md),
+  which tests every barcode with the same edgeR model, so they include
+  the replicate variability. It is also a competitive test.
 
 ``` r
 
-statistics_t4 <- compute_barcode_statistics(object, design, contrasts$T4)
-agreement <- summarise_hits(list(
-    FRY = tests$T4,
-    CAMERA = find_camera_hit(object, design, contrasts$T4, fdr = 1),
-    Zscore = find_gene_zscore_hit(statistics_t4, reference = "empirical",
-        fdr = 1)
-), fdr = 0.05)
+run_methods <- function(contrast) {
+    statistics <- compute_barcode_statistics(object, design, contrast)
+    list(
+        FRY = find_roast_hit(object, design, contrast, method = "fry",
+            direction = "Down", fdr = 1),
+        ROAST = find_roast_hit(object, design, contrast, method = "roast",
+            nrot = 9999, seed = 1, direction = "Down", fdr = 1),
+        CAMERA = find_camera_hit(object, design, contrast,
+            direction = "Down", fdr = 1),
+        `Z-score, empirical null` = find_gene_zscore_hit(statistics,
+            reference = "empirical", fdr = 1),
+        `Z-score, random barcodes` = find_gene_zscore_hit(statistics,
+            n_permutations = 1e5, seed = 1, fdr = 1)
+    )
+}
+methods_t3 <- run_methods(contrasts$T3)
+methods_t4 <- run_methods(contrasts$T4)
+sapply(list(T3 = methods_t3, T4 = methods_t4), function(results) {
+    sapply(results, function(result) sum(result$FDR <= 0.05))
+})
+#>                          T3 T4
+#> FRY                       0  7
+#> ROAST                     0  7
+#> CAMERA                    0  0
+#> Z-score, empirical null   0  0
+#> Z-score, random barcodes  0  0
+```
+
+[`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
+shows how the hits of the methods overlap. With more than three methods
+it draws an UpSet plot: each column is a combination of methods (the
+dots below), and its bar counts the genes found by exactly those
+methods; the bars on the left are the hits of each method.
+
+``` r
+
+plot_common_hit(methods_t4, fdr = 0.05,
+    title = "Depleted genes at T4 (5% FDR)")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/upset-t4-1.png)
+
+At T4 the two self-contained tests agree exactly, while the competitive
+tests find no gene at 5% FDR. At a looser threshold the overlap shows
+which genes come closest to the competitive tests as well:
+
+``` r
+
+plot_common_hit(methods_t4, fdr = 0.25,
+    title = "Depleted genes at T4 (25% FDR)")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/upset-t4-relaxed-1.png)
+
+At T3 no method finds any depleted gene:
+
+``` r
+
+plot_common_hit(methods_t3, fdr = 0.05,
+    title = "Depleted genes at T3 (5% FDR)")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/upset-t3-1.png)
+
+[`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
+puts the FDR of every method in one table:
+
+``` r
+
+agreement <- summarise_hits(methods_t4, fdr = 0.05)
 agreement %>%
     filter(Gene %in% hits_t4$Gene) %>%
     select(Gene, NMethods, starts_with("FDR")) %>%
-    knitr::kable(digits = 4)
+    knitr::kable(digits = 3)
 ```
 
-| Gene     | NMethods | FDR_FRY | FDR_CAMERA | FDR_Zscore |
-|:---------|---------:|--------:|-----------:|-----------:|
-| Gene_173 |        1 |  0.0254 |     0.0941 |     0.0637 |
-| Gene_422 |        1 |  0.0254 |     0.0941 |     0.0995 |
-| Gene_296 |        1 |  0.0254 |     0.0969 |     0.1721 |
-| Gene_15  |        1 |  0.0254 |     0.2264 |     0.1452 |
-| Gene_349 |        1 |  0.0254 |     0.2708 |     0.3174 |
-| Gene_412 |        1 |  0.0254 |     0.3037 |     0.5310 |
-| Gene_322 |        1 |  0.0337 |     0.7162 |     0.3174 |
+| Gene | NMethods | FDR_FRY | FDR_ROAST | FDR_CAMERA | FDR_Z-score, empirical null | FDR_Z-score, random barcodes |
+|:---|---:|---:|---:|---:|---:|---:|
+| Gene_173 | 2 | 0.032 | 0.042 | 0.082 | 0.069 | 0.133 |
+| Gene_422 | 2 | 0.032 | 0.037 | 0.082 | 0.111 | 0.179 |
+| Gene_296 | 2 | 0.032 | 0.037 | 0.082 | 0.149 | 0.199 |
+| Gene_15 | 2 | 0.032 | 0.037 | 0.225 | 0.149 | 0.199 |
+| Gene_349 | 2 | 0.032 | 0.037 | 0.261 | 0.307 | 0.367 |
+| Gene_412 | 2 | 0.032 | 0.037 | 0.288 | 0.521 | 0.580 |
+| Gene_322 | 2 | 0.041 | 0.042 | 0.726 | 0.307 | 0.367 |
 
-[`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md)
-tests every barcode with the same edgeR model (quasi-likelihood F-test),
-so the Z-scores used here already include the replicate variability.
-
-The T4 hits are called by FRY only: none reaches 5% FDR with CAMERA or
-with the Z-score test, and a few are close (CAMERA FDR about 0.1). The
-tests ask different questions. FRY asks whether the shRNAs of the gene
-are depleted, relative to the variability between replicates; CAMERA and
-the Z-score test ask whether the gene is more depleted than the other
-genes of the library. The effects of the T4 hits are moderate (median
-log2 fold changes between -0.51 and -0.18), so they are significant as
-depletions but do not stand out against all the other genes. They are
-**candidates with moderate effects** that need independent validation,
-not unambiguous hits.
+The two kinds of tests ask different questions. FRY and ROAST call a
+gene when its shRNAs are depleted more than the replicates vary; CAMERA
+and the Z-score tests call it only when it is more depleted than the
+other genes of the library. The effects at T4 are moderate (median log2
+fold changes between -0.5 and -0.17): they are reproducible depletions,
+but they do not stand out against all the other genes. These are
+**candidates with moderate effects**; the next sections collect the
+evidence needed to choose which of them to validate.
 
 ### Across the two time points: three different questions
 
@@ -649,8 +771,9 @@ T4 answers none of them exactly.
 1.  **Is the gene depleted at T3 and at T4?** This is tested by the
     *intersection-union test*: the gene is called only if both one-sided
     tests reject, so its p-value is the larger of the two (p =
-    max(p_(T3), p_(T4))), corrected for the number of genes. It is the
-    formal test of reproducibility across time points.
+    max(p_(T3), p_(T4))), corrected for the number of genes. It tests
+    depletion at every specified time point; it does not establish equal
+    effect sizes or replication in an independent experiment.
 2.  **Is the gene depleted on average over the two time points?** The
     `Average` contrast tests the mean of the two treatment effects. It
     can be significant because of one time point only.
@@ -660,31 +783,38 @@ T4 answers none of them exactly.
     [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
     (next section).
 
+[`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md)
+runs this test directly, retaining all gene-level one-sided p-values
+before combining them and adjusting across genes. FRY, ROAST, CAMERA and
+gene-level Z-score tests are supported; the interpretation follows the
+chosen method. For complete precomputed tables of one-sided raw
+p-values, use
+[`combine_consistent_hits()`](https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.md).
+Missing genes or p-values are errors, and filtered hit lists must not be
+used. Both functions offer BH correction or the more conservative BY
+correction for arbitrary dependence across genes.
+
 ``` r
 
-genes <- tests$T3$Gene
-both <- tibble(
-    Gene = genes,
-    Log2FC_T3 = tests$T3$Log2FC[match(genes, tests$T3$Gene)],
-    Log2FC_T4 = tests$T4$Log2FC[match(genes, tests$T4$Gene)],
-    P_T3 = tests$T3$PValue[match(genes, tests$T3$Gene)],
-    P_T4 = tests$T4$PValue[match(genes, tests$T4$Gene)]
-) %>%
-    mutate(
-        PValue_both = pmax(P_T3, P_T4),
-        FDR_both = p.adjust(PValue_both, method = "BH"),
-        FDR_average = tests$Average$FDR[match(Gene, tests$Average$Gene)]
-    ) %>%
-    arrange(PValue_both)
+consistent <- find_consistent_hit(object, design,
+    contrasts = contrasts[c("T3", "T4")], method = "fry",
+    direction = "Down", fdr = 1)
+# Keep all genes for the following summaries and classification.
+genes <- consistent$Gene
+both <- consistent %>%
+    rename(P_T3 = PValue_T3, P_T4 = PValue_T4,
+        PValue_both = PValue, FDR_both = FDR) %>%
+    mutate(FDR_average = tests$Average$FDR[match(Gene, tests$Average$Gene)])
 head(both, 5)
-#> # A tibble: 5 × 8
-#>   Gene     Log2FC_T3 Log2FC_T4    P_T3     P_T4 PValue_both FDR_both FDR_average
-#>   <chr>        <dbl>     <dbl>   <dbl>    <dbl>       <dbl>    <dbl>       <dbl>
-#> 1 Gene_173   -0.222    -0.515  0.0121  0.000188      0.0121    0.999      0.0692
-#> 2 Gene_457   -0.134     0.0677 0.00710 0.0280        0.0280    0.999      0.171 
-#> 3 Gene_394   -0.0935   -0.128  0.0366  0.0274        0.0366    0.999      0.238 
-#> 4 Gene_121   -0.0867   -0.177  0.0381  0.00609       0.0381    0.999      0.171 
-#> 5 Gene_86    -0.346    -0.173  0.00938 0.0461        0.0461    0.999      0.177
+#> # A tibble: 5 × 10
+#>   Gene     Direction NContrasts PValue_both FDR_both    P_T3 Log2FC_T3     P_T4
+#>   <chr>    <chr>          <int>       <dbl>    <dbl>   <dbl>     <dbl>    <dbl>
+#> 1 Gene_173 Down               2      0.0134    0.999 0.0134    -0.211  0.000190
+#> 2 Gene_457 Down               2      0.0402    0.999 0.00938   -0.121  0.0402  
+#> 3 Gene_121 Down               2      0.0506    0.999 0.0506    -0.0741 0.00860 
+#> 4 Gene_394 Down               2      0.0580    0.999 0.0580    -0.0813 0.0474  
+#> 5 Gene_293 Down               2      0.0601    0.999 0.0601    -0.134  0.0451  
+#> # ℹ 2 more variables: Log2FC_T4 <dbl>, FDR_average <dbl>
 ```
 
 ``` r
@@ -727,12 +857,12 @@ head(time_hits)
 #> # A tibble: 6 × 6
 #>   Gene     NGenes Direction   PValue   FDR Log2FC
 #>   <chr>     <dbl> <fct>        <dbl> <dbl>  <dbl>
-#> 1 Gene_296     10 Down      0.000608 0.321 -0.676
-#> 2 Gene_372     12 Down      0.00158  0.321 -0.729
-#> 3 Gene_422     10 Down      0.00180  0.321 -0.473
-#> 4 Gene_412     10 Down      0.00487  0.485 -0.569
-#> 5 Gene_419     10 Down      0.00508  0.485 -0.582
-#> 6 Gene_87      10 Down      0.00571  0.485 -0.412
+#> 1 Gene_296     10 Down      0.000596 0.318 -0.675
+#> 2 Gene_372     12 Down      0.00156  0.323 -0.727
+#> 3 Gene_422     10 Down      0.00181  0.323 -0.470
+#> 4 Gene_412     10 Down      0.00480  0.483 -0.568
+#> 5 Gene_419     10 Down      0.00510  0.483 -0.579
+#> 6 Gene_87      10 Down      0.00566  0.483 -0.409
 sum(time_hits$FDR <= 0.05)
 #> [1] 0
 ```
@@ -745,13 +875,44 @@ time_hits %>%
 #> # A tibble: 7 × 4
 #>   Gene     Log2FC   PValue   FDR
 #>   <chr>     <dbl>    <dbl> <dbl>
-#> 1 Gene_296 -0.676 0.000608 0.321
-#> 2 Gene_422 -0.473 0.00180  0.321
-#> 3 Gene_412 -0.569 0.00487  0.485
-#> 4 Gene_349 -0.270 0.00636  0.485
-#> 5 Gene_15  -0.306 0.0426   0.861
-#> 6 Gene_322 -0.355 0.0530   0.861
-#> 7 Gene_173 -0.497 0.0587   0.870
+#> 1 Gene_296 -0.675 0.000596 0.318
+#> 2 Gene_422 -0.470 0.00181  0.323
+#> 3 Gene_412 -0.568 0.00480  0.483
+#> 4 Gene_349 -0.267 0.00633  0.483
+#> 5 Gene_15  -0.303 0.0425   0.860
+#> 6 Gene_322 -0.352 0.0528   0.865
+#> 7 Gene_173 -0.494 0.0594   0.881
+```
+
+By default
+[`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
+numbers the time points 0, 1, 2, …, as if they were equally spaced. With
+the real times (here we assume 7 and 14 days after the end of the
+selection, the usual schedule of this protocol), the `Log2FC` column
+becomes the change of the treatment effect per day. With two time points
+the model is saturated, so the p-values do not change; with three or
+more time points that are not equally spaced, the real times fit the
+change of the treatment effect against the actual time and do change the
+results.
+
+``` r
+
+time_hits_days <- find_time_hit(object, treatment = "TRT", control = "CTRL",
+    days = c("T3", "T4"), time = c(T3 = 7, T4 = 14), direction = "Down",
+    fdr = 1)
+same_genes <- match(time_hits$Gene, time_hits_days$Gene)
+all.equal(time_hits_days$PValue[same_genes], time_hits$PValue)
+#> [1] TRUE
+head(select(time_hits_days, Gene, Log2FC, PValue))
+#> # A tibble: 6 × 3
+#>   Gene      Log2FC   PValue
+#>   <chr>      <dbl>    <dbl>
+#> 1 Gene_296 -0.0964 0.000596
+#> 2 Gene_372 -0.104  0.00156 
+#> 3 Gene_422 -0.0672 0.00181 
+#> 4 Gene_412 -0.0812 0.00480 
+#> 5 Gene_419 -0.0826 0.00510 
+#> 6 Gene_87  -0.0585 0.00566
 ```
 
 No gene passes the FDR threshold. 4 of the 7 T4 hits have p-values below
@@ -786,19 +947,19 @@ essential <- fitness %>%
     filter(FDR_CTRL <= 0.05, FDR_TRT <= 0.05, FDR_treatment > 0.05) %>%
     arrange(Log2FC_CTRL)
 nrow(essential)
-#> [1] 16
+#> [1] 13
 head(essential, 5)
 #> # A tibble: 5 × 6
 #>   Gene     Log2FC_CTRL  FDR_CTRL Log2FC_TRT   FDR_TRT FDR_treatment
 #>   <chr>          <dbl>     <dbl>      <dbl>     <dbl>         <dbl>
-#> 1 Gene_364       -3.66 0.0000158     -4.11  0.0000152         0.193
-#> 2 Gene_372       -2.34 0.0000726     -2.62  0.0000225         0.224
-#> 3 Gene_323       -1.59 0.00352       -1.42  0.00180           0.641
-#> 4 Gene_374       -1.58 0.000497      -1.52  0.000214          0.268
-#> 5 Gene_80        -1.52 0.0215        -0.647 0.0229            0.944
+#> 1 Gene_364       -3.65 0.0000188     -4.07  0.0000185         0.248
+#> 2 Gene_372       -2.32 0.0000864     -2.59  0.0000266         0.302
+#> 3 Gene_323       -1.57 0.00404       -1.39  0.00217           0.777
+#> 4 Gene_374       -1.57 0.000634      -1.49  0.000308          0.370
+#> 5 Gene_80        -1.50 0.0234        -0.616 0.0292            0.999
 ```
 
-16 genes are depleted in both conditions with no significant treatment
+13 genes are depleted in both conditions with no significant treatment
 effect: they behave like essential genes. They are not
 treatment-specific hits, even though they are among the most depleted
 genes of the screen. For the two most depleted ones the treated cultures
@@ -830,8 +991,8 @@ dplyr::count(classes, Class)
 #> # A tibble: 3 × 2
 #>   Class                         n
 #>   <chr>                     <int>
-#> 1 Fitness (both conditions)    16
-#> 2 Not significant             511
+#> 1 Fitness (both conditions)    13
+#> 2 Not significant             514
 #> 3 Treatment: T4                 7
 ```
 
@@ -877,133 +1038,31 @@ treated and control cultures alike, so treated and control samples of
 the same time point differ little even though both are strongly depleted
 over time.
 
-## Evidence for the candidate hits
+## From candidates to the hits to validate
 
-A gene-level p-value is only as good as the shRNAs behind it. For the
-top treatment-specific hit and the top essential gene, we look at the
-reagents and at the samples.
+A gene-level FDR is the starting point, not the end of the analysis.
+Before spending time on validation, each candidate is checked against
+the questions that make a hit credible:
 
-``` r
+1.  **Is it found by more than one method?** Here: FRY and ROAST, the
+    two self-contained tests, both at 5% FDR.
+2.  **Is it supported by several shRNAs?** The number of shRNAs of the
+    gene that are depleted on their own (barcode p-value below 0.05 in
+    [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md)),
+    and the number of shRNAs that behave very differently from the
+    others of the gene
+    ([`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)),
+    which may point to off-target effects.
+3.  **Does it depend on a single sample?** The FRY FDR without T4_TRT_1,
+    the treated replicate that resembles the controls.
+4.  **Is it treatment-specific?** Whether the gene is also lost in the
+    control cultures (fitness contrast against the baseline): then the
+    treatment enhances a loss of fitness rather than creating a new
+    dependency.
+5.  **How does it behave over time?** Its effect at T3 and the p-value
+    of the interaction, a stronger depletion at T4 than at T3.
 
-top_hit <- hits_t4$Gene[1]
-top_essential <- essential$Gene[1]
-c(hit = top_hit, essential = top_essential)
-#>        hit  essential 
-#> "Gene_412" "Gene_364"
-```
-
-### Every shRNA of the gene
-
-[`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
-ranks all the barcodes of the library by their log2 fold change in a
-contrast and marks the barcodes of the gene: most of them should be on
-the depleted side.
-
-``` r
-
-plot_barcode_hit(object, design, contrasts$T4, gene = top_hit) +
-    plot_annotation(caption = "Treated vs control at T4")
-```
-
-![](Longitudinal_Screen_Analysis_files/figure-html/barcode-hit-1.png)
-
-``` r
-
-plot_barcode_hit(object, design, contrasts$T3, gene = top_hit) +
-    plot_annotation(caption = "Treated vs control at T3")
-```
-
-![](Longitudinal_Screen_Analysis_files/figure-html/barcode-hit-2.png)
-
-At T4 half of the shRNAs of the gene are among the most depleted
-barcodes of the library and the others are close to zero, as often
-happens with shRNAs of different knockdown efficiency; at T3 they lean
-slightly towards enrichment.
-[`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
-follows each shRNA from T3 to T4 (log2 fold change of treated vs
-control):
-
-``` r
-
-plot_barcode_trend(metrics, genes = top_hit)[[1]]
-```
-
-![](Longitudinal_Screen_Analysis_files/figure-html/barcode-trend-1.png)
-
-Several shRNAs go from no effect at T3 to a clear depletion at T4, while
-the others stay close to zero: the depletion of the gene appears between
-the two time points and is carried by its most effective shRNAs.
-
-[`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
-lists the shRNAs that behave very differently from the others of their
-gene, for example because of off-target effects (a deviation of more
-than 3 median absolute deviations from the median of the gene):
-
-``` r
-
-find_discordant_barcodes(metrics$T4, threshold = 3) %>%
-    filter(Gene %in% c(top_hit, hits_t4$Gene))
-#> # A tibble: 3 × 5
-#>   Barcode Gene     Log2FC GeneLog2FC Deviation
-#>   <fct>   <chr>     <dbl>      <dbl>     <dbl>
-#> 1 13838   Gene_322  -2.01     -0.386     -3.98
-#> 2 13246   Gene_322  -1.82     -0.386     -3.51
-#> 3 994     Gene_349  -1.61     -0.180     -3.21
-```
-
-None of the shRNAs of the top hit is discordant. Gene_322 has two shRNAs
-much more depleted than its other shRNAs: its call depends more on a few
-reagents and deserves more caution.
-
-### Every sample
-
-The normalized counts of the shRNAs in every sample show the difference
-between a treatment-specific hit and an essential gene directly:
-
-``` r
-
-plot_boxplot(object, genes = c(top_hit, top_essential),
-    group_var = c("Infected", "Baseline", "CTRL", "TRT"),
-    fill_var = "Treatment", ncol = 2) +
-    scale_y_continuous(transform = "log1p",
-        breaks = c(0, 10, 100, 1000, 10000)) +
-    scale_x_discrete(guide = guide_axis(angle = 60))
-```
-
-![](Longitudinal_Screen_Analysis_files/figure-html/boxplots-1.png)
-
-The essential gene decreases from the baseline in control and treated
-cultures alike. The treatment-specific hit stays close to its baseline
-level in the controls, while in the treated cultures it is lower at T4.
-
-[`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-summarizes the same data as a line over the stages of the screen,
-separately for the control and the treated cultures (the stages are
-taken as equally spaced; give their real times with `time` if known):
-
-The trend lines (mean normalized count of the shRNAs of the gene in each
-sample) show a slight decrease of the treatment-specific hit also in the
-controls, and a larger one in the treated cultures, which end lower at
-T4: the treatment effect adds to a small decrease shared by all the
-cultures.
-
-``` r
-
-trend <- function(condition) {
-    plot_trend(object, genes = c(top_hit, top_essential),
-        group_var = c("Infected", "Baseline", condition), ncol = 2) +
-        ggtitle(condition)
-}
-trend("CTRL") / trend("TRT")
-```
-
-![](Longitudinal_Screen_Analysis_files/figure-html/trends-1.png)
-
-## Sensitivity analysis
-
-The quality control showed that T4_TRT_1 resembles the T3 samples.
-Refitting the model without it shows whether the conclusions depend on
-this sample:
+### Sensitivity to one replicate
 
 ``` r
 
@@ -1011,43 +1070,302 @@ without <- object[, colnames(object) != "T4_TRT_1"]
 design_without <- create_design_matrix(without)
 t4_without <- find_roast_hit(without, design_without,
     create_contrast(design_without, "T4_TRT", "T4_CTRL"),
-    method = "fry", direction = "Down", fdr = 0.05)
-t3_without <- find_roast_hit(without, design_without,
-    create_contrast(design_without, "T3_TRT", "T3_CTRL"),
-    method = "fry", direction = "Down", fdr = 0.05)
-c(T3 = nrow(t3_without), T4 = nrow(t4_without),
-    `T4 hits also found with all samples` =
-        sum(t4_without$Gene %in% hits_t4$Gene))
-#>                                  T3                                  T4 
-#>                                   0                                  10 
-#> T4 hits also found with all samples 
-#>                                   6
+    method = "fry", direction = "Down", fdr = 1)
+c(`T4 hits without T4_TRT_1` = sum(t4_without$FDR <= 0.05),
+    `of which also hits with all the samples` =
+        sum(t4_without$Gene[t4_without$FDR <= 0.05] %in% hits_t4$Gene))
+#>                T4 hits without T4_TRT_1 of which also hits with all the samples 
+#>                                       4                                       2
 ```
 
-Without T4_TRT_1 there are still no hits at T3 and a similar set of hits
-at T4, which includes most of the hits found with all the samples. The
-subset keeps the normalization of the full object: the retained samples
-keep their effective library sizes.
+Without T4_TRT_1, 4 genes pass 5% FDR at T4, 2 of them among the 7 hits
+found with all the samples, and 6 of these 7 hits keep an FDR of at most
+10%. With one treated replicate fewer at T4 the test has less power:
+most hits fall just above the threshold rather than disappearing. The
+direction of the evidence does not depend on this replicate, but its
+strength does, which is one more reason to validate the hits
+independently. (The subset keeps the normalization of the full object:
+its samples keep their effective library sizes.)
+
+### The evidence for each candidate
+
+``` r
+
+statistics_t4 <- compute_barcode_statistics(object, design, contrasts$T4)
+discordant <- find_discordant_barcodes(metrics$T4, threshold = 3)
+fdr_of <- function(result, genes) result$FDR[match(genes, result$Gene)]
+evidence <- tibble(Gene = hits_t4$Gene) %>%
+    mutate(
+        Log2FC_T4 = tests$T4$Log2FC[match(Gene, tests$T4$Gene)],
+        Log2FC_T3 = tests$T3$Log2FC[match(Gene, tests$T3$Gene)],
+        FDR_FRY = fdr_of(methods_t4$FRY, Gene),
+        FDR_ROAST = fdr_of(methods_t4$ROAST, Gene),
+        FDR_CAMERA = fdr_of(methods_t4$CAMERA, Gene),
+        shRNAs = vapply(Gene, function(gene) {
+            sum(statistics_t4$Gene == gene)
+        }, integer(1)),
+        Depleted_shRNAs = vapply(Gene, function(gene) {
+            sum(statistics_t4$Gene == gene & statistics_t4$Log2FC < 0 &
+                statistics_t4$PValue < 0.05)
+        }, integer(1)),
+        Discordant_shRNAs = vapply(Gene, function(gene) {
+            sum(discordant$Gene == gene)
+        }, integer(1)),
+        FDR_without_T4_TRT_1 = fdr_of(t4_without, Gene),
+        FDR_fitness_CTRL = tests$Fitness_CTRL$FDR[
+            match(Gene, tests$Fitness_CTRL$Gene)],
+        P_interaction = time_hits$PValue[match(Gene, time_hits$Gene)]
+    )
+```
+
+The candidates are ranked with explicit rules, written once in the code
+so that they can be read, discussed and changed:
+
+- **Priority 1**: found by FRY and ROAST, supported by at least three
+  shRNAs depleted on their own, with no discordant shRNA;
+- **Priority 2**: found by FRY and ROAST, but supported by fewer shRNAs;
+- **Not recommended**: the call relies on discordant shRNAs (more
+  discordant shRNAs than shRNAs depleted on their own).
+
+Caveats that do not change the priority but must be kept in mind are
+listed next to each gene.
+
+``` r
+
+evidence <- evidence %>%
+    mutate(
+        Priority = factor(case_when(
+            Discordant_shRNAs > Depleted_shRNAs ~ "Not recommended",
+            FDR_FRY <= 0.05 & FDR_ROAST <= 0.05 & Depleted_shRNAs >= 3 &
+                Discordant_shRNAs == 0 ~ "Priority 1",
+            FDR_FRY <= 0.05 & FDR_ROAST <= 0.05 ~ "Priority 2",
+            TRUE ~ "Not recommended"
+        ), levels = c("Priority 1", "Priority 2", "Not recommended")),
+        Caveats = paste0(
+            ifelse(FDR_without_T4_TRT_1 > 0.05,
+                "depends on T4_TRT_1; ", ""),
+            ifelse(FDR_fitness_CTRL <= 0.05,
+                "also lost in the controls (fitness); ", ""),
+            ifelse(P_interaction > 0.05, "no clear increase from T3; ", ""),
+            ifelse(Depleted_shRNAs < 3,
+                paste(Depleted_shRNAs, "shRNA(s) depleted on their own; "),
+                "")
+        ),
+        Caveats = sub("; $", "", Caveats)
+    ) %>%
+    arrange(Priority, FDR_FRY, Log2FC_T4)
+evidence %>%
+    select(Gene, Priority, Log2FC_T3, Log2FC_T4, FDR_FRY, FDR_ROAST,
+        FDR_CAMERA, Depleted_shRNAs, shRNAs, Discordant_shRNAs,
+        FDR_without_T4_TRT_1, P_interaction) %>%
+    knitr::kable(digits = 3)
+```
+
+| Gene | Priority | Log2FC_T3 | Log2FC_T4 | FDR_FRY | FDR_ROAST | FDR_CAMERA | Depleted_shRNAs | shRNAs | Discordant_shRNAs | FDR_without_T4_TRT_1 | P_interaction |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Gene_173 | Priority 1 | -0.211 | -0.500 | 0.032 | 0.042 | 0.082 | 5 | 10 | 0 | 0.052 | 0.059 |
+| Gene_422 | Priority 1 | -0.043 | -0.419 | 0.032 | 0.037 | 0.082 | 4 | 10 | 0 | 0.028 | 0.002 |
+| Gene_296 | Priority 2 | 0.051 | -0.491 | 0.032 | 0.037 | 0.082 | 2 | 10 | 0 | 0.106 | 0.001 |
+| Gene_412 | Priority 2 | 0.213 | -0.311 | 0.032 | 0.037 | 0.288 | 2 | 10 | 0 | 0.052 | 0.005 |
+| Gene_15 | Priority 2 | -0.076 | -0.310 | 0.032 | 0.037 | 0.225 | 2 | 10 | 0 | 0.052 | 0.043 |
+| Gene_349 | Priority 2 | -0.034 | -0.167 | 0.032 | 0.037 | 0.261 | 2 | 10 | 1 | 0.028 | 0.006 |
+| Gene_322 | Priority 2 | -0.111 | -0.380 | 0.041 | 0.042 | 0.726 | 2 | 10 | 2 | 0.052 | 0.053 |
+
+## Hits to validate
+
+``` r
+
+to_validate <- filter(evidence, Priority == "Priority 1")
+also_consider <- filter(evidence, Priority == "Priority 2")
+evidence %>%
+    select(Gene, Priority, Log2FC_T4, FDR_FRY, Caveats) %>%
+    knitr::kable(digits = 3)
+```
+
+| Gene | Priority | Log2FC_T4 | FDR_FRY | Caveats |
+|:---|:---|---:|---:|:---|
+| Gene_173 | Priority 1 | -0.500 | 0.032 | depends on T4_TRT_1; no clear increase from T3 |
+| Gene_422 | Priority 1 | -0.419 | 0.032 |  |
+| Gene_296 | Priority 2 | -0.491 | 0.032 | depends on T4_TRT_1; also lost in the controls (fitness); 2 shRNA(s) depleted on their own |
+| Gene_412 | Priority 2 | -0.311 | 0.032 | depends on T4_TRT_1; also lost in the controls (fitness); 2 shRNA(s) depleted on their own |
+| Gene_15 | Priority 2 | -0.310 | 0.032 | depends on T4_TRT_1; 2 shRNA(s) depleted on their own |
+| Gene_349 | Priority 2 | -0.167 | 0.032 | 2 shRNA(s) depleted on their own |
+| Gene_322 | Priority 2 | -0.380 | 0.041 | depends on T4_TRT_1; no clear increase from T3; 2 shRNA(s) depleted on their own |
+
+**The hits that should be validated first are Gene_173, Gene_422.** They
+are depleted in the treated cultures compared with the controls at T4 by
+the two self-contained tests at 5% FDR, with median log2 fold changes
+between -0.5 and -0.42, and each of them is supported by at least three
+shRNAs depleted on their own and by no discordant shRNA. Their caveats
+are in the table: a gene that is also lost in the controls is a
+treatment-enhanced loss of fitness rather than a new dependency created
+by the treatment, and a gene that depends on T4_TRT_1 should be
+confirmed in a new experiment before anything else. Gene_422 has no
+caveat: it is the most robust candidate of the screen.
+
+Gene_296, Gene_412, Gene_15, Gene_349, Gene_322 are also depleted at T4
+by both tests, but fewer of their shRNAs support them: they are
+second-line candidates. Genes marked “Not recommended” rely on shRNAs
+that behave unlike the others of the gene.
+
+None of these genes is depleted at T3: these are **late treatment
+effects**, which validation experiments should measure at the later time
+point.
+
+### The hits at T3 and at T4
+
+The normalized counts of the shRNAs of the hits to validate in the
+control and treated cultures of the two time points show the treatment
+effect directly: at T4 the treated cultures have lower counts than the
+controls, while at T3 the difference is small (the gene with a caveat on
+the time trend is the one already slightly lower at T3). The shRNAs of a
+gene have very different abundances, so each box spans a wide range: the
+comparison is between treated and control samples of the same time
+point.
+
+``` r
+
+plot_boxplot(object, genes = to_validate$Gene,
+    group_var = c("CTRL", "TRT"), fill_var = "Treatment",
+    ncol = nrow(to_validate)) +
+    scale_y_continuous(transform = "log1p",
+        breaks = c(0, 10, 100, 1000, 10000)) +
+    scale_x_discrete(guide = guide_axis(angle = 60))
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-boxplots-1.png)
+
+[`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
+follows each shRNA from T3 to T4 (log2 fold change of treated vs
+control). In each gene several shRNAs go from no effect at T3 to a
+depletion at T4:
+
+``` r
+
+plot_barcode_trend(metrics, genes = to_validate$Gene,
+    n_col = nrow(to_validate))
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-barcode-trend-1.png)
+
+[`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
+places the shRNAs of a gene among all the barcodes of the library,
+ranked by their log2 fold change. For the first hit to validate, at T3
+and at T4:
+
+``` r
+
+top_hit <- to_validate$Gene[1]
+plot_barcode_hit(object, design, contrasts$T3, gene = top_hit) +
+    plot_annotation(caption = "Treated vs control at T3")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-barcode-hit-1.png)
+
+``` r
+
+plot_barcode_hit(object, design, contrasts$T4, gene = top_hit) +
+    plot_annotation(caption = "Treated vs control at T4")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-barcode-hit-2.png)
+
+At T3 the shRNAs of the gene are spread over the ranking; at T4 several
+of them are among the most depleted barcodes of the library.
+
+Overlaying the control and treatment in each gene panel shows the
+complete screen: T0, the post-selection baseline, T3 and T4. Grey
+crosses are the shared reference observations, displayed once. The grey
+line connects the references; each colored trajectory starts from the
+last shared reference and then joins that condition’s sample means. The
+reference is used only as a graphical anchor, not as an extra replicate.
+Small colored points are biological samples, each summarized across the
+gene’s shRNAs.
+
+``` r
+
+top_essential <- essential$Gene[1]
+trend_genes <- c(to_validate$Gene, top_essential)
+combined_trends <- plot_trend(object, genes = trend_genes,
+    group_var = c("Infected", "Baseline", "CTRL", "TRT"),
+    color_by = "Treatment", trend = "mean",
+    reference_groups = c("Infected", "Baseline"), connect_reference = TRUE,
+    highlight_difference = TRUE, ncol = 2, point_size = 1.8) +
+    labs(x = "Screen stage (equally spaced)")
+combined_trends
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-trends-1.png)
+
+The shaded band highlights the observed difference between control and
+treatment means at their shared time points. It is not a confidence
+band. All stages are included, with equally spaced positions rather than
+assumed elapsed times. `trend = "lm"` instead fits separate regressions;
+its optional `se` band describes that regression, not gene-level
+treatment-effect uncertainty. These plotting functions apply no theme:
+the
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html)
+above controls their appearance.
+
+Large changes shared by both cultures can hide a moderate treatment
+effect on the abundance scale. This companion view shows the
+treated/control ratio of the sample means at T3 and T4, with percentage
+differences labeled. There is no treated/control comparison before the
+cultures split, so T0 and Puro have no effect points. These are
+descriptive ratios, not the median shRNA log2 fold changes or p-values
+reported by the gene-level tests. The exported
+[`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+function accepts any two condition names, custom `condition_column` and
+`time_column` metadata, an optional named `time` mapping and a `samples`
+selection. It can also display one comparable stage. For screens with
+multiple cell lines or doses, select a single experimental stratum with
+`samples` before averaging replicates.
+
+``` r
+
+plot_treatment_separation(object, genes = trend_genes,
+    treatment = "TRT", control = "CTRL", ncol = 2) +
+    labs(x = "Screen stage (equally spaced)")
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-separation-1.png)
+
+A barcode heatmap complements the gene summaries. Each row is one shRNA
+and each column one biological sample, including both references. Here
+log2 normalized abundance is centered on each shRNA’s mean over the
+displayed samples: red and blue mean higher and lower abundance relative
+to that shRNA’s own average. Colors do not represent significance, and
+rows are reagents rather than independent biological replicates.
+
+``` r
+
+plot_barcode_heatmap(object, genes = trend_genes,
+    center = "barcode", column_group = "Day") +
+    scale_x_discrete(guide = guide_axis(angle = 60))
+```
+
+![](Longitudinal_Screen_Analysis_files/figure-html/validate-heatmap-1.png)
 
 ## Conclusions
 
 - The screen is of good quality: deep sequencing, no bottleneck at
   infection or selection, and consistent replicates. The treated
   replicates at T4 are heterogeneous (T4_TRT_1 is close to the
-  controls), which does not change the conclusions but limits the power.
+  controls): without it the T4 hits are weaker, most of them just above
+  5% FDR, so their strength depends on this replicate.
 - The strongest depletion in the screen is a **loss of fitness** shared
-  by control and treated cultures: 16 genes behave like essential genes
-  and are not treatment-specific hits.
+  by control and treated cultures: 13 genes behave like essential genes
+  and are not treatment hits.
 - **Treatment-specific depletion appears at T4**, not at T3: 7 genes are
-  depleted in treated compared with control cultures at T4 (5% FDR),
-  with moderate effects, while no gene is depleted at T3 and none at
-  both time points. They should be described as late treatment effects,
-  not as effects constant over time.
-- These candidates are supported by several shRNAs and by the replicate
-  variability (FRY), and some of them also by a trend towards a stronger
-  effect at T4, but not by the competitive tests (CAMERA, Z-score): they
-  are moderate effects to validate independently, for example with
-  individual shRNAs or another screen.
+  depleted in treated compared with control cultures at T4 by the
+  self-contained tests (5% FDR), with moderate effects; no gene is
+  depleted at T3, and none at both time points.
+- **Hits to validate: Gene_173, Gene_422**, with Gene_296, Gene_412,
+  Gene_15, Gene_349, Gene_322 as second-line candidates. They should be
+  validated as late effects of the treatment (at the later time point),
+  with individual shRNAs or other reagents against the same genes; the
+  competitive tests do not single them out, so independent confirmation
+  is essential.
 
 ## Limitations
 
@@ -1055,10 +1373,13 @@ The analysis above uses only methods whose statistical formulation fits
 the question. Some questions of a longitudinal design are not fully
 covered by ScreenR at present:
 
-- **No built-in test of reproducibility across time points.** The
-  intersection-union test is computed here from the per-time-point
-  results; ScreenR has no function that does it, or that classifies
-  genes as above.
+- **Consistency does not establish equal effects or independent
+  replication.**
+  [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md)
+  tests a directional effect at every specified time point. It inherits
+  the assumptions of the per-contrast tests and does not account for
+  repeated cultures unless the underlying design does so. The
+  classification shown above is specific to this analysis.
 - **No equivalence test.** ScreenR can show that a treatment effect
   changes over time (interaction), but not that it is the same at two
   time points: that needs an equivalence test with a margin chosen by
@@ -1130,16 +1451,15 @@ sessionInfo()
 #> [19] htmltools_0.5.9     sass_0.4.10         yaml_2.3.12        
 #> [22] pillar_1.11.1       pkgdown_2.2.1       jquerylib_0.1.4    
 #> [25] tidyr_1.3.2         DelayedArray_0.38.2 cachem_1.1.0       
-#> [28] limma_3.68.5        abind_1.4-8         nlme_3.1-169       
-#> [31] tidyselect_1.2.1    locfit_1.5-9.12     digest_0.6.39      
-#> [34] stringi_1.8.9       purrr_1.2.2         bookdown_0.48      
-#> [37] splines_4.6.1       labeling_0.4.3      fastmap_1.2.0      
-#> [40] grid_4.6.1          cli_3.6.6           SparseArray_1.12.3 
-#> [43] magrittr_2.0.5      S4Arrays_1.12.1     utf8_1.2.6         
-#> [46] withr_3.0.3         edgeR_4.10.6        scales_1.4.0       
-#> [49] rmarkdown_2.32      XVector_0.52.0      otel_0.2.0         
-#> [52] ragg_1.5.2          evaluate_1.0.5      knitr_1.52         
-#> [55] mgcv_1.9-4          rlang_1.3.0         glue_1.8.1         
-#> [58] BiocManager_1.30.27 jsonlite_2.0.0      R6_2.6.1           
-#> [61] systemfonts_1.3.2   fs_2.1.0
+#> [28] limma_3.68.5        abind_1.4-8         tidyselect_1.2.1   
+#> [31] locfit_1.5-9.12     digest_0.6.39       stringi_1.8.9      
+#> [34] purrr_1.2.2         bookdown_0.48       labeling_0.4.3     
+#> [37] fastmap_1.2.0       grid_4.6.1          cli_3.6.6          
+#> [40] SparseArray_1.12.3  magrittr_2.0.5      S4Arrays_1.12.1    
+#> [43] utf8_1.2.6          withr_3.0.3         edgeR_4.10.6       
+#> [46] scales_1.4.0        rmarkdown_2.32      XVector_0.52.0     
+#> [49] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
+#> [52] knitr_1.52          rlang_1.3.0         glue_1.8.1         
+#> [55] BiocManager_1.30.27 jsonlite_2.0.0      R6_2.6.1           
+#> [58] systemfonts_1.3.2   fs_2.1.0
 ```

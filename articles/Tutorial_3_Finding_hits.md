@@ -83,21 +83,21 @@ that are not valid R names are changed (`T1/T2` becomes `T1.T2`).
 
 design <- create_design_matrix(object)
 design
-#>    T1.T2 Time3_CTRL Time3_TRT Time4_CTRL Time4_TRT
-#> 1      1          0         0          0         0
-#> 2      1          0         0          0         0
-#> 3      0          0         1          0         0
-#> 4      0          0         1          0         0
-#> 5      0          0         1          0         0
-#> 6      0          1         0          0         0
-#> 7      0          1         0          0         0
-#> 8      0          1         0          0         0
-#> 9      0          0         0          0         1
-#> 10     0          0         0          0         1
-#> 11     0          0         0          0         1
-#> 12     0          0         0          1         0
-#> 13     0          0         0          1         0
-#> 14     0          0         0          1         0
+#>              T1.T2 Time3_CTRL Time3_TRT Time4_CTRL Time4_TRT
+#> Time1            1          0         0          0         0
+#> Time2            1          0         0          0         0
+#> Time3_TRT_A      0          0         1          0         0
+#> Time3_TRT_B      0          0         1          0         0
+#> Time3_TRT_C      0          0         1          0         0
+#> Time3_CTRL_A     0          1         0          0         0
+#> Time3_CTRL_B     0          1         0          0         0
+#> Time3_CTRL_C     0          1         0          0         0
+#> Time4_TRT_A      0          0         0          0         1
+#> Time4_TRT_B      0          0         0          0         1
+#> Time4_TRT_C      0          0         0          0         1
+#> Time4_CTRL_A     0          0         0          1         0
+#> Time4_CTRL_B     0          0         0          1         0
+#> Time4_CTRL_C     0          0         0          1         0
 #> attr(,"assign")
 #> [1] 1 1 1 1 1
 #> attr(,"contrasts")
@@ -710,30 +710,29 @@ sessionInfo()
 #> [19] compiler_4.6.1              farver_2.1.2               
 #> [21] stringr_1.6.0               textshaping_1.0.5          
 #> [23] statmod_1.5.2               Seqinfo_1.2.0              
-#> [25] ggvenn_0.1.19               htmltools_0.5.9            
-#> [27] sass_0.4.10                 yaml_2.3.12                
-#> [29] pillar_1.11.1               pkgdown_2.2.1              
-#> [31] jquerylib_0.1.4             tidyr_1.3.2                
-#> [33] DelayedArray_0.38.2         cachem_1.1.0               
-#> [35] limma_3.68.5                abind_1.4-8                
-#> [37] nlme_3.1-169                tidyselect_1.2.1           
-#> [39] locfit_1.5-9.12             digest_0.6.39              
-#> [41] stringi_1.8.9               purrr_1.2.2                
-#> [43] bookdown_0.48               splines_4.6.1              
-#> [45] labeling_0.4.3              fastmap_1.2.0              
-#> [47] grid_4.6.1                  cli_3.6.6                  
-#> [49] SparseArray_1.12.3          magrittr_2.0.5             
-#> [51] patchwork_1.3.2             S4Arrays_1.12.1            
-#> [53] utf8_1.2.6                  withr_3.0.3                
-#> [55] edgeR_4.10.6                scales_1.4.0               
-#> [57] rmarkdown_2.32              XVector_0.52.0             
-#> [59] matrixStats_1.5.0           otel_0.2.0                 
-#> [61] ragg_1.5.2                  evaluate_1.0.5             
-#> [63] knitr_1.52                  GenomicRanges_1.64.0       
-#> [65] IRanges_2.46.0              mgcv_1.9-4                 
-#> [67] rlang_1.3.0                 glue_1.8.1                 
-#> [69] BiocManager_1.30.27         BiocGenerics_0.58.1        
-#> [71] jsonlite_2.0.0              R6_2.6.1                   
-#> [73] MatrixGenerics_1.24.0       systemfonts_1.3.2          
-#> [75] fs_2.1.0
+#> [25] htmltools_0.5.9             sass_0.4.10                
+#> [27] yaml_2.3.12                 pillar_1.11.1              
+#> [29] pkgdown_2.2.1               jquerylib_0.1.4            
+#> [31] tidyr_1.3.2                 DelayedArray_0.38.2        
+#> [33] cachem_1.1.0                limma_3.68.5               
+#> [35] abind_1.4-8                 nlme_3.1-169               
+#> [37] tidyselect_1.2.1            locfit_1.5-9.12            
+#> [39] digest_0.6.39               stringi_1.8.9              
+#> [41] purrr_1.2.2                 bookdown_0.48              
+#> [43] splines_4.6.1               labeling_0.4.3             
+#> [45] fastmap_1.2.0               grid_4.6.1                 
+#> [47] cli_3.6.6                   SparseArray_1.12.3         
+#> [49] magrittr_2.0.5              patchwork_1.3.2            
+#> [51] S4Arrays_1.12.1             utf8_1.2.6                 
+#> [53] withr_3.0.3                 edgeR_4.10.6               
+#> [55] scales_1.4.0                rmarkdown_2.32             
+#> [57] XVector_0.52.0              matrixStats_1.5.0          
+#> [59] otel_0.2.0                  ragg_1.5.2                 
+#> [61] evaluate_1.0.5              knitr_1.52                 
+#> [63] GenomicRanges_1.64.0        IRanges_2.46.0             
+#> [65] mgcv_1.9-4                  rlang_1.3.0                
+#> [67] glue_1.8.1                  BiocManager_1.30.27        
+#> [69] BiocGenerics_0.58.1         jsonlite_2.0.0             
+#> [71] R6_2.6.1                    MatrixGenerics_1.24.0      
+#> [73] systemfonts_1.3.2           fs_2.1.0
 ```

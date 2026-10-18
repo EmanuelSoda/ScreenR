@@ -7,7 +7,15 @@
     so that each coefficient is the mean of a group and a comparison
     between groups is expressed with a contrast created by
     create_contrast. The column names are syntactically valid
-    versions of the group names (for example "T1/T2" becomes "T1.T2").'><meta property="og:description" content='Creates the design matrix used by the edgeR/limma based
+    versions of the group names (for example "T1/T2" becomes "T1.T2").
+    Row names are sample identifiers in the order of the object. All
+    model-based ScreenR functions check that this order matches the
+    object. Recreate the design after subsetting or reordering samples.
+    For a custom design from model.matrix(), explicitly set its row names
+    to the identifiers of the samples used to construct its rows; unnamed
+    rows or default numeric row names do not establish sample alignment.
+    Named contrast vectors are aligned to the design columns; unnamed
+    vectors are interpreted in column order.'><meta property="og:description" content='Creates the design matrix used by the edgeR/limma based
     methods (find_camera_hit, find_roast_hit,
     compute_barcode_statistics, filter_by_variance
     and plot_barcode_hit) from the groups of the ScreenR
@@ -15,7 +23,15 @@
     so that each coefficient is the mean of a group and a comparison
     between groups is expressed with a contrast created by
     create_contrast. The column names are syntactically valid
-    versions of the group names (for example "T1/T2" becomes "T1.T2").'><meta property="og:image" content="https://emanuelsoda.github.io/ScreenR/logo.png"><style>
+    versions of the group names (for example "T1/T2" becomes "T1.T2").
+    Row names are sample identifiers in the order of the object. All
+    model-based ScreenR functions check that this order matches the
+    object. Recreate the design after subsetting or reordering samples.
+    For a custom design from model.matrix(), explicitly set its row names
+    to the identifiers of the samples used to construct its rows; unnamed
+    rows or default numeric row names do not establish sample alignment.
+    Named contrast vectors are aligned to the design columns; unnamed
+    vectors are interpreted in column order.'><meta property="og:image" content="https://emanuelsoda.github.io/ScreenR/logo.png"><style>
   .navbar-dark .navbar-nav .nav-link, .navbar-dark .navbar-brand { color: rgba(255,255,255,.88); }
   .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link.active { color: #fff; }
   .navbar-dark .nav-text.text-muted { color: rgba(255,255,255,.65) !important; }
@@ -80,7 +96,15 @@
     so that each coefficient is the mean of a group and a comparison
     between groups is expressed with a contrast created by
     <code><a href="create_contrast.html">create_contrast</a></code>. The column names are syntactically valid
-    versions of the group names (for example "T1/T2" becomes "T1.T2").</p>
+    versions of the group names (for example "T1/T2" becomes "T1.T2").
+    Row names are sample identifiers in the order of the object. All
+    model-based ScreenR functions check that this order matches the
+    object. Recreate the design after subsetting or reordering samples.
+    For a custom design from model.matrix(), explicitly set its row names
+    to the identifiers of the samples used to construct its rows; unnamed
+    rows or default numeric row names do not establish sample alignment.
+    Named contrast vectors are aligned to the design columns; unnamed
+    vectors are interpreted in column order.</p>
     </div>
 
     <div class="section level2">
@@ -111,21 +135,21 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/exists.html" class="external-link">get0</a></span><span class="op">(</span><span class="st">"object"</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"ScreenR"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">create_design_matrix</span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Control T1.T2 Treated</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        0     1       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        0     1       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3        0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6        1     0       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7        1     0       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8        1     0       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9        0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10       0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11       0     0       1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12       1     0       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13       1     0       0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14       1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Control T1.T2 Treated</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> T1                0     1       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> T2                0     1       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_TRT_A       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_TRT_B       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_TRT_C       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_A           1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_B           1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time3_C           1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_TRT_A       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_TRT_B       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_TRT_C       0     0       1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_A           1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_B           1     0       0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Time4_c           1     0       0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"assign")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"contrasts")</span>

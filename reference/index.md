@@ -46,6 +46,9 @@ Getter and setter functions for the content of the ScreenR object.
   : Get the normalization
 - [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md)
   : Get the normalized count table
+- [`get_palettes()`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)
+  [`set_palettes()`](https://emanuelsoda.github.io/ScreenR/reference/get_palettes.md)
+  : Get or set the palettes of a ScreenR object
 - [`get_replicates()`](https://emanuelsoda.github.io/ScreenR/reference/get_replicates.md)
   : Get the replicates
 - [`get_sample_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md)
@@ -131,6 +134,10 @@ every gene.
   : Find hits with CAMERA
 - [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md)
   : Find hits with ROAST or FRY
+- [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md)
+  : Find genes with a consistent directional effect across contrasts
+- [`combine_consistent_hits()`](https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.md)
+  : Combine evidence for an effect in every contrast
 - [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
   : Find hits with a time-course model
 
@@ -152,6 +159,10 @@ Compare the methods and check the hits at the barcode level.
   : Plot the trend of the barcodes of genes over time
 - [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
   : Plot the trend of genes over time
+- [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+  : Plot the separation between two screening conditions
+- [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+  : Plot barcode abundance across samples
 - [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
   : Plot the distribution of the barcode log2 fold changes
 - [`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)

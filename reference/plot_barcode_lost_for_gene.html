@@ -73,7 +73,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_barcode_lost_for_gene</span><span class="op">(</span><span class="va">screenR_Object</span>, facet <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">samples</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_barcode_lost_for_gene</span><span class="op">(</span></span>
+<span>  <span class="va">screenR_Object</span>,</span>
+<span>  facet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">samples</span>,</span>
+<span>  palette <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -92,6 +97,14 @@ default) or a single panel.</p></dd>
 
 <dt id="arg-samples">samples<a class="anchor" aria-label="anchor" href="#arg-samples"></a></dt>
 <dd><p>The names of the samples to plot (required).</p></dd>
+
+
+<dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
+<dd><p>An optional vector of colors for the samples (named by
+sample, or one for each sample in order), which replaces the palette
+of the object. By default the Sample palette of the object is used
+when it is set (see <code><a href="get_palettes.html">get_palettes</a></code>), otherwise the
+default colors of ggplot2.</p></dd>
 
 </dl></div>
     <div class="section level2">
