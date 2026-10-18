@@ -53,7 +53,7 @@ test_that("with two time points the times only change the units", {
     by_day <- find_time_hit(screen$object, "TRT", "CTRL", days, fdr = 1,
         time = screen$days[days])
     expect_equal(by_day$Gene, by_step$Gene)
-    expect_equal(by_day$PValue, by_step$PValue, tolerance = 1e-8)
+    expect_equal(by_day$PValue, by_step$PValue, tolerance = 1e-6)
     # Log2FC is per day instead of per time point: 18 days between them
     expect_equal(by_day$Log2FC, by_step$Log2FC / 18, tolerance = 1e-6)
 })

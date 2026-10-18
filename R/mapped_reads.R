@@ -20,7 +20,7 @@ mapped_reads <- function(screenR_Object) {
     table <- count_mapped_reads(screenR_Object)
 
     table <- table %>%
-        dplyr::select(.data$Sample, .data$Mapped) %>%
+        dplyr::select("Sample", "Mapped") %>%
         dplyr::group_by(.data$Sample) %>%
         dplyr::mutate(Mapped = sum(.data$Mapped)) %>%
         summarise(Sample = unique(.data$Sample), Mapped = unique(.data$Mapped))
