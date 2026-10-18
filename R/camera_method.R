@@ -29,6 +29,9 @@
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
+#'     Rows must be named with sample identifiers in object order (see
+#'     \code{\link{create_design_matrix}}); mismatched names or order
+#'     are errors. Named contrast coefficients are aligned to design columns.
 #' @param contrast The comparison to test: the name or index of a column of
 #'     matrix_model, a numeric contrast vector (for example created with
 #'     \code{\link{create_contrast}}) or a one-column matrix created with
@@ -96,6 +99,7 @@ find_camera_hit <- function(screenR_Object, matrix_model,
             "deprecated and ignored. Filter the result on the FDR column ",
             "instead.", call. = FALSE)
     }
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
     contrast <- as_contrast(contrast, matrix_model)
     # We have to convert the screenR obj into an edgeR obj
     DGEList <- ScreenR::create_edger_obj(screenR_Object)
@@ -130,6 +134,10 @@ find_camera_hit <- function(screenR_Object, matrix_model,
 #' @keywords internal
 compute_camera <- function(xglm, DGEList, matrix_model, contrast,
     number_barcode = 3) {
+    if (!identical(rownames(matrix_model), colnames(DGEList))) {
+        stop("The design sample order differs from the DGEList.", call. = FALSE)
+    }
+    contrast <- as_contrast(contrast, matrix_model)
     genesymbols <- DGEList$genes$Gene
     genesymbollist <- unique_gene_symbols(genesymbols, number_barcode)
 

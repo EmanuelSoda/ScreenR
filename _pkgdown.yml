@@ -162,6 +162,8 @@ reference:
   - plot_barcode_hit
   - plot_barcode_trend
   - plot_trend
+  - plot_treatment_separation
+  - plot_barcode_heatmap
   - plot_zscore_distribution
   - filter_by_slope
   - filter_by_variance

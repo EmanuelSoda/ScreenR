@@ -108,7 +108,9 @@ combine_consistent_hits <- function(results, direction = c("Down", "Up"),
 #' \code{\link{combine_consistent_hits}}.
 #' @param screenR_Object A normalized ScreenR object.
 #' @param matrix_model A design matrix with rows in the sample order of the
-#'     object. Use a design appropriate for the experimental dependence.
+#'     object, with sample identifiers as row names. Mismatched names or
+#'     order are errors (see \code{\link{create_design_matrix}}).
+#'     Use a design appropriate for the experimental dependence.
 #' @param contrasts A uniquely named list of at least two contrasts accepted
 #'     by \code{\link{find_roast_hit}}, such as treatment versus control at
 #'     each time point. The same design and normalization are used throughout.
@@ -176,6 +178,8 @@ find_consistent_hit <- function(screenR_Object, matrix_model, contrasts,
         stop("Unsupported or reserved method_args: ", paste(bad, collapse = ", "),
             call. = FALSE)
     }
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
+    contrasts <- lapply(contrasts, as_contrast, design = matrix_model)
     results <- lapply(contrasts, function(contrast) {
         args <- list(direction = direction, fdr = 1, fdr_method = "BH")
         if (method == "zscore") {

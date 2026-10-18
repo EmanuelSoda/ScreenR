@@ -25,7 +25,10 @@ and the data table (see \code{\link{create_edger_obj}}).}
 
 \item{matrix_model}{The design matrix of the linear model, for example
 created with \code{\link{create_design_matrix}} (or with
-\code{\link[stats]{model.matrix}}).}
+\code{\link[stats]{model.matrix}}).
+Rows must be named with sample identifiers in object order (see
+\code{\link{create_design_matrix}}); mismatched names or order
+are errors. Named contrast coefficients are aligned to design columns.}
 
 \item{variance}{The maximum variance of the barcode log2 fold changes
 accepted (default 0.5).}

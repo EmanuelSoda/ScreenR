@@ -19,7 +19,9 @@ find_consistent_hit(
 \item{screenR_Object}{A normalized ScreenR object.}
 
 \item{matrix_model}{A design matrix with rows in the sample order of the
-object. Use a design appropriate for the experimental dependence.}
+object, with sample identifiers as row names. Mismatched names or
+order are errors (see \code{\link{create_design_matrix}}).
+Use a design appropriate for the experimental dependence.}
 
 \item{contrasts}{A uniquely named list of at least two contrasts accepted
 by \code{\link{find_roast_hit}}, such as treatment versus control at

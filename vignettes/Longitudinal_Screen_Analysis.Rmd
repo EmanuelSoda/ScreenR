@@ -1016,20 +1016,63 @@ plot_barcode_hit(object, design, contrasts$T4, gene = top_hit) +
 At T3 the shRNAs of the gene are spread over the ranking; at T4 several of
 them are among the most depleted barcodes of the library.
 
-Over the whole screen, the trend lines (mean normalized count of the shRNAs
-of each gene) separate the hits to validate from an essential gene: the
-essential gene is lost in control and treated cultures alike, while the hits
-end lower in the treated cultures at T4.
+Overlaying the control and treatment in each gene panel shows the complete
+screen: T0, the post-selection baseline, T3 and T4. Grey crosses are the
+shared reference observations, displayed once. The grey line connects the
+references; each colored trajectory starts from the last shared reference
+and then joins that condition's sample means. The reference is used only as
+a graphical anchor, not as an extra replicate. Small colored points are
+biological samples, each summarized across the gene's shRNAs.
 
-```{r validate-trends, fig.height = 4.5, fig.width = 10}
+```{r validate-trends, fig.height = 5, fig.width = 10}
 top_essential <- essential$Gene[1]
-trend <- function(condition) {
-    plot_trend(object, genes = c(to_validate$Gene, top_essential),
-        group_var = c("Infected", "Baseline", condition),
-        ncol = nrow(to_validate) + 1) +
-        ggtitle(condition)
-}
-trend("CTRL") / trend("TRT")
+trend_genes <- c(to_validate$Gene, top_essential)
+combined_trends <- plot_trend(object, genes = trend_genes,
+    group_var = c("Infected", "Baseline", "CTRL", "TRT"),
+    color_by = "Treatment", trend = "mean",
+    reference_groups = c("Infected", "Baseline"), connect_reference = TRUE,
+    highlight_difference = TRUE, ncol = 2, point_size = 1.8) +
+    labs(x = "Screen stage (equally spaced)")
+combined_trends
+```
+
+The shaded band highlights the observed difference between control and
+treatment means at their shared time points. It is not a confidence band.
+All stages are included, with equally spaced positions rather than assumed
+elapsed times. `trend = "lm"` instead fits separate regressions; its optional
+`se` band describes that regression, not gene-level treatment-effect uncertainty.
+These plotting functions apply no theme: the `theme_set()` above controls
+their appearance.
+
+Large changes shared by both cultures can hide a moderate treatment effect
+on the abundance scale. This companion view shows the treated/control ratio
+of the sample means at T3 and T4, with percentage differences labeled. There
+is no treated/control comparison before the cultures split, so T0 and Puro
+have no effect points. These are descriptive ratios, not the median shRNA
+log2 fold changes or p-values reported by the gene-level tests.
+The exported `plot_treatment_separation()` function accepts any two condition
+names, custom `condition_column` and `time_column` metadata, an optional
+named `time` mapping and a `samples` selection. It can also display one
+comparable stage. For screens with multiple cell lines or doses, select a
+single experimental stratum with `samples` before averaging replicates.
+
+```{r validate-separation, fig.height = 5, fig.width = 10}
+plot_treatment_separation(object, genes = trend_genes,
+    treatment = "TRT", control = "CTRL", ncol = 2) +
+    labs(x = "Screen stage (equally spaced)")
+```
+
+A barcode heatmap complements the gene summaries. Each row is one shRNA and
+each column one biological sample, including both references. Here log2
+normalized abundance is centered on each shRNA's mean over the displayed
+samples: red and blue mean higher and lower abundance relative to that
+shRNA's own average. Colors do not represent significance, and rows are
+reagents rather than independent biological replicates.
+
+```{r validate-heatmap, fig.height = 7, fig.width = 10}
+plot_barcode_heatmap(object, genes = trend_genes,
+    center = "barcode", column_group = "Day") +
+    scale_x_discrete(guide = guide_axis(angle = 60))
 ```
 
 # Conclusions

@@ -31,6 +31,9 @@
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
+#'     Rows must be named with sample identifiers in object order (see
+#'     \code{\link{create_design_matrix}}); mismatched names or order
+#'     are errors. Named contrast coefficients are aligned to design columns.
 #' @param contrast The comparison to plot: the name or index of a column of
 #'     matrix_model, a numeric contrast vector (for example created with
 #'     \code{\link{create_contrast}}) or a one-column matrix created with
@@ -76,6 +79,7 @@ plot_barcode_hit <- function(screenR_Object, matrix_model,
     contrast, number_barcode = 3, gene,
     quantile = c(-0.5, 0.5), labels = c("Negative logFC", "Positive logFC"),
     show_log2fc = TRUE) {
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
     contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, design = matrix_model)

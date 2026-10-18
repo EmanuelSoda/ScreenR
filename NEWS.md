@@ -1,5 +1,32 @@
 # ScreenR 1.15.16
 
+* `plot_treatment_separation()` plots descriptive treatment/control abundance
+  ratios for any two condition labels and configurable time metadata. It
+  retains all selected stages, supports real times and sample subsets, and
+  inherits the user theme. Missing comparisons are never assigned zero effects.
+
+* `plot_trend(color_by = "Treatment")` overlays separate condition trends
+  with biological sample points and lines joining time-point means. The
+  original ungrouped regression remains the default without color_by;
+  `trend = "lm"` explicitly fits separate regressions. Object palettes are
+  used, and `reference_groups` shows shared baselines once as neutral points.
+  `connect_reference` joins the shared reference history to condition means;
+  `highlight_difference` shades the observed gap between two conditions.
+  No theme is applied by these new plots; use `theme_set()` in user code.
+* `plot_barcode_heatmap()` shows individual barcode abundances across samples,
+  with gene and sample-variable panels. Display log2 normalized counts,
+  barcode-centered values or values relative to explicit reference samples.
+
+
+* Model designs now carry sample identifiers and are checked against the
+  object before fitting. Custom designs must have sample identifiers as row
+  names in object order. Named contrast vectors and one-column contrast
+  matrices are aligned to coefficient names; missing, duplicated and unknown
+  names are rejected. Unnamed numeric contrast vectors remain positional.
+* Package checks, coverage and website builds now run on pushes and pull
+  requests to devel. Website builds on devel do not deploy GitHub Pages.
+
+
 * `find_consistent_hit()` tests directional effects shared by all supplied
   contrasts using FRY, ROAST, CAMERA or gene-level Z-scores (random or
   empirical reference). `combine_consistent_hits()` accepts complete

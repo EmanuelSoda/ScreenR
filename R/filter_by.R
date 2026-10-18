@@ -243,6 +243,9 @@ encode_time <- function(data, time_column = "Day", time = NULL) {
 #' @param matrix_model The design matrix of the linear model, for example
 #'     created with \code{\link{create_design_matrix}} (or with
 #'     \code{\link[stats]{model.matrix}}).
+#'     Rows must be named with sample identifiers in object order (see
+#'     \code{\link{create_design_matrix}}); mismatched names or order
+#'     are errors. Named contrast coefficients are aligned to design columns.
 #' @return The rows of the data table (see \code{\link{get_data_table}}) of
 #'     the genes that pass the filter, with an additional Variance column (the
 #'     variance of the barcode log2 fold changes of the gene).
@@ -268,6 +271,7 @@ filter_by_variance <- function(screenR_Object, genes, matrix_model,
         "filter_by_variance()")
 
     # Create the edgeR object and computing the LogFC
+    matrix_model <- check_design_samples(matrix_model, screenR_Object)
     contrast <- as_contrast(contrast, matrix_model)
     DGEList <- create_edger_obj(screenR_Object)
     xglm <- edgeR::estimateDisp(DGEList, matrix_model)
