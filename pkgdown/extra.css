@@ -1,0 +1,990 @@
+/* ==========================================================================
+   ScreenR pkgdown theme: frosted glass panels over a soft colour field.
+   Loaded automatically by pkgdown after Bootstrap and pkgdown.css.
+   ========================================================================== */
+
+/* Design tokens ------------------------------------------------------------ */
+
+:root {
+  --sr-teal: #1F5F55;
+  --sr-teal-rgb: 31, 95, 85;
+  --sr-sage: #93B5A3;
+  --sr-clay: #C9836A;
+  --sr-clay-rgb: 201, 131, 106;
+  --sr-ink: #13332D;
+
+  --sr-page: #EEF4F1;
+  --sr-heading: var(--sr-teal);
+  --sr-glass: rgba(255, 255, 255, 0.5);
+  --sr-glass-strong: rgba(255, 255, 255, 0.74);
+  --sr-glass-border: rgba(255, 255, 255, 0.7);
+  --sr-glass-highlight: rgba(255, 255, 255, 0.85);
+  --sr-hairline: rgba(19, 51, 45, 0.1);
+  --sr-shadow: 0 1px 2px rgba(19, 51, 45, 0.06),
+    0 12px 32px -12px rgba(19, 51, 45, 0.22);
+  --sr-shadow-hover: 0 2px 4px rgba(19, 51, 45, 0.08),
+    0 20px 44px -14px rgba(19, 51, 45, 0.32);
+  --sr-code-bg: rgba(255, 255, 255, 0.62);
+  --sr-inline-code: rgba(var(--sr-teal-rgb), 0.08);
+  --sr-blur: blur(22px) saturate(170%);
+  --sr-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sr-radius: 1.25rem;
+  --sr-radius-sm: 0.75rem;
+
+  --sr-light: rgba(255, 255, 255, 0.8);
+  --sr-light-edge: rgba(var(--sr-teal-rgb), 0.55);
+  --sr-ambient: rgba(255, 255, 255, 0.55);
+
+  --sr-blob-1: rgba(var(--sr-teal-rgb), 0.42);
+  --sr-blob-2: rgba(var(--sr-clay-rgb), 0.38);
+  --sr-blob-3: rgba(147, 181, 163, 0.6);
+}
+
+[data-bs-theme="dark"] {
+  --sr-page: #0A1714;
+  --sr-heading: #A8D8C9;
+  --sr-glass: rgba(20, 38, 34, 0.55);
+  --sr-glass-strong: rgba(20, 38, 34, 0.78);
+  --sr-glass-border: rgba(255, 255, 255, 0.09);
+  --sr-glass-highlight: rgba(255, 255, 255, 0.12);
+  --sr-hairline: rgba(255, 255, 255, 0.08);
+  --sr-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 36px -14px rgba(0, 0, 0, 0.6);
+  --sr-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35),
+    0 22px 48px -14px rgba(0, 0, 0, 0.7);
+  --sr-code-bg: rgba(0, 0, 0, 0.28);
+  --sr-inline-code: rgba(168, 216, 201, 0.1);
+
+  --sr-light: rgba(168, 216, 201, 0.16);
+  --sr-light-edge: rgba(168, 216, 201, 0.75);
+  --sr-ambient: rgba(46, 125, 110, 0.4);
+
+  --sr-blob-1: rgba(46, 125, 110, 0.55);
+  --sr-blob-2: rgba(var(--sr-clay-rgb), 0.3);
+  --sr-blob-3: rgba(46, 125, 110, 0.4);
+
+  --bs-link-color: #8FD0BD;
+  --bs-link-color-rgb: 143, 208, 189;
+  --bs-link-hover-color: #B9E6D8;
+  --bs-link-hover-color-rgb: 185, 230, 216;
+}
+
+/* Colour field behind the glass -------------------------------------------- */
+
+/* Only on html: a body background would cover the colour field below */
+html {
+  background-color: var(--sr-page);
+}
+
+body {
+  background: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -6vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40vmax 34vmax at 18% 18%, var(--sr-blob-1), transparent 70%),
+    radial-gradient(36vmax 32vmax at 88% 30%, var(--sr-blob-2), transparent 70%),
+    radial-gradient(46vmax 36vmax at 50% 95%, var(--sr-blob-3), transparent 70%);
+  animation: sr-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes sr-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2vmax, -1.5vmax, 0) scale(1.04); }
+  100% { transform: translate3d(-1.5vmax, 1vmax, 0) scale(1.02); }
+}
+
+::selection {
+  background: rgba(var(--sr-clay-rgb), 0.35);
+}
+
+/* Shared glass surface ----------------------------------------------------- */
+
+.navbar,
+.row > main,
+.row > aside > *,
+.dropdown-menu,
+footer,
+.algolia-autocomplete .aa-dropdown-menu {
+  background: var(--sr-grain), var(--sr-glass);
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
+  border: 1px solid var(--sr-glass-border);
+  box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
+}
+
+/* Floating navbar ---------------------------------------------------------- */
+
+.navbar.fixed-top {
+  top: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  border-radius: var(--sr-radius);
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.sr-scrolled .navbar.fixed-top {
+  background-color: var(--sr-glass-strong);
+  box-shadow: var(--sr-shadow-hover), inset 0 1px 0 var(--sr-glass-highlight);
+}
+
+.navbar,
+.navbar .nav-link,
+.navbar .navbar-toggler {
+  color: var(--bs-body-color);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--sr-heading) !important;
+}
+
+.navbar .nav-text.text-muted {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--sr-clay-rgb), 0.16);
+  color: var(--bs-body-color) !important;
+}
+
+.navbar .nav-link {
+  border-radius: 999px;
+  padding-left: 0.85rem !important;
+  padding-right: 0.85rem !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus-visible,
+.navbar .nav-link.active,
+.navbar .nav-link.show {
+  background: rgba(var(--sr-teal-rgb), 0.1);
+  color: var(--sr-heading);
+}
+
+[data-bs-theme="dark"] .navbar .nav-link:hover,
+[data-bs-theme="dark"] .navbar .nav-link.active,
+[data-bs-theme="dark"] .navbar .nav-link.show {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#search-input {
+  border-radius: 999px;
+  border: 1px solid var(--sr-hairline);
+  background: var(--sr-code-bg);
+  padding-left: 1rem;
+  min-width: 12rem;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+#search-input:focus {
+  border-color: rgba(var(--sr-teal-rgb), 0.45);
+  box-shadow: 0 0 0 4px rgba(var(--sr-teal-rgb), 0.15);
+}
+
+.dropdown-menu {
+  border-radius: var(--sr-radius-sm);
+  padding: 0.4rem;
+  animation: sr-pop 0.18s ease-out;
+}
+
+.dropdown-item {
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: rgba(var(--sr-teal-rgb), 0.1);
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background: var(--sr-teal);
+}
+
+@keyframes sr-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Content and sidebar panels ----------------------------------------------- */
+
+.row > main {
+  border-radius: var(--sr-radius);
+  padding: 2rem 2.5rem 2.5rem;
+  animation: sr-rise 0.5s ease-out both;
+}
+
+.row > aside {
+  padding-left: 1.25rem;
+  animation: sr-rise 0.5s 0.08s ease-out both;
+}
+
+.row > aside > * {
+  border-radius: var(--sr-radius);
+  padding: 0.25rem 1.25rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.row > aside > #toc {
+  padding-top: 0.75rem;
+}
+
+aside h2 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: RGBA(var(--bs-body-color-rgb), 0.6);
+}
+
+#toc > .nav a.nav-link.active {
+  background: var(--sr-teal);
+  color: #fff;
+}
+
+@keyframes sr-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 767.98px) {
+  .row > main {
+    padding: 1.25rem;
+  }
+  .row > aside {
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
+    background: none !important;
+  }
+}
+
+/* Typography --------------------------------------------------------------- */
+
+h1, h2, h3, h4 {
+  color: var(--sr-heading);
+  letter-spacing: -0.015em;
+}
+
+h2 {
+  font-weight: 700;
+  margin-top: 2.5rem;
+}
+
+.page-header {
+  border-bottom: 1px solid var(--sr-hairline);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  /* Inline, so that a long title still wraps beside the logo */
+  display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, var(--sr-teal) 10%, #2E7D6E 45%, var(--sr-clay) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-bs-theme="dark"] .page-header h1 {
+  background-image: linear-gradient(120deg, #A8D8C9 10%, #8FD0BD 45%, #E3A894 95%);
+}
+
+.page-header img.logo {
+  filter: drop-shadow(0 10px 18px rgba(19, 51, 45, 0.28));
+  transition: transform 0.4s cubic-bezier(.2, .8, .2, 1);
+}
+
+
+/* The tagline of the home page */
+.template-home .page-header + p strong,
+.template-home main > .section > p:first-of-type strong {
+  display: block;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--bs-body-color);
+}
+
+main a:not(.anchor):not(.btn):not(.nav-link) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: rgba(var(--bs-link-color-rgb), 0.35);
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+
+main a:not(.anchor):not(.btn):not(.nav-link):hover {
+  text-decoration-color: currentColor;
+}
+
+/* Code --------------------------------------------------------------------- */
+
+pre {
+  background: var(--sr-code-bg) !important;
+  border: 1px solid var(--sr-hairline);
+  border-left: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius-sm);
+  padding: 1rem 1.15rem;
+  box-shadow: inset 0 1px 0 var(--sr-glass-highlight);
+}
+
+div.sourceCode {
+  background: transparent;
+  border-radius: var(--sr-radius-sm);
+}
+
+:not(pre) > code {
+  background: var(--sr-inline-code);
+  border-radius: 0.4rem;
+  padding: 0.1em 0.35em;
+  color: inherit;
+}
+
+.btn-copy-ex {
+  border-radius: 0.5rem;
+  backdrop-filter: blur(8px);
+}
+
+/* Output of R chunks */
+pre.r-output,
+pre code .co {
+  opacity: 0.92;
+}
+
+/* Tables and figures ------------------------------------------------------- */
+
+main table.table,
+main table {
+  --bs-table-bg: transparent;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--sr-hairline);
+  border-radius: var(--sr-radius-sm);
+  background: var(--sr-code-bg);
+}
+
+main table th {
+  background: rgba(var(--sr-teal-rgb), 0.08);
+  font-weight: 600;
+}
+
+main table th,
+main table td {
+  border-color: var(--sr-hairline) !important;
+  padding: 0.55rem 0.8rem;
+}
+
+main table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+main table tbody tr:hover {
+  background: rgba(var(--sr-teal-rgb), 0.05);
+}
+
+main img:not(.logo):not([src*="shields"]):not([src*="badge"]):not([src*="codecov"]) {
+  border-radius: var(--sr-radius-sm);
+  max-width: 100%;
+  height: auto;
+}
+
+main p > img:not(.logo):not([src*="shields"]):not([src*="badge"]):not([src*="codecov"]),
+main .figure img,
+main figure img {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--sr-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+main p > img:not(.logo):not([src*="shields"]):not([src*="badge"]):not([src*="codecov"]):hover,
+main .figure img:hover,
+main figure img:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sr-shadow-hover);
+}
+
+/* Reference index ---------------------------------------------------------- */
+
+.template-reference-index main h2 {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.template-reference-index main dl dt {
+  margin-top: 0.75rem;
+}
+
+.template-reference-index main dl dt code {
+  background: rgba(var(--sr-teal-rgb), 0.1);
+  font-weight: 600;
+}
+
+.template-reference-index main dl dd {
+  margin-left: 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid rgba(var(--sr-clay-rgb), 0.45);
+  color: RGBA(var(--bs-body-color-rgb), 0.85);
+}
+
+/* Footer ------------------------------------------------------------------- */
+
+footer {
+  border-radius: var(--sr-radius);
+  margin: 2rem 0 1rem;
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* Light that follows the cursor (pkgdown/extra.js) -------------------------- */
+
+/* Ambient light on the colour field */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(520px circle at var(--sr-mx, 50%) var(--sr-my, 50%),
+    var(--sr-ambient), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.sr-pointer::after {
+  opacity: 1;
+}
+
+.navbar,
+.row > main,
+.row > aside > *,
+footer {
+  isolation: isolate;
+}
+
+.row > main,
+.row > aside > *,
+footer {
+  position: relative;
+}
+
+/* Sheen on the glass, under the content */
+.navbar::before,
+.row > main::before,
+.row > aside > *::before,
+footer::before,
+/* Glow on the edge of the glass */
+.navbar::after,
+.row > main::after,
+.row > aside > *::after,
+footer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.navbar::before,
+.row > main::before,
+.row > aside > *::before,
+footer::before {
+  z-index: -1;
+  background: radial-gradient(420px circle at var(--sr-px, 50%) var(--sr-py, 50%),
+    var(--sr-light), transparent 65%);
+}
+
+.navbar::after,
+.row > main::after,
+.row > aside > *::after,
+footer::after {
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--sr-px, 50%) var(--sr-py, 50%),
+    var(--sr-light-edge), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* :is() gives these the specificity of the panel selectors above */
+:is(.navbar, .row > main, .row > aside > *, footer).sr-lit::before,
+:is(.navbar, .row > main, .row > aside > *, footer).sr-lit::after {
+  opacity: 1;
+}
+
+/* Page transitions (View Transitions API, ignored by other browsers) ------ */
+
+@view-transition {
+  navigation: auto;
+}
+
+.navbar.fixed-top {
+  view-transition-name: sr-navbar;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+}
+
+/* Home page: buttons and highlights ---------------------------------------- */
+
+.sr-hero {
+  margin: 1.25rem 0 1.75rem;
+}
+
+.sr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+
+.sr-chip {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  color: var(--sr-heading);
+  background: rgba(var(--sr-teal-rgb), 0.09);
+  border: 1px solid rgba(var(--sr-teal-rgb), 0.18);
+}
+
+.sr-actions,
+.sr-prev-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sr-btn {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none !important;
+  color: var(--sr-heading);
+  background: var(--sr-glass-strong);
+  border: 1px solid var(--sr-glass-border);
+  box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.sr-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sr-shadow-hover), inset 0 1px 0 var(--sr-glass-highlight);
+  color: var(--sr-heading);
+}
+
+.sr-btn-primary {
+  color: #fff !important;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E 60%, var(--sr-clay));
+}
+
+.sr-btn small {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+/* Tutorials: progress and previous/next ------------------------------------ */
+
+.sr-tutorial-nav {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--sr-hairline);
+}
+
+.sr-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.sr-step {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  font-weight: 700;
+  text-decoration: none !important;
+  color: var(--sr-heading);
+  border: 2px solid rgba(var(--sr-teal-rgb), 0.3);
+  background: var(--sr-glass-strong);
+  transition: transform 0.2s ease;
+}
+
+.sr-step:hover {
+  transform: scale(1.1);
+}
+
+.sr-step-done {
+  background: rgba(var(--sr-teal-rgb), 0.15);
+}
+
+.sr-step-current {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--sr-teal), var(--sr-clay));
+  box-shadow: 0 0 0 5px rgba(var(--sr-teal-rgb), 0.15);
+}
+
+.sr-step-line {
+  width: 3rem;
+  height: 2px;
+  background: rgba(var(--sr-teal-rgb), 0.25);
+}
+
+.sr-prev-next {
+  justify-content: space-between;
+}
+
+.sr-prev-next .sr-btn:last-child {
+  text-align: right;
+}
+
+/* Reading progress --------------------------------------------------------- */
+
+.sr-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1040;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--sr-teal), #2E7D6E, var(--sr-clay));
+  pointer-events: none;
+}
+
+/* Reference index cards ---------------------------------------------------- */
+
+.template-reference-index main .sr-card {
+  margin: 1.25rem 0;
+  padding: 0.25rem 1.5rem 1rem;
+  border-radius: var(--sr-radius);
+  background: var(--sr-code-bg);
+  border: 1px solid var(--sr-hairline);
+  box-shadow: inset 0 1px 0 var(--sr-glass-highlight);
+}
+
+.template-reference-index main .sr-card h2 {
+  border-top: none;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Code labels and copy button ---------------------------------------------- */
+
+pre[data-lang] {
+  position: relative;
+  padding-top: 1.6rem;
+}
+
+pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.45rem;
+  right: 0.75rem;
+  font-family: var(--bs-font-sans-serif);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: RGBA(var(--bs-body-color-rgb), 0.45);
+  transition: opacity 0.2s ease;
+}
+
+div.sourceCode:hover pre[data-lang]::before,
+.hasCopyButton:hover pre[data-lang]::before {
+  opacity: 0;
+}
+
+.tooltip-inner {
+  border-radius: 0.6rem;
+  background: var(--sr-teal);
+}
+
+/* Figure zoom -------------------------------------------------------------- */
+
+img.sr-zoomable {
+  cursor: zoom-in;
+}
+
+.sr-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 4vmin;
+  cursor: zoom-out;
+  background: rgba(10, 23, 20, 0.35);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s;
+}
+
+.sr-zoom.sr-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sr-zoom img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--sr-radius);
+  background: #fff;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  transform: scale(0.94);
+  transition: transform 0.3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.sr-zoom.sr-open img {
+  transform: none;
+}
+
+/* Scroll reveal ------------------------------------------------------------ */
+
+.sr-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(.2, .8, .2, 1);
+}
+
+.sr-reveal.sr-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Light sweep over the workflow diagram ------------------------------------ */
+
+.sr-sweep {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--sr-radius-sm);
+}
+
+.sr-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%,
+    rgba(255, 255, 255, 0.7) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+
+.sr-sweep.sr-sweep-run::after {
+  animation: sr-sweep 1.6s 0.2s cubic-bezier(.4, 0, .2, 1) both;
+}
+
+@keyframes sr-sweep {
+  to { transform: translateX(120%); }
+}
+
+/* Tilt of figures and sidebar cards ---------------------------------------- */
+
+.row > aside > *,
+main img.sr-zoomable {
+  transition: transform 0.25s ease-out, box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+/* Refraction of the navbar (Chromium, see extra.js) ------------------------ */
+
+.sr-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+html.sr-refraction .navbar.fixed-top {
+  -webkit-backdrop-filter: url(#sr-refract) blur(14px) saturate(170%);
+  backdrop-filter: url(#sr-refract) blur(14px) saturate(170%);
+}
+
+/* Callout boxes for the vignettes: ::: {.callout-tip} ... ::: -------------- */
+
+.callout,
+.callout-tip,
+.callout-note,
+.callout-warning,
+.callout-important {
+  --sr-callout: var(--sr-teal-rgb);
+  margin: 1.5rem 0;
+  padding: 0.9rem 1.1rem 0.9rem 1.25rem;
+  border-radius: var(--sr-radius-sm);
+  border: 1px solid rgba(var(--sr-callout), 0.25);
+  border-left: 4px solid rgba(var(--sr-callout), 0.85);
+  background: rgba(var(--sr-callout), 0.07);
+}
+
+.callout-warning,
+.callout-important {
+  --sr-callout: var(--sr-clay-rgb);
+}
+
+.callout > :last-child,
+[class^="callout-"] > :last-child {
+  margin-bottom: 0;
+}
+
+/* CRISPR scissors: a small pair of scissors cuts the DNA of the logo ------- */
+
+.sr-logo {
+  position: relative;
+  display: block;
+  float: right;
+  margin-left: 30px;
+  cursor: pointer;
+}
+
+/* The wrapper takes the float and the margin of the logo, so that the
+   pieces of the DNA line up with the image */
+.page-header .sr-logo img.logo {
+  float: none;
+  display: block;
+  margin: 0;
+}
+
+/* Only the DNA is cut: the helix region of the logo is covered with the
+   background colour of the logo, and two pieces of the helix move apart
+   inside it. The hexagon, the text and the R stay intact. */
+.sr-logo .sr-dna {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  clip-path: polygon(4% 38%, 28% 22%, 33% 28%, 39% 35%, 40% 42%, 44% 47%,
+    50% 49%, 52% 55%, 57% 59%, 61% 64%, 63% 70%, 72% 74%, 72% 79%, 52% 92%,
+    46% 93%, 40% 91%, 32% 80%, 22% 66%, 13% 53%, 12% 45%, 5% 43%);
+}
+
+.sr-logo .sr-patch {
+  position: absolute;
+  inset: 0;
+  background: rgb(141, 180, 165);
+}
+
+.sr-logo .sr-half {
+  position: absolute;
+  inset: 0;
+  background: var(--sr-logo) center / contain no-repeat;
+  transition: transform 0.45s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* A double-strand break: the cut crosses the helix through its middle */
+.sr-logo .sr-half-a { clip-path: polygon(0 0, 100% 0, 100% 15.7%, 0 78%); }
+.sr-logo .sr-half-b { clip-path: polygon(0 78%, 100% 15.7%, 100% 100%, 0 100%); }
+
+.sr-logo.sr-cut .sr-dna { opacity: 1; }
+.sr-logo.sr-split .sr-half-a { transform: translate(-4px, -6px) rotate(-3deg); }
+.sr-logo.sr-split .sr-half-b { transform: translate(4px, 6px) rotate(2deg); }
+
+.sr-scissors {
+  position: absolute;
+  left: 0;
+  top: 78%;
+  width: 42%;
+  opacity: 0;
+  pointer-events: none;
+  /* Across the helix, along the cut */
+  transform: translate(-60%, -50%) rotate(-35deg);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+.sr-logo.sr-cutting .sr-scissors {
+  animation: sr-scissors-path 1.5s ease-in-out forwards;
+}
+
+.sr-logo.sr-cutting .sr-blade-a {
+  animation: sr-snip-a 0.3s ease-in-out 4;
+}
+
+.sr-logo.sr-cutting .sr-blade-b {
+  animation: sr-snip-b 0.3s ease-in-out 4;
+}
+
+.sr-blade-a,
+.sr-blade-b {
+  transform-origin: 30px 20px;
+}
+
+@keyframes sr-scissors-path {
+  0% { opacity: 0; left: -10%; top: 84%; }
+  15% { opacity: 1; }
+  80% { opacity: 1; left: 37%; top: 55%; }
+  100% { opacity: 0; left: 50%; top: 47%; }
+}
+
+@keyframes sr-snip-a {
+  50% { transform: rotate(-16deg); }
+}
+
+@keyframes sr-snip-b {
+  50% { transform: rotate(16deg); }
+}
+
+/* Accessibility and fallbacks ---------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  .row > main,
+  .row > aside,
+  .dropdown-menu {
+    animation: none;
+  }
+  .page-header img.logo,
+  main img {
+    transition: none;
+  }
+  .sr-scissors,
+  .sr-reveal {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root { --sr-glass: #F7FAF8; --sr-glass-strong: #FFFFFF; }
+  [data-bs-theme="dark"] { --sr-glass: #142622; --sr-glass-strong: #18302B; }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root { --sr-glass: rgba(255, 255, 255, 0.92); --sr-glass-strong: #FFFFFF; }
+  [data-bs-theme="dark"] { --sr-glass: rgba(20, 38, 34, 0.94); }
+}

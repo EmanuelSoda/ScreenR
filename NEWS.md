@@ -1,5 +1,13 @@
 # ScreenR 1.15.16
 
+* New design of the pkgdown site: frosted glass panels and a floating navbar
+  over a soft colour field, with a light that follows the cursor and a
+  light/dark/auto switch. The home page has highlights and buttons, the
+  tutorials a progress indicator with previous/next links, the articles a
+  reading progress bar; figures can be enlarged, Cmd/Ctrl + K opens the
+  search, the reference index is grouped in cards, and a pair of scissors
+  cuts the DNA of the logo. Animations stop with the reduced motion setting
+  of the system, and the site has a card for links shared on social media.
 * The README, the pkgdown home page, the DESCRIPTION and the package help
   describe shRNA and CRISPR-Cas9 screens. The README quick start uses a
   sample table, palettes, `theme_set()`, FRY, CAMERA and the empirical null,
