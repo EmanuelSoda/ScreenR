@@ -98,8 +98,9 @@
 #'         annotation = counts[, c("Barcode", "Gene")],
 #'         groups = factor(c("Plasmid", "Late", "Late", "Late")),
 #'         sample_table = data.frame(
-#'             Sample = c("Plasmid", "R1", "R2", "R3"), Day = "Screen",
-#'             Treatment = c("Plasmid", "Late", "Late", "Late")
+#'             Sample = c("Plasmid", "R1", "R2", "R3"),
+#'             Day = c("Plasmid", "Late", "Late", "Late"),
+#'             Treatment = "Untreated"
 #'         )
 #'     )
 #'     corrected <- correct_crispr_bias(object,

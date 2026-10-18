@@ -4,20 +4,29 @@
 \alias{compute_metrics}
 \title{Compute the barcode metrics}
 \usage{
-compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
+compute_metrics(
+  screenR_Object,
+  control,
+  treatment,
+  day = NULL,
+  pseudocount = 0.5,
+  condition_column = c("Treatment", "Day")
+)
 }
 \arguments{
 \item{screenR_Object}{The ScreenR object obtained using
 \code{\link{create_screenr_object}}.}
 
-\item{control}{The value(s) of the Treatment column of the data table (see
-\code{\link{get_sample_table}}) that identify the control samples.}
+\item{control}{The value(s) of the condition_column column of the data
+table (see \code{\link{get_sample_table}}) that identify the control
+samples.}
 
-\item{treatment}{The value(s) of the Treatment column of the data table
-that identify the treated samples.}
+\item{treatment}{The value(s) of the condition_column column of the data
+table that identify the treated samples.}
 
 \item{day}{The day (time point) to use, as in the Day column of the data
-table.}
+table. Required with condition_column = "Treatment"; not used with
+condition_column = "Day".}
 
 \item{pseudocount}{A small value (in counts per million) added to the
 treated and control mean frequencies before computing the log2 fold
@@ -30,15 +39,23 @@ million reads of the effective library size of
 times the TMM factor for "tmm", the reads of the control barcodes for
 "control"). It is a display transformation that keeps the fold changes
 finite; it does not change the normalization.}
+
+\item{condition_column}{The column of the data table that tells the
+control from the treated samples: "Treatment" (default) to compare a
+treatment with a control at the time point day, or "Day" to compare
+two time points, for example a late time point with T0 in a dropout
+screen without treatment (control = "T0", treatment = "T18").}
 }
 \value{
 A tibble with one row for each barcode and the columns Barcode,
     Gene, Treated and Control (the mean normalized counts), Log2FC, Zscore,
-    ZscoreRobust, Day and Treatment.
+    ZscoreRobust, Day and Treatment. With condition_column = "Day", Day is
+    the time point of the treated samples and Treatment their treatment.
 }
 \description{
 Computes, for each barcode, the log2 fold change between the
-    treated and the control samples of a given time point, and its Z-score
+    treated and the control samples of a given time point (or between two
+    time points, see condition_column), and its Z-score
     and robust Z-score. The result is the input of the Z-score methods
     (\code{\link{find_gene_zscore_hit}}, \code{\link{find_zscore_hit}}) and
     of several plots. More information about the Z-score and other metrics
@@ -65,6 +82,12 @@ metrics <- compute_metrics(object,
     treatment = "TRT", day = "Time3"
 )
 head(metrics)
+
+# Two time points of the same samples, as in a dropout screen
+metrics_time <- compute_metrics(object,
+    control = "Time3", treatment = "Time4", condition_column = "Day"
+)
+head(metrics_time)
 }
 \seealso{
 \code{\link{find_gene_zscore_hit}},

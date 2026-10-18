@@ -1,5 +1,19 @@
 # ScreenR 1.15.16
 
+* `compute_metrics(condition_column = "Day")` compares two time points
+  (`control = "T0", treatment = "T18"`), for dropout screens without a
+  treatment; `day` is then not used. The default compares a treatment and a
+  control at the time point `day`, as before.
+* Dropout screens (Tutorial 4, the empirical null and the MAGeCK benchmark
+  vignettes, the examples) are described with the time points in the Day
+  column and a single Treatment, `"Untreated"`, for all the samples.
+* Tutorial 4 checks the lost sgRNAs (`barcode_lost()`, `plot_barcode_lost()`,
+  `plot_barcode_lost_for_gene()`), compares the time points with
+  `plot_zscore_distribution()`, `compute_slope()` and
+  `plot_treatment_separation()`, uses `find_common_hit()` and
+  `find_consistent_hit()`, and inspects the sgRNAs of ten hits with
+  `plot_barcode_hit()`, `plot_barcode_trend()`, `plot_barcode_heatmap()`,
+  `find_discordant_barcodes()` and `filter_by_variance()`.
 * Tutorial 3 (finding and validating hits) uses the current functions: a
   sample table and palettes at creation, `theme_set()`, TMM normalization,
   FRY as the recommended test, the empirical null, `plot_common_hit()` with
