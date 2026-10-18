@@ -213,11 +213,13 @@ adjust_p <- function(p, method = c("BH", "storey")) {
 #'               Direction and PValue.
 #' @param direction The requested direction ("Down" or "Up").
 #' @param fdr_method "BH" or "storey".
+#' @param keep_all Whether to retain both observed directions.
 #' @return The result with one-sided PValue and FDR, only for the genes in
-#'         the requested direction.
+#'         the requested direction unless keep_all is TRUE.
 #' @keywords internal
-one_direction <- function(result, direction, fdr_method) {
+one_direction <- function(result, direction, fdr_method, keep_all = FALSE) {
     result$PValue <- one_sided_p(result$PValue, result$Direction, direction)
     result$FDR <- adjust_p(result$PValue, fdr_method)
+    if (keep_all) return(result)
     result[as.character(result$Direction) == direction, ]
 }

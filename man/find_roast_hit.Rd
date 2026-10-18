@@ -15,7 +15,8 @@ find_roast_hit(
   fdr = 0.05,
   seed = NULL,
   method = c("roast", "fry"),
-  fdr_method = c("BH", "storey")
+  fdr_method = c("BH", "storey"),
+  keep_all = FALSE
 )
 }
 \arguments{
@@ -67,9 +68,16 @@ approximation, recommended for large screens).}
 default) or "storey" (Benjamini-Hochberg multiplied by the estimated
 proportion of genes without effect, less conservative when many genes
 have an effect).}
+
+\item{keep_all}{Keep genes with either observed direction (default FALSE).
+Their PValue still tests the requested direction. Use keep_all = TRUE
+and fdr = 1 to obtain complete tables for
+\code{\link{combine_consistent_hits}}. Direction records the observed
+direction; it does not change the direction of the one-sided test.}
 }
 \value{
-A tibble with one row for each hit in the requested direction and
+A tibble with one row for each hit (restricted to the observed
+    requested direction unless keep_all = TRUE) and
     the columns returned by \code{\link[limma]{mroast}} (Gene, NGenes,
     PropDown, PropUp, Direction, PValue, FDR, PValue.Mixed, FDR.Mixed) or
     by \code{\link[limma]{fry}} (without PropDown and PropUp), plus Log2FC,

@@ -148,6 +148,8 @@ reference:
   - plot_empirical_null
   - find_camera_hit
   - find_roast_hit
+  - find_consistent_hit
+  - combine_consistent_hits
   - find_time_hit
 
 - title: Combine and validate hits

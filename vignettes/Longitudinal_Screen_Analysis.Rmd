@@ -639,7 +639,8 @@ none of them exactly.
    *intersection-union test*: the gene is called only if both one-sided
    tests reject, so its p-value is the larger of the two
    (p = max(p<sub>T3</sub>, p<sub>T4</sub>)), corrected for the number of
-   genes. It is the formal test of reproducibility across time points.
+   genes. It tests depletion at every specified time point; it does not
+   establish equal effect sizes or replication in an independent experiment.
 2. **Is the gene depleted on average over the two time points?** The
    `Average` contrast tests the mean of the two treatment effects. It can be
    significant because of one time point only.
@@ -647,21 +648,24 @@ none of them exactly.
    interaction, (T4 treated - T4 control) - (T3 treated - T3 control), tested
    by `find_time_hit()` (next section).
 
+`find_consistent_hit()` runs this test directly, retaining all gene-level
+one-sided p-values before combining them and adjusting across genes. FRY,
+ROAST, CAMERA and gene-level Z-score tests are supported; the interpretation
+follows the chosen method. For complete precomputed tables of one-sided raw
+p-values, use `combine_consistent_hits()`. Missing genes or p-values are errors,
+and filtered hit lists must not be used. Both functions offer BH correction
+or the more conservative BY correction for arbitrary dependence across genes.
+
 ```{r intersection-union}
-genes <- tests$T3$Gene
-both <- tibble(
-    Gene = genes,
-    Log2FC_T3 = tests$T3$Log2FC[match(genes, tests$T3$Gene)],
-    Log2FC_T4 = tests$T4$Log2FC[match(genes, tests$T4$Gene)],
-    P_T3 = tests$T3$PValue[match(genes, tests$T3$Gene)],
-    P_T4 = tests$T4$PValue[match(genes, tests$T4$Gene)]
-) %>%
-    mutate(
-        PValue_both = pmax(P_T3, P_T4),
-        FDR_both = p.adjust(PValue_both, method = "BH"),
-        FDR_average = tests$Average$FDR[match(Gene, tests$Average$Gene)]
-    ) %>%
-    arrange(PValue_both)
+consistent <- find_consistent_hit(object, design,
+    contrasts = contrasts[c("T3", "T4")], method = "fry",
+    direction = "Down", fdr = 1)
+# Keep all genes for the following summaries and classification.
+genes <- consistent$Gene
+both <- consistent %>%
+    rename(P_T3 = PValue_T3, P_T4 = PValue_T4,
+        PValue_both = PValue, FDR_both = FDR) %>%
+    mutate(FDR_average = tests$Average$FDR[match(Gene, tests$Average$Gene)])
 head(both, 5)
 ```
 
@@ -1055,9 +1059,11 @@ The analysis above uses only methods whose statistical formulation fits the
 question. Some questions of a longitudinal design are not fully covered by
 ScreenR at present:
 
-* **No built-in test of reproducibility across time points.** The
-  intersection-union test is computed here from the per-time-point results;
-  ScreenR has no function that does it, or that classifies genes as above.
+* **Consistency does not establish equal effects or independent replication.**
+  `find_consistent_hit()` tests a directional effect at every specified time
+  point. It inherits the assumptions of the per-contrast tests and does not
+  account for repeated cultures unless the underlying design does so. The
+  classification shown above is specific to this analysis.
 * **No equivalence test.** ScreenR can show that a treatment effect changes
   over time (interaction), but not that it is the same at two time points:
   that needs an equivalence test with a margin chosen by the user.

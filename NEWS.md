@@ -1,5 +1,17 @@
 # ScreenR 1.15.16
 
+* `find_consistent_hit()` tests directional effects shared by all supplied
+  contrasts using FRY, ROAST, CAMERA or gene-level Z-scores (random or
+  empirical reference). `combine_consistent_hits()` accepts complete
+  one-sided gene-level p-value tables, combines their raw p-values with an
+  intersection-union test and applies BH or BY correction across genes.
+  Missing or duplicated genes and invalid p-values are errors.
+* `find_camera_hit()` and `find_roast_hit()` gain `keep_all = TRUE` to retain
+  opposite observed directions with their requested one-sided p-values;
+  defaults are unchanged. The longitudinal vignette uses the built-in
+  consistency test.
+
+
 * Palettes: `create_screenr_object(palettes = )` and the new
   `set_palettes()`/`get_palettes()` store colors for the values of the sample
   variables (Treatment, Group, Day, Sample, ...), checked against the

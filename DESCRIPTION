@@ -71,6 +71,7 @@ Collate:
     'empirical_null.R'
     'filter_by.R'
     'find_common_hit.R'
+    'find_consistent_hit.R'
     'find_roast_hit.R'
     'find_robust_zscore_hit.R'
     'find_zscore_hit.R'
