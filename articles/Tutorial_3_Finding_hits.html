@@ -114,92 +114,164 @@ in the treated samples compared with the control samples. In a dropout
 (loss of function) screen the interesting hits are usually depleted:
 their knockdown kills the cells only in the presence of the
 treatment.</p>
-<p>This tutorial explains, step by step:</p>
+<p>This tutorial goes through the functions of ScreenR that find hits
+and check them, one step at a time:</p>
 <ol style="list-style-type: decimal">
-<li>how to tell ScreenR which samples to compare;</li>
-<li>the statistical methods to find hits and how to read their
-results;</li>
-<li>how to combine the methods;</li>
-<li>how to check the candidate hits before trusting them.</li>
+<li>tell ScreenR which samples to compare (design matrix and
+contrasts);</li>
+<li>test each gene with FRY, ROAST and CAMERA;</li>
+<li>test each gene with the Z-score methods;</li>
+<li>compare the methods and combine their results;</li>
+<li>use several time points;</li>
+<li>check the candidates in the data, barcode by barcode.</li>
 </ol>
-<p>It continues from the object of the previous tutorials:</p>
+<p>It uses the example screen of ScreenR. The complete analysis of this
+screen, from the quality control to the list of the genes to validate,
+is in the <a href="Longitudinal_Screen_Analysis.html">longitudinal
+screen vignette</a>; here the focus is on how each function works and
+how to read its result.</p>
+</div>
+<div class="section level2">
+<h2 id="the-data">The data<a class="anchor" aria-label="anchor" href="#the-data"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emanuelsoda.github.io/ScreenR/">ScreenR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<p>The plots of ScreenR have no theme of their own: choose one for the
+whole session with <code><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_light</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The screen has two samples taken before the treatment
+(<code>Time1</code>, before the infection, and <code>Time2</code>, after
+the puromycin selection), then three treated (<code>TRT</code>) and
+three control (<code>CTRL</code>) replicates 7 days (<code>Time3</code>)
+and 14 days (<code>Time4</code>) after the selection. The
+<code>sample_table</code> describes the samples, the <code>groups</code>
+(used by the statistical models) are the combinations of time point and
+treatment, and the <code>palettes</code> give each value of the sample
+variables the same color in every plot.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">count_table</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">annotation_table</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="va">count_table</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"Barcode"</span>, <span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"Time3_TRT_A"</span>, <span class="st">"Time3_TRT_B"</span>, <span class="st">"Time3_TRT_C"</span>,</span>
-<span>    <span class="st">"Time3_CTRL_A"</span>, <span class="st">"Time3_CTRL_B"</span>, <span class="st">"Time3_CTRL_C"</span>,</span>
-<span>    <span class="st">"Time4_TRT_A"</span>, <span class="st">"Time4_TRT_B"</span>, <span class="st">"Time4_TRT_C"</span>,</span>
-<span>    <span class="st">"Time4_CTRL_A"</span>, <span class="st">"Time4_CTRL_B"</span>, <span class="st">"Time4_CTRL_C"</span></span>
+<span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Time3_TRT_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Time3_CTRL_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Time4_TRT_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Time4_CTRL_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time3"</span>, <span class="st">"Time4"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TRT"</span>, <span class="st">"CTRL"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">counts</span>, <span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span></span>
-<span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"T1/T2"</span>, <span class="st">"T1/T2"</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time3_TRT"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time3_CTRL"</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time4_TRT"</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"Time4_CTRL"</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Day</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span><span class="op">)</span>, <span class="st">"T1/T2"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Day</span>, <span class="va">samples</span><span class="op">$</span><span class="va">Treatment</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">count_table</span>, <span class="va">Barcode</span> <span class="op">!=</span> <span class="st">"*"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Barcode"</span>, <span class="va">samples</span><span class="op">$</span><span class="va">Sample</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenr_object.html">create_screenr_object</a></span><span class="op">(</span></span>
-<span>    table <span class="op">=</span> <span class="va">counts</span>, annotation <span class="op">=</span> <span class="va">annotation_table</span>, groups <span class="op">=</span> <span class="va">groups</span></span>
+<span>    table <span class="op">=</span> <span class="va">counts</span>, annotation <span class="op">=</span> <span class="va">annotation_table</span>, groups <span class="op">=</span> <span class="va">groups</span>,</span>
+<span>    sample_table <span class="op">=</span> <span class="va">samples</span>,</span>
+<span>    palettes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Time1 <span class="op">=</span> <span class="st">"#CCCCCC"</span>, Time2 <span class="op">=</span> <span class="st">"#999999"</span>,</span>
+<span>            CTRL <span class="op">=</span> <span class="st">"#1B9E77"</span>, TRT <span class="op">=</span> <span class="st">"#D95F02"</span><span class="op">)</span>,</span>
+<span>        Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Time1 <span class="op">=</span> <span class="st">"#CCCCCC"</span>, Time2 <span class="op">=</span> <span class="st">"#999999"</span>,</span>
+<span>            Time3 <span class="op">=</span> <span class="st">"#7570B3"</span>, Time4 <span class="op">=</span> <span class="st">"#E7298A"</span><span class="op">)</span>,</span>
+<span>        Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`T1/T2` <span class="op">=</span> <span class="st">"#999999"</span>, Time3_CTRL <span class="op">=</span> <span class="st">"#66C2A5"</span>,</span>
+<span>            Time3_TRT <span class="op">=</span> <span class="st">"#FC8D62"</span>, Time4_CTRL <span class="op">=</span> <span class="st">"#1B9E77"</span>,</span>
+<span>            Time4_TRT <span class="op">=</span> <span class="st">"#D95F02"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/remove_all_zero_row.html">remove_all_zero_row</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
-<span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
-<span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_data_table.html">compute_data_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/get_sample_table.html">get_sample_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 3</span></span></span>
+<span><span class="co">#&gt;    Sample       Day   Treatment</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Time1        Time1 Time1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Time2        Time2 Time2    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Time3_TRT_A  Time3 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Time3_TRT_B  Time3 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Time3_TRT_C  Time3 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Time3_CTRL_A Time3 CTRL     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Time3_CTRL_B Time3 CTRL     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Time3_CTRL_C Time3 CTRL     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Time4_TRT_A  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Time4_TRT_B  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> Time4_TRT_C  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> Time4_CTRL_A Time4 CTRL     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> Time4_CTRL_B Time4 CTRL     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> Time4_CTRL_C Time4 CTRL</span></span></code></pre></div>
+<p>The counts are normalized once, and the same normalization is used by
+every function below: the hit-finding methods, the fold changes and the
+plots. TMM is used here, as in the longitudinal vignette (see
+<code><a href="../reference/normalize_data.html">?normalize_data</a></code> for the methods and for when TMM is
+biased).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span>, method <span class="op">=</span> <span class="st">"tmm"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/get_normalization.html">get_normalization</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">method</span></span>
+<span><span class="co">#&gt; [1] "tmm"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="overview-of-the-methods">Overview of the methods<a class="anchor" aria-label="anchor" href="#overview-of-the-methods"></a>
 </h2>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="14%">
+<col width="13%">
+<col width="16%">
+<col width="24%">
 <col width="18%">
-<col width="10%">
-<col width="25%">
-<col width="30%">
+<col width="27%">
 </colgroup>
 <thead><tr class="header">
 <th>Method</th>
 <th>Function</th>
-<th>Unit</th>
-<th>Gives an FDR</th>
+<th>What it tests</th>
+<th>Reference</th>
 <th>Uses replicates</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Gene-level Z-score test</td>
-<td><code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code></td>
-<td>Compares the mean Z-score of the barcodes of each gene with random
-sets of barcodes</td>
+<td>FRY</td>
+<td><code>find_roast_hit(method = "fry")</code></td>
+<td>The barcodes of the gene change</td>
+<td>None (self-contained)</td>
 <td>Yes</td>
-<td>With <code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code>
-</td>
 </tr>
 <tr class="even">
-<td>CAMERA</td>
-<td><code><a href="../reference/find_camera_hit.html">find_camera_hit()</a></code></td>
-<td>Tests whether the barcodes of a gene change more than the
-others</td>
-<td>Yes</td>
+<td>ROAST</td>
+<td><code><a href="../reference/find_roast_hit.html">find_roast_hit()</a></code></td>
+<td>As FRY, with random rotations</td>
+<td>None (self-contained)</td>
 <td>Yes</td>
 </tr>
 <tr class="odd">
-<td>ROAST</td>
-<td><code><a href="../reference/find_roast_hit.html">find_roast_hit()</a></code></td>
-<td>Tests whether the barcodes of a gene change</td>
+<td>CAMERA</td>
+<td><code><a href="../reference/find_camera_hit.html">find_camera_hit()</a></code></td>
+<td>The barcodes of the gene change more than the others</td>
+<td>The other genes (competitive)</td>
 <td>Yes</td>
+</tr>
+<tr class="even">
+<td>Gene-level Z-score</td>
+<td><code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code></td>
+<td>The mean Z-score of the barcodes of the gene is extreme</td>
+<td>Random sets of barcodes, or the empirical null</td>
+<td>With <code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code>
+</td>
+</tr>
+<tr class="odd">
+<td>All time points</td>
+<td><code><a href="../reference/find_consistent_hit.html">find_consistent_hit()</a></code></td>
+<td>The gene changes at every time point</td>
+<td>As the chosen method</td>
 <td>Yes</td>
 </tr>
 <tr class="even">
 <td>Time course</td>
 <td><code><a href="../reference/find_time_hit.html">find_time_hit()</a></code></td>
-<td>Tests whether the treatment effect changes over time</td>
-<td>Yes</td>
+<td>The treatment effect changes over time</td>
+<td>None</td>
 <td>Yes</td>
 </tr>
 <tr class="odd">
@@ -209,7 +281,7 @@ others</td>
 <code><a href="../reference/find_robust_zscore_hit.html">find_robust_zscore_hit()</a></code>
 </td>
 <td>Counts barcodes below the median Z-score</td>
-<td>No</td>
+<td>None</td>
 <td>No</td>
 </tr>
 </tbody>
@@ -219,13 +291,13 @@ proportion of false hits among the genes you call hits: with an FDR cut
 off of 5%, about 1 in 20 of the reported genes is expected to be a false
 positive. Each method returns only the genes with
 <code>FDR &lt;= fdr</code> (default 0.05); use <code>fdr = 1</code> to
-get all the genes and rank them yourself.</p>
+get all the genes and rank them yourself, as done below.</p>
 </div>
 <div class="section level2">
 <h2 id="step-1-which-samples-to-compare">Step 1: which samples to compare<a class="anchor" aria-label="anchor" href="#step-1-which-samples-to-compare"></a>
 </h2>
-<p>CAMERA, ROAST and the replicate-aware statistics use a linear model,
-which needs two things:</p>
+<p>The methods that use the replicates fit a linear model, which needs
+two things:</p>
 <ul>
 <li>a <strong>design matrix</strong>, which says which group each sample
 belongs to;</li>
@@ -236,7 +308,7 @@ compare.</li>
 groups of the object: one column per group, and a 1 in the column of the
 group of each sample. Group names that are not valid R names are changed
 (<code>T1/T2</code> becomes <code>T1.T2</code>).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_design_matrix.html">create_design_matrix</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="va">design</span></span>
 <span><span class="co">#&gt;              T1.T2 Time3_CTRL Time3_TRT Time4_CTRL Time4_TRT</span></span>
@@ -261,7 +333,7 @@ group of each sample. Group names that are not valid R names are changed
 <span><span class="co">#&gt; [1] "contr.treatment"</span></span></code></pre></div>
 <p><code><a href="../reference/create_contrast.html">create_contrast()</a></code> builds the comparison between groups
 by name: here treated against control at each time point.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">contrast_time3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_contrast.html">create_contrast</a></span><span class="op">(</span><span class="va">design</span>,</span>
 <span>    treatment <span class="op">=</span> <span class="st">"Time3_TRT"</span>, control <span class="op">=</span> <span class="st">"Time3_CTRL"</span></span>
 <span><span class="op">)</span></span>
@@ -281,11 +353,121 @@ used.</p>
 group becomes the intercept and the columns are in alphabetical order,
 so the names end up on the wrong columns and the wrong samples are
 compared. <code><a href="../reference/create_design_matrix.html">create_design_matrix()</a></code> and
-<code><a href="../reference/create_contrast.html">create_contrast()</a></code> avoid this.</p>
-<p>The examples below compare treated and control samples at Time4.</p>
+<code><a href="../reference/create_contrast.html">create_contrast()</a></code> avoid this, and every function that takes
+a design checks that its rows are the samples of the object, in the same
+order.</p>
+<p>The examples below compare treated and control samples at Time4, the
+time point with the larger effect.</p>
 </div>
 <div class="section level2">
-<h2 id="step-2-the-z-score-method">Step 2: the Z-score method<a class="anchor" aria-label="anchor" href="#step-2-the-z-score-method"></a>
+<h2 id="step-2-fry-roast-and-camera">Step 2: FRY, ROAST and CAMERA<a class="anchor" aria-label="anchor" href="#step-2-fry-roast-and-camera"></a>
+</h2>
+<p>These methods test the barcodes of each gene as a set, with edgeR on
+the raw counts and the normalization of the object.</p>
+<ul>
+<li>
+<strong>FRY and ROAST</strong> ask whether the barcodes of a gene
+<strong>change at all</strong> (a self-contained test). ROAST uses
+random rotations: set <code>seed</code> to get the same result every
+time and use many rotations (<code>nrot</code>, default 9999) for a real
+analysis; here 999 keep the tutorial fast. FRY
+(<code>method = "fry"</code>) computes the same test exactly, without
+rotations: it is faster, its p-values are not limited by the number of
+rotations, and it is the recommended choice.</li>
+<li>
+<strong>CAMERA</strong> asks whether the barcodes of a gene change
+<strong>more than the other barcodes</strong> (a competitive test),
+taking into account the correlation between barcodes.</li>
+</ul>
+<p>The two kinds of tests answer different questions. A self-contained
+test calls a gene when its barcodes are depleted more than the
+replicates vary, even if many genes are depleted; a competitive test
+calls it only when it stands out from the rest of the library, so it
+becomes conservative when many genes have an effect. On the other hand
+FRY and ROAST rely on the variability between replicates: they need
+replicates in both groups, have little power with two replicates or
+noisy data, and find almost nothing when the control is a single sample
+(for example a plasmid library). All the p-values are one-sided, for the
+requested direction.</p>
+<p><code>number_barcode</code> sets the minimum number of barcodes (more
+than <code>number_barcode</code>) a gene needs to be tested, and
+<code>direction</code> chooses depleted (<code>"Down"</code>) or
+enriched (<code>"Up"</code>) genes.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fry</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"fry"</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fry</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
+<span><span class="co">#&gt;   Gene     NGenes Direction    PValue    FDR  PValue.Mixed  FDR.Mixed Log2FC</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173     10 Down      0.000<span style="text-decoration: underline;">089</span>1 0.019<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">002</span>44    0.000<span style="text-decoration: underline;">217</span>   -<span style="color: #BB0000;">0.500</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422     10 Down      0.000<span style="text-decoration: underline;">093</span>3 0.019<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">052</span>5     0.001<span style="text-decoration: underline;">56</span>    -<span style="color: #BB0000;">0.419</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_412     10 Down      0.000<span style="text-decoration: underline;">107</span>  0.019<span style="text-decoration: underline;">1</span> 0.000<span style="text-decoration: underline;">005</span>79    0.000<span style="text-decoration: underline;">309</span>   -<span style="color: #BB0000;">0.311</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_15      10 Down      0.000<span style="text-decoration: underline;">166</span>  0.019<span style="text-decoration: underline;">1</span> 0.007<span style="text-decoration: underline;">24</span>       0.039<span style="text-decoration: underline;">0</span>     -<span style="color: #BB0000;">0.310</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">179</span>  0.019<span style="text-decoration: underline;">1</span> 0.015<span style="text-decoration: underline;">8</span>        0.061<span style="text-decoration: underline;">5</span>     -<span style="color: #BB0000;">0.491</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_349     10 Down      0.000<span style="text-decoration: underline;">365</span>  0.032<span style="text-decoration: underline;">5</span> 0.000<span style="text-decoration: underline;">000</span>006<span style="text-decoration: underline;">78</span> 0.000<span style="text-decoration: underline;">001</span>21 -<span style="color: #BB0000;">0.167</span></span></span>
+<span></span>
+<span><span class="va">roast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span>,</span>
+<span>    nrot <span class="op">=</span> <span class="fl">999</span>, seed <span class="op">=</span> <span class="fl">42</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">camera</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span>, fdr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">camera</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   Gene     NGenes Direction   PValue    FDR Log2FC</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173     10 Down      0.000<span style="text-decoration: underline;">218</span> 0.076<span style="text-decoration: underline;">7</span> -<span style="color: #BB0000;">0.500</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">421</span> 0.076<span style="text-decoration: underline;">7</span> -<span style="color: #BB0000;">0.491</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_422     10 Down      0.000<span style="text-decoration: underline;">431</span> 0.076<span style="text-decoration: underline;">7</span> -<span style="color: #BB0000;">0.419</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_352     10 Down      0.001<span style="text-decoration: underline;">79</span>  0.230  -<span style="color: #BB0000;">0.455</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_87      10 Down      0.002<span style="text-decoration: underline;">41</span>  0.230  -<span style="color: #BB0000;">0.422</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_370     10 Down      0.003<span style="text-decoration: underline;">00</span>  0.230  -<span style="color: #BB0000;">0.330</span></span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="47%">
+<col width="52%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>NGenes</code></td>
+<td>Number of barcodes of the gene</td>
+</tr>
+<tr class="even">
+<td><code>Direction</code></td>
+<td>Down or Up</td>
+</tr>
+<tr class="odd">
+<td>
+<code>PValue</code>, <code>FDR</code>
+</td>
+<td>Significance for the requested direction</td>
+</tr>
+<tr class="even">
+<td>
+<code>PValue.Mixed</code>, <code>FDR.Mixed</code> (FRY, ROAST)</td>
+<td>Significance of a change in either direction of the barcodes</td>
+</tr>
+<tr class="odd">
+<td>
+<code>PropDown</code>, <code>PropUp</code> (ROAST)</td>
+<td>Proportion of barcodes going down or up</td>
+</tr>
+<tr class="even">
+<td><code>Log2FC</code></td>
+<td>Median log2 fold change of the barcodes</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>PValue</code> and <code>FDR</code>: the “Mixed” columns
+test whether the barcodes change in any direction, so they also call
+genes whose barcodes disagree.</p>
+</div>
+<div class="section level2">
+<h2 id="step-3-the-z-score-methods">Step 3: the Z-score methods<a class="anchor" aria-label="anchor" href="#step-3-the-z-score-methods"></a>
 </h2>
 <div class="section level3">
 <h3 id="fold-changes-and-z-scores">Fold changes and Z-scores<a class="anchor" aria-label="anchor" href="#fold-changes-and-z-scores"></a>
@@ -329,76 +511,98 @@ outliers</td>
 <p>The <code>treatment</code> and <code>control</code> arguments are
 values of the Treatment column of <code><a href="../reference/get_sample_table.html">get_sample_table()</a></code>, and
 <code>day</code> a value of its Day column.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metrics_time4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">metrics_time3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span>    control <span class="op">=</span> <span class="st">"CTRL"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>, day <span class="op">=</span> <span class="st">"Time3"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">metrics_time4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    control <span class="op">=</span> <span class="st">"CTRL"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>, day <span class="op">=</span> <span class="st">"Time4"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">metrics_time4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 9</span></span></span>
-<span><span class="co">#&gt;   Barcode Gene     Treated Control  Log2FC Zscore ZscoreRobust Day   Treatment</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208   Gene_380   387.    362.   0.096<span style="text-decoration: underline;">5</span>  0.289        0.332 Time4 TRT      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502   Gene_380    27.3    37.6 -<span style="color: #BB0000;">0.458</span>  -<span style="color: #BB0000;">0.869</span>       -<span style="color: #BB0000;">1.26</span>  Time4 TRT      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796   Gene_380    35.0    58.4 -<span style="color: #BB0000;">0.732</span>  -<span style="color: #BB0000;">1.44</span>        -<span style="color: #BB0000;">2.04</span>  Time4 TRT      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 11089   Gene_380   289.    324.  -<span style="color: #BB0000;">0.167</span>  -<span style="color: #BB0000;">0.261</span>       -<span style="color: #BB0000;">0.424</span> Time4 TRT      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 11382   Gene_380    26.3    42.6 -<span style="color: #BB0000;">0.683</span>  -<span style="color: #BB0000;">1.34</span>        -<span style="color: #BB0000;">1.90</span>  Time4 TRT      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11675   Gene_380   799.    974.  -<span style="color: #BB0000;">0.286</span>  -<span style="color: #BB0000;">0.511</span>       -<span style="color: #BB0000;">0.766</span> Time4 TRT</span></span></code></pre></div>
+<span><span class="co">#&gt;   Barcode Gene     Treated Control Log2FC Zscore ZscoreRobust Day   Treatment</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208   Gene_380   395.    365.   0.111  0.289        0.331 Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502   Gene_380    27.8    37.9 -<span style="color: #BB0000;">0.441</span> -<span style="color: #BB0000;">0.863</span>       -<span style="color: #BB0000;">1.25</span>  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796   Gene_380    35.7    59.0 -<span style="color: #BB0000;">0.718</span> -<span style="color: #BB0000;">1.44</span>        -<span style="color: #BB0000;">2.04</span>  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 11089   Gene_380   294.    327.  -<span style="color: #BB0000;">0.152</span> -<span style="color: #BB0000;">0.259</span>       -<span style="color: #BB0000;">0.421</span> Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 11382   Gene_380    26.8    43.0 -<span style="color: #BB0000;">0.671</span> -<span style="color: #BB0000;">1.34</span>        -<span style="color: #BB0000;">1.91</span>  Time4 TRT      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11675   Gene_380   813.    982.  -<span style="color: #BB0000;">0.272</span> -<span style="color: #BB0000;">0.509</span>       -<span style="color: #BB0000;">0.764</span> Time4 TRT</span></span></code></pre></div>
 <p><code><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution()</a></code> compares the Z-scores of
 several time points: a treatment with an effect gives a longer left tail
-at the later time point.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metrics_time3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    control <span class="op">=</span> <span class="st">"CTRL"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>, day <span class="op">=</span> <span class="st">"Time3"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution</a></span><span class="op">(</span></span>
+at the later time point. It receives the tables, not the object, so the
+palette of the time points is given explicitly to keep the colors of the
+other plots:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="va">metrics_time3</span>, Time4 <span class="op">=</span> <span class="va">metrics_time4</span><span class="op">)</span>,</span>
-<span>    alpha <span class="op">=</span> <span class="fl">0.6</span></span>
+<span>    alpha <span class="op">=</span> <span class="fl">0.6</span>, palette <span class="op">=</span> <span class="fu"><a href="../reference/get_palettes.html">get_palettes</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">Day</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/zscore-distribution-1.png" class="r-plt" alt="" width="672"></p>
+</div>
+<div class="section level3">
+<h3 id="using-the-replicates">Using the replicates<a class="anchor" aria-label="anchor" href="#using-the-replicates"></a>
+</h3>
+<p><code><a href="../reference/compute_metrics.html">compute_metrics()</a></code> averages the replicates, so it cannot
+tell a consistent barcode from a noisy one.
+<code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code> tests each barcode with edgeR,
+using the variability between replicates, and returns a Z-score with the
+same columns. This is the recommended input of the gene-level test.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">barcode_statistics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics</a></span><span class="op">(</span></span>
+<span>    <span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">barcode_statistics</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
+<span><span class="co">#&gt;   Barcode Gene     Log2FC logCPM     F PValue   FDR Zscore</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208   Gene_380  0.124   8.56 0.566 0.455  0.801  0.748</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502   Gene_380 -<span style="color: #BB0000;">0.464</span>   4.97 0.702 0.405  0.776 -<span style="color: #BB0000;">0.832</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796   Gene_380 -<span style="color: #BB0000;">0.650</span>   6.60 2.36  0.129  0.525 -<span style="color: #BB0000;">1.52</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 11089   Gene_380 -<span style="color: #BB0000;">0.153</span>   8.44 0.818 0.369  0.749 -<span style="color: #BB0000;">0.898</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 11382   Gene_380 -<span style="color: #BB0000;">0.636</span>   5.62 1.37  0.247  0.655 -<span style="color: #BB0000;">1.16</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11675   Gene_380 -<span style="color: #BB0000;">0.271</span>   9.66 5.92  0.017<span style="text-decoration: underline;">8</span> 0.251 -<span style="color: #BB0000;">2.37</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="gene-level-test">Gene-level test<a class="anchor" aria-label="anchor" href="#gene-level-test"></a>
 </h3>
 <p><code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code> computes for each gene the mean
-Z-score of its barcodes and asks how often a random set of barcodes of
-the same size has a score at least as low
-(<code>direction = "Down"</code>). The random sets are drawn many times
-(<code>n_permutations</code>), so the p-value needs no assumption on the
-distribution of the Z-scores; <code>seed</code> makes it reproducible.
-The p-values are then corrected for testing many genes (FDR).</p>
-<p>If the library has control genes, their gene name can be given with
-<code>control_genes</code> (for example
-<code>control_genes = "non-targeting"</code>): the random sets are then
-drawn from the controls, which cannot contain true hits. Do this only if
-the controls behave like genes without effect. Non-targeting shRNAs
-often do not: targeting shRNAs are usually somewhat depleted compared
-with them, so every gene looks depleted (in the K562 screen of ScreenR
-this called hundreds of non-essential genes). Check first that the
-controls have the same scores as genes known to have no effect; when in
-doubt, keep the default. <code>statistic = "median"</code> uses the
-median instead of the mean, which is less affected by a single barcode
-with a strong (possibly off-target) effect.</p>
-<p>With <code>reference = "empirical"</code> the gene scores are
-compared with an empirical null instead: the distribution of the scores
+Z-score of its barcodes (<code>statistic = "median"</code> uses the
+median, which is less affected by a single barcode with a strong,
+possibly off-target, effect) and compares it with a reference
+distribution:</p>
+<ul>
+<li>
+<code>reference = "random"</code> (default): the scores of random
+sets of barcodes of the same size, drawn <code>n_permutations</code>
+times (<code>seed</code> makes it reproducible). With
+<code>control_genes</code> the random sets are drawn from control genes
+instead. Do this only if the controls behave like genes without effect:
+non-targeting shRNAs often do not (targeting shRNAs are usually somewhat
+depleted compared with them, so every gene looks depleted).</li>
+<li>
+<code>reference = "empirical"</code>: the distribution of the scores
 of the genes without effect, estimated from the centre of the
-distribution of all the genes (<code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code> shows
-it). The hits do not make it conservative, and it accounts for the
-barcodes of a gene varying together, which makes the random sets of
-barcodes give too small p-values, especially in shRNA screens (see
-<code><a href="../reference/find_gene_zscore_hit.html">?find_gene_zscore_hit</a></code> and <a href="Tutorial_4_CRISPR_screens.html">Tutorial 4</a>). It needs a
-library with hundreds of genes, most of them without effect.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gene_zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">metrics_time4</span>, fdr <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene_zscore</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
-<span><span class="co">#&gt;   Gene     NBarcodes  Score Log2FC     PValue     FDR</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_364        12 -<span style="color: #BB0000;">1.55</span>  -<span style="color: #BB0000;">0.473</span> 0.000<span style="text-decoration: underline;">010</span>00 0.005<span style="text-decoration: underline;">34</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_296        10 -<span style="color: #BB0000;">1.31</span>  -<span style="color: #BB0000;">0.499</span> 0.000<span style="text-decoration: underline;">440</span>   0.117  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_322        10 -<span style="color: #BB0000;">1.13</span>  -<span style="color: #BB0000;">0.386</span> 0.001<span style="text-decoration: underline;">59</span>    0.283  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_419        10 -<span style="color: #BB0000;">1.08</span>  -<span style="color: #BB0000;">0.311</span> 0.002<span style="text-decoration: underline;">17</span>    0.290  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_352        10 -<span style="color: #BB0000;">1.02</span>  -<span style="color: #BB0000;">0.455</span> 0.003<span style="text-decoration: underline;">26</span>    0.348  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_422        10 -<span style="color: #BB0000;">0.951</span> -<span style="color: #BB0000;">0.430</span> 0.004<span style="text-decoration: underline;">82</span>    0.429</span></span></code></pre></div>
+distribution of all the genes. It accounts for the barcodes of a gene
+varying together, which makes the random sets give too small p-values,
+especially in shRNA screens. It needs a library with hundreds of genes,
+most of them without effect (see the <a href="Empirical_null.html">empirical null vignette</a>).</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">barcode_statistics</span>, fdr <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">zscore_empirical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">barcode_statistics</span>,</span>
+<span>    reference <span class="op">=</span> <span class="st">"empirical"</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">zscore_empirical</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt;   Gene     NBarcodes Score Log2FC Statistic   PValue    FDR</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173        10 -<span style="color: #BB0000;">1.53</span> -<span style="color: #BB0000;">0.506</span>     -<span style="color: #BB0000;">3.65</span> 0.000<span style="text-decoration: underline;">135</span> 0.071<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422        10 -<span style="color: #BB0000;">1.39</span> -<span style="color: #BB0000;">0.436</span>     -<span style="color: #BB0000;">3.31</span> 0.000<span style="text-decoration: underline;">474</span> 0.127 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_15         10 -<span style="color: #BB0000;">1.31</span> -<span style="color: #BB0000;">0.305</span>     -<span style="color: #BB0000;">3.12</span> 0.000<span style="text-decoration: underline;">901</span> 0.155 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_296        10 -<span style="color: #BB0000;">1.28</span> -<span style="color: #BB0000;">0.477</span>     -<span style="color: #BB0000;">3.05</span> 0.001<span style="text-decoration: underline;">16</span>  0.155 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_370        10 -<span style="color: #BB0000;">1.19</span> -<span style="color: #BB0000;">0.378</span>     -<span style="color: #BB0000;">2.83</span> 0.002<span style="text-decoration: underline;">35</span>  0.223 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_168        10 -<span style="color: #BB0000;">1.15</span> -<span style="color: #BB0000;">0.242</span>     -<span style="color: #BB0000;">2.74</span> 0.003<span style="text-decoration: underline;">06</span>  0.223</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th>Column</th>
@@ -425,43 +629,14 @@ library with hundreds of genes, most of them without effect.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level3">
-<h3 id="using-the-replicates">Using the replicates<a class="anchor" aria-label="anchor" href="#using-the-replicates"></a>
-</h3>
-<p><code><a href="../reference/compute_metrics.html">compute_metrics()</a></code> averages the replicates, so it cannot
-tell a consistent barcode from a noisy one.
-<code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code> tests each barcode with edgeR,
-using the variability between replicates, and returns a Z-score that can
-be used by <code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code> in the same way. This is
-the recommended input.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">barcode_statistics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics</a></span><span class="op">(</span></span>
-<span>    <span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">barcode_statistics</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   Barcode Gene     Log2FC logCPM     F PValue   FDR Zscore</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 10208   Gene_380  0.109   8.56 0.438 0.510  0.835  0.658</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10502   Gene_380 -<span style="color: #BB0000;">0.480</span>   4.97 0.748 0.390  0.765 -<span style="color: #BB0000;">0.859</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10796   Gene_380 -<span style="color: #BB0000;">0.665</span>   6.61 2.49  0.120  0.515 -<span style="color: #BB0000;">1.56</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 11089   Gene_380 -<span style="color: #BB0000;">0.169</span>   8.44 0.992 0.323  0.716 -<span style="color: #BB0000;">0.988</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 11382   Gene_380 -<span style="color: #BB0000;">0.651</span>   5.62 1.44  0.235  0.643 -<span style="color: #BB0000;">1.19</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11675   Gene_380 -<span style="color: #BB0000;">0.286</span>   9.66 6.71  0.011<span style="text-decoration: underline;">9</span> 0.219 -<span style="color: #BB0000;">2.51</span></span></span>
-<span></span>
-<span><span class="va">gene_zscore_edger</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">barcode_statistics</span>, fdr <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>    seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene_zscore_edger</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
-<span><span class="co">#&gt;   Gene     NBarcodes Score Log2FC   PValue   FDR</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173        10 -<span style="color: #BB0000;">1.58</span> -<span style="color: #BB0000;">0.521</span> 0.000<span style="text-decoration: underline;">240</span> 0.128</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422        10 -<span style="color: #BB0000;">1.45</span> -<span style="color: #BB0000;">0.451</span> 0.000<span style="text-decoration: underline;">700</span> 0.187</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_15         10 -<span style="color: #BB0000;">1.37</span> -<span style="color: #BB0000;">0.321</span> 0.001<span style="text-decoration: underline;">31</span>  0.233</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_296        10 -<span style="color: #BB0000;">1.31</span> -<span style="color: #BB0000;">0.493</span> 0.001<span style="text-decoration: underline;">87</span>  0.250</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_370        10 -<span style="color: #BB0000;">1.24</span> -<span style="color: #BB0000;">0.394</span> 0.003<span style="text-decoration: underline;">04</span>  0.280</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_168        10 -<span style="color: #BB0000;">1.21</span> -<span style="color: #BB0000;">0.256</span> 0.003<span style="text-decoration: underline;">55</span>  0.280</span></span></code></pre></div>
+<p><code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code> shows the gene scores and the
+fitted null, which should follow the centre of the distribution:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_empirical_null.html">plot_empirical_null</a></span><span class="op">(</span><span class="va">barcode_statistics</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/empirical-null-1.png" class="r-plt" alt="" width="672"></p>
+<p>Here the null is almost the standard normal (mean 0.01, standard
+deviation 1), with no long tail of depleted genes: the treatment effect
+is moderate and concerns a few genes.</p>
 </div>
 <div class="section level3">
 <h3 id="legacy-rules">Legacy rules<a class="anchor" aria-label="anchor" href="#legacy-rules"></a>
@@ -473,282 +648,335 @@ Z-score. They are kept for compatibility, but they do not give a p-value
 and many genes without an effect pass them by chance (about 17% with 10
 barcodes and <code>number_barcode = 6</code>): prefer
 <code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span><span class="va">metrics_time4</span>, number_barcode <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 97</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="step-3-camera-and-roast">Step 3: CAMERA and ROAST<a class="anchor" aria-label="anchor" href="#step-3-camera-and-roast"></a>
-</h2>
-<p>Both test the barcodes of each gene as a set, using edgeR on the raw
-counts.</p>
-<ul>
-<li>
-<strong>CAMERA</strong> asks whether the barcodes of a gene change
-<strong>more than the other barcodes</strong> (a competitive test),
-taking into account the correlation between barcodes.</li>
-<li>
-<strong>ROAST</strong> asks whether the barcodes of a gene
-<strong>change at all</strong> (a self-contained test). It uses random
-rotations: set <code>seed</code> to get the same result every time, and
-use many rotations (<code>nrot</code>, default 9999) for a real
-analysis; here 999 keep the tutorial fast. With
-<code>method = "fry"</code> the same test is computed exactly, without
-rotations: it is faster and its p-values are not limited by the number
-of rotations.</li>
-</ul>
-<p>CAMERA becomes conservative when many genes have an effect, because
-the other barcodes it compares with then include true hits; ROAST and
-fry do not have this limitation. On the other hand ROAST and fry test
-each gene on its own barcodes, so they rely on the variability between
-replicates: they need replicates in both groups, have little power with
-two replicates or noisy data, and find almost nothing when the control
-is a single sample (for example a plasmid library). The p-values of all
-three are one-sided, for the requested direction.</p>
-<p><code>number_barcode</code> sets the minimum number of barcodes (more
-than <code>number_barcode</code>) a gene needs to be tested, and
-<code>direction</code> chooses depleted (<code>"Down"</code>) or
-enriched (<code>"Up"</code>) genes.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">camera</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span>, fdr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">camera</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
-<span><span class="co">#&gt;   Gene     NGenes Direction   PValue    FDR Log2FC</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173     10 Down      0.000<span style="text-decoration: underline;">214</span> 0.088<span style="text-decoration: underline;">2</span> -<span style="color: #BB0000;">0.515</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422     10 Down      0.000<span style="text-decoration: underline;">418</span> 0.088<span style="text-decoration: underline;">2</span> -<span style="color: #BB0000;">0.433</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">495</span> 0.088<span style="text-decoration: underline;">2</span> -<span style="color: #BB0000;">0.508</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_352     10 Down      0.002<span style="text-decoration: underline;">00</span>  0.232  -<span style="color: #BB0000;">0.467</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_87      10 Down      0.002<span style="text-decoration: underline;">50</span>  0.232  -<span style="color: #BB0000;">0.436</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_370     10 Down      0.002<span style="text-decoration: underline;">95</span>  0.232  -<span style="color: #BB0000;">0.344</span></span></span>
-<span></span>
-<span><span class="va">roast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_roast_hit.html">find_roast_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast_time4</span>,</span>
-<span>    nrot <span class="op">=</span> <span class="fl">999</span>, seed <span class="op">=</span> <span class="fl">42</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">roast</span>, <span class="va">Gene</span>, <span class="va">NGenes</span>, <span class="va">PropDown</span>, <span class="va">PropUp</span>, <span class="va">Direction</span>, <span class="va">PValue</span>, <span class="va">FDR</span>,</span>
-<span>    <span class="va">Log2FC</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   Gene     NGenes PropDown PropUp Direction PValue    FDR Log2FC</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_296     10      0.6    0   Down      0.000<span style="text-decoration: underline;">5</span> 0.053<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.508</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_173     10      0.5    0.1 Down      0.000<span style="text-decoration: underline;">5</span> 0.053<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.515</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_412     10      0.5    0.1 Down      0.000<span style="text-decoration: underline;">5</span> 0.053<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.325</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_422     10      0.5    0   Down      0.000<span style="text-decoration: underline;">5</span> 0.053<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.433</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_325     10      0.3    0.1 Down      0.000<span style="text-decoration: underline;">5</span> 0.053<span style="text-decoration: underline;">4</span> -<span style="color: #BB0000;">0.246</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_15      10      0.5    0   Down      0.001  0.066<span style="text-decoration: underline;">8</span> -<span style="color: #BB0000;">0.325</span></span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="47%">
-<col width="52%">
-</colgroup>
-<thead><tr class="header">
-<th>Column</th>
-<th>Meaning</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><code>NGenes</code></td>
-<td>Number of barcodes of the gene</td>
-</tr>
-<tr class="even">
-<td><code>Direction</code></td>
-<td>Down or Up</td>
-</tr>
-<tr class="odd">
-<td>
-<code>PValue</code>, <code>FDR</code>
-</td>
-<td>Significance</td>
-</tr>
-<tr class="even">
-<td>
-<code>PropDown</code>, <code>PropUp</code> (ROAST)</td>
-<td>Proportion of barcodes going down or up</td>
-</tr>
-<tr class="odd">
-<td><code>Log2FC</code></td>
-<td>Median log2 fold change of the barcodes</td>
-</tr>
-</tbody>
-</table>
-<p>How many genes pass different FDR cut offs:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fdr_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>    FDR <span class="op">=</span> <span class="va">fdr_levels</span>,</span>
-<span>    zscore <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">fdr_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">gene_zscore_edger</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">x</span><span class="op">)</span>,</span>
-<span>        <span class="fl">1L</span><span class="op">)</span>,</span>
-<span>    CAMERA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">fdr_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">camera</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">x</span><span class="op">)</span>, <span class="fl">1L</span><span class="op">)</span>,</span>
-<span>    ROAST <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">fdr_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">roast</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">x</span><span class="op">)</span>, <span class="fl">1L</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 4</span></span></span>
-<span><span class="co">#&gt;     FDR zscore CAMERA ROAST</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  0.05      0      0     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  0.1       0      3    11</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  0.25      4      7    55</span></span></code></pre></div>
-<p>The effect of the treatment in this example is weak: no gene reaches
-an FDR of 5%. In the rest of the tutorial we use 25% to illustrate the
-steps; in your own analysis, choose the cut off before looking at the
-results and report it.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fl">0.25</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="step-4-the-time-course">Step 4: the time course<a class="anchor" aria-label="anchor" href="#step-4-the-time-course"></a>
-</h2>
-<p>When the screen has several time points, <code><a href="../reference/find_time_hit.html">find_time_hit()</a></code>
-asks whether the treatment effect <strong>changes over time</strong>,
-with one model for all the time points instead of one analysis per time
-point. Untreated and treated samples each follow a line over time; the
-method tests the difference between the slopes. Early samples taken
-before the treatment can be added as <code>baseline</code>. The time
-points are given in order with <code>days</code> and are treated as
-equally spaced.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">time_hit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_time_hit.html">find_time_hit</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    treatment <span class="op">=</span> <span class="st">"TRT"</span>, control <span class="op">=</span> <span class="st">"CTRL"</span>,</span>
-<span>    baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span><span class="op">)</span>,</span>
-<span>    days <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"Time3"</span>, <span class="st">"Time4"</span><span class="op">)</span>,</span>
-<span>    fdr <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">time_hit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
-<span><span class="co">#&gt;   Gene     NGenes Direction      PValue       FDR Log2FC</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_372     12 Down      0.000<span style="text-decoration: underline;">000</span>157 0.000<span style="text-decoration: underline;">083</span>6 -<span style="color: #BB0000;">0.974</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">000</span>706 0.000<span style="text-decoration: underline;">135</span>  -<span style="color: #BB0000;">1.17</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_364     12 Down      0.000<span style="text-decoration: underline;">000</span>760 0.000<span style="text-decoration: underline;">135</span>  -<span style="color: #BB0000;">1.01</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_412     10 Down      0.000<span style="text-decoration: underline;">112</span>    0.014<span style="text-decoration: underline;">9</span>    -<span style="color: #BB0000;">0.815</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_370     10 Down      0.000<span style="text-decoration: underline;">565</span>    0.060<span style="text-decoration: underline;">4</span>    -<span style="color: #BB0000;">0.389</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_349     10 Down      0.003<span style="text-decoration: underline;">76</span>     0.318     -<span style="color: #BB0000;">0.192</span></span></span></code></pre></div>
-<p>Here <code>Log2FC</code> is the change of the treatment log2 fold
-change per time point: a negative value means that the depletion grows
-over time. In this dataset 4 genes have an FDR below 5% (Gene_372,
-Gene_296, Gene_364, Gene_412): the time course model is more powerful
-here than the comparison at a single time point, because it uses all the
-samples.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/find_zscore_hit.html">find_zscore_hit</a></span><span class="op">(</span><span class="va">metrics_time4</span>, number_barcode <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 96</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="step-5-combining-the-methods">Step 5: combining the methods<a class="anchor" aria-label="anchor" href="#step-5-combining-the-methods"></a>
+<h2 id="step-4-comparing-and-combining-the-methods">Step 4: comparing and combining the methods<a class="anchor" aria-label="anchor" href="#step-4-comparing-and-combining-the-methods"></a>
 </h2>
-<p>The methods look at the data in different ways, so genes found by
-several of them are the most convincing. <code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code>
-shows the overlap between the hits of three methods:</p>
+<div class="section level3">
+<h3 id="how-many-genes-each-method-finds">How many genes each method finds<a class="anchor" aria-label="anchor" href="#how-many-genes-each-method-finds"></a>
+</h3>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span></span>
-<span>    hit_zscore <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">gene_zscore_edger</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    hit_camera <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">camera</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    hit_roast <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">roast</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    show_elements <span class="op">=</span> <span class="cn">FALSE</span>, show_percentage <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="Tutorial_3_Finding_hits_files/figure-html/venn-1.png" class="r-plt" alt="" width="672"></p>
-<p><code><a href="../reference/find_common_hit.html">find_common_hit()</a></code> returns the genes found by at least
-<code>common_in</code> methods:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">common</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">gene_zscore_edger</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">camera</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">roast</span>, <span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">alpha</span><span class="op">)</span>,</span>
-<span>    common_in <span class="op">=</span> <span class="fl">2</span></span>
+<code class="sourceCode R"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    FRY <span class="op">=</span> <span class="va">fry</span>, ROAST <span class="op">=</span> <span class="va">roast</span>, CAMERA <span class="op">=</span> <span class="va">camera</span>,</span>
+<span>    `Z-score` <span class="op">=</span> <span class="va">zscore</span>, `Z-score (empirical)` <span class="op">=</span> <span class="va">zscore_empirical</span></span>
 <span><span class="op">)</span></span>
+<span><span class="va">fdr_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">results</span>, <span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">fdr_levels</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="va">x</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span>, .id <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>FDR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">fdr_levels</span>, <span class="st">"%"</span><span class="op">)</span>, .before <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
+<span><span class="co">#&gt;   FDR     FRY ROAST CAMERA `Z-score` `Z-score (empirical)`</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 5%        7     0      0         0                     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 10%      12    10      3         0                     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 25%      34    28      7         4                     8</span></span></code></pre></div>
+<p>FRY, the most powerful test here, finds 7 genes at 5% FDR. ROAST
+tests the same hypothesis, but with 999 rotations its p-values cannot be
+smaller than 1/1000, which after the correction for the 283 genes is not
+enough to reach 5% (use <code>nrot = 9999</code>, or FRY). The
+competitive tests (CAMERA and the Z-score tests) find none at 5%: the
+depletions are reproducible, but they do not stand out against all the
+other genes of the library. Choose the cut off before looking at the
+results and report it; below, 10% is used to compare the methods.</p>
+</div>
+<div class="section level3">
+<h3 id="overlap-between-the-methods">Overlap between the methods<a class="anchor" aria-label="anchor" href="#overlap-between-the-methods"></a>
+</h3>
+<p><code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code> takes the results of any number of
+methods (any table with Gene and FDR) and shows the overlap of their
+hits at the cut off given with <code>fdr</code>. With up to three
+methods it draws a Venn diagram:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span><span class="va">results</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FRY"</span>, <span class="st">"ROAST"</span>, <span class="st">"CAMERA"</span><span class="op">)</span><span class="op">]</span>, fdr <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Depleted genes at Time4 (10% FDR)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/venn-1.png" class="r-plt" alt="" width="672"></p>
+<p>With more methods it draws an UpSet plot: each column is a
+combination of methods (the dots below), and the bar on top counts the
+genes found by exactly that combination; the bars on the left count the
+genes found by each method.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span><span class="va">results</span>, fdr <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Depleted genes at Time4 (10% FDR)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/upset-1.png" class="r-plt" alt="" width="768"></p>
+<p><code><a href="../reference/find_common_hit.html">find_common_hit()</a></code> returns the genes found by at least
+<code>common_in</code> methods (by default by all of them):</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">common</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">results</span>, fdr <span class="op">=</span> <span class="fl">0.1</span>, common_in <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">common</span></span>
-<span><span class="co">#&gt; [1] "Gene_173" "Gene_422" "Gene_15"  "Gene_296" "Gene_352" "Gene_87"  "Gene_370"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Gene_173" "Gene_422" "Gene_296"</span></span></code></pre></div>
 <p><code><a href="../reference/summarise_hits.html">summarise_hits()</a></code> puts the FDR of every method in one
 table. <code>NMethods</code> counts the methods in which the gene passes
 the cut off, and <code>MaxFDR</code> (the largest FDR) is a conservative
 score to rank the genes supported by all the methods. Pass the tables
 computed with <code>fdr = 1</code>, so that every gene has a value.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarise_hits.html">summarise_hits</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>        zscore <span class="op">=</span> <span class="va">gene_zscore_edger</span>, camera <span class="op">=</span> <span class="va">camera</span>,</span>
-<span>        roast <span class="op">=</span> <span class="va">roast</span>, time <span class="op">=</span> <span class="va">time_hit</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    fdr <span class="op">=</span> <span class="va">alpha</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarise_hits.html">summarise_hits</a></span><span class="op">(</span><span class="va">results</span>, fdr <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="va">summary</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">Gene</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"FDR"</span><span class="op">)</span>, <span class="va">NMethods</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="10%">
+<col width="9%">
+<col width="12%">
+<col width="13%">
+<col width="14%">
+<col width="28%">
+<col width="10%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Gene</th>
+<th align="right">FDR_FRY</th>
+<th align="right">FDR_ROAST</th>
+<th align="right">FDR_CAMERA</th>
+<th align="right">FDR_Z-score</th>
+<th align="right">FDR_Z-score (empirical)</th>
+<th align="right">NMethods</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Gene_173</td>
+<td align="right">0.019</td>
+<td align="right">0.076</td>
+<td align="right">0.077</td>
+<td align="right">0.123</td>
+<td align="right">0.072</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">Gene_422</td>
+<td align="right">0.019</td>
+<td align="right">0.076</td>
+<td align="right">0.077</td>
+<td align="right">0.192</td>
+<td align="right">0.127</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">Gene_296</td>
+<td align="right">0.019</td>
+<td align="right">0.076</td>
+<td align="right">0.077</td>
+<td align="right">0.203</td>
+<td align="right">0.155</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">Gene_15</td>
+<td align="right">0.019</td>
+<td align="right">0.076</td>
+<td align="right">0.230</td>
+<td align="right">0.203</td>
+<td align="right">0.155</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">Gene_370</td>
+<td align="right">0.132</td>
+<td align="right">0.144</td>
+<td align="right">0.230</td>
+<td align="right">0.271</td>
+<td align="right">0.223</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Gene_352</td>
+<td align="right">0.185</td>
+<td align="right">0.173</td>
+<td align="right">0.230</td>
+<td align="right">0.271</td>
+<td align="right">0.223</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Gene_87</td>
+<td align="right">0.261</td>
+<td align="right">0.267</td>
+<td align="right">0.230</td>
+<td align="right">0.271</td>
+<td align="right">0.223</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Gene_349</td>
+<td align="right">0.032</td>
+<td align="right">0.076</td>
+<td align="right">0.254</td>
+<td align="right">0.363</td>
+<td align="right">0.311</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>The combined list has no guaranteed false discovery rate: treat it as
+a short list of candidates to check and validate.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="step-5-several-time-points">Step 5: several time points<a class="anchor" aria-label="anchor" href="#step-5-several-time-points"></a>
+</h2>
+<p>“Depleted over time” can mean different things, which need different
+tests.</p>
+<div class="section level3">
+<h3 id="depleted-at-every-time-point">Depleted at every time point<a class="anchor" aria-label="anchor" href="#depleted-at-every-time-point"></a>
+</h3>
+<p><code><a href="../reference/find_consistent_hit.html">find_consistent_hit()</a></code> runs the same method for several
+contrasts and calls a gene only if it is depleted in
+<strong>all</strong> of them (an intersection-union test: the p-value of
+the gene is the largest of its p-values, then corrected for the number
+of genes).</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">consistent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_consistent_hit.html">find_consistent_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>,</span>
+<span>    contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="va">contrast_time3</span>, Time4 <span class="op">=</span> <span class="va">contrast_time4</span><span class="op">)</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"fry"</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summary</span>, <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 8</span></span></span>
-<span><span class="co">#&gt;    Gene     FDR_zscore FDR_camera FDR_roast FDR_time NMethods MaxFDR Hit  </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Gene_296      0.250     0.088<span style="text-decoration: underline;">2</span>    0.053<span style="text-decoration: underline;">4</span> 0.000<span style="text-decoration: underline;">135</span>        4  0.250 TRUE </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Gene_370      0.280     0.232     0.111  0.060<span style="text-decoration: underline;">4</span>          3  0.280 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Gene_349      0.390     0.263     0.066<span style="text-decoration: underline;">8</span> 0.318           1  0.390 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Gene_352      0.280     0.232     0.157  0.508           2  0.508 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Gene_87       0.280     0.232     0.207  0.508           2  0.508 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Gene_422      0.187     0.088<span style="text-decoration: underline;">2</span>    0.053<span style="text-decoration: underline;">4</span> 0.545           3  0.545 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Gene_412      0.590     0.306     0.053<span style="text-decoration: underline;">4</span> 0.014<span style="text-decoration: underline;">9</span>          2  0.590 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Gene_325      0.649     0.738     0.053<span style="text-decoration: underline;">4</span> 0.318           1  0.738 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Gene_173      0.128     0.088<span style="text-decoration: underline;">2</span>    0.053<span style="text-decoration: underline;">4</span> 0.742           3  0.742 FALSE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Gene_168      0.280     0.380     0.153  0.742           1  0.742 FALSE</span></span></code></pre></div>
-<p>The column <code>Hit</code> is <code>TRUE</code> when the gene passes
-the cut off in every method (<code>MaxFDR &lt;= alpha</code>). A note on
-interpretation: the combined list does not have a guaranteed false
-discovery rate, so treat it as a short list of candidates to validate.
-In this dataset 1 gene(s) pass all four methods at 25%, so below we
-check the genes found by at least two of the three methods of the Venn
-diagram.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">consistent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 9</span></span></span>
+<span><span class="co">#&gt;   Gene     Direction NContrasts  PValue   FDR PValue_Time3 Log2FC_Time3</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173 Down               2 0.009<span style="text-decoration: underline;">86</span> 1.000      0.009<span style="text-decoration: underline;">86</span>      -<span style="color: #BB0000;">0.211</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_457 Down               2 0.037<span style="text-decoration: underline;">7</span>  1.000      0.008<span style="text-decoration: underline;">58</span>      -<span style="color: #BB0000;">0.121</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_121 Down               2 0.042<span style="text-decoration: underline;">8</span>  1.000      0.042<span style="text-decoration: underline;">8</span>       -<span style="color: #BB0000;">0.074</span><span style="color: #BB0000; text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_293 Down               2 0.051<span style="text-decoration: underline;">6</span>  1.000      0.051<span style="text-decoration: underline;">6</span>       -<span style="color: #BB0000;">0.134</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_394 Down               2 0.057<span style="text-decoration: underline;">7</span>  1.000      0.057<span style="text-decoration: underline;">7</span>       -<span style="color: #BB0000;">0.081</span><span style="color: #BB0000; text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_377 Down               2 0.070<span style="text-decoration: underline;">7</span>  1.000      0.001<span style="text-decoration: underline;">38</span>      -<span style="color: #BB0000;">0.249</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: PValue_Time4 &lt;dbl&gt;, Log2FC_Time4 &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>The smallest FDR is 1: no gene is depleted at both time points. The
+candidates of Time4 have small effects at Time3 (see
+<code>Log2FC_Time3</code>), so in this screen the treatment-specific
+depletion appears at the later time point.
+<code><a href="../reference/combine_consistent_hits.html">combine_consistent_hits()</a></code> does the same with tables of
+p-values computed beforehand.</p>
+</div>
+<div class="section level3">
+<h3 id="a-treatment-effect-that-changes-over-time">A treatment effect that changes over time<a class="anchor" aria-label="anchor" href="#a-treatment-effect-that-changes-over-time"></a>
+</h3>
+<p><code><a href="../reference/find_time_hit.html">find_time_hit()</a></code> asks whether the treatment effect
+<strong>changes over time</strong>, with one model for the treated and
+control samples of all the time points: untreated and treated samples
+each follow a line over time, and the method tests the difference
+between the slopes. Give the real times of the time points with
+<code>time</code> (here days after the selection); otherwise they are
+treated as equally spaced. Samples taken before the treatment can be
+added as untreated samples with <code>baseline</code>, when their times
+are known too.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">time_hit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_time_hit.html">find_time_hit</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span>    treatment <span class="op">=</span> <span class="st">"TRT"</span>, control <span class="op">=</span> <span class="st">"CTRL"</span>,</span>
+<span>    days <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time3"</span>, <span class="st">"Time4"</span><span class="op">)</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="fl">7</span>, Time4 <span class="op">=</span> <span class="fl">14</span><span class="op">)</span>,</span>
+<span>    fdr <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">time_hit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   Gene     NGenes Direction   PValue   FDR  Log2FC</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_296     10 Down      0.000<span style="text-decoration: underline;">596</span> 0.318 -<span style="color: #BB0000;">0.096</span><span style="color: #BB0000; text-decoration: underline;">4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_372     12 Down      0.001<span style="text-decoration: underline;">56</span>  0.323 -<span style="color: #BB0000;">0.104</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_422     10 Down      0.001<span style="text-decoration: underline;">81</span>  0.323 -<span style="color: #BB0000;">0.067</span><span style="color: #BB0000; text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Gene_412     10 Down      0.004<span style="text-decoration: underline;">80</span>  0.483 -<span style="color: #BB0000;">0.081</span><span style="color: #BB0000; text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Gene_419     10 Down      0.005<span style="text-decoration: underline;">10</span>  0.483 -<span style="color: #BB0000;">0.082</span><span style="color: #BB0000; text-decoration: underline;">6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gene_87      10 Down      0.005<span style="text-decoration: underline;">66</span>  0.483 -<span style="color: #BB0000;">0.058</span><span style="color: #BB0000; text-decoration: underline;">5</span></span></span></code></pre></div>
+<p><code>Log2FC</code> is the change of the treatment log2 fold change
+per day: a negative value means that the depletion grows over time. With
+two time points this is the difference between the effects at Time4 and
+at Time3, divided by 7 days. Here 0 genes have an FDR below 5% (smallest
+FDR 0.32): the effects grow between the two time points, but not enough
+to be detected gene by gene with three replicates.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-6-checking-the-candidates">Step 6: checking the candidates<a class="anchor" aria-label="anchor" href="#step-6-checking-the-candidates"></a>
 </h2>
 <p>Statistics can produce false positives, so look at the data of each
-candidate.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">candidates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">common</span>, <span class="fl">2</span><span class="op">)</span></span>
+candidate. The candidates here are the genes found by at least three of
+the five methods at 10% FDR:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">candidates</span> <span class="op">&lt;-</span> <span class="va">common</span></span>
 <span><span class="va">candidates</span></span>
-<span><span class="co">#&gt; [1] "Gene_173" "Gene_422"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Gene_173" "Gene_422" "Gene_296"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="trend-over-time">Trend over time<a class="anchor" aria-label="anchor" href="#trend-over-time"></a>
 </h3>
-<p><code><a href="../reference/plot_trend.html">plot_trend()</a></code> shows the mean frequency of the barcodes of
-a gene in the chosen samples (<code>group_var</code> takes values of the
-Treatment column). A depleted hit goes down in the treated samples but
-not in the controls.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/plot_trend.html">plot_trend()</a></code> shows the mean normalized count of the
+barcodes of a gene in each sample over the time points. With
+<code>color_by</code> the treated and control samples get their own
+trend (the mean of each time point), the samples before the treatment
+are drawn once as shared references (<code>reference_groups</code>), and
+<code>highlight_difference</code> shades the gap between the two
+conditions. A treatment-specific hit goes down in the treated samples
+more than in the controls.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    genes <span class="op">=</span> <span class="va">candidates</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"TRT"</span><span class="op">)</span>,</span>
-<span>    nrow <span class="op">=</span> <span class="fl">1</span>, ncol <span class="op">=</span> <span class="fl">2</span></span>
+<span>    genes <span class="op">=</span> <span class="va">candidates</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"CTRL"</span>, <span class="st">"TRT"</span><span class="op">)</span>,</span>
+<span>    color_by <span class="op">=</span> <span class="st">"Treatment"</span>, reference_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span><span class="op">)</span>,</span>
+<span>    connect_reference <span class="op">=</span> <span class="cn">TRUE</span>, highlight_difference <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    nrow <span class="op">=</span> <span class="fl">1</span>, scales <span class="op">=</span> <span class="st">"free_y"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Treated samples"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Tutorial_3_Finding_hits_files/figure-html/trend-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    genes <span class="op">=</span> <span class="va">candidates</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"CTRL"</span><span class="op">)</span>,</span>
-<span>    nrow <span class="op">=</span> <span class="fl">1</span>, ncol <span class="op">=</span> <span class="fl">2</span></span>
-<span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Control samples"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Tutorial_3_Finding_hits_files/figure-html/trend-2.png" class="r-plt" alt="" width="672"></p>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time point (equally spaced)"</span>,</span>
+<span>        y <span class="op">=</span> <span class="st">"Mean normalized counts per shRNA"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/trend-1.png" class="r-plt" alt="" width="864"></p>
+</div>
+<div class="section level3">
+<h3 id="size-of-the-effect">Size of the effect<a class="anchor" aria-label="anchor" href="#size-of-the-effect"></a>
+</h3>
+<p><code><a href="../reference/plot_treatment_separation.html">plot_treatment_separation()</a></code> shows the log2 ratio of the
+treated to the control samples at each time point, labelled with the
+percentage difference. It shows how far the conditions separate and at
+which time point; it is descriptive, not a test.</p>
+<p>Gene_173 and Gene_422 decrease in the treated samples while the
+controls stay stable or grow. Gene_296 decreases in the controls too
+(its knockdown slows growth even without the treatment), and more in the
+treated samples: the treatment adds to a fitness effect.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_treatment_separation.html">plot_treatment_separation</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">candidates</span>,</span>
+<span>    treatment <span class="op">=</span> <span class="st">"TRT"</span>, control <span class="op">=</span> <span class="st">"CTRL"</span>, nrow <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/separation-1.png" class="r-plt" alt="" width="864"></p>
 </div>
 <div class="section level3">
 <h3 id="distribution-of-the-barcodes">Distribution of the barcodes<a class="anchor" aria-label="anchor" href="#distribution-of-the-barcodes"></a>
 </h3>
-<p><code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code> shows the frequencies of all the barcodes
-of a gene in each sample:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p><code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code> shows the normalized counts of all the
+barcodes of a gene in each sample, colored by the variable given with
+<code>fill_var</code> (here with the palette of the Treatment):</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_boxplot.html">plot_boxplot</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    genes <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TRT"</span>, <span class="st">"CTRL"</span><span class="op">)</span>,</span>
 <span>    fill_var <span class="op">=</span> <span class="st">"Treatment"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/boxplot-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="barcode-by-barcode">Barcode by barcode<a class="anchor" aria-label="anchor" href="#barcode-by-barcode"></a>
 </h3>
 <p>A real hit should be supported by most of its barcodes, not by one or
-two. <code><a href="../reference/plot_barcode_trend.html">plot_barcode_trend()</a></code> shows the log2 fold change of
-each barcode over the time points:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_trend.html">plot_barcode_trend</a></span><span class="op">(</span></span>
+two. <code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code> shows every barcode of the
+genes in every sample, centred on the mean of the barcode across the
+samples shown: blue is lower and red higher than the usual abundance of
+the barcode.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">candidates</span>, column_group <span class="op">=</span> <span class="st">"Day"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">60</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_3_Finding_hits_files/figure-html/heatmap-1.png" class="r-plt" alt="" width="864"></p>
+<p>At Time4 several barcodes of each gene are lower in the treated
+samples than in the controls, so the depletion is not driven by a single
+barcode; it is clearest for Gene_296. The effects are moderate, and they
+vary between the replicates.</p>
+<p><code><a href="../reference/plot_barcode_trend.html">plot_barcode_trend()</a></code> shows the log2 fold change of each
+barcode at each time point (it returns one plot per gene):</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">barcode_trends</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_barcode_trend.html">plot_barcode_trend</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="va">metrics_time3</span>, Time4 <span class="op">=</span> <span class="va">metrics_time4</span><span class="op">)</span>,</span>
 <span>    genes <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; $Gene_173</span></span></code></pre></div>
+<span><span class="va">barcode_trends</span><span class="op">[[</span><span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/barcode-trend-1.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code> ranks all the barcodes by their log2
 fold change and places the barcodes of a gene on the ranking (vertical
@@ -756,15 +984,16 @@ lines): most lines on the left side means that the gene is depleted. The
 line on top shows where the barcodes of the gene are concentrated (above
 1, dashed line), and the bottom panel shows their log2 fold changes
 (<code>show_log2fc = FALSE</code> hides it):</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_hit.html">plot_barcode_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>,</span>
 <span>    contrast <span class="op">=</span> <span class="va">contrast_time4</span>, gene <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_3_Finding_hits_files/figure-html/barcode-hit-1.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code> lists the barcodes that
 behave very differently from the other barcodes of their gene, which may
-have off-target effects:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+have off-target effects. They are a warning to read the result of the
+gene with care; do not remove them before the tests.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">discordant</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes</a></span><span class="op">(</span><span class="va">metrics_time4</span>, threshold <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">discordant</span>, <span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">candidates</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 5</span></span></span>
@@ -777,36 +1006,39 @@ have off-target effects:</p>
 <p>Two filters can remove candidates that are not convincing:</p>
 <ul>
 <li>
-<code><a href="../reference/filter_by_slope.html">filter_by_slope()</a></code> keeps the genes whose frequency
-decreases more over time in the treated samples than in the control
-samples;</li>
+<code><a href="../reference/filter_by_slope.html">filter_by_slope()</a></code> keeps the genes whose normalized
+counts decrease more over time in the treated samples than in the
+control samples (with <code>time</code>, the slopes are per unit of
+time);</li>
 <li>
 <code><a href="../reference/filter_by_variance.html">filter_by_variance()</a></code> removes the genes whose barcodes
 disagree too much (variance of the barcode log2 fold changes above
 <code>variance</code>).</li>
 </ul>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/filter_by_slope.html">filter_by_slope</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    genes <span class="op">=</span> <span class="va">candidates</span>,</span>
-<span>    group_var_treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"TRT"</span><span class="op">)</span>,</span>
-<span>    group_var_control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Time1"</span>, <span class="st">"Time2"</span>, <span class="st">"CTRL"</span><span class="op">)</span></span>
+<span>    group_var_treatment <span class="op">=</span> <span class="st">"TRT"</span>, group_var_control <span class="op">=</span> <span class="st">"CTRL"</span>,</span>
+<span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>Time3 <span class="op">=</span> <span class="fl">7</span>, Time4 <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 3</span></span></span>
 <span><span class="co">#&gt;   Gene     slope_control slope_treatment</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173          7.07          -<span style="color: #BB0000;">11.4</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422          5.38           -<span style="color: #BB0000;">5.96</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173          1.14          -<span style="color: #BB0000;">3.47</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_296         -<span style="color: #BB0000;">4.64</span>          -<span style="color: #BB0000;">8.92</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_422          2.98          -<span style="color: #BB0000;">0.680</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/filter_by_variance.html">filter_by_variance</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    genes <span class="op">=</span> <span class="va">candidates</span>, matrix_model <span class="op">=</span> <span class="va">design</span>,</span>
 <span>    contrast <span class="op">=</span> <span class="va">contrast_time4</span>, variance <span class="op">=</span> <span class="fl">0.5</span></span>
 <span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">Gene</span>, <span class="va">Variance</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
 <span><span class="co">#&gt;   Gene     Variance</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173    0.324</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_422    0.227</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Gene_173    0.325</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Gene_296    0.287</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Gene_422    0.226</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -831,41 +1063,45 @@ disagree too much (variance of the barcode log2 fold changes above
 <tr class="even">
 <td>2</td>
 <td>
-<code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code> +
-<code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code>
-</td>
+<code>find_roast_hit(method = "fry")</code>;
+<code><a href="../reference/find_camera_hit.html">find_camera_hit()</a></code> for a competitive test</td>
 </tr>
 <tr class="odd">
 <td>3</td>
 <td>
-<code><a href="../reference/find_camera_hit.html">find_camera_hit()</a></code> and <code><a href="../reference/find_roast_hit.html">find_roast_hit()</a></code>
-(with <code>seed</code>)</td>
+<code><a href="../reference/compute_barcode_statistics.html">compute_barcode_statistics()</a></code> +
+<code><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit()</a></code>, with
+<code>reference = "empirical"</code> for shRNA libraries</td>
 </tr>
 <tr class="even">
 <td>4</td>
 <td>
-<code><a href="../reference/find_time_hit.html">find_time_hit()</a></code> if there are several time points</td>
+<code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code>, <code><a href="../reference/find_common_hit.html">find_common_hit()</a></code> and
+<code><a href="../reference/summarise_hits.html">summarise_hits()</a></code>
+</td>
 </tr>
 <tr class="odd">
 <td>5</td>
 <td>
-<code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code> and
-<code><a href="../reference/summarise_hits.html">summarise_hits()</a></code>
-</td>
+<code><a href="../reference/find_consistent_hit.html">find_consistent_hit()</a></code> (every time point) and
+<code><a href="../reference/find_time_hit.html">find_time_hit()</a></code> (an effect that changes over time)</td>
 </tr>
 <tr class="even">
 <td>6</td>
 <td>
-<code><a href="../reference/plot_trend.html">plot_trend()</a></code>, <code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code>,
-<code><a href="../reference/plot_barcode_trend.html">plot_barcode_trend()</a></code>, <code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code>,
+<code><a href="../reference/plot_trend.html">plot_trend()</a></code>, <code><a href="../reference/plot_treatment_separation.html">plot_treatment_separation()</a></code>,
+<code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code>, <code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code>,
+<code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code>,
 <code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code>
 </td>
 </tr>
 </tbody>
 </table>
 <p>Choose the FDR cut off before the analysis, report it, and validate
-the candidates experimentally.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+the candidates experimentally. The <a href="Longitudinal_Screen_Analysis.html">longitudinal screen
+vignette</a> puts these steps together and ends with the genes of this
+screen to validate.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
@@ -908,26 +1144,25 @@ the candidates experimentally.</p>
 <span><span class="co">#&gt; [29] pkgdown_2.2.1               jquerylib_0.1.4            </span></span>
 <span><span class="co">#&gt; [31] tidyr_1.3.2                 DelayedArray_0.38.2        </span></span>
 <span><span class="co">#&gt; [33] cachem_1.1.0                limma_3.68.5               </span></span>
-<span><span class="co">#&gt; [35] abind_1.4-8                 nlme_3.1-169               </span></span>
-<span><span class="co">#&gt; [37] tidyselect_1.2.1            locfit_1.5-9.12            </span></span>
-<span><span class="co">#&gt; [39] digest_0.6.39               stringi_1.8.9              </span></span>
-<span><span class="co">#&gt; [41] purrr_1.2.2                 bookdown_0.48              </span></span>
-<span><span class="co">#&gt; [43] splines_4.6.1               labeling_0.4.3             </span></span>
-<span><span class="co">#&gt; [45] fastmap_1.2.0               grid_4.6.1                 </span></span>
-<span><span class="co">#&gt; [47] cli_3.6.6                   SparseArray_1.12.3         </span></span>
-<span><span class="co">#&gt; [49] magrittr_2.0.5              patchwork_1.3.2            </span></span>
-<span><span class="co">#&gt; [51] S4Arrays_1.12.1             utf8_1.2.6                 </span></span>
-<span><span class="co">#&gt; [53] withr_3.0.3                 edgeR_4.10.6               </span></span>
-<span><span class="co">#&gt; [55] scales_1.4.0                rmarkdown_2.32             </span></span>
-<span><span class="co">#&gt; [57] XVector_0.52.0              matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt; [59] otel_0.2.0                  ragg_1.5.2                 </span></span>
-<span><span class="co">#&gt; [61] evaluate_1.0.5              knitr_1.52                 </span></span>
-<span><span class="co">#&gt; [63] GenomicRanges_1.64.0        IRanges_2.46.0             </span></span>
-<span><span class="co">#&gt; [65] mgcv_1.9-4                  rlang_1.3.0                </span></span>
-<span><span class="co">#&gt; [67] glue_1.8.1                  BiocManager_1.30.27        </span></span>
-<span><span class="co">#&gt; [69] BiocGenerics_0.58.1         jsonlite_2.0.0             </span></span>
-<span><span class="co">#&gt; [71] R6_2.6.1                    MatrixGenerics_1.24.0      </span></span>
-<span><span class="co">#&gt; [73] systemfonts_1.3.2           fs_2.1.0</span></span></code></pre></div>
+<span><span class="co">#&gt; [35] abind_1.4-8                 tidyselect_1.2.1           </span></span>
+<span><span class="co">#&gt; [37] locfit_1.5-9.12             digest_0.6.39              </span></span>
+<span><span class="co">#&gt; [39] stringi_1.8.9               purrr_1.2.2                </span></span>
+<span><span class="co">#&gt; [41] bookdown_0.48               labeling_0.4.3             </span></span>
+<span><span class="co">#&gt; [43] fastmap_1.2.0               grid_4.6.1                 </span></span>
+<span><span class="co">#&gt; [45] cli_3.6.6                   SparseArray_1.12.3         </span></span>
+<span><span class="co">#&gt; [47] magrittr_2.0.5              patchwork_1.3.2            </span></span>
+<span><span class="co">#&gt; [49] S4Arrays_1.12.1             utf8_1.2.6                 </span></span>
+<span><span class="co">#&gt; [51] withr_3.0.3                 edgeR_4.10.6               </span></span>
+<span><span class="co">#&gt; [53] scales_1.4.0                rmarkdown_2.32             </span></span>
+<span><span class="co">#&gt; [55] XVector_0.52.0              matrixStats_1.5.0          </span></span>
+<span><span class="co">#&gt; [57] otel_0.2.0                  ragg_1.5.2                 </span></span>
+<span><span class="co">#&gt; [59] evaluate_1.0.5              knitr_1.52                 </span></span>
+<span><span class="co">#&gt; [61] GenomicRanges_1.64.0        IRanges_2.46.0             </span></span>
+<span><span class="co">#&gt; [63] rlang_1.3.0                 glue_1.8.1                 </span></span>
+<span><span class="co">#&gt; [65] BiocManager_1.30.27         BiocGenerics_0.58.1        </span></span>
+<span><span class="co">#&gt; [67] jsonlite_2.0.0              R6_2.6.1                   </span></span>
+<span><span class="co">#&gt; [69] MatrixGenerics_1.24.0       systemfonts_1.3.2          </span></span>
+<span><span class="co">#&gt; [71] fs_2.1.0</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

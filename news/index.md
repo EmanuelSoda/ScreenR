@@ -2,6 +2,29 @@
 
 ## ScreenR 1.15.16
 
+- Tutorial 3 (finding and validating hits) uses the current functions: a
+  sample table and palettes at creation,
+  [`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html),
+  TMM normalization, FRY as the recommended test, the empirical null,
+  [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
+  with any number of methods (UpSet plot),
+  [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md),
+  [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
+  with real times, and `plot_trend(color_by = )`,
+  [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+  and
+  [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+  to check the candidates.
+
+- Tutorial 4 (CRISPR-Cas9 screens) uses palettes,
+  [`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html),
+  the trend of the reference genes over the real days, their sgRNAs with
+  [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md),
+  the overlap of the methods with
+  [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md),
+  and explains how the baseline of the normalization affects the
+  self-contained tests.
+
 - [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
   plots descriptive treatment/control abundance ratios for any two
   condition labels and configurable time metadata. It retains all

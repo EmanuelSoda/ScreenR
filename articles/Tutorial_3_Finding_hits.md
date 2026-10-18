@@ -7,14 +7,23 @@ samples compared with the control samples. In a dropout (loss of
 function) screen the interesting hits are usually depleted: their
 knockdown kills the cells only in the presence of the treatment.
 
-This tutorial explains, step by step:
+This tutorial goes through the functions of ScreenR that find hits and
+check them, one step at a time:
 
-1.  how to tell ScreenR which samples to compare;
-2.  the statistical methods to find hits and how to read their results;
-3.  how to combine the methods;
-4.  how to check the candidate hits before trusting them.
+1.  tell ScreenR which samples to compare (design matrix and contrasts);
+2.  test each gene with FRY, ROAST and CAMERA;
+3.  test each gene with the Z-score methods;
+4.  compare the methods and combine their results;
+5.  use several time points;
+6.  check the candidates in the data, barcode by barcode.
 
-It continues from the object of the previous tutorials:
+It uses the example screen of ScreenR. The complete analysis of this
+screen, from the quality control to the list of the genes to validate,
+is in the [longitudinal screen
+vignette](https://emanuelsoda.github.io/ScreenR/articles/Longitudinal_Screen_Analysis.md);
+here the focus is on how each function works and how to read its result.
+
+## The data
 
 ``` r
 
@@ -23,53 +32,112 @@ library(dplyr)
 library(ggplot2)
 ```
 
+The plots of ScreenR have no theme of their own: choose one for the
+whole session with
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html).
+
+``` r
+
+theme_set(theme_light(base_size = 12))
+```
+
+The screen has two samples taken before the treatment (`Time1`, before
+the infection, and `Time2`, after the puromycin selection), then three
+treated (`TRT`) and three control (`CTRL`) replicates 7 days (`Time3`)
+and 14 days (`Time4`) after the selection. The `sample_table` describes
+the samples, the `groups` (used by the statistical models) are the
+combinations of time point and treatment, and the `palettes` give each
+value of the sample variables the same color in every plot.
+
 ``` r
 
 data(count_table)
 data(annotation_table)
 
-counts <- count_table
-colnames(counts) <- c(
-    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
-    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
-    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
-    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
+samples <- data.frame(
+    Sample = c("Time1", "Time2",
+        paste0("Time3_TRT_", c("A", "B", "C")),
+        paste0("Time3_CTRL_", c("A", "B", "C")),
+        paste0("Time4_TRT_", c("A", "B", "C")),
+        paste0("Time4_CTRL_", c("A", "B", "C"))),
+    Day = c("Time1", "Time2", rep(c("Time3", "Time4"), each = 6)),
+    Treatment = c("Time1", "Time2", rep(rep(c("TRT", "CTRL"), each = 3), 2))
 )
-counts <- filter(counts, Barcode != "*")
-groups <- factor(c(
-    "T1/T2", "T1/T2",
-    rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
-    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
-))
+groups <- factor(ifelse(samples$Day %in% c("Time1", "Time2"), "T1/T2",
+    paste(samples$Day, samples$Treatment, sep = "_")))
+
+counts <- filter(count_table, Barcode != "*")
+colnames(counts) <- c("Barcode", samples$Sample)
 
 object <- create_screenr_object(
-    table = counts, annotation = annotation_table, groups = groups
+    table = counts, annotation = annotation_table, groups = groups,
+    sample_table = samples,
+    palettes = list(
+        Treatment = c(Time1 = "#CCCCCC", Time2 = "#999999",
+            CTRL = "#1B9E77", TRT = "#D95F02"),
+        Day = c(Time1 = "#CCCCCC", Time2 = "#999999",
+            Time3 = "#7570B3", Time4 = "#E7298A"),
+        Group = c(`T1/T2` = "#999999", Time3_CTRL = "#66C2A5",
+            Time3_TRT = "#FC8D62", Time4_CTRL = "#1B9E77",
+            Time4_TRT = "#D95F02")
+    )
 )
 object <- remove_all_zero_row(object)
-object <- normalize_data(object)
-object <- compute_data_table(object)
+get_sample_table(object)
+#> # A tibble: 14 × 3
+#>    Sample       Day   Treatment
+#>    <chr>        <chr> <chr>    
+#>  1 Time1        Time1 Time1    
+#>  2 Time2        Time2 Time2    
+#>  3 Time3_TRT_A  Time3 TRT      
+#>  4 Time3_TRT_B  Time3 TRT      
+#>  5 Time3_TRT_C  Time3 TRT      
+#>  6 Time3_CTRL_A Time3 CTRL     
+#>  7 Time3_CTRL_B Time3 CTRL     
+#>  8 Time3_CTRL_C Time3 CTRL     
+#>  9 Time4_TRT_A  Time4 TRT      
+#> 10 Time4_TRT_B  Time4 TRT      
+#> 11 Time4_TRT_C  Time4 TRT      
+#> 12 Time4_CTRL_A Time4 CTRL     
+#> 13 Time4_CTRL_B Time4 CTRL     
+#> 14 Time4_CTRL_C Time4 CTRL
+```
+
+The counts are normalized once, and the same normalization is used by
+every function below: the hit-finding methods, the fold changes and the
+plots. TMM is used here, as in the longitudinal vignette (see
+[`?normalize_data`](https://emanuelsoda.github.io/ScreenR/reference/normalize_data.md)
+for the methods and for when TMM is biased).
+
+``` r
+
+object <- normalize_data(object, method = "tmm")
+get_normalization(object)$method
+#> [1] "tmm"
 ```
 
 ## Overview of the methods
 
-| Method | Function | Unit | Gives an FDR | Uses replicates |
+| Method | Function | What it tests | Reference | Uses replicates |
 |----|----|----|----|----|
-| Gene-level Z-score test | [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) | Compares the mean Z-score of the barcodes of each gene with random sets of barcodes | Yes | With [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) |
-| CAMERA | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) | Tests whether the barcodes of a gene change more than the others | Yes | Yes |
-| ROAST | [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md) | Tests whether the barcodes of a gene change | Yes | Yes |
-| Time course | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) | Tests whether the treatment effect changes over time | Yes | Yes |
-| Legacy Z-score rules | [`find_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md), [`find_robust_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_robust_zscore_hit.md) | Counts barcodes below the median Z-score | No | No |
+| FRY | `find_roast_hit(method = "fry")` | The barcodes of the gene change | None (self-contained) | Yes |
+| ROAST | [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md) | As FRY, with random rotations | None (self-contained) | Yes |
+| CAMERA | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) | The barcodes of the gene change more than the others | The other genes (competitive) | Yes |
+| Gene-level Z-score | [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) | The mean Z-score of the barcodes of the gene is extreme | Random sets of barcodes, or the empirical null | With [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) |
+| All time points | [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md) | The gene changes at every time point | As the chosen method | Yes |
+| Time course | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) | The treatment effect changes over time | None | Yes |
+| Legacy Z-score rules | [`find_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md), [`find_robust_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_robust_zscore_hit.md) | Counts barcodes below the median Z-score | None | No |
 
 The **FDR** (false discovery rate) is the expected proportion of false
 hits among the genes you call hits: with an FDR cut off of 5%, about 1
 in 20 of the reported genes is expected to be a false positive. Each
 method returns only the genes with `FDR <= fdr` (default 0.05); use
-`fdr = 1` to get all the genes and rank them yourself.
+`fdr = 1` to get all the genes and rank them yourself, as done below.
 
 ## Step 1: which samples to compare
 
-CAMERA, ROAST and the replicate-aware statistics use a linear model,
-which needs two things:
+The methods that use the replicates fit a linear model, which needs two
+things:
 
 - a **design matrix**, which says which group each sample belongs to;
 - a **contrast**, which says which groups to compare.
@@ -134,11 +202,89 @@ end up on the wrong columns and the wrong samples are compared.
 [`create_design_matrix()`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md)
 and
 [`create_contrast()`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md)
-avoid this.
+avoid this, and every function that takes a design checks that its rows
+are the samples of the object, in the same order.
 
-The examples below compare treated and control samples at Time4.
+The examples below compare treated and control samples at Time4, the
+time point with the larger effect.
 
-## Step 2: the Z-score method
+## Step 2: FRY, ROAST and CAMERA
+
+These methods test the barcodes of each gene as a set, with edgeR on the
+raw counts and the normalization of the object.
+
+- **FRY and ROAST** ask whether the barcodes of a gene **change at all**
+  (a self-contained test). ROAST uses random rotations: set `seed` to
+  get the same result every time and use many rotations (`nrot`,
+  default 9999) for a real analysis; here 999 keep the tutorial fast.
+  FRY (`method = "fry"`) computes the same test exactly, without
+  rotations: it is faster, its p-values are not limited by the number of
+  rotations, and it is the recommended choice.
+- **CAMERA** asks whether the barcodes of a gene change **more than the
+  other barcodes** (a competitive test), taking into account the
+  correlation between barcodes.
+
+The two kinds of tests answer different questions. A self-contained test
+calls a gene when its barcodes are depleted more than the replicates
+vary, even if many genes are depleted; a competitive test calls it only
+when it stands out from the rest of the library, so it becomes
+conservative when many genes have an effect. On the other hand FRY and
+ROAST rely on the variability between replicates: they need replicates
+in both groups, have little power with two replicates or noisy data, and
+find almost nothing when the control is a single sample (for example a
+plasmid library). All the p-values are one-sided, for the requested
+direction.
+
+`number_barcode` sets the minimum number of barcodes (more than
+`number_barcode`) a gene needs to be tested, and `direction` chooses
+depleted (`"Down"`) or enriched (`"Up"`) genes.
+
+``` r
+
+fry <- find_roast_hit(object, design, contrast_time4,
+    method = "fry", fdr = 1
+)
+head(fry)
+#> # A tibble: 6 × 8
+#>   Gene     NGenes Direction    PValue    FDR  PValue.Mixed  FDR.Mixed Log2FC
+#>   <chr>     <int> <fct>         <dbl>  <dbl>         <dbl>      <dbl>  <dbl>
+#> 1 Gene_173     10 Down      0.0000891 0.0191 0.00000244    0.000217   -0.500
+#> 2 Gene_422     10 Down      0.0000933 0.0191 0.0000525     0.00156    -0.419
+#> 3 Gene_412     10 Down      0.000107  0.0191 0.00000579    0.000309   -0.311
+#> 4 Gene_15      10 Down      0.000166  0.0191 0.00724       0.0390     -0.310
+#> 5 Gene_296     10 Down      0.000179  0.0191 0.0158        0.0615     -0.491
+#> 6 Gene_349     10 Down      0.000365  0.0325 0.00000000678 0.00000121 -0.167
+
+roast <- find_roast_hit(object, design, contrast_time4,
+    nrot = 999, seed = 42, fdr = 1
+)
+camera <- find_camera_hit(object, design, contrast_time4, fdr = 1)
+head(camera)
+#> # A tibble: 6 × 6
+#>   Gene     NGenes Direction   PValue    FDR Log2FC
+#>   <chr>     <dbl> <fct>        <dbl>  <dbl>  <dbl>
+#> 1 Gene_173     10 Down      0.000218 0.0767 -0.500
+#> 2 Gene_296     10 Down      0.000421 0.0767 -0.491
+#> 3 Gene_422     10 Down      0.000431 0.0767 -0.419
+#> 4 Gene_352     10 Down      0.00179  0.230  -0.455
+#> 5 Gene_87      10 Down      0.00241  0.230  -0.422
+#> 6 Gene_370     10 Down      0.00300  0.230  -0.330
+```
+
+| Column | Meaning |
+|----|----|
+| `NGenes` | Number of barcodes of the gene |
+| `Direction` | Down or Up |
+| `PValue`, `FDR` | Significance for the requested direction |
+| `PValue.Mixed`, `FDR.Mixed` (FRY, ROAST) | Significance of a change in either direction of the barcodes |
+| `PropDown`, `PropUp` (ROAST) | Proportion of barcodes going down or up |
+| `Log2FC` | Median log2 fold change of the barcodes |
+
+Use `PValue` and `FDR`: the “Mixed” columns test whether the barcodes
+change in any direction, so they also call genes whose barcodes
+disagree.
+
+## Step 3: the Z-score methods
 
 ### Fold changes and Z-scores
 
@@ -160,94 +306,39 @@ and `day` a value of its Day column.
 
 ``` r
 
+metrics_time3 <- compute_metrics(object,
+    control = "CTRL", treatment = "TRT", day = "Time3"
+)
 metrics_time4 <- compute_metrics(object,
     control = "CTRL", treatment = "TRT", day = "Time4"
 )
 head(metrics_time4)
 #> # A tibble: 6 × 9
-#>   Barcode Gene     Treated Control  Log2FC Zscore ZscoreRobust Day   Treatment
-#>   <fct>   <chr>      <dbl>   <dbl>   <dbl>  <dbl>        <dbl> <chr> <chr>    
-#> 1 10208   Gene_380   387.    362.   0.0965  0.289        0.332 Time4 TRT      
-#> 2 10502   Gene_380    27.3    37.6 -0.458  -0.869       -1.26  Time4 TRT      
-#> 3 10796   Gene_380    35.0    58.4 -0.732  -1.44        -2.04  Time4 TRT      
-#> 4 11089   Gene_380   289.    324.  -0.167  -0.261       -0.424 Time4 TRT      
-#> 5 11382   Gene_380    26.3    42.6 -0.683  -1.34        -1.90  Time4 TRT      
-#> 6 11675   Gene_380   799.    974.  -0.286  -0.511       -0.766 Time4 TRT
+#>   Barcode Gene     Treated Control Log2FC Zscore ZscoreRobust Day   Treatment
+#>   <fct>   <chr>      <dbl>   <dbl>  <dbl>  <dbl>        <dbl> <chr> <chr>    
+#> 1 10208   Gene_380   395.    365.   0.111  0.289        0.331 Time4 TRT      
+#> 2 10502   Gene_380    27.8    37.9 -0.441 -0.863       -1.25  Time4 TRT      
+#> 3 10796   Gene_380    35.7    59.0 -0.718 -1.44        -2.04  Time4 TRT      
+#> 4 11089   Gene_380   294.    327.  -0.152 -0.259       -0.421 Time4 TRT      
+#> 5 11382   Gene_380    26.8    43.0 -0.671 -1.34        -1.91  Time4 TRT      
+#> 6 11675   Gene_380   813.    982.  -0.272 -0.509       -0.764 Time4 TRT
 ```
 
 [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
 compares the Z-scores of several time points: a treatment with an effect
-gives a longer left tail at the later time point.
+gives a longer left tail at the later time point. It receives the
+tables, not the object, so the palette of the time points is given
+explicitly to keep the colors of the other plots:
 
 ``` r
 
-metrics_time3 <- compute_metrics(object,
-    control = "CTRL", treatment = "TRT", day = "Time3"
-)
 plot_zscore_distribution(
     list(Time3 = metrics_time3, Time4 = metrics_time4),
-    alpha = 0.6
+    alpha = 0.6, palette = get_palettes(object)$Day
 )
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/zscore-distribution-1.png)
-
-### Gene-level test
-
-[`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
-computes for each gene the mean Z-score of its barcodes and asks how
-often a random set of barcodes of the same size has a score at least as
-low (`direction = "Down"`). The random sets are drawn many times
-(`n_permutations`), so the p-value needs no assumption on the
-distribution of the Z-scores; `seed` makes it reproducible. The p-values
-are then corrected for testing many genes (FDR).
-
-If the library has control genes, their gene name can be given with
-`control_genes` (for example `control_genes = "non-targeting"`): the
-random sets are then drawn from the controls, which cannot contain true
-hits. Do this only if the controls behave like genes without effect.
-Non-targeting shRNAs often do not: targeting shRNAs are usually somewhat
-depleted compared with them, so every gene looks depleted (in the K562
-screen of ScreenR this called hundreds of non-essential genes). Check
-first that the controls have the same scores as genes known to have no
-effect; when in doubt, keep the default. `statistic = "median"` uses the
-median instead of the mean, which is less affected by a single barcode
-with a strong (possibly off-target) effect.
-
-With `reference = "empirical"` the gene scores are compared with an
-empirical null instead: the distribution of the scores of the genes
-without effect, estimated from the centre of the distribution of all the
-genes
-([`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
-shows it). The hits do not make it conservative, and it accounts for the
-barcodes of a gene varying together, which makes the random sets of
-barcodes give too small p-values, especially in shRNA screens (see
-[`?find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
-and [Tutorial
-4](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.md)).
-It needs a library with hundreds of genes, most of them without effect.
-
-``` r
-
-gene_zscore <- find_gene_zscore_hit(metrics_time4, fdr = 1, seed = 1)
-head(gene_zscore)
-#> # A tibble: 6 × 6
-#>   Gene     NBarcodes  Score Log2FC     PValue     FDR
-#>   <chr>        <int>  <dbl>  <dbl>      <dbl>   <dbl>
-#> 1 Gene_364        12 -1.55  -0.473 0.00001000 0.00534
-#> 2 Gene_296        10 -1.31  -0.499 0.000440   0.117  
-#> 3 Gene_322        10 -1.13  -0.386 0.00159    0.283  
-#> 4 Gene_419        10 -1.08  -0.311 0.00217    0.290  
-#> 5 Gene_352        10 -1.02  -0.455 0.00326    0.348  
-#> 6 Gene_422        10 -0.951 -0.430 0.00482    0.429
-```
-
-| Column          | Meaning                                 |
-|-----------------|-----------------------------------------|
-| `NBarcodes`     | Number of barcodes of the gene          |
-| `Score`         | Mean Z-score of the barcodes            |
-| `Log2FC`        | Median log2 fold change of the barcodes |
-| `PValue`, `FDR` | Significance                            |
 
 ### Using the replicates
 
@@ -256,9 +347,8 @@ averages the replicates, so it cannot tell a consistent barcode from a
 noisy one.
 [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md)
 tests each barcode with edgeR, using the variability between replicates,
-and returns a Z-score that can be used by
-[`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
-in the same way. This is the recommended input.
+and returns a Z-score with the same columns. This is the recommended
+input of the gene-level test.
 
 ``` r
 
@@ -269,26 +359,76 @@ head(barcode_statistics)
 #> # A tibble: 6 × 8
 #>   Barcode Gene     Log2FC logCPM     F PValue   FDR Zscore
 #>   <chr>   <chr>     <dbl>  <dbl> <dbl>  <dbl> <dbl>  <dbl>
-#> 1 10208   Gene_380  0.109   8.56 0.438 0.510  0.835  0.658
-#> 2 10502   Gene_380 -0.480   4.97 0.748 0.390  0.765 -0.859
-#> 3 10796   Gene_380 -0.665   6.61 2.49  0.120  0.515 -1.56 
-#> 4 11089   Gene_380 -0.169   8.44 0.992 0.323  0.716 -0.988
-#> 5 11382   Gene_380 -0.651   5.62 1.44  0.235  0.643 -1.19 
-#> 6 11675   Gene_380 -0.286   9.66 6.71  0.0119 0.219 -2.51
-
-gene_zscore_edger <- find_gene_zscore_hit(barcode_statistics, fdr = 1,
-    seed = 1)
-head(gene_zscore_edger)
-#> # A tibble: 6 × 6
-#>   Gene     NBarcodes Score Log2FC   PValue   FDR
-#>   <chr>        <int> <dbl>  <dbl>    <dbl> <dbl>
-#> 1 Gene_173        10 -1.58 -0.521 0.000240 0.128
-#> 2 Gene_422        10 -1.45 -0.451 0.000700 0.187
-#> 3 Gene_15         10 -1.37 -0.321 0.00131  0.233
-#> 4 Gene_296        10 -1.31 -0.493 0.00187  0.250
-#> 5 Gene_370        10 -1.24 -0.394 0.00304  0.280
-#> 6 Gene_168        10 -1.21 -0.256 0.00355  0.280
+#> 1 10208   Gene_380  0.124   8.56 0.566 0.455  0.801  0.748
+#> 2 10502   Gene_380 -0.464   4.97 0.702 0.405  0.776 -0.832
+#> 3 10796   Gene_380 -0.650   6.60 2.36  0.129  0.525 -1.52 
+#> 4 11089   Gene_380 -0.153   8.44 0.818 0.369  0.749 -0.898
+#> 5 11382   Gene_380 -0.636   5.62 1.37  0.247  0.655 -1.16 
+#> 6 11675   Gene_380 -0.271   9.66 5.92  0.0178 0.251 -2.37
 ```
+
+### Gene-level test
+
+[`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md)
+computes for each gene the mean Z-score of its barcodes
+(`statistic = "median"` uses the median, which is less affected by a
+single barcode with a strong, possibly off-target, effect) and compares
+it with a reference distribution:
+
+- `reference = "random"` (default): the scores of random sets of
+  barcodes of the same size, drawn `n_permutations` times (`seed` makes
+  it reproducible). With `control_genes` the random sets are drawn from
+  control genes instead. Do this only if the controls behave like genes
+  without effect: non-targeting shRNAs often do not (targeting shRNAs
+  are usually somewhat depleted compared with them, so every gene looks
+  depleted).
+- `reference = "empirical"`: the distribution of the scores of the genes
+  without effect, estimated from the centre of the distribution of all
+  the genes. It accounts for the barcodes of a gene varying together,
+  which makes the random sets give too small p-values, especially in
+  shRNA screens. It needs a library with hundreds of genes, most of them
+  without effect (see the [empirical null
+  vignette](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.md)).
+
+``` r
+
+zscore <- find_gene_zscore_hit(barcode_statistics, fdr = 1, seed = 1)
+zscore_empirical <- find_gene_zscore_hit(barcode_statistics,
+    reference = "empirical", fdr = 1
+)
+head(zscore_empirical)
+#> # A tibble: 6 × 7
+#>   Gene     NBarcodes Score Log2FC Statistic   PValue    FDR
+#>   <chr>        <int> <dbl>  <dbl>     <dbl>    <dbl>  <dbl>
+#> 1 Gene_173        10 -1.53 -0.506     -3.65 0.000135 0.0719
+#> 2 Gene_422        10 -1.39 -0.436     -3.31 0.000474 0.127 
+#> 3 Gene_15         10 -1.31 -0.305     -3.12 0.000901 0.155 
+#> 4 Gene_296        10 -1.28 -0.477     -3.05 0.00116  0.155 
+#> 5 Gene_370        10 -1.19 -0.378     -2.83 0.00235  0.223 
+#> 6 Gene_168        10 -1.15 -0.242     -2.74 0.00306  0.223
+```
+
+| Column          | Meaning                                 |
+|-----------------|-----------------------------------------|
+| `NBarcodes`     | Number of barcodes of the gene          |
+| `Score`         | Mean Z-score of the barcodes            |
+| `Log2FC`        | Median log2 fold change of the barcodes |
+| `PValue`, `FDR` | Significance                            |
+
+[`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md)
+shows the gene scores and the fitted null, which should follow the
+centre of the distribution:
+
+``` r
+
+plot_empirical_null(barcode_statistics)
+```
+
+![](Tutorial_3_Finding_hits_files/figure-html/empirical-null-1.png)
+
+Here the null is almost the standard normal (mean 0.01, standard
+deviation 1), with no long tail of depleted genes: the treatment effect
+is moderate and concerns a few genes.
 
 ### Legacy rules
 
@@ -304,175 +444,78 @@ not give a p-value and many genes without an effect pass them by chance
 ``` r
 
 nrow(find_zscore_hit(metrics_time4, number_barcode = 6))
-#> [1] 97
+#> [1] 96
 ```
 
-## Step 3: CAMERA and ROAST
+## Step 4: comparing and combining the methods
 
-Both test the barcodes of each gene as a set, using edgeR on the raw
-counts.
-
-- **CAMERA** asks whether the barcodes of a gene change **more than the
-  other barcodes** (a competitive test), taking into account the
-  correlation between barcodes.
-- **ROAST** asks whether the barcodes of a gene **change at all** (a
-  self-contained test). It uses random rotations: set `seed` to get the
-  same result every time, and use many rotations (`nrot`, default 9999)
-  for a real analysis; here 999 keep the tutorial fast. With
-  `method = "fry"` the same test is computed exactly, without rotations:
-  it is faster and its p-values are not limited by the number of
-  rotations.
-
-CAMERA becomes conservative when many genes have an effect, because the
-other barcodes it compares with then include true hits; ROAST and fry do
-not have this limitation. On the other hand ROAST and fry test each gene
-on its own barcodes, so they rely on the variability between replicates:
-they need replicates in both groups, have little power with two
-replicates or noisy data, and find almost nothing when the control is a
-single sample (for example a plasmid library). The p-values of all three
-are one-sided, for the requested direction.
-
-`number_barcode` sets the minimum number of barcodes (more than
-`number_barcode`) a gene needs to be tested, and `direction` chooses
-depleted (`"Down"`) or enriched (`"Up"`) genes.
+### How many genes each method finds
 
 ``` r
 
-camera <- find_camera_hit(object, design, contrast_time4, fdr = 1)
-head(camera)
-#> # A tibble: 6 × 6
-#>   Gene     NGenes Direction   PValue    FDR Log2FC
-#>   <chr>     <dbl> <fct>        <dbl>  <dbl>  <dbl>
-#> 1 Gene_173     10 Down      0.000214 0.0882 -0.515
-#> 2 Gene_422     10 Down      0.000418 0.0882 -0.433
-#> 3 Gene_296     10 Down      0.000495 0.0882 -0.508
-#> 4 Gene_352     10 Down      0.00200  0.232  -0.467
-#> 5 Gene_87      10 Down      0.00250  0.232  -0.436
-#> 6 Gene_370     10 Down      0.00295  0.232  -0.344
-
-roast <- find_roast_hit(object, design, contrast_time4,
-    nrot = 999, seed = 42, fdr = 1
+results <- list(
+    FRY = fry, ROAST = roast, CAMERA = camera,
+    `Z-score` = zscore, `Z-score (empirical)` = zscore_empirical
 )
-head(select(roast, Gene, NGenes, PropDown, PropUp, Direction, PValue, FDR,
-    Log2FC))
-#> # A tibble: 6 × 8
-#>   Gene     NGenes PropDown PropUp Direction PValue    FDR Log2FC
-#>   <chr>     <int>    <dbl>  <dbl> <fct>      <dbl>  <dbl>  <dbl>
-#> 1 Gene_296     10      0.6    0   Down      0.0005 0.0534 -0.508
-#> 2 Gene_173     10      0.5    0.1 Down      0.0005 0.0534 -0.515
-#> 3 Gene_412     10      0.5    0.1 Down      0.0005 0.0534 -0.325
-#> 4 Gene_422     10      0.5    0   Down      0.0005 0.0534 -0.433
-#> 5 Gene_325     10      0.3    0.1 Down      0.0005 0.0534 -0.246
-#> 6 Gene_15      10      0.5    0   Down      0.001  0.0668 -0.325
-```
-
-| Column                       | Meaning                                 |
-|------------------------------|-----------------------------------------|
-| `NGenes`                     | Number of barcodes of the gene          |
-| `Direction`                  | Down or Up                              |
-| `PValue`, `FDR`              | Significance                            |
-| `PropDown`, `PropUp` (ROAST) | Proportion of barcodes going down or up |
-| `Log2FC`                     | Median log2 fold change of the barcodes |
-
-How many genes pass different FDR cut offs:
-
-``` r
-
 fdr_levels <- c(0.05, 0.1, 0.25)
-tibble(
-    FDR = fdr_levels,
-    zscore = vapply(fdr_levels, function(x) sum(gene_zscore_edger$FDR <= x),
-        1L),
-    CAMERA = vapply(fdr_levels, function(x) sum(camera$FDR <= x), 1L),
-    ROAST = vapply(fdr_levels, function(x) sum(roast$FDR <= x), 1L)
-)
-#> # A tibble: 3 × 4
-#>     FDR zscore CAMERA ROAST
-#>   <dbl>  <int>  <int> <int>
-#> 1  0.05      0      0     0
-#> 2  0.1       0      3    11
-#> 3  0.25      4      7    55
+bind_rows(lapply(results, function(result) {
+    vapply(fdr_levels, function(x) sum(result$FDR <= x), integer(1))
+}), .id = "Method") %>%
+    mutate(FDR = paste0(100 * fdr_levels, "%"), .before = 1)
+#> # A tibble: 3 × 6
+#>   FDR     FRY ROAST CAMERA `Z-score` `Z-score (empirical)`
+#>   <chr> <int> <int>  <int>     <int>                 <int>
+#> 1 5%        7     0      0         0                     0
+#> 2 10%      12    10      3         0                     1
+#> 3 25%      34    28      7         4                     8
 ```
 
-The effect of the treatment in this example is weak: no gene reaches an
-FDR of 5%. In the rest of the tutorial we use 25% to illustrate the
-steps; in your own analysis, choose the cut off before looking at the
-results and report it.
+FRY, the most powerful test here, finds 7 genes at 5% FDR. ROAST tests
+the same hypothesis, but with 999 rotations its p-values cannot be
+smaller than 1/1000, which after the correction for the 283 genes is not
+enough to reach 5% (use `nrot = 9999`, or FRY). The competitive tests
+(CAMERA and the Z-score tests) find none at 5%: the depletions are
+reproducible, but they do not stand out against all the other genes of
+the library. Choose the cut off before looking at the results and report
+it; below, 10% is used to compare the methods.
 
-``` r
+### Overlap between the methods
 
-alpha <- 0.25
-```
-
-## Step 4: the time course
-
-When the screen has several time points,
-[`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
-asks whether the treatment effect **changes over time**, with one model
-for all the time points instead of one analysis per time point.
-Untreated and treated samples each follow a line over time; the method
-tests the difference between the slopes. Early samples taken before the
-treatment can be added as `baseline`. The time points are given in order
-with `days` and are treated as equally spaced.
-
-``` r
-
-time_hit <- find_time_hit(object,
-    treatment = "TRT", control = "CTRL",
-    baseline = c("Time1", "Time2"),
-    days = c("Time1", "Time2", "Time3", "Time4"),
-    fdr = 1
-)
-head(time_hit)
-#> # A tibble: 6 × 6
-#>   Gene     NGenes Direction      PValue       FDR Log2FC
-#>   <chr>     <dbl> <fct>           <dbl>     <dbl>  <dbl>
-#> 1 Gene_372     12 Down      0.000000157 0.0000836 -0.974
-#> 2 Gene_296     10 Down      0.000000706 0.000135  -1.17 
-#> 3 Gene_364     12 Down      0.000000760 0.000135  -1.01 
-#> 4 Gene_412     10 Down      0.000112    0.0149    -0.815
-#> 5 Gene_370     10 Down      0.000565    0.0604    -0.389
-#> 6 Gene_349     10 Down      0.00376     0.318     -0.192
-```
-
-Here `Log2FC` is the change of the treatment log2 fold change per time
-point: a negative value means that the depletion grows over time. In
-this dataset 4 genes have an FDR below 5% (Gene_372, Gene_296, Gene_364,
-Gene_412): the time course model is more powerful here than the
-comparison at a single time point, because it uses all the samples.
-
-## Step 5: combining the methods
-
-The methods look at the data in different ways, so genes found by
-several of them are the most convincing.
 [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
-shows the overlap between the hits of three methods:
+takes the results of any number of methods (any table with Gene and FDR)
+and shows the overlap of their hits at the cut off given with `fdr`.
+With up to three methods it draws a Venn diagram:
 
 ``` r
 
-plot_common_hit(
-    hit_zscore = filter(gene_zscore_edger, FDR <= alpha),
-    hit_camera = filter(camera, FDR <= alpha),
-    hit_roast = filter(roast, FDR <= alpha),
-    show_elements = FALSE, show_percentage = FALSE
-)
+plot_common_hit(results[c("FRY", "ROAST", "CAMERA")], fdr = 0.1,
+    title = "Depleted genes at Time4 (10% FDR)")
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/venn-1.png)
 
-[`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
-returns the genes found by at least `common_in` methods:
+With more methods it draws an UpSet plot: each column is a combination
+of methods (the dots below), and the bar on top counts the genes found
+by exactly that combination; the bars on the left count the genes found
+by each method.
 
 ``` r
 
-common <- find_common_hit(
-    filter(gene_zscore_edger, FDR <= alpha),
-    filter(camera, FDR <= alpha),
-    filter(roast, FDR <= alpha),
-    common_in = 2
-)
+plot_common_hit(results, fdr = 0.1,
+    title = "Depleted genes at Time4 (10% FDR)")
+```
+
+![](Tutorial_3_Finding_hits_files/figure-html/upset-1.png)
+
+[`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
+returns the genes found by at least `common_in` methods (by default by
+all of them):
+
+``` r
+
+common <- find_common_hit(results, fdr = 0.1, common_in = 3)
 common
-#> [1] "Gene_173" "Gene_422" "Gene_15"  "Gene_296" "Gene_352" "Gene_87"  "Gene_370"
+#> [1] "Gene_173" "Gene_422" "Gene_296"
 ```
 
 [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
@@ -483,84 +526,170 @@ Pass the tables computed with `fdr = 1`, so that every gene has a value.
 
 ``` r
 
-summary <- summarise_hits(
-    list(
-        zscore = gene_zscore_edger, camera = camera,
-        roast = roast, time = time_hit
-    ),
-    fdr = alpha
-)
-head(summary, 10)
-#> # A tibble: 10 × 8
-#>    Gene     FDR_zscore FDR_camera FDR_roast FDR_time NMethods MaxFDR Hit  
-#>    <chr>         <dbl>      <dbl>     <dbl>    <dbl>    <dbl>  <dbl> <lgl>
-#>  1 Gene_296      0.250     0.0882    0.0534 0.000135        4  0.250 TRUE 
-#>  2 Gene_370      0.280     0.232     0.111  0.0604          3  0.280 FALSE
-#>  3 Gene_349      0.390     0.263     0.0668 0.318           1  0.390 FALSE
-#>  4 Gene_352      0.280     0.232     0.157  0.508           2  0.508 FALSE
-#>  5 Gene_87       0.280     0.232     0.207  0.508           2  0.508 FALSE
-#>  6 Gene_422      0.187     0.0882    0.0534 0.545           3  0.545 FALSE
-#>  7 Gene_412      0.590     0.306     0.0534 0.0149          2  0.590 FALSE
-#>  8 Gene_325      0.649     0.738     0.0534 0.318           1  0.738 FALSE
-#>  9 Gene_173      0.128     0.0882    0.0534 0.742           3  0.742 FALSE
-#> 10 Gene_168      0.280     0.380     0.153  0.742           1  0.742 FALSE
+summary <- summarise_hits(results, fdr = 0.1)
+summary %>%
+    select(Gene, starts_with("FDR"), NMethods) %>%
+    head(8) %>%
+    knitr::kable(digits = 3)
 ```
 
-The column `Hit` is `TRUE` when the gene passes the cut off in every
-method (`MaxFDR <= alpha`). A note on interpretation: the combined list
-does not have a guaranteed false discovery rate, so treat it as a short
-list of candidates to validate. In this dataset 1 gene(s) pass all four
-methods at 25%, so below we check the genes found by at least two of the
-three methods of the Venn diagram.
+| Gene | FDR_FRY | FDR_ROAST | FDR_CAMERA | FDR_Z-score | FDR_Z-score (empirical) | NMethods |
+|:---|---:|---:|---:|---:|---:|---:|
+| Gene_173 | 0.019 | 0.076 | 0.077 | 0.123 | 0.072 | 4 |
+| Gene_422 | 0.019 | 0.076 | 0.077 | 0.192 | 0.127 | 3 |
+| Gene_296 | 0.019 | 0.076 | 0.077 | 0.203 | 0.155 | 3 |
+| Gene_15 | 0.019 | 0.076 | 0.230 | 0.203 | 0.155 | 2 |
+| Gene_370 | 0.132 | 0.144 | 0.230 | 0.271 | 0.223 | 0 |
+| Gene_352 | 0.185 | 0.173 | 0.230 | 0.271 | 0.223 | 0 |
+| Gene_87 | 0.261 | 0.267 | 0.230 | 0.271 | 0.223 | 0 |
+| Gene_349 | 0.032 | 0.076 | 0.254 | 0.363 | 0.311 | 2 |
+
+The combined list has no guaranteed false discovery rate: treat it as a
+short list of candidates to check and validate.
+
+## Step 5: several time points
+
+“Depleted over time” can mean different things, which need different
+tests.
+
+### Depleted at every time point
+
+[`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md)
+runs the same method for several contrasts and calls a gene only if it
+is depleted in **all** of them (an intersection-union test: the p-value
+of the gene is the largest of its p-values, then corrected for the
+number of genes).
+
+``` r
+
+consistent <- find_consistent_hit(object, design,
+    contrasts = list(Time3 = contrast_time3, Time4 = contrast_time4),
+    method = "fry", fdr = 1
+)
+head(consistent)
+#> # A tibble: 6 × 9
+#>   Gene     Direction NContrasts  PValue   FDR PValue_Time3 Log2FC_Time3
+#>   <chr>    <chr>          <int>   <dbl> <dbl>        <dbl>        <dbl>
+#> 1 Gene_173 Down               2 0.00986 1.000      0.00986      -0.211 
+#> 2 Gene_457 Down               2 0.0377  1.000      0.00858      -0.121 
+#> 3 Gene_121 Down               2 0.0428  1.000      0.0428       -0.0741
+#> 4 Gene_293 Down               2 0.0516  1.000      0.0516       -0.134 
+#> 5 Gene_394 Down               2 0.0577  1.000      0.0577       -0.0813
+#> 6 Gene_377 Down               2 0.0707  1.000      0.00138      -0.249 
+#> # ℹ 2 more variables: PValue_Time4 <dbl>, Log2FC_Time4 <dbl>
+```
+
+The smallest FDR is 1: no gene is depleted at both time points. The
+candidates of Time4 have small effects at Time3 (see `Log2FC_Time3`), so
+in this screen the treatment-specific depletion appears at the later
+time point.
+[`combine_consistent_hits()`](https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.md)
+does the same with tables of p-values computed beforehand.
+
+### A treatment effect that changes over time
+
+[`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
+asks whether the treatment effect **changes over time**, with one model
+for the treated and control samples of all the time points: untreated
+and treated samples each follow a line over time, and the method tests
+the difference between the slopes. Give the real times of the time
+points with `time` (here days after the selection); otherwise they are
+treated as equally spaced. Samples taken before the treatment can be
+added as untreated samples with `baseline`, when their times are known
+too.
+
+``` r
+
+time_hit <- find_time_hit(object,
+    treatment = "TRT", control = "CTRL",
+    days = c("Time3", "Time4"), time = c(Time3 = 7, Time4 = 14),
+    fdr = 1
+)
+head(time_hit)
+#> # A tibble: 6 × 6
+#>   Gene     NGenes Direction   PValue   FDR  Log2FC
+#>   <chr>     <dbl> <fct>        <dbl> <dbl>   <dbl>
+#> 1 Gene_296     10 Down      0.000596 0.318 -0.0964
+#> 2 Gene_372     12 Down      0.00156  0.323 -0.104 
+#> 3 Gene_422     10 Down      0.00181  0.323 -0.0672
+#> 4 Gene_412     10 Down      0.00480  0.483 -0.0812
+#> 5 Gene_419     10 Down      0.00510  0.483 -0.0826
+#> 6 Gene_87      10 Down      0.00566  0.483 -0.0585
+```
+
+`Log2FC` is the change of the treatment log2 fold change per day: a
+negative value means that the depletion grows over time. With two time
+points this is the difference between the effects at Time4 and at Time3,
+divided by 7 days. Here 0 genes have an FDR below 5% (smallest FDR
+0.32): the effects grow between the two time points, but not enough to
+be detected gene by gene with three replicates.
 
 ## Step 6: checking the candidates
 
 Statistics can produce false positives, so look at the data of each
-candidate.
+candidate. The candidates here are the genes found by at least three of
+the five methods at 10% FDR:
 
 ``` r
 
-candidates <- head(common, 2)
+candidates <- common
 candidates
-#> [1] "Gene_173" "Gene_422"
+#> [1] "Gene_173" "Gene_422" "Gene_296"
 ```
 
 ### Trend over time
 
 [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-shows the mean frequency of the barcodes of a gene in the chosen samples
-(`group_var` takes values of the Treatment column). A depleted hit goes
-down in the treated samples but not in the controls.
+shows the mean normalized count of the barcodes of a gene in each sample
+over the time points. With `color_by` the treated and control samples
+get their own trend (the mean of each time point), the samples before
+the treatment are drawn once as shared references (`reference_groups`),
+and `highlight_difference` shades the gap between the two conditions. A
+treatment-specific hit goes down in the treated samples more than in the
+controls.
 
 ``` r
 
 plot_trend(object,
-    genes = candidates, group_var = c("Time1", "Time2", "TRT"),
-    nrow = 1, ncol = 2
+    genes = candidates, group_var = c("Time1", "Time2", "CTRL", "TRT"),
+    color_by = "Treatment", reference_groups = c("Time1", "Time2"),
+    connect_reference = TRUE, highlight_difference = TRUE,
+    nrow = 1, scales = "free_y"
 ) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Treated samples")
+    labs(x = "Time point (equally spaced)",
+        y = "Mean normalized counts per shRNA")
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/trend-1.png)
 
+### Size of the effect
+
+[`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+shows the log2 ratio of the treated to the control samples at each time
+point, labelled with the percentage difference. It shows how far the
+conditions separate and at which time point; it is descriptive, not a
+test.
+
+Gene_173 and Gene_422 decrease in the treated samples while the controls
+stay stable or grow. Gene_296 decreases in the controls too (its
+knockdown slows growth even without the treatment), and more in the
+treated samples: the treatment adds to a fitness effect.
+
 ``` r
 
-
-plot_trend(object,
-    genes = candidates, group_var = c("Time1", "Time2", "CTRL"),
-    nrow = 1, ncol = 2
-) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle("Control samples")
+plot_treatment_separation(object, candidates,
+    treatment = "TRT", control = "CTRL", nrow = 1
+)
 ```
 
-![](Tutorial_3_Finding_hits_files/figure-html/trend-2.png)
+![](Tutorial_3_Finding_hits_files/figure-html/separation-1.png)
 
 ### Distribution of the barcodes
 
 [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
-shows the frequencies of all the barcodes of a gene in each sample:
+shows the normalized counts of all the barcodes of a gene in each
+sample, colored by the variable given with `fill_var` (here with the
+palette of the Treatment):
 
 ``` r
 
@@ -568,7 +697,7 @@ plot_boxplot(object,
     genes = candidates[1], group_var = c("TRT", "CTRL"),
     fill_var = "Treatment"
 ) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    scale_x_discrete(guide = guide_axis(angle = 45))
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/boxplot-1.png)
@@ -577,16 +706,35 @@ plot_boxplot(object,
 
 A real hit should be supported by most of its barcodes, not by one or
 two.
-[`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
-shows the log2 fold change of each barcode over the time points:
+[`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+shows every barcode of the genes in every sample, centred on the mean of
+the barcode across the samples shown: blue is lower and red higher than
+the usual abundance of the barcode.
 
 ``` r
 
-plot_barcode_trend(
+plot_barcode_heatmap(object, candidates, column_group = "Day") +
+    scale_x_discrete(guide = guide_axis(angle = 60))
+```
+
+![](Tutorial_3_Finding_hits_files/figure-html/heatmap-1.png)
+
+At Time4 several barcodes of each gene are lower in the treated samples
+than in the controls, so the depletion is not driven by a single
+barcode; it is clearest for Gene_296. The effects are moderate, and they
+vary between the replicates.
+
+[`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
+shows the log2 fold change of each barcode at each time point (it
+returns one plot per gene):
+
+``` r
+
+barcode_trends <- plot_barcode_trend(
     list(Time3 = metrics_time3, Time4 = metrics_time4),
     genes = candidates[1]
 )
-#> $Gene_173
+barcode_trends[[candidates[1]]]
 ```
 
 ![](Tutorial_3_Finding_hits_files/figure-html/barcode-trend-1.png)
@@ -610,7 +758,9 @@ plot_barcode_hit(object, design,
 
 [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
 lists the barcodes that behave very differently from the other barcodes
-of their gene, which may have off-target effects:
+of their gene, which may have off-target effects. They are a warning to
+read the result of the gene with care; do not remove them before the
+tests.
 
 ``` r
 
@@ -626,8 +776,9 @@ filter(discordant, Gene %in% candidates)
 Two filters can remove candidates that are not convincing:
 
 - [`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md)
-  keeps the genes whose frequency decreases more over time in the
-  treated samples than in the control samples;
+  keeps the genes whose normalized counts decrease more over time in the
+  treated samples than in the control samples (with `time`, the slopes
+  are per unit of time);
 - [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md)
   removes the genes whose barcodes disagree too much (variance of the
   barcode log2 fold changes above `variance`).
@@ -636,25 +787,27 @@ Two filters can remove candidates that are not convincing:
 
 filter_by_slope(object,
     genes = candidates,
-    group_var_treatment = c("Time1", "Time2", "TRT"),
-    group_var_control = c("Time1", "Time2", "CTRL")
+    group_var_treatment = "TRT", group_var_control = "CTRL",
+    time = c(Time3 = 7, Time4 = 14)
 )
-#> # A tibble: 2 × 3
+#> # A tibble: 3 × 3
 #>   Gene     slope_control slope_treatment
 #>   <chr>            <dbl>           <dbl>
-#> 1 Gene_173          7.07          -11.4 
-#> 2 Gene_422          5.38           -5.96
+#> 1 Gene_173          1.14          -3.47 
+#> 2 Gene_296         -4.64          -8.92 
+#> 3 Gene_422          2.98          -0.680
 
 filter_by_variance(object,
     genes = candidates, matrix_model = design,
     contrast = contrast_time4, variance = 0.5
 ) %>%
     distinct(Gene, Variance)
-#> # A tibble: 2 × 2
+#> # A tibble: 3 × 2
 #>   Gene     Variance
 #>   <chr>       <dbl>
-#> 1 Gene_173    0.324
-#> 2 Gene_422    0.227
+#> 1 Gene_173    0.325
+#> 2 Gene_296    0.287
+#> 3 Gene_422    0.226
 ```
 
 ## Summary
@@ -662,14 +815,17 @@ filter_by_variance(object,
 | Step | What to do |
 |----|----|
 | 1 | [`create_design_matrix()`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md) and [`create_contrast()`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md) for the comparison |
-| 2 | [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) + [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) |
-| 3 | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) and [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md) (with `seed`) |
-| 4 | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) if there are several time points |
-| 5 | [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) and [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
-| 6 | [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md), [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md), [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md), [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md) |
+| 2 | `find_roast_hit(method = "fry")`; [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) for a competitive test |
+| 3 | [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) + [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md), with `reference = "empirical"` for shRNA libraries |
+| 4 | [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md), [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md) and [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
+| 5 | [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md) (every time point) and [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) (an effect that changes over time) |
+| 6 | [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md), [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md), [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md), [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md) |
 
 Choose the FDR cut off before the analysis, report it, and validate the
-candidates experimentally.
+candidates experimentally. The [longitudinal screen
+vignette](https://emanuelsoda.github.io/ScreenR/articles/Longitudinal_Screen_Analysis.md)
+puts these steps together and ends with the genes of this screen to
+validate.
 
 ``` r
 
@@ -715,24 +871,23 @@ sessionInfo()
 #> [29] pkgdown_2.2.1               jquerylib_0.1.4            
 #> [31] tidyr_1.3.2                 DelayedArray_0.38.2        
 #> [33] cachem_1.1.0                limma_3.68.5               
-#> [35] abind_1.4-8                 nlme_3.1-169               
-#> [37] tidyselect_1.2.1            locfit_1.5-9.12            
-#> [39] digest_0.6.39               stringi_1.8.9              
-#> [41] purrr_1.2.2                 bookdown_0.48              
-#> [43] splines_4.6.1               labeling_0.4.3             
-#> [45] fastmap_1.2.0               grid_4.6.1                 
-#> [47] cli_3.6.6                   SparseArray_1.12.3         
-#> [49] magrittr_2.0.5              patchwork_1.3.2            
-#> [51] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [53] withr_3.0.3                 edgeR_4.10.6               
-#> [55] scales_1.4.0                rmarkdown_2.32             
-#> [57] XVector_0.52.0              matrixStats_1.5.0          
-#> [59] otel_0.2.0                  ragg_1.5.2                 
-#> [61] evaluate_1.0.5              knitr_1.52                 
-#> [63] GenomicRanges_1.64.0        IRanges_2.46.0             
-#> [65] mgcv_1.9-4                  rlang_1.3.0                
-#> [67] glue_1.8.1                  BiocManager_1.30.27        
-#> [69] BiocGenerics_0.58.1         jsonlite_2.0.0             
-#> [71] R6_2.6.1                    MatrixGenerics_1.24.0      
-#> [73] systemfonts_1.3.2           fs_2.1.0
+#> [35] abind_1.4-8                 tidyselect_1.2.1           
+#> [37] locfit_1.5-9.12             digest_0.6.39              
+#> [39] stringi_1.8.9               purrr_1.2.2                
+#> [41] bookdown_0.48               labeling_0.4.3             
+#> [43] fastmap_1.2.0               grid_4.6.1                 
+#> [45] cli_3.6.6                   SparseArray_1.12.3         
+#> [47] magrittr_2.0.5              patchwork_1.3.2            
+#> [49] S4Arrays_1.12.1             utf8_1.2.6                 
+#> [51] withr_3.0.3                 edgeR_4.10.6               
+#> [53] scales_1.4.0                rmarkdown_2.32             
+#> [55] XVector_0.52.0              matrixStats_1.5.0          
+#> [57] otel_0.2.0                  ragg_1.5.2                 
+#> [59] evaluate_1.0.5              knitr_1.52                 
+#> [61] GenomicRanges_1.64.0        IRanges_2.46.0             
+#> [63] rlang_1.3.0                 glue_1.8.1                 
+#> [65] BiocManager_1.30.27         BiocGenerics_0.58.1        
+#> [67] jsonlite_2.0.0              R6_2.6.1                   
+#> [69] MatrixGenerics_1.24.0       systemfonts_1.3.2          
+#> [71] fs_2.1.0
 ```

@@ -66,6 +66,15 @@ library(ggplot2)
 crisprcleanr_available()
 ```
 
+The plots of ScreenR have no theme of their own; one is chosen for the
+whole tutorial with
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html):
+
+``` r
+
+theme_set(theme_light(base_size = 12))
+```
+
 *CRISPRcleanR is not installed where this tutorial was built: the code
 of the copy-number correction is shown but not run, and its results are
 read from a precomputed table.*
@@ -113,7 +122,9 @@ The sample names (`T0`, `T3_A`, …) do not follow the
 described with a `sample_table`. In a dropout screen the comparison is
 between time points, so all the samples belong to the same experiment
 (`Day = "Screen"`) and the time point is used as the `Treatment`; the
-`groups` (used by the statistical models) are the time points too.
+`groups` (used by the statistical models) are the time points too. The
+`palettes` give each time point (and each sample) the same color in
+every plot.
 
 ``` r
 
@@ -131,17 +142,24 @@ samples
 #> 5  T18_A Screen       T18
 #> 6  T18_B Screen       T18
 #> 7  T18_C Screen       T18
+time_colors <- c(T0 = "#999999", T3 = "#7570B3", T18 = "#D95F02")
 object <- create_screenr_object(
     table = hap1_count_table,
     annotation = hap1_annotation_table,
     groups = factor(samples$Treatment, levels = c("T0", "T3", "T18")),
-    sample_table = samples
+    sample_table = samples,
+    palettes = list(
+        Treatment = time_colors, Group = time_colors,
+        Sample = c(T0 = "#999999", T3_A = "#9E9AC8", T3_B = "#7570B3",
+            T3_C = "#54278F", T18_A = "#FDAE6B", T18_B = "#D95F02",
+            T18_C = "#A63603")
+    )
 )
 object <- remove_all_zero_row(object)
 object
 #> class: screenr_object 
 #> dim: 13598 7 
-#> metadata(1): screenr_layout
+#> metadata(2): screenr_layout palettes
 #> assays(1): counts
 #> rownames(13598): EGFP_TGGTTGTCGGGCAGCAGCAC EGFP_GGTTGTCGGGCAGCAGCACG
 #>   ... luciferase_GGCTATGAAGAGATACGCCC luciferase_GGCATGCGAGAATCTGACGC
@@ -374,7 +392,7 @@ plot_boxplot(object,
     genes = c("POLR2L", "RPL14", "EGFP"),
     group_var = c("T0", "T3", "T18"), fill_var = "Treatment", ncol = 3
 ) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    scale_x_discrete(guide = guide_axis(angle = 45))
 ```
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/boxplot-1.png)
@@ -382,6 +400,38 @@ plot_boxplot(object,
 The sgRNAs of the essential genes are depleted at day 3 and almost gone
 at day 18; those of EGFP are stable (slightly higher, because of the CPM
 normalization described below).
+
+[`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
+follows the same genes over time. The time points are in the Treatment
+column (`time_column`), and `time` places them at their real days, so
+that day 3 is close to T0 and far from day 18:
+
+``` r
+
+plot_trend(object,
+    genes = c("POLR2L", "RPL14", "EGFP"), group_var = c("T0", "T3", "T18"),
+    time_column = "Treatment", time = c(T0 = 0, T3 = 3, T18 = 18),
+    trend = "mean", ncol = 3, scales = "free_y"
+) +
+    labs(x = "Days", y = "Mean normalized counts per sgRNA")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/trend-1.png)
+
+[`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+shows each sgRNA in each sample (log2 normalized counts minus the mean
+of the sgRNA): every sgRNA of the two essential genes drops out, which
+is what a good knockout looks like. A gene supported by a single sgRNA
+would show one blue row among white ones.
+
+``` r
+
+plot_barcode_heatmap(object, genes = c("POLR2L", "RPL14"),
+    column_group = "Treatment") +
+    scale_x_discrete(guide = guide_axis(angle = 45))
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/heatmap-1.png)
 
 The non-essential genes have a positive mean log2 fold change (0.36 at
 day 18) although they have no effect. This is a side effect of the CPM
@@ -392,14 +442,12 @@ non-essential genes (`method = "control"`) puts it back at 0:
 
 ``` r
 
-nonessential_sgrnas <- hap1_annotation_table$Barcode[
-    hap1_annotation_table$Gene %in% nonessential]
+nonessential_sgrnas <- intersect(rownames(object),
+    hap1_annotation_table$Barcode[hap1_annotation_table$Gene %in% nonessential])
 day18_control <- normalize_data(object,
     method = "control", control_barcodes = nonessential_sgrnas
 ) %>%
     compute_metrics(control = "T0", treatment = "T18", day = "Screen")
-#> Warning: 1 of the 3067 control barcodes are not in the object
-#> (OTOP3_TCTCCGGAAAGCTTCACACG): the other 3066 are used.
 knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
     digits = 3)
 ```
@@ -407,6 +455,15 @@ knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
 | NEssential | NNonessential | MeanEssential | MeanNonessential |   NNMD | CohenD |   AUC |
 |-----------:|--------------:|--------------:|-----------------:|-------:|-------:|------:|
 |        646 |           797 |        -2.782 |            0.027 | -7.184 | -3.688 | 0.997 |
+
+The rest of the tutorial uses the CPM normalization. The baseline
+matters for the self-contained tests such as FRY, which ask whether a
+gene changes at all: with the non-essential sgRNAs at 0, the small real
+effects of many genes become significant. In this dataset, normalizing
+to half of the non-essential genes made FRY call about 6% of the other
+half at 5% FDR, against almost none with CPM. The tests that compare
+each gene with the others (CAMERA and the Z-score tests) depend much
+less on the baseline.
 
 ## Copy-number bias and CRISPRcleanR
 
@@ -641,6 +698,22 @@ table(hits$NMethods)
 #> 2415   22   98  121  294   69  332
 ```
 
+[`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
+shows how the hits of the methods overlap (an UpSet plot, since there
+are more than three methods; each column counts the genes found by
+exactly the combination of methods marked below it):
+
+``` r
+
+plot_common_hit(hit_list, fdr = 0.05,
+    title = "Depleted genes at day 18 (5% FDR)")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/upset-1.png)
+
+How many of the hits are core essential, and how many are held-out
+non-essential genes (false calls):
+
 ``` r
 
 evaluate_hits <- function(result) {
@@ -736,9 +809,9 @@ or control genes known to have no effect on the selection.
 |----|----|----|
 | Create the object | describe time points with a `sample_table` | [`create_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md) |
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md) |
-| Quality control | check the separation of essential and non-essential genes | [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md) |
+| Quality control | check the separation of essential and non-essential genes | [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md), [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md) |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md) |
-| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md), [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
+| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md), [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) |
 | Compare screens | scale to the reference genes | [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md) |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 
