@@ -6,6 +6,9 @@
 #' @param screenR_Object A normalized ScreenR object.
 #' @param genes Gene identifiers to show, in panel order.
 #' @param treatment,control The two distinct values of condition_column to compare.
+#'     When condition_column and time_column are the same variable (a time
+#'     course without treatment, such as a dropout screen), control is the
+#'     reference time point and treatment one or more later time points.
 #' @param condition_column The colData variable identifying conditions (default
 #'     "Treatment"). Names such as CTRL or TRT are not required.
 #' @param time_column The colData variable identifying stages (default "Day").
@@ -27,7 +30,13 @@
 #' @param point_size,line_size Size of points and width of connecting lines.
 #' @param nrow,ncol Optional numbers of facet rows and columns.
 #' @param scales Facet scales: "fixed" (default), "free", "free_x" or "free_y".
-#' @details Only stages with both conditions have a comparison. Other stages
+#' @details When condition_column and time_column are the same variable,
+#'     every selected time point (control and treatment) is on the x axis and
+#'     is compared with the control time point: the control is the reference,
+#'     at 0, and is not labelled. Points are colored by time point and joined
+#'     by a grey line.
+#'
+#'     Otherwise only stages with both conditions have a comparison. Other stages
 #'     have missing values, never fabricated zero effects; lines break at missing
 #'     comparisons. A single comparable stage can also be plotted.
 #'     This is a descriptive ratio of arithmetic means, not the median barcode
@@ -46,6 +55,10 @@
 #' object <- get0("object", envir = asNamespace("ScreenR"))
 #' plot_treatment_separation(object, "Gene_42", treatment = "TRT",
 #'     control = "Time3", time_column = "Day")
+#'
+#' # A time course: each time point compared with the first one
+#' plot_treatment_separation(object, "Gene_42", treatment = "Time4",
+#'     control = "Time3", condition_column = "Day", time_column = "Day")
 plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
     condition_column = "Treatment", time_column = "Day", time = NULL,
     samples = NULL, pseudocount = 0, labels = TRUE, palette = NULL,
@@ -74,14 +87,18 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
                 call. = FALSE)
         }
     }
+    # The conditions are the time points: each is compared with the control
+    time_course <- identical(condition_column, time_column)
     for (value in list(treatment, control)) {
-        if (!is.character(value) || length(value) != 1L || is.na(value) ||
-            !value %in% as.character(info[[condition_column]])) {
+        single <- length(value) == 1L || (time_course && identical(value, treatment))
+        if (!is.character(value) || !length(value) || !single || anyNA(value) ||
+            anyDuplicated(value) ||
+            any(!value %in% as.character(info[[condition_column]]))) {
             stop("treatment and control must each identify a selected condition.",
                 call. = FALSE)
         }
     }
-    if (identical(treatment, control)) {
+    if (any(treatment %in% control)) {
         stop("treatment and control must be distinct.", call. = FALSE)
     }
     if (!is.numeric(pseudocount) || length(pseudocount) != 1L ||
@@ -98,6 +115,11 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
             call. = FALSE)
     }
     info$Sample <- samples
+    if (time_course) {
+        info <- info[as.character(info[[condition_column]]) %in%
+            c(control, treatment), , drop = FALSE]
+        samples <- info$Sample
+    }
     positions <- encode_time(info, time_column, time)
     stage_labels <- attr(positions, "labels")
     values <- normalized_counts(object, "plot_treatment_separation()")
@@ -111,7 +133,7 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
         Condition = rep(as.character(info[[condition_column]]), times = length(genes)),
         Frequency = as.vector(means))
     summarize_condition <- function(condition, mean_name, n_name) {
-        subset <- observations[observations$Condition == condition, ]
+        subset <- observations[observations$Condition %in% condition, ]
         summary <- subset %>%
             dplyr::group_by(.data$Gene, .data$Time) %>%
             dplyr::summarise(Mean = mean(.data$Frequency), N = dplyr::n(),
@@ -120,12 +142,23 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
         summary
     }
     data <- tidyr::expand_grid(Gene = genes, Time = sort(unique(as.numeric(positions))))
-    data <- dplyr::left_join(data,
-        summarize_condition(treatment, "TreatmentMean", "NTreatment"),
-        by = c("Gene", "Time"))
-    data <- dplyr::left_join(data,
-        summarize_condition(control, "ControlMean", "NControl"),
-        by = c("Gene", "Time"))
+    if (time_course) {
+        # Every time point against the mean of the control time point
+        stages <- unique(observations[c("Time", "Condition")])
+        data <- dplyr::left_join(data,
+            summarize_condition(stages$Condition, "TreatmentMean", "NTreatment"),
+            by = c("Gene", "Time"))
+        reference <- summarize_condition(control, "ControlMean", "NControl")
+        data <- dplyr::left_join(data, reference[c("Gene", "ControlMean", "NControl")],
+            by = "Gene")
+    } else {
+        data <- dplyr::left_join(data,
+            summarize_condition(treatment, "TreatmentMean", "NTreatment"),
+            by = c("Gene", "Time"))
+        data <- dplyr::left_join(data,
+            summarize_condition(control, "ControlMean", "NControl"),
+            by = c("Gene", "Time"))
+    }
     paired <- !is.na(data$TreatmentMean) & !is.na(data$ControlMean)
     if (!any(paired)) {
         stop("The selected conditions have no shared time point.", call. = FALSE)
@@ -140,19 +173,37 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
     data$PercentDifference <- 100 * (data$Ratio - 1)
     data$Label <- ifelse(paired, sprintf("%+.0f%%", data$PercentDifference), NA_character_)
     data$Gene <- factor(data$Gene, levels = genes)
-    data$Condition <- factor(treatment, levels = treatment)
+    if (time_course) {
+        data$Condition <- stages$Condition[match(data$Time, stages$Time)]
+        data$Label[data$Condition == control] <- NA_character_
+        data$Condition <- factor(data$Condition, levels = c(control, treatment))
+        conditions <- c(control, treatment)
+        y_label <- paste0("Log2 ratio to ", control)
+    } else {
+        data$Condition <- factor(treatment, levels = treatment)
+        conditions <- treatment
+        y_label <- paste0("Log2 ", treatment, " / ", control)
+    }
     # Keep missing comparisons inside trajectories so lines break at those stages.
     line_data <- data[data$Gene %in% names(which(tapply(paired, data$Gene, sum) > 1)), ]
+    # In a time course the points have the colors of the time points and the
+    # line joining them is grey
+    line <- if (time_course) {
+        ggplot2::geom_line(data = line_data, aes(colour = NULL),
+            colour = "grey60", linewidth = line_size, na.rm = TRUE)
+    } else {
+        ggplot2::geom_line(data = line_data, linewidth = line_size, na.rm = TRUE)
+    }
     plot <- ggplot2::ggplot(data,
         aes(.data$Time, .data$Log2Ratio, group = .data$Gene, colour = .data$Condition)) +
         ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "grey50") +
-        ggplot2::geom_line(data = line_data, linewidth = line_size, na.rm = TRUE) +
+        line +
         ggplot2::geom_point(size = point_size, na.rm = TRUE) +
-        palette_scale(object, condition_column, treatment, palette, aesthetic = "colour") +
+        palette_scale(object, condition_column, conditions, palette, aesthetic = "colour") +
         ggplot2::guides(colour = "none") +
         ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(.15, .3))) +
         ggplot2::labs(x = if (is.null(time)) time_column else "Time",
-            y = paste0("Log2 ", treatment, " / ", control))
+            y = y_label)
     if (labels) {
         plot <- plot + ggplot2::geom_text(aes(label = .data$Label),
             vjust = -1, size = 3, na.rm = TRUE)
@@ -162,7 +213,9 @@ plot_treatment_separation <- function(screenR_Object, genes, treatment, control,
             breaks = seq_along(stage_labels), labels = stage_labels,
             limits = range(seq_along(stage_labels)) + c(-.2, .2))
     } else {
-        plot <- plot + ggplot2::scale_x_continuous(breaks = sort(unique(positions)))
+        # Room for the labels of the first and last time points
+        plot <- plot + ggplot2::scale_x_continuous(breaks = sort(unique(positions)),
+            expand = ggplot2::expansion(mult = .1))
     }
     if (length(genes) > 1L) {
         plot <- plot + ggplot2::facet_wrap("Gene", nrow = nrow, ncol = ncol, scales = scales)

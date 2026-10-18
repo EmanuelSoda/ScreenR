@@ -66,6 +66,36 @@ test_that("the hit-finding functions warn for CRISPR-sized libraries", {
     expect_warning(find_zscore_hit(metrics), "consider number_barcode")
 })
 
+test_that("compute_metrics compares time points without a treatment", {
+    counts <- data.frame(Barcode = sprintf("sg%02d", 1:8),
+        T0 = c(100, 100, 100, 100, 200, 200, 200, 200),
+        T18_A = c(25, 25, 25, 25, 200, 200, 200, 200),
+        T18_B = c(25, 25, 25, 25, 200, 200, 200, 200))
+    object <- suppressMessages(create_screenr_object(
+        table = counts,
+        annotation = data.frame(Barcode = counts$Barcode,
+            Gene = rep(c("E", "N"), each = 4)),
+        groups = factor(c("T0", "T18", "T18")),
+        sample_table = data.frame(Sample = c("T0", "T18_A", "T18_B"),
+            Day = c("T0", "T18", "T18"), Treatment = "Untreated")
+    ))
+    object <- normalize_data(object)
+    metrics <- compute_metrics(object, control = "T0", treatment = "T18",
+        condition_column = "Day")
+    expect_equal(nrow(metrics), 8)
+    expect_true(all(metrics$Day == "T18"))
+    expect_true(all(metrics$Treatment == "Untreated"))
+    # The essential barcodes lose reads relative to the others
+    expect_true(all(metrics$Log2FC[metrics$Gene == "E"] <
+        metrics$Log2FC[metrics$Gene == "N"]))
+    expect_error(compute_metrics(object, control = "T0", treatment = "T18"),
+        "day is required")
+    expect_error(compute_metrics(object, control = "T0", treatment = "T18",
+        day = "T18", condition_column = "Day"), "day cannot be used")
+    expect_error(compute_metrics(object, control = "T0", treatment = "T99",
+        condition_column = "Day"), "No control or treated samples")
+})
+
 test_that("compute_screen_quality measures the separation", {
     table <- data.frame(
         Gene = rep(c(paste0("E", 1:20), paste0("N", 1:30)), each = 4),

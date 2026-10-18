@@ -47,8 +47,8 @@
 #' data(k562_annotation_table)
 #' data(hart_reference_genes)
 #' samples <- data.frame(
-#'     Sample = c("Plasmid", "T14_A", "T14_B"), Day = "Screen",
-#'     Treatment = c("Plasmid", "T14", "T14")
+#'     Sample = c("Plasmid", "T14_A", "T14_B"),
+#'     Day = c("Plasmid", "T14", "T14"), Treatment = "Untreated"
 #' )
 #' object <- create_screenr_object(
 #'     table = k562_count_table, annotation = k562_annotation_table,
@@ -56,7 +56,7 @@
 #' )
 #' object <- compute_data_table(normalize_data(object))
 #' metrics <- compute_metrics(object,
-#'     control = "Plasmid", treatment = "T14", day = "Screen"
+#'     control = "Plasmid", treatment = "T14", condition_column = "Day"
 #' )
 #' essential <- hart_reference_genes$Gene[
 #'     hart_reference_genes$Class == "core essential"]

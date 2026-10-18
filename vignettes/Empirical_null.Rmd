@@ -144,12 +144,13 @@ compared here at day 18 against T0, as in
 data(hap1_count_table)
 data(hap1_annotation_table)
 samples <- data.frame(
-    Sample = colnames(hap1_count_table)[-1], Day = "Screen",
-    Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+    Sample = colnames(hap1_count_table)[-1],
+    Day = c("T0", "T3", "T3", "T3", "T18", "T18", "T18"),
+    Treatment = "Untreated"
 )
 hap1 <- create_screenr_object(
     table = hap1_count_table, annotation = hap1_annotation_table,
-    groups = factor(samples$Treatment, levels = c("T0", "T3", "T18")),
+    groups = factor(samples$Day, levels = c("T0", "T3", "T18")),
     sample_table = samples
 )
 hap1 <- compute_data_table(normalize_data(remove_all_zero_row(hap1)))
@@ -200,12 +201,12 @@ k562 <- create_screenr_object(
     groups = factor(c("Plasmid", "T14", "T14")),
     sample_table = data.frame(
         Sample = c("Plasmid", "T14_A", "T14_B"),
-        Day = "Screen", Treatment = c("Plasmid", "T14", "T14")
+        Day = c("Plasmid", "T14", "T14"), Treatment = "Untreated"
     )
 )
 k562 <- compute_data_table(normalize_data(k562))
 k562_metrics <- compute_metrics(k562,
-    control = "Plasmid", treatment = "T14", day = "Screen"
+    control = "Plasmid", treatment = "T14", condition_column = "Day"
 )
 ```
 
