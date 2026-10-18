@@ -246,7 +246,7 @@ count_mapped_reads(object) %>%
             TRUE ~ "Other"
         )
     ) %>%
-    count(Sample, Class) %>%
+    dplyr::count(Sample, Class) %>%
     tidyr::pivot_wider(names_from = Class, values_from = n, values_fill = 0)
 ```
 
@@ -503,7 +503,7 @@ found, and most essential genes have three or four:
 essential_guides %>%
     group_by(Gene) %>%
     summarise(EffectiveGuides = sum(Effective)) %>%
-    count(EffectiveGuides)
+    dplyr::count(EffectiveGuides)
 ```
 
 The genes with no or one effective sgRNA are the ones the gene-level tests are
