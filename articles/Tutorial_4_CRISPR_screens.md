@@ -14,9 +14,11 @@ what is specific to CRISPR:
 3.  choosing the thresholds on the number of sgRNAs per gene;
 4.  checking the quality of the screen with essential and non-essential
     reference genes;
-5.  correcting the copy-number bias of CRISPR-Cas9 with CRISPRcleanR;
-6.  finding the hits, using the non-essential genes as reference;
-7.  positive-selection screens.
+5.  measuring the efficiency of the sgRNAs;
+6.  correcting the copy-number bias of CRISPR-Cas9 with CRISPRcleanR;
+7.  finding the hits, using the non-essential genes as reference, and
+    checking the sgRNAs of each hit;
+8.  positive-selection screens.
 
 |  | shRNA screen | CRISPR-Cas9 knockout screen |
 |----|----|----|
@@ -119,37 +121,37 @@ and non-essential reference genes, the controls and the other genes.
 
 The sample names (`T0`, `T3_A`, …) do not follow the
 `Day_Treatment_Replicate` convention of ScreenR, so the samples are
-described with a `sample_table`. In a dropout screen the comparison is
-between time points, so all the samples belong to the same experiment
-(`Day = "Screen"`) and the time point is used as the `Treatment`; the
-`groups` (used by the statistical models) are the time points too. The
-`palettes` give each time point (and each sample) the same color in
-every plot.
+described with a `sample_table`. T0, T3 and T18 are the time points (the
+`Day` column). A dropout screen has no treatment: the cells only grow,
+and the comparison is between time points, so every sample has the same
+`Treatment`, here `"Untreated"`. The `groups` (used by the statistical
+models) are the time points. The `palettes` give each time point (and
+each sample) the same color in every plot.
 
 ``` r
 
 samples <- data.frame(
     Sample = colnames(hap1_count_table)[-1],
-    Day = "Screen",
-    Treatment = c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+    Day = c("T0", "T3", "T3", "T3", "T18", "T18", "T18"),
+    Treatment = "Untreated"
 )
 samples
-#>   Sample    Day Treatment
-#> 1     T0 Screen        T0
-#> 2   T3_A Screen        T3
-#> 3   T3_B Screen        T3
-#> 4   T3_C Screen        T3
-#> 5  T18_A Screen       T18
-#> 6  T18_B Screen       T18
-#> 7  T18_C Screen       T18
+#>   Sample Day Treatment
+#> 1     T0  T0 Untreated
+#> 2   T3_A  T3 Untreated
+#> 3   T3_B  T3 Untreated
+#> 4   T3_C  T3 Untreated
+#> 5  T18_A T18 Untreated
+#> 6  T18_B T18 Untreated
+#> 7  T18_C T18 Untreated
 time_colors <- c(T0 = "#999999", T3 = "#7570B3", T18 = "#D95F02")
 object <- create_screenr_object(
     table = hap1_count_table,
     annotation = hap1_annotation_table,
-    groups = factor(samples$Treatment, levels = c("T0", "T3", "T18")),
+    groups = factor(samples$Day, levels = c("T0", "T3", "T18")),
     sample_table = samples,
     palettes = list(
-        Treatment = time_colors, Group = time_colors,
+        Day = time_colors, Group = time_colors,
         Sample = c(T0 = "#999999", T3_A = "#9E9AC8", T3_B = "#7570B3",
             T3_C = "#54278F", T18_A = "#FDAE6B", T18_B = "#D95F02",
             T18_C = "#A63603")
@@ -246,6 +248,93 @@ to the right. At day 18 the distribution is wider than at day 3, with
 more sgRNAs close to 0: the sgRNAs of the essential genes are dropping
 out.
 
+### Lost sgRNAs
+
+[`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md)
+counts the sgRNAs with no reads in each sample and
+[`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md)
+shows them. At T0 almost every sgRNA should be present: an sgRNA missing
+there was not represented in the library and cannot be measured.
+
+``` r
+
+barcode_lost(object)
+#> # A tibble: 7 × 2
+#>   Sample LostBarcode
+#>   <fct>        <int>
+#> 1 T0              26
+#> 2 T3_A            47
+#> 3 T3_B            48
+#> 4 T3_C            63
+#> 5 T18_A          456
+#> 6 T18_B          301
+#> 7 T18_C          296
+plot_barcode_lost(object) +
+    scale_x_discrete(guide = guide_axis(angle = 45))
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/barcode-lost-1.png)
+
+In a shRNA screen many lost barcodes are a warning; in a CRISPR dropout
+screen the sgRNAs lost at the late time point are expected, because the
+cells that carry the sgRNAs of essential genes are gone.
+[`count_mapped_reads()`](https://emanuelsoda.github.io/ScreenR/reference/count_mapped_reads.md)
+gives the reads of each sgRNA in each sample, so the lost sgRNAs can be
+assigned to the reference genes (defined in the [quality
+section](#quality-with-reference-genes) below):
+
+``` r
+
+data(hart_reference_genes)
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+count_mapped_reads(object) %>%
+    filter(Mapped == 0) %>%
+    mutate(
+        Gene = hap1_annotation_table$Gene[
+            match(Barcode, hap1_annotation_table$Barcode)],
+        Class = case_when(
+            Gene %in% essential ~ "Core essential",
+            Gene %in% nonessential ~ "Non-essential",
+            TRUE ~ "Other"
+        )
+    ) %>%
+    dplyr::count(Sample, Class) %>%
+    tidyr::pivot_wider(names_from = Class, values_from = n, values_fill = 0)
+#> # A tibble: 7 × 4
+#>   Sample `Core essential` `Non-essential` Other
+#>   <fct>             <int>           <int> <int>
+#> 1 T0                    7               5    14
+#> 2 T3_A                 16              11    20
+#> 3 T3_B                 16              12    20
+#> 4 T3_C                 26              12    25
+#> 5 T18_A               362              17    77
+#> 6 T18_B               238              12    51
+#> 7 T18_C               240              11    45
+```
+
+At day 18 most lost sgRNAs target core essential genes, and very few
+target non-essential genes: the losses are the effect of the screen, not
+a technical problem.
+[`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md)
+(see [Tutorial
+2](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.md))
+lists the genes that lost sgRNAs in chosen samples; at day 18 they are
+hundreds, so it is more useful at T0, to find the genes that were poorly
+represented from the start:
+
+``` r
+
+plot_barcode_lost_for_gene(object, samples = "T0")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/barcode-lost-gene-1.png)
+
+Each of these genes lost a single sgRNA at T0 and is still measured with
+the others.
+
 ### Library representation and replicates
 
 The library should be evenly represented at T0 (low Gini index) and the
@@ -334,28 +423,29 @@ Hart et al. for human cells.
 measures how well the two groups are separated (NNMD and Cohen’s d: more
 negative is better; ROC AUC: 0.5 is no separation, 1 is perfect) and
 [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md)
-shows it.
+shows it. The two lists were read above, to classify the lost sgRNAs:
 
 ``` r
 
-data(hart_reference_genes)
-essential <- hart_reference_genes$Gene[
-    hart_reference_genes$Class == "core essential"]
-nonessential <- hart_reference_genes$Gene[
-    hart_reference_genes$Class == "non-essential"]
+c(`Core essential` = length(essential), `Non-essential` = length(nonessential))
+#> Core essential  Non-essential 
+#>            684            926
 ```
 
 [`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md)
 computes the log2 fold change of each sgRNA between two groups of
-samples (`control` and `treatment` are values of the Treatment column):
+samples. In a treated screen they are a treatment and a control of the
+same day; in a dropout screen they are two time points:
+`condition_column = "Day"` makes `control` and `treatment` values of the
+Day column.
 
 ``` r
 
 day3 <- compute_metrics(object,
-    control = "T0", treatment = "T3", day = "Screen"
+    control = "T0", treatment = "T3", condition_column = "Day"
 )
 day18 <- compute_metrics(object,
-    control = "T0", treatment = "T18", day = "Screen"
+    control = "T0", treatment = "T18", condition_column = "Day"
 )
 quality <- bind_rows(
     `Day 3` = compute_screen_quality(day3, essential, nonessential),
@@ -381,6 +471,24 @@ plot_reference_separation(day18, essential, nonessential) +
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/separation-1.png)
 
+[`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md)
+compares the sgRNA fold changes of the two time points (the `Day` column
+of the tables, `T3` and `T18`). It receives the tables, not the object,
+so the palette of the time points is given explicitly:
+
+``` r
+
+plot_zscore_distribution(list(day3, day18),
+    alpha = 0.5, palette = get_palettes(object)$Day
+) +
+    labs(fill = "Time point")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/zscore-distribution-1.png)
+
+At day 18 the distribution has a long left tail (the depleted sgRNAs)
+that is only beginning at day 3.
+
 [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md)
 shows the normalized counts of the sgRNAs of single genes in each
 sample, for example two core essential genes and the EGFP control
@@ -390,7 +498,7 @@ sample, for example two core essential genes and the EGFP control
 
 plot_boxplot(object,
     genes = c("POLR2L", "RPL14", "EGFP"),
-    group_var = c("T0", "T3", "T18"), fill_var = "Treatment", ncol = 3
+    group_var = "Untreated", fill_var = "Day", ncol = 3
 ) +
     scale_x_discrete(guide = guide_axis(angle = 45))
 ```
@@ -402,21 +510,59 @@ at day 18; those of EGFP are stable (slightly higher, because of the CPM
 normalization described below).
 
 [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md)
-follows the same genes over time. The time points are in the Treatment
-column (`time_column`), and `time` places them at their real days, so
-that day 3 is close to T0 and far from day 18:
+follows the same genes over time. The time points are in the Day column
+(`time_column`, the default), and `time` places them at their real days,
+so that day 3 is close to T0 and far from day 18:
 
 ``` r
 
 plot_trend(object,
-    genes = c("POLR2L", "RPL14", "EGFP"), group_var = c("T0", "T3", "T18"),
-    time_column = "Treatment", time = c(T0 = 0, T3 = 3, T18 = 18),
+    genes = c("POLR2L", "RPL14", "EGFP"), group_var = "Untreated",
+    time = c(T0 = 0, T3 = 3, T18 = 18),
     trend = "mean", ncol = 3, scales = "free_y"
 ) +
     labs(x = "Days", y = "Mean normalized counts per sgRNA")
 ```
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/trend-1.png)
+
+[`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md)
+gives the slope of the line of each gene, per day when the real times
+are given with `time`: a summary of the depletion rate that can be
+compared between genes:
+
+``` r
+
+compute_slope(object,
+    genes = c("POLR2L", "RPL14", "EGFP"), group_var = "Untreated",
+    time = c(T0 = 0, T3 = 3, T18 = 18)
+)
+#> # A tibble: 3 × 2
+#> # Rowwise:  Gene
+#>   Gene   Slope
+#>   <chr>  <dbl>
+#> 1 EGFP    1.69
+#> 2 POLR2L -3.44
+#> 3 RPL14  -3.31
+```
+
+[`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+shows how much a gene changes between two conditions, as the log2 ratio
+of their mean normalized counts labelled with the percentage difference.
+Here the conditions are the time points (`condition_column = "Day"`, the
+same column as `time_column`), so every time point is compared with T0
+and placed at its real day:
+
+``` r
+
+plot_treatment_separation(object, genes = c("POLR2L", "RPL14", "EGFP"),
+    treatment = c("T3", "T18"), control = "T0", condition_column = "Day",
+    time = c(T0 = 0, T3 = 3, T18 = 18), nrow = 1
+) +
+    labs(x = "Days")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/treatment-separation-1.png)
 
 [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
 shows each sgRNA in each sample (log2 normalized counts minus the mean
@@ -426,8 +572,7 @@ would show one blue row among white ones.
 
 ``` r
 
-plot_barcode_heatmap(object, genes = c("POLR2L", "RPL14"),
-    column_group = "Treatment") +
+plot_barcode_heatmap(object, genes = c("POLR2L", "RPL14")) +
     scale_x_discrete(guide = guide_axis(angle = 45))
 ```
 
@@ -447,7 +592,8 @@ nonessential_sgrnas <- intersect(rownames(object),
 day18_control <- normalize_data(object,
     method = "control", control_barcodes = nonessential_sgrnas
 ) %>%
-    compute_metrics(control = "T0", treatment = "T18", day = "Screen")
+    compute_metrics(control = "T0", treatment = "T18",
+        condition_column = "Day")
 knitr::kable(compute_screen_quality(day18_control, essential, nonessential),
     digits = 3)
 ```
@@ -464,6 +610,155 @@ to half of the non-essential genes made FRY call about 6% of the other
 half at 5% FDR, against almost none with CPM. The tests that compare
 each gene with the others (CAMERA and the Z-score tests) depend much
 less on the baseline.
+
+## sgRNA efficiency
+
+Not every sgRNA works equally well: some knock out their gene, others
+have little effect. A dropout screen gives an indirect estimate of this
+through the core essential genes: all their sgRNAs should be depleted,
+so an sgRNA of an essential gene that is barely depleted is probably
+inefficient. It is an estimate, not a measurement: the depletion also
+depends on how often the repair keeps the gene in frame, on how
+essential the gene is in these cells and on the noise of the counts. The
+sequence of each sgRNA (20 nucleotides, before the NGG PAM) is the
+second part of its identifier, so it can be related to the depletion.
+
+Here an sgRNA of an essential gene is called *effective* when its log2
+fold change at day 18 is below the 5th percentile of the sgRNAs of the
+non-essential genes. The cut off is a choice: by construction 5% of the
+sgRNAs without effect would pass it too.
+
+``` r
+
+guides <- day18 %>%
+    mutate(
+        Sequence = sub(".*_", "", Barcode),
+        GC = nchar(gsub("[AT]", "", Sequence)) / nchar(Sequence),
+        PAMProximal = substr(Sequence, 20, 20)
+    )
+threshold <- quantile(
+    guides$Log2FC[guides$Gene %in% nonessential], 0.05)
+essential_guides <- guides %>%
+    filter(Gene %in% essential) %>%
+    mutate(Effective = Log2FC < threshold)
+mean(essential_guides$Effective)
+#> [1] 0.8358446
+```
+
+84% of the sgRNAs of the core essential genes are effective. A gene
+needs only some effective sgRNAs to be found, and most essential genes
+have three or four:
+
+``` r
+
+essential_guides %>%
+    group_by(Gene) %>%
+    summarise(EffectiveGuides = sum(Effective)) %>%
+    dplyr::count(EffectiveGuides)
+#> # A tibble: 5 × 2
+#>   EffectiveGuides     n
+#>             <int> <int>
+#> 1               0     6
+#> 2               1    24
+#> 3               2    87
+#> 4               3   206
+#> 5               4   323
+```
+
+The genes with no or one effective sgRNA are the ones the gene-level
+tests are most likely to miss:
+[`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+and
+[`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
+show them as single blue rows among white ones.
+
+Is the difference between the sgRNAs of a gene a property of the sgRNAs,
+or noise? If it is a property of the sgRNAs it is the same in
+independent cultures. The three replicates (A, B and C) were grown
+separately from day 3 to day 18, so the change of each sgRNA in this
+interval is measured three times independently. The part specific to the
+sgRNA is its log2 fold change minus the median of its gene:
+
+``` r
+
+normalized <- get_normalized_count_table(object)
+#> ScreenR normalized count table: 13598 rows, 8 columns
+guide_effect <- function(late, early) {
+    tibble(
+        Gene = hap1_annotation_table$Gene[
+            match(normalized$Barcode, hap1_annotation_table$Barcode)],
+        Log2FC = log2((normalized[[late]] + 0.5) / (normalized[[early]] + 0.5))
+    ) %>%
+        group_by(Gene) %>%
+        mutate(GuideEffect = Log2FC - median(Log2FC)) %>%
+        pull(GuideEffect)
+}
+reproducibility <- data.frame(
+    A = guide_effect("T18_A", "T3_A"),
+    B = guide_effect("T18_B", "T3_B"),
+    C = guide_effect("T18_C", "T3_C")
+)[normalized$Barcode %in% essential_guides$Barcode, ]
+round(cor(reproducibility, method = "spearman"), 2)
+#>      A    B    C
+#> A 1.00 0.37 0.36
+#> B 0.37 1.00 0.41
+#> C 0.36 0.41 1.00
+```
+
+The correlations are positive in every pair of cultures: part of the
+difference between the sgRNAs of an essential gene is reproducible, so
+it belongs to the sgRNAs; the rest is noise. A single screen ranks the
+sgRNAs only roughly.
+
+The efficiency depends on the sequence. The GC content and the
+nucleotide next to the PAM (position 20) are two known factors (Doench
+et al. 2014): sgRNAs with a GC content of about 50-60% and a G at
+position 20 deplete more.
+
+``` r
+
+essential_guides %>%
+    mutate(GC = cut(GC, c(0, 0.4, 0.5, 0.6, 0.7, 1),
+        labels = c("<40%", "40-50%", "50-60%", "60-70%", ">70%"))) %>%
+    ggplot(aes(GC, Log2FC)) +
+    geom_boxplot(fill = time_colors[["T18"]], alpha = 0.5,
+        outlier.size = 0.5) +
+    labs(x = "GC content", y = "Log2FC at day 18",
+        title = "sgRNAs of the core essential genes")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/guide-sequence-1.png)
+
+``` r
+
+essential_guides %>%
+    group_by(PAMProximal) %>%
+    summarise(Guides = n(), MedianLog2FC = median(Log2FC),
+        Effective = mean(Effective))
+#> # A tibble: 4 × 4
+#>   PAMProximal Guides MedianLog2FC Effective
+#>   <chr>        <int>        <dbl>     <dbl>
+#> 1 A              780        -2.09     0.828
+#> 2 C              332        -1.80     0.777
+#> 3 G             1257        -2.50     0.866
+#> 4 T              153        -1.97     0.758
+```
+
+The GC content and the nucleotide at position 20 explain only a small
+part of the differences: the depletion is a noisy and indirect estimate,
+and these plots show trends, not the efficiency of a single sgRNA.
+
+None of the sgRNAs contains `TTTT` (0 sgRNAs), which ends the
+transcription by the U6 promoter: the library was designed to avoid it.
+These effects are small compared with the differences between genes, and
+the gene-level tests do not need them; they are useful to choose the
+sgRNAs of a validation experiment, or to judge a gene whose sgRNAs
+disagree (see
+[`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
+below). For a prediction of the efficiency of an sgRNA use dedicated
+tools, such as Rule Set 2 (Doench et al. 2016); to measure it, sequence
+the target site of the cells (the fraction of edited alleles) or check
+the loss of the protein.
 
 ## Copy-number bias and CRISPRcleanR
 
@@ -511,7 +806,7 @@ ht29 <- create_screenr_object(
     groups = factor(c("Plasmid", "Late", "Late", "Late")),
     sample_table = data.frame(
         Sample = c("Plasmid", "HT29_R1", "HT29_R2", "HT29_R3"),
-        Day = "Screen", Treatment = c("Plasmid", "Late", "Late", "Late")
+        Day = c("Plasmid", "Late", "Late", "Late"), Treatment = "Untreated"
     )
 )
 ht29_corrected <- correct_crispr_bias(ht29,
@@ -711,6 +1006,19 @@ plot_common_hit(hit_list, fdr = 0.05,
 
 ![](Tutorial_4_CRISPR_screens_files/figure-html/upset-1.png)
 
+[`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
+returns the genes found by at least `common_in` methods, for example by
+all six:
+
+``` r
+
+common <- find_common_hit(hit_list, fdr = 0.05)
+length(common)
+#> [1] 332
+mean(common %in% essential)
+#> [1] 0.8674699
+```
+
 How many of the hits are core essential, and how many are held-out
 non-essential genes (false calls):
 
@@ -760,6 +1068,168 @@ replicates of the model, so a single T0 sample is enough when the other
 time points have replicates, as here. It finds more essential genes than
 the tests without reference, with very few held-out non-essential genes.
 
+### Depleted at every time point
+
+[`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md)
+runs the same method for several contrasts and calls a gene only if it
+is depleted in all of them (the p-value of the gene is the largest of
+its p-values). Here the contrasts are day 3 and day 18 against T0, with
+FRY:
+
+``` r
+
+contrast_day3 <- create_contrast(design, treatment = "T3", control = "T0")
+consistent <- find_consistent_hit(object, design,
+    contrasts = list(Day3 = contrast_day3, Day18 = contrast),
+    method = "fry", method_args = list(number_barcode = 2), fdr = 1
+)
+head(consistent)
+#> # A tibble: 6 × 9
+#>   Gene  Direction NContrasts  PValue    FDR PValue_Day3 Log2FC_Day3 PValue_Day18
+#>   <chr> <chr>          <int>   <dbl>  <dbl>       <dbl>       <dbl>        <dbl>
+#> 1 RPA2  Down               2 9.13e-6 0.0306  0.00000913      -2.34   0.00000203 
+#> 2 RTF1  Down               2 2.14e-5 0.0346  0.0000214       -0.568  0.000000779
+#> 3 RPL23 Down               2 4.00e-5 0.0346  0.0000400       -1.51   0.0000337  
+#> 4 RPL14 Down               2 5.71e-5 0.0346  0.0000571       -1.47   0.00000141 
+#> 5 SMU1  Down               2 6.02e-5 0.0346  0.0000260       -3.34   0.0000602  
+#> 6 CKAP5 Down               2 6.19e-5 0.0346  0.0000574       -1.75   0.0000619  
+#> # ℹ 1 more variable: Log2FC_Day18 <dbl>
+```
+
+Only 15 genes pass 5% FDR, because at day 3 the depletion is only
+beginning and FRY, which uses the variability of the replicates, has
+little power there. The genes found (13 of them are core essential) are
+those whose loss stops the growth of the cells immediately, such as the
+ribosomal proteins.
+[`combine_consistent_hits()`](https://emanuelsoda.github.io/ScreenR/reference/combine_consistent_hits.md)
+does the same with tables of p-values computed beforehand, for example
+with different methods for each contrast.
+
+A dropout screen has no treatment, so the methods that compare treated
+and control samples over time,
+[`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md)
+and
+[`filter_by_slope()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_slope.md),
+are not used here; they are useful in screens with a drug and a vehicle
+arm at several time points (see [Tutorial
+3](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.md)).
+
+### Looking at single genes
+
+Before validating a hit, look at its sgRNAs: a convincing knockout has
+all its sgRNAs depleted, not only one. Take the ten best genes found by
+all the methods that are not in the reference lists:
+
+``` r
+
+candidates <- hits %>%
+    filter(NMethods == length(hit_list),
+        !Gene %in% c(essential, nonessential)) %>%
+    arrange(MaxFDR) %>%
+    head(10) %>%
+    pull(Gene)
+candidates
+#>  [1] "ATP6V1F" "PPP6C"   "DUT"     "EIF1AD"  "SLC30A9" "UBE2S"   "NDNL2"  
+#>  [8] "NAA25"   "MRPL13"  "COX7C"
+```
+
+[`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md)
+ranks all the sgRNAs by their log2 fold change (day 18 against T0, from
+the model) and marks the sgRNAs of the gene (vertical lines): lines on
+the left side mean that the gene is depleted. As in the hit-finding
+functions, `number_barcode = 2` accepts genes with 3 sgRNAs:
+
+``` r
+
+plot_barcode_hit(object, design, contrast,
+    number_barcode = 2, gene = candidates[1]
+)
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/barcode-hit-1.png)
+
+[`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md)
+follows the log2 fold change of each sgRNA at day 3 and day 18 (from the
+tables of
+[`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md),
+in the order of the list). With `n_col` larger than 1 it combines the
+plots of the genes (a patchwork object, so `&` applies a theme to all of
+them), here the first three; each line is an sgRNA, and the long sgRNA
+names of the legend are hidden:
+
+``` r
+
+plot_barcode_trend(list(day3, day18), genes = candidates[1:3], n_col = 3) &
+    theme(legend.position = "none")
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/barcode-trend-1.png)
+
+[`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md)
+shows the sgRNAs of all ten genes in every sample, next to a core
+essential gene for comparison:
+
+``` r
+
+plot_barcode_heatmap(object, genes = c(candidates, "POLR2L")) +
+    scale_x_discrete(guide = guide_axis(angle = 45))
+```
+
+![](Tutorial_4_CRISPR_screens_files/figure-html/candidates-heatmap-1.png)
+
+[`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
+lists the sgRNAs that behave very differently from the other sgRNAs of
+their gene (distance from the median of the gene in units of its MAD).
+With 3 or 4 sgRNAs per gene the MAD is unstable, so many sgRNAs pass the
+default threshold: use it to look at the hits, not to filter the
+library, and do not remove sgRNAs before the tests.
+
+``` r
+
+discordant <- find_discordant_barcodes(day18, threshold = 3)
+filter(discordant, Gene %in% common)
+#> # A tibble: 73 × 5
+#>    Barcode                     Gene    Log2FC GeneLog2FC Deviation
+#>    <fct>                       <chr>    <dbl>      <dbl>     <dbl>
+#>  1 MRPL53_GGCGGTGAGCATTTCCAGAG MRPL53 -7.10        -4.02     -27.4
+#>  2 CCT8_TTTGCCCAGATGCTCAAGGA   CCT8   -4.19        -1.70     -24.4
+#>  3 MRPL39_GAGGAGGTACGACTCAGGCG MRPL39  0.0621      -3.39      21.4
+#>  4 DKC1_ACAAGGATGAGAGTTACCTG   DKC1   -4.67        -2.93     -20.1
+#>  5 PPP1R8_TTGGGCAGTCGAACAGCGGG PPP1R8 -0.774       -3.28      19.0
+#>  6 SYMPK_CATGACCCAGCTCTACAAGG  SYMPK  -5.07        -2.41     -17.8
+#>  7 GEMIN5_AAACAATCTTCACCAGGCAG GEMIN5 -0.988       -3.90      16.8
+#>  8 RPP21_CTGGAGCGCGGCGGTGATGG  RPP21  -2.74        -4.86      13.3
+#>  9 CDK9_GCACCGCAAGACCGGCCAGA   CDK9   -8.22        -2.07     -12.9
+#> 10 ELP2_CAAGATAGTGATCTTCCAGA   ELP2   -3.01        -1.94     -11.5
+#> # ℹ 63 more rows
+```
+
+[`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md)
+keeps the genes whose sgRNAs agree (variance of the sgRNA log2 fold
+changes, from the model, below `variance`):
+
+``` r
+
+filter_by_variance(object,
+    genes = candidates, matrix_model = design, contrast = contrast,
+    variance = 0.5
+) %>%
+    distinct(Gene, Variance)
+#> # A tibble: 10 × 2
+#>    Gene    Variance
+#>    <chr>      <dbl>
+#>  1 EIF1AD    2.28  
+#>  2 NAA25     1.10  
+#>  3 NDNL2     3.57  
+#>  4 DUT      10.3   
+#>  5 UBE2S     1.14  
+#>  6 SLC30A9   0.0734
+#>  7 COX7C     1.02  
+#>  8 ATP6V1F   1.99  
+#>  9 MRPL13   12.9   
+#> 10 PPP6C     1.05
+```
+
 ### Comparable fold changes
 
 [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md)
@@ -807,16 +1277,25 @@ or control genes known to have no effect on the selection.
 
 | Step | CRISPR-specific advice | Functions |
 |----|----|----|
-| Create the object | describe time points with a `sample_table` | [`create_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md) |
+| Create the object | time points in the Day column of a `sample_table`, one Treatment for all the samples | [`create_screenr_object()`](https://emanuelsoda.github.io/ScreenR/reference/create_screenr_object.md) |
 | sgRNAs per gene | lower `number_barcode` / `min_barcodes` for 3-6 sgRNAs per gene | [`barcodes_per_gene()`](https://emanuelsoda.github.io/ScreenR/reference/barcodes_per_gene.md) |
-| Quality control | check the separation of essential and non-essential genes | [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md), [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md) |
+| Compare time points | `condition_column = "Day"` | [`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md), [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md) |
+| Quality control | lost sgRNAs at the late time point are expected; check the separation of essential and non-essential genes | [`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md), [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md), [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md), [`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md), [`plot_reference_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_reference_separation.md), [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md), [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md), [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md) |
+| sgRNA efficiency | the sgRNAs of the essential genes estimate it; check that it is reproducible and relate it to the sequence | [`compute_metrics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_metrics.md), [`get_normalized_count_table()`](https://emanuelsoda.github.io/ScreenR/reference/get_normalized_count_table.md) |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | [`correct_crispr_bias()`](https://emanuelsoda.github.io/ScreenR/reference/correct_crispr_bias.md) |
-| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md), [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) |
+| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, [`plot_empirical_null()`](https://emanuelsoda.github.io/ScreenR/reference/plot_empirical_null.md), [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md), [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md), [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md), [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md) |
+| Single genes | check that all the sgRNAs of a hit agree | [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md), [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md), [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md), [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md) |
 | Compare screens | scale to the reference genes | [`scale_by_reference()`](https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.md) |
 | Positive selection | look for enriched genes | `direction = "Up"` |
 
 ## Literature
 
+- Doench JG, Hartenian E, Graham DB et al. (2014). Rational design of
+  highly active sgRNAs for CRISPR-Cas9-mediated gene inactivation. Nat
+  Biotechnol 32:1262-1267.
+- Doench JG, Fusi N, Sullender M et al. (2016). Optimized sgRNA design
+  to maximize activity and minimize off-target effects of CRISPR-Cas9.
+  Nat Biotechnol 34:184-191.
 - Hart T, Tong AHY, Chan K et al. (2017). Evaluation and design of
   genome-wide CRISPR/SpCas9 knockout screens. G3 7:2719-2727.
 - Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014). Measuring

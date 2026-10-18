@@ -1,8 +1,9 @@
 # Compute the barcode metrics
 
 Computes, for each barcode, the log2 fold change between the treated and
-the control samples of a given time point, and its Z-score and robust
-Z-score. The result is the input of the Z-score methods
+the control samples of a given time point (or between two time points,
+see condition_column), and its Z-score and robust Z-score. The result is
+the input of the Z-score methods
 ([`find_gene_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md),
 [`find_zscore_hit`](https://emanuelsoda.github.io/ScreenR/reference/find_zscore_hit.md))
 and of several plots. More information about the Z-score and other
@@ -12,7 +13,14 @@ metrics used in genetic screens can be found in this
 ## Usage
 
 ``` r
-compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
+compute_metrics(
+  screenR_Object,
+  control,
+  treatment,
+  day = NULL,
+  pseudocount = 0.5,
+  condition_column = c("Treatment", "Day")
+)
 ```
 
 ## Arguments
@@ -24,18 +32,20 @@ compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
 
 - control:
 
-  The value(s) of the Treatment column of the data table (see
+  The value(s) of the condition_column column of the data table (see
   [`get_sample_table`](https://emanuelsoda.github.io/ScreenR/reference/get_sample_table.md))
   that identify the control samples.
 
 - treatment:
 
-  The value(s) of the Treatment column of the data table that identify
-  the treated samples.
+  The value(s) of the condition_column column of the data table that
+  identify the treated samples.
 
 - day:
 
   The day (time point) to use, as in the Day column of the data table.
+  Required with condition_column = "Treatment"; not used with
+  condition_column = "Day".
 
 - pseudocount:
 
@@ -52,11 +62,20 @@ compute_metrics(screenR_Object, control, treatment, day, pseudocount = 0.5)
   display transformation that keeps the fold changes finite; it does not
   change the normalization.
 
+- condition_column:
+
+  The column of the data table that tells the control from the treated
+  samples: "Treatment" (default) to compare a treatment with a control
+  at the time point day, or "Day" to compare two time points, for
+  example a late time point with T0 in a dropout screen without
+  treatment (control = "T0", treatment = "T18").
+
 ## Value
 
 A tibble with one row for each barcode and the columns Barcode, Gene,
 Treated and Control (the mean normalized counts), Log2FC, Zscore,
-ZscoreRobust, Day and Treatment.
+ZscoreRobust, Day and Treatment. With condition_column = "Day", Day is
+the time point of the treated samples and Treatment their treatment.
 
 ## Details
 
@@ -100,4 +119,19 @@ head(metrics)
 #> 4 11089   Gene_380   378.    365.   0.0510  0.170         0.229 Time3 TRT      
 #> 5 11382   Gene_380    48.6    66.9 -0.456  -1.33         -1.84  Time3 TRT      
 #> 6 11675   Gene_380   691.    829.  -0.263  -0.759        -1.05  Time3 TRT      
+
+# Two time points of the same samples, as in a dropout screen
+metrics_time <- compute_metrics(object,
+    control = "Time3", treatment = "Time4", condition_column = "Day"
+)
+head(metrics_time)
+#> # A tibble: 6 × 9
+#>   Barcode Gene     Treated Control   Log2FC Zscore ZscoreRobust Day   Treatment
+#>   <fct>   <chr>      <dbl>   <dbl>    <dbl>  <dbl>        <dbl> <chr> <chr>    
+#> 1 10208   Gene_380   375.    377.  -0.00695  0.185       0.0758 Time4 TRT/Time4
+#> 2 10502   Gene_380    32.4    30.1  0.108    0.454       0.421  Time4 TRT/Time4
+#> 3 10796   Gene_380    46.7   131.  -1.48    -3.28       -4.35   Time4 TRT/Time4
+#> 4 11089   Gene_380   307.    372.  -0.278   -0.450      -0.737  Time4 TRT/Time4
+#> 5 11382   Gene_380    34.4    57.8 -0.738   -1.53       -2.12   Time4 TRT/Time4
+#> 6 11675   Gene_380   886.    760.   0.221    0.720       0.761  Time4 TRT/Time4
 ```

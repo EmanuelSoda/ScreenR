@@ -2,6 +2,50 @@
 
 ## ScreenR 1.15.16
 
+- [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md)
+  plots a time course: when `condition_column` and `time_column` are the
+  same variable (for example “Day” in a dropout screen), `treatment` can
+  be several time points and each is compared with the `control` time
+  point, with every time point on the x axis. Previously this found no
+  shared stage and gave an error. With real `time` the labels of the
+  first and last time points are no longer clipped.
+
+- `compute_metrics(condition_column = "Day")` compares two time points
+  (`control = "T0", treatment = "T18"`), for dropout screens without a
+  treatment; `day` is then not used. The default compares a treatment
+  and a control at the time point `day`, as before.
+
+- Dropout screens (Tutorial 4, the empirical null and the MAGeCK
+  benchmark vignettes, the examples) are described with the time points
+  in the Day column and a single Treatment, `"Untreated"`, for all the
+  samples.
+
+- Tutorial 4 checks the lost sgRNAs
+  ([`barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/barcode_lost.md),
+  [`plot_barcode_lost()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost.md),
+  [`plot_barcode_lost_for_gene()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_lost_for_gene.md)),
+  compares the time points with
+  [`plot_zscore_distribution()`](https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.md),
+  [`compute_slope()`](https://emanuelsoda.github.io/ScreenR/reference/compute_slope.md)
+  and
+  [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md),
+  uses
+  [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
+  and
+  [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md),
+  and inspects the sgRNAs of ten hits with
+  [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md),
+  [`plot_barcode_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_trend.md),
+  [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md),
+  [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md)
+  and
+  [`filter_by_variance()`](https://emanuelsoda.github.io/ScreenR/reference/filter_by_variance.md).
+
+- Tutorial 4 estimates the efficiency of the sgRNAs from the depletion
+  of the core essential genes, checks that it is reproducible between
+  independent cultures and relates it to the GC content and the
+  nucleotide next to the PAM.
+
 - Tutorial 3 (finding and validating hits) uses the current functions: a
   sample table and palettes at creation,
   [`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html),

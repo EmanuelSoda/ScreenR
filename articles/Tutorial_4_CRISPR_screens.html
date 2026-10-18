@@ -122,9 +122,11 @@ points);</li>
 <li>choosing the thresholds on the number of sgRNAs per gene;</li>
 <li>checking the quality of the screen with essential and non-essential
 reference genes;</li>
+<li>measuring the efficiency of the sgRNAs;</li>
 <li>correcting the copy-number bias of CRISPR-Cas9 with
 CRISPRcleanR;</li>
-<li>finding the hits, using the non-essential genes as reference;</li>
+<li>finding the hits, using the non-essential genes as reference, and
+checking the sgRNAs of each hit;</li>
 <li>positive-selection screens.</li>
 </ol>
 <table class="table">
@@ -239,36 +241,37 @@ genes.</p>
 </h2>
 <p>The sample names (<code>T0</code>, <code>T3_A</code>, …) do not
 follow the <code>Day_Treatment_Replicate</code> convention of ScreenR,
-so the samples are described with a <code>sample_table</code>. In a
-dropout screen the comparison is between time points, so all the samples
-belong to the same experiment (<code>Day = "Screen"</code>) and the time
-point is used as the <code>Treatment</code>; the <code>groups</code>
-(used by the statistical models) are the time points too. The
-<code>palettes</code> give each time point (and each sample) the same
-color in every plot.</p>
+so the samples are described with a <code>sample_table</code>. T0, T3
+and T18 are the time points (the <code>Day</code> column). A dropout
+screen has no treatment: the cells only grow, and the comparison is
+between time points, so every sample has the same
+<code>Treatment</code>, here <code>"Untreated"</code>. The
+<code>groups</code> (used by the statistical models) are the time
+points. The <code>palettes</code> give each time point (and each sample)
+the same color in every plot.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">hap1_count_table</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>,</span>
-<span>    Day <span class="op">=</span> <span class="st">"Screen"</span>,</span>
-<span>    Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T3"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span>, <span class="st">"T18"</span>, <span class="st">"T18"</span><span class="op">)</span></span>
+<span>    Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T3"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span>, <span class="st">"T18"</span>, <span class="st">"T18"</span><span class="op">)</span>,</span>
+<span>    Treatment <span class="op">=</span> <span class="st">"Untreated"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">samples</span></span>
-<span><span class="co">#&gt;   Sample    Day Treatment</span></span>
-<span><span class="co">#&gt; 1     T0 Screen        T0</span></span>
-<span><span class="co">#&gt; 2   T3_A Screen        T3</span></span>
-<span><span class="co">#&gt; 3   T3_B Screen        T3</span></span>
-<span><span class="co">#&gt; 4   T3_C Screen        T3</span></span>
-<span><span class="co">#&gt; 5  T18_A Screen       T18</span></span>
-<span><span class="co">#&gt; 6  T18_B Screen       T18</span></span>
-<span><span class="co">#&gt; 7  T18_C Screen       T18</span></span>
+<span><span class="co">#&gt;   Sample Day Treatment</span></span>
+<span><span class="co">#&gt; 1     T0  T0 Untreated</span></span>
+<span><span class="co">#&gt; 2   T3_A  T3 Untreated</span></span>
+<span><span class="co">#&gt; 3   T3_B  T3 Untreated</span></span>
+<span><span class="co">#&gt; 4   T3_C  T3 Untreated</span></span>
+<span><span class="co">#&gt; 5  T18_A T18 Untreated</span></span>
+<span><span class="co">#&gt; 6  T18_B T18 Untreated</span></span>
+<span><span class="co">#&gt; 7  T18_C T18 Untreated</span></span>
 <span><span class="va">time_colors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="st">"#999999"</span>, T3 <span class="op">=</span> <span class="st">"#7570B3"</span>, T18 <span class="op">=</span> <span class="st">"#D95F02"</span><span class="op">)</span></span>
 <span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenr_object.html">create_screenr_object</a></span><span class="op">(</span></span>
 <span>    table <span class="op">=</span> <span class="va">hap1_count_table</span>,</span>
 <span>    annotation <span class="op">=</span> <span class="va">hap1_annotation_table</span>,</span>
-<span>    groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Treatment</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">samples</span><span class="op">$</span><span class="va">Day</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    sample_table <span class="op">=</span> <span class="va">samples</span>,</span>
 <span>    palettes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>        Treatment <span class="op">=</span> <span class="va">time_colors</span>, Group <span class="op">=</span> <span class="va">time_colors</span>,</span>
+<span>        Day <span class="op">=</span> <span class="va">time_colors</span>, Group <span class="op">=</span> <span class="va">time_colors</span>,</span>
 <span>        Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="st">"#999999"</span>, T3_A <span class="op">=</span> <span class="st">"#9E9AC8"</span>, T3_B <span class="op">=</span> <span class="st">"#7570B3"</span>,</span>
 <span>            T3_C <span class="op">=</span> <span class="st">"#54278F"</span>, T18_A <span class="op">=</span> <span class="st">"#FDAE6B"</span>, T18_B <span class="op">=</span> <span class="st">"#D95F02"</span>,</span>
 <span>            T18_C <span class="op">=</span> <span class="st">"#A63603"</span><span class="op">)</span></span>
@@ -344,20 +347,90 @@ with more sgRNAs close to 0: the sgRNAs of the essential genes are
 dropping out.</p>
 </div>
 <div class="section level3">
+<h3 id="lost-sgrnas">Lost sgRNAs<a class="anchor" aria-label="anchor" href="#lost-sgrnas"></a>
+</h3>
+<p><code><a href="../reference/barcode_lost.html">barcode_lost()</a></code> counts the sgRNAs with no reads in each
+sample and <code><a href="../reference/plot_barcode_lost.html">plot_barcode_lost()</a></code> shows them. At T0 almost
+every sgRNA should be present: an sgRNA missing there was not
+represented in the library and cannot be measured.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/barcode_lost.html">barcode_lost</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 2</span></span></span>
+<span><span class="co">#&gt;   Sample LostBarcode</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> T0              26</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> T3_A            47</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> T3_B            48</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> T3_C            63</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> T18_A          456</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> T18_B          301</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> T18_C          296</span></span>
+<span><span class="fu"><a href="../reference/plot_barcode_lost.html">plot_barcode_lost</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/barcode-lost-1.png" class="r-plt" alt="" width="672"></p>
+<p>In a shRNA screen many lost barcodes are a warning; in a CRISPR
+dropout screen the sgRNAs lost at the late time point are expected,
+because the cells that carry the sgRNAs of essential genes are gone.
+<code><a href="../reference/count_mapped_reads.html">count_mapped_reads()</a></code> gives the reads of each sgRNA in each
+sample, so the lost sgRNAs can be assigned to the reference genes
+(defined in the <a href="#quality-with-reference-genes">quality
+section</a> below):</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hart_reference_genes</span><span class="op">)</span></span>
+<span><span class="va">essential</span> <span class="op">&lt;-</span> <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
+<span>    <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Class</span> <span class="op">==</span> <span class="st">"core essential"</span><span class="op">]</span></span>
+<span><span class="va">nonessential</span> <span class="op">&lt;-</span> <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
+<span>    <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Class</span> <span class="op">==</span> <span class="st">"non-essential"</span><span class="op">]</span></span>
+<span><span class="fu"><a href="../reference/count_mapped_reads.html">count_mapped_reads</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Mapped</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>        Gene <span class="op">=</span> <span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">Barcode</span>, <span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Barcode</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>        Class <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>            <span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">essential</span> <span class="op">~</span> <span class="st">"Core essential"</span>,</span>
+<span>            <span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">nonessential</span> <span class="op">~</span> <span class="st">"Non-essential"</span>,</span>
+<span>            <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"Other"</span></span>
+<span>        <span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">Sample</span>, <span class="va">Class</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">Class</span>, values_from <span class="op">=</span> <span class="va">n</span>, values_fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 4</span></span></span>
+<span><span class="co">#&gt;   Sample `Core essential` `Non-essential` Other</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> T0                    7               5    14</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> T3_A                 16              11    20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> T3_B                 16              12    20</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> T3_C                 26              12    25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> T18_A               362              17    77</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> T18_B               238              12    51</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> T18_C               240              11    45</span></span></code></pre></div>
+<p>At day 18 most lost sgRNAs target core essential genes, and very few
+target non-essential genes: the losses are the effect of the screen, not
+a technical problem. <code><a href="../reference/plot_barcode_lost_for_gene.html">plot_barcode_lost_for_gene()</a></code> (see <a href="Tutorial_2_Quality_control.html">Tutorial 2</a>) lists the genes
+that lost sgRNAs in chosen samples; at day 18 they are hundreds, so it
+is more useful at T0, to find the genes that were poorly represented
+from the start:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_lost_for_gene.html">plot_barcode_lost_for_gene</a></span><span class="op">(</span><span class="va">object</span>, samples <span class="op">=</span> <span class="st">"T0"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/barcode-lost-gene-1.png" class="r-plt" alt="" width="672"></p>
+<p>Each of these genes lost a single sgRNA at T0 and is still measured
+with the others.</p>
+</div>
+<div class="section level3">
 <h3 id="library-representation-and-replicates">Library representation and replicates<a class="anchor" aria-label="anchor" href="#library-representation-and-replicates"></a>
 </h3>
 <p>The library should be evenly represented at T0 (low Gini index) and
 the replicates should agree:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_gini.html">plot_gini</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/gini-1.png" class="r-plt" alt="" width="672"></p>
 <p>The plots so far use the raw counts. The correlation between
 replicates and the sample plots below compare normalized counts, so the
 counts are normalized first (counts per million; the choice of the
 normalization is discussed below):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">object</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_replicate_correlation.html">plot_replicate_correlation</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/replicates-1.png" class="r-plt" alt="" width="576"></p>
 </div>
@@ -371,16 +444,16 @@ between the samples each principal component explains. Both the MDS and
 the PCA use the log2 normalized counts, with the normalization chosen in
 <code><a href="../reference/normalize_data.html">normalize_data()</a></code> (here counts per million), so that the
 sequencing depth of the samples does not drive the result:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_mds.html">plot_mds</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/mds-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_pca.html">plot_pca</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/mds-2.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/explained-variance-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_explained_variance.html">plot_explained_variance</a></span><span class="op">(</span><span class="va">object</span>, cumulative <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/explained-variance-2.png" class="r-plt" alt="" width="672"></p>
 <p>The first dimension of both plots orders the samples by time point
@@ -400,22 +473,24 @@ the lists of Hart et al. for human cells.
 <code><a href="../reference/compute_screen_quality.html">compute_screen_quality()</a></code> measures how well the two groups
 are separated (NNMD and Cohen’s d: more negative is better; ROC AUC: 0.5
 is no separation, 1 is perfect) and
-<code><a href="../reference/plot_reference_separation.html">plot_reference_separation()</a></code> shows it.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">hart_reference_genes</span><span class="op">)</span></span>
-<span><span class="va">essential</span> <span class="op">&lt;-</span> <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
-<span>    <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Class</span> <span class="op">==</span> <span class="st">"core essential"</span><span class="op">]</span></span>
-<span><span class="va">nonessential</span> <span class="op">&lt;-</span> <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
-<span>    <span class="va">hart_reference_genes</span><span class="op">$</span><span class="va">Class</span> <span class="op">==</span> <span class="st">"non-essential"</span><span class="op">]</span></span></code></pre></div>
+<code><a href="../reference/plot_reference_separation.html">plot_reference_separation()</a></code> shows it. The two lists were
+read above, to classify the lost sgRNAs:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`Core essential` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">essential</span><span class="op">)</span>, `Non-essential` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nonessential</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Core essential  Non-essential </span></span>
+<span><span class="co">#&gt;            684            926</span></span></code></pre></div>
 <p><code><a href="../reference/compute_metrics.html">compute_metrics()</a></code> computes the log2 fold change of each
-sgRNA between two groups of samples (<code>control</code> and
-<code>treatment</code> are values of the Treatment column):</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+sgRNA between two groups of samples. In a treated screen they are a
+treatment and a control of the same day; in a dropout screen they are
+two time points: <code>condition_column = "Day"</code> makes
+<code>control</code> and <code>treatment</code> values of the Day
+column.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">day3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T3"</span>, day <span class="op">=</span> <span class="st">"Screen"</span></span>
+<span>    control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T3"</span>, condition_column <span class="op">=</span> <span class="st">"Day"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">day18</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T18"</span>, day <span class="op">=</span> <span class="st">"Screen"</span></span>
+<span>    control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T18"</span>, condition_column <span class="op">=</span> <span class="st">"Day"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">quality</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
 <span>    `Day 3` <span class="op">=</span> <span class="fu"><a href="../reference/compute_screen_quality.html">compute_screen_quality</a></span><span class="op">(</span><span class="va">day3</span>, <span class="va">essential</span>, <span class="va">nonessential</span><span class="op">)</span>,</span>
@@ -469,18 +544,31 @@ sgRNA between two groups of samples (<code>control</code> and
 </table>
 <p>After 3 days the essential genes are only starting to drop out; after
 18 days the separation is almost perfect.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_reference_separation.html">plot_reference_separation</a></span><span class="op">(</span><span class="va">day18</span>, <span class="va">essential</span>, <span class="va">nonessential</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Day 18 vs T0"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/separation-1.png" class="r-plt" alt="" width="672"></p>
+<p><code><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution()</a></code> compares the sgRNA fold
+changes of the two time points (the <code>Day</code> column of the
+tables, <code>T3</code> and <code>T18</code>). It receives the tables,
+not the object, so the palette of the time points is given
+explicitly:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">day3</span>, <span class="va">day18</span><span class="op">)</span>,</span>
+<span>    alpha <span class="op">=</span> <span class="fl">0.5</span>, palette <span class="op">=</span> <span class="fu"><a href="../reference/get_palettes.html">get_palettes</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span><span class="op">$</span><span class="va">Day</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"Time point"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/zscore-distribution-1.png" class="r-plt" alt="" width="672"></p>
+<p>At day 18 the distribution has a long left tail (the depleted sgRNAs)
+that is only beginning at day 3.</p>
 <p><code><a href="../reference/plot_boxplot.html">plot_boxplot()</a></code> shows the normalized counts of the sgRNAs
 of single genes in each sample, for example two core essential genes and
 the EGFP control (sgRNAs that target a gene not present in the
 cells):</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_boxplot.html">plot_boxplot</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span>, <span class="st">"EGFP"</span><span class="op">)</span>,</span>
-<span>    group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span><span class="op">)</span>, fill_var <span class="op">=</span> <span class="st">"Treatment"</span>, ncol <span class="op">=</span> <span class="fl">3</span></span>
+<span>    group_var <span class="op">=</span> <span class="st">"Untreated"</span>, fill_var <span class="op">=</span> <span class="st">"Day"</span>, ncol <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/boxplot-1.png" class="r-plt" alt="" width="672"></p>
@@ -488,25 +576,52 @@ cells):</p>
 gone at day 18; those of EGFP are stable (slightly higher, because of
 the CPM normalization described below).</p>
 <p><code><a href="../reference/plot_trend.html">plot_trend()</a></code> follows the same genes over time. The time
-points are in the Treatment column (<code>time_column</code>), and
-<code>time</code> places them at their real days, so that day 3 is close
-to T0 and far from day 18:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+points are in the Day column (<code>time_column</code>, the default),
+and <code>time</code> places them at their real days, so that day 3 is
+close to T0 and far from day 18:</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trend.html">plot_trend</a></span><span class="op">(</span><span class="va">object</span>,</span>
-<span>    genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span>, <span class="st">"EGFP"</span><span class="op">)</span>, group_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T0"</span>, <span class="st">"T3"</span>, <span class="st">"T18"</span><span class="op">)</span>,</span>
-<span>    time_column <span class="op">=</span> <span class="st">"Treatment"</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="fl">0</span>, T3 <span class="op">=</span> <span class="fl">3</span>, T18 <span class="op">=</span> <span class="fl">18</span><span class="op">)</span>,</span>
+<span>    genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span>, <span class="st">"EGFP"</span><span class="op">)</span>, group_var <span class="op">=</span> <span class="st">"Untreated"</span>,</span>
+<span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="fl">0</span>, T3 <span class="op">=</span> <span class="fl">3</span>, T18 <span class="op">=</span> <span class="fl">18</span><span class="op">)</span>,</span>
 <span>    trend <span class="op">=</span> <span class="st">"mean"</span>, ncol <span class="op">=</span> <span class="fl">3</span>, scales <span class="op">=</span> <span class="st">"free_y"</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Days"</span>, y <span class="op">=</span> <span class="st">"Mean normalized counts per sgRNA"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/trend-1.png" class="r-plt" alt="" width="672"></p>
+<p><code><a href="../reference/compute_slope.html">compute_slope()</a></code> gives the slope of the line of each
+gene, per day when the real times are given with <code>time</code>: a
+summary of the depletion rate that can be compared between genes:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/compute_slope.html">compute_slope</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span>    genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span>, <span class="st">"EGFP"</span><span class="op">)</span>, group_var <span class="op">=</span> <span class="st">"Untreated"</span>,</span>
+<span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="fl">0</span>, T3 <span class="op">=</span> <span class="fl">3</span>, T18 <span class="op">=</span> <span class="fl">18</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Rowwise:  Gene</span></span></span>
+<span><span class="co">#&gt;   Gene   Slope</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> EGFP    1.69</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> POLR2L -<span style="color: #BB0000;">3.44</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> RPL14  -<span style="color: #BB0000;">3.31</span></span></span></code></pre></div>
+<p><code><a href="../reference/plot_treatment_separation.html">plot_treatment_separation()</a></code> shows how much a gene
+changes between two conditions, as the log2 ratio of their mean
+normalized counts labelled with the percentage difference. Here the
+conditions are the time points (<code>condition_column = "Day"</code>,
+the same column as <code>time_column</code>), so every time point is
+compared with T0 and placed at its real day:</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_treatment_separation.html">plot_treatment_separation</a></span><span class="op">(</span><span class="va">object</span>, genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span>, <span class="st">"EGFP"</span><span class="op">)</span>,</span>
+<span>    treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T3"</span>, <span class="st">"T18"</span><span class="op">)</span>, control <span class="op">=</span> <span class="st">"T0"</span>, condition_column <span class="op">=</span> <span class="st">"Day"</span>,</span>
+<span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>T0 <span class="op">=</span> <span class="fl">0</span>, T3 <span class="op">=</span> <span class="fl">3</span>, T18 <span class="op">=</span> <span class="fl">18</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Days"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/treatment-separation-1.png" class="r-plt" alt="" width="672"></p>
 <p><code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code> shows each sgRNA in each sample
 (log2 normalized counts minus the mean of the sgRNA): every sgRNA of the
 two essential genes drops out, which is what a good knockout looks like.
 A gene supported by a single sgRNA would show one blue row among white
 ones.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap</a></span><span class="op">(</span><span class="va">object</span>, genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span><span class="op">)</span>,</span>
-<span>    column_group <span class="op">=</span> <span class="st">"Treatment"</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap</a></span><span class="op">(</span><span class="va">object</span>, genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POLR2L"</span>, <span class="st">"RPL14"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/heatmap-1.png" class="r-plt" alt="" width="672"></p>
 <p>The non-essential genes have a positive mean log2 fold change (0.36
@@ -516,13 +631,14 @@ to the others, which look enriched. The ranking of the genes does not
 change, but the baseline is not 0. Normalizing to the sgRNAs of the
 non-essential genes (<code>method = "control"</code>) puts it back at
 0:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nonessential_sgrnas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span>,</span>
 <span>    <span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Barcode</span><span class="op">[</span><span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">nonessential</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">day18_control</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalize_data.html">normalize_data</a></span><span class="op">(</span><span class="va">object</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"control"</span>, control_barcodes <span class="op">=</span> <span class="va">nonessential_sgrnas</span></span>
 <span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T18"</span>, day <span class="op">=</span> <span class="st">"Screen"</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span>control <span class="op">=</span> <span class="st">"T0"</span>, treatment <span class="op">=</span> <span class="st">"T18"</span>,</span>
+<span>        condition_column <span class="op">=</span> <span class="st">"Day"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="../reference/compute_screen_quality.html">compute_screen_quality</a></span><span class="op">(</span><span class="va">day18_control</span>, <span class="va">essential</span>, <span class="va">nonessential</span><span class="op">)</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
@@ -565,6 +681,130 @@ less on the baseline.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="sgrna-efficiency">sgRNA efficiency<a class="anchor" aria-label="anchor" href="#sgrna-efficiency"></a>
+</h2>
+<p>Not every sgRNA works equally well: some knock out their gene, others
+have little effect. A dropout screen gives an indirect estimate of this
+through the core essential genes: all their sgRNAs should be depleted,
+so an sgRNA of an essential gene that is barely depleted is probably
+inefficient. It is an estimate, not a measurement: the depletion also
+depends on how often the repair keeps the gene in frame, on how
+essential the gene is in these cells and on the noise of the counts. The
+sequence of each sgRNA (20 nucleotides, before the NGG PAM) is the
+second part of its identifier, so it can be related to the
+depletion.</p>
+<p>Here an sgRNA of an essential gene is called <em>effective</em> when
+its log2 fold change at day 18 is below the 5th percentile of the sgRNAs
+of the non-essential genes. The cut off is a choice: by construction 5%
+of the sgRNAs without effect would pass it too.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">guides</span> <span class="op">&lt;-</span> <span class="va">day18</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>        Sequence <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">".*_"</span>, <span class="st">""</span>, <span class="va">Barcode</span><span class="op">)</span>,</span>
+<span>        GC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"[AT]"</span>, <span class="st">""</span>, <span class="va">Sequence</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">Sequence</span><span class="op">)</span>,</span>
+<span>        PAMProximal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">Sequence</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="va">threshold</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span></span>
+<span>    <span class="va">guides</span><span class="op">$</span><span class="va">Log2FC</span><span class="op">[</span><span class="va">guides</span><span class="op">$</span><span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">nonessential</span><span class="op">]</span>, <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="va">essential_guides</span> <span class="op">&lt;-</span> <span class="va">guides</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">essential</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Effective <span class="op">=</span> <span class="va">Log2FC</span> <span class="op">&lt;</span> <span class="va">threshold</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">essential_guides</span><span class="op">$</span><span class="va">Effective</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.8358446</span></span></code></pre></div>
+<p>84% of the sgRNAs of the core essential genes are effective. A gene
+needs only some effective sgRNAs to be found, and most essential genes
+have three or four:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">essential_guides</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Gene</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>EffectiveGuides <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Effective</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">EffectiveGuides</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;   EffectiveGuides     n</span></span>
+<span><span class="co">#&gt;             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>               0     6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>               1    24</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>               2    87</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>               3   206</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>               4   323</span></span></code></pre></div>
+<p>The genes with no or one effective sgRNA are the ones the gene-level
+tests are most likely to miss: <code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code> and
+<code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code> show them as single blue rows among
+white ones.</p>
+<p>Is the difference between the sgRNAs of a gene a property of the
+sgRNAs, or noise? If it is a property of the sgRNAs it is the same in
+independent cultures. The three replicates (A, B and C) were grown
+separately from day 3 to day 18, so the change of each sgRNA in this
+interval is measured three times independently. The part specific to the
+sgRNA is its log2 fold change minus the median of its gene:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">normalized</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_normalized_count_table.html">get_normalized_count_table</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ScreenR normalized count table: 13598 rows, 8 columns</span></span>
+<span><span class="va">guide_effect</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">late</span>, <span class="va">early</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>        Gene <span class="op">=</span> <span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span></span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">normalized</span><span class="op">$</span><span class="va">Barcode</span>, <span class="va">hap1_annotation_table</span><span class="op">$</span><span class="va">Barcode</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>        Log2FC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="op">(</span><span class="va">normalized</span><span class="op">[[</span><span class="va">late</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">normalized</span><span class="op">[[</span><span class="va">early</span><span class="op">]</span><span class="op">]</span> <span class="op">+</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Gene</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>GuideEffect <span class="op">=</span> <span class="va">Log2FC</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Log2FC</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">GuideEffect</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">reproducibility</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    A <span class="op">=</span> <span class="fu">guide_effect</span><span class="op">(</span><span class="st">"T18_A"</span>, <span class="st">"T3_A"</span><span class="op">)</span>,</span>
+<span>    B <span class="op">=</span> <span class="fu">guide_effect</span><span class="op">(</span><span class="st">"T18_B"</span>, <span class="st">"T3_B"</span><span class="op">)</span>,</span>
+<span>    C <span class="op">=</span> <span class="fu">guide_effect</span><span class="op">(</span><span class="st">"T18_C"</span>, <span class="st">"T3_C"</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">[</span><span class="va">normalized</span><span class="op">$</span><span class="va">Barcode</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">essential_guides</span><span class="op">$</span><span class="va">Barcode</span>, <span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">reproducibility</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      A    B    C</span></span>
+<span><span class="co">#&gt; A 1.00 0.37 0.36</span></span>
+<span><span class="co">#&gt; B 0.37 1.00 0.41</span></span>
+<span><span class="co">#&gt; C 0.36 0.41 1.00</span></span></code></pre></div>
+<p>The correlations are positive in every pair of cultures: part of the
+difference between the sgRNAs of an essential gene is reproducible, so
+it belongs to the sgRNAs; the rest is noise. A single screen ranks the
+sgRNAs only roughly.</p>
+<p>The efficiency depends on the sequence. The GC content and the
+nucleotide next to the PAM (position 20) are two known factors (Doench
+et al. 2014): sgRNAs with a GC content of about 50-60% and a G at
+position 20 deplete more.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">essential_guides</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>GC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">GC</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">0.7</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>        labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"&lt;40%"</span>, <span class="st">"40-50%"</span>, <span class="st">"50-60%"</span>, <span class="st">"60-70%"</span>, <span class="st">"&gt;70%"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">GC</span>, <span class="va">Log2FC</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">time_colors</span><span class="op">[[</span><span class="st">"T18"</span><span class="op">]</span><span class="op">]</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>        outlier.size <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"GC content"</span>, y <span class="op">=</span> <span class="st">"Log2FC at day 18"</span>,</span>
+<span>        title <span class="op">=</span> <span class="st">"sgRNAs of the core essential genes"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/guide-sequence-1.png" class="r-plt" alt="" width="768"></p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">essential_guides</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">PAMProximal</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>Guides <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, MedianLog2FC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">Log2FC</span><span class="op">)</span>,</span>
+<span>        Effective <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Effective</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
+<span><span class="co">#&gt;   PAMProximal Guides MedianLog2FC Effective</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A              780        -<span style="color: #BB0000;">2.09</span>     0.828</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> C              332        -<span style="color: #BB0000;">1.80</span>     0.777</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> G             <span style="text-decoration: underline;">1</span>257        -<span style="color: #BB0000;">2.50</span>     0.866</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> T              153        -<span style="color: #BB0000;">1.97</span>     0.758</span></span></code></pre></div>
+<p>The GC content and the nucleotide at position 20 explain only a small
+part of the differences: the depletion is a noisy and indirect estimate,
+and these plots show trends, not the efficiency of a single sgRNA.</p>
+<p>None of the sgRNAs contains <code>TTTT</code> (0 sgRNAs), which ends
+the transcription by the U6 promoter: the library was designed to avoid
+it. These effects are small compared with the differences between genes,
+and the gene-level tests do not need them; they are useful to choose the
+sgRNAs of a validation experiment, or to judge a gene whose sgRNAs
+disagree (see <code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code> below). For a
+prediction of the efficiency of an sgRNA use dedicated tools, such as
+Rule Set 2 (Doench et al. 2016); to measure it, sequence the target site
+of the cells (the fraction of edited alleles) or check the loss of the
+protein.</p>
+</div>
+<div class="section level2">
 <h2 id="copy-number-bias-and-crisprcleanr">Copy-number bias and CRISPRcleanR<a class="anchor" aria-label="anchor" href="#copy-number-bias-and-crisprcleanr"></a>
 </h2>
 <p>Cas9 cuts the DNA, and cells with many cuts grow less. sgRNAs that
@@ -594,7 +834,7 @@ frame from its annotation file.</li>
 CRISPRcleanR (KY library, about 90,000 sgRNAs; HT-29 cells carry an
 amplification of the MYC region on chromosome 8q24). It takes about a
 minute.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ccr</span> <span class="op">&lt;-</span> <span class="st">"CRISPRcleanR"</span></span>
 <span><span class="co"># Library annotation and counts distributed with CRISPRcleanR</span></span>
 <span><span class="va">library_annotation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/get.html" class="external-link">get</a></span><span class="op">(</span><span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"KY_Library_v1.0"</span>, package <span class="op">=</span> <span class="va">ccr</span><span class="op">)</span><span class="op">)</span></span>
@@ -608,7 +848,7 @@ minute.</p>
 <span>    groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    sample_table <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>        Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"HT29_R1"</span>, <span class="st">"HT29_R2"</span>, <span class="st">"HT29_R3"</span><span class="op">)</span>,</span>
-<span>        Day <span class="op">=</span> <span class="st">"Screen"</span>, Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span><span class="op">)</span></span>
+<span>        Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span>, <span class="st">"Late"</span><span class="op">)</span>, Treatment <span class="op">=</span> <span class="st">"Untreated"</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">ht29_corrected</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/correct_crispr_bias.html">correct_crispr_bias</a></span><span class="op">(</span><span class="va">ht29</span>,</span>
@@ -623,7 +863,7 @@ compute the data table and find the hits. CRISPRcleanR’s own results
 <p>The effect of the correction on this screen (computed with the code
 above; the script is in the <code>benchmark/crispr</code> folder of the
 GitHub repository):</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">correction</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"crisprcleanr_ht29.csv"</span>,</span>
 <span>    package <span class="op">=</span> <span class="st">"ScreenR"</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
@@ -676,7 +916,7 @@ stronger.</p>
 </h2>
 <p>The hit-finding functions are used as in <a href="Tutorial_3_Finding_hits.html">Tutorial 3</a>. The comparison is
 day 18 against T0:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_design_matrix.html">create_design_matrix</a></span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span>
 <span><span class="va">contrast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_contrast.html">create_contrast</a></span><span class="op">(</span><span class="va">design</span>, treatment <span class="op">=</span> <span class="st">"T18"</span>, control <span class="op">=</span> <span class="st">"T0"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -694,7 +934,7 @@ the DNA like any other, while non-targeting sgRNAs do not.</p>
 <p>To be able to check the result, here half of the non-essential genes
 are used as reference and the other half is kept to count the false
 calls; in a real analysis use all of them.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2017</span><span class="op">)</span></span>
 <span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">nonessential</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nonessential</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">held_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">nonessential</span>, <span class="va">reference</span><span class="op">)</span></span>
@@ -712,7 +952,7 @@ calls; in a real analysis use all of them.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ACTR10         4 -<span style="color: #BB0000;">3.47</span>  -<span style="color: #BB0000;">3.18</span> 0.000<span style="text-decoration: underline;">010</span>00 0.000<span style="text-decoration: underline;">047</span>6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ACTR2          4 -<span style="color: #BB0000;">2.94</span>  -<span style="color: #BB0000;">2.21</span> 0.000<span style="text-decoration: underline;">010</span>00 0.000<span style="text-decoration: underline;">047</span>6</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ADSL           4 -<span style="color: #BB0000;">3.52</span>  -<span style="color: #BB0000;">3.07</span> 0.000<span style="text-decoration: underline;">010</span>00 0.000<span style="text-decoration: underline;">047</span>6</span></span></code></pre></div>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">called</span> <span class="op">&lt;-</span> <span class="va">zscore</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span><span class="va">zscore</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    `Genes called` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">called</span><span class="op">)</span>,</span>
@@ -742,7 +982,7 @@ estimates the spread from the side without hits only (above the centre
 for depleted genes), which gives more power when the hits are well
 separated, as in CRISPR screens; the default, <code>"central"</code>, is
 the safer choice (see <code><a href="../reference/find_gene_zscore_hit.html">?find_gene_zscore_hit</a></code>).</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zscore_empirical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">statistics</span>,</span>
 <span>    reference <span class="op">=</span> <span class="st">"empirical"</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
@@ -755,7 +995,7 @@ the safer choice (see <code><a href="../reference/find_gene_zscore_hit.html">?fi
 <p><code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code> shows the gene statistics and the
 fitted null, which should follow the centre of the distribution; the
 depleted genes are in the tail on the left:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_empirical_null.html">plot_empirical_null</a></span><span class="op">(</span><span class="va">statistics</span>, empirical_fit <span class="op">=</span> <span class="st">"one-sided"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/empirical-null-plot-1.png" class="r-plt" alt="" width="672"></p>
 </div>
@@ -766,7 +1006,7 @@ depleted genes are in the tail on the left:</p>
 reference of the Z-score test (random sets of sgRNAs of all the genes),
 CAMERA and FRY. <code>number_barcode = 2</code> keeps the genes with 3
 or 4 sgRNAs.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zscore_default</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">statistics</span>, fdr <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">camera</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast</span>,</span>
 <span>    number_barcode <span class="op">=</span> <span class="fl">2</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
@@ -799,13 +1039,21 @@ or 4 sgRNAs.</p>
 overlap (an UpSet plot, since there are more than three methods; each
 column counts the genes found by exactly the combination of methods
 marked below it):</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_common_hit.html">plot_common_hit</a></span><span class="op">(</span><span class="va">hit_list</span>, fdr <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>    title <span class="op">=</span> <span class="st">"Depleted genes at day 18 (5% FDR)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Tutorial_4_CRISPR_screens_files/figure-html/upset-1.png" class="r-plt" alt="" width="864"></p>
+<p><code><a href="../reference/find_common_hit.html">find_common_hit()</a></code> returns the genes found by at least
+<code>common_in</code> methods, for example by all six:</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">common</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_common_hit.html">find_common_hit</a></span><span class="op">(</span><span class="va">hit_list</span>, fdr <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 332</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">common</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">essential</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.8674699</span></span></code></pre></div>
 <p>How many of the hits are core essential, and how many are held-out
 non-essential genes (false calls):</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">evaluate_hits</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">result</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">called</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">Gene</span><span class="op">[</span><span class="va">result</span><span class="op">$</span><span class="va">FDR</span> <span class="op">&lt;=</span> <span class="fl">0.05</span><span class="op">]</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -891,13 +1139,138 @@ replicates, as here. It finds more essential genes than the tests
 without reference, with very few held-out non-essential genes.</p>
 </div>
 <div class="section level3">
+<h3 id="depleted-at-every-time-point">Depleted at every time point<a class="anchor" aria-label="anchor" href="#depleted-at-every-time-point"></a>
+</h3>
+<p><code><a href="../reference/find_consistent_hit.html">find_consistent_hit()</a></code> runs the same method for several
+contrasts and calls a gene only if it is depleted in all of them (the
+p-value of the gene is the largest of its p-values). Here the contrasts
+are day 3 and day 18 against T0, with FRY:</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">contrast_day3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_contrast.html">create_contrast</a></span><span class="op">(</span><span class="va">design</span>, treatment <span class="op">=</span> <span class="st">"T3"</span>, control <span class="op">=</span> <span class="st">"T0"</span><span class="op">)</span></span>
+<span><span class="va">consistent</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_consistent_hit.html">find_consistent_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>,</span>
+<span>    contrasts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Day3 <span class="op">=</span> <span class="va">contrast_day3</span>, Day18 <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"fry"</span>, method_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>number_barcode <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, fdr <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">consistent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 9</span></span></span>
+<span><span class="co">#&gt;   Gene  Direction NContrasts  PValue    FDR PValue_Day3 Log2FC_Day3 PValue_Day18</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> RPA2  Down               2 9.13<span style="color: #949494;">e</span><span style="color: #BB0000;">-6</span> 0.030<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">009</span>13      -<span style="color: #BB0000;">2.34</span>   0.000<span style="text-decoration: underline;">002</span>03 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> RTF1  Down               2 2.14<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 0.034<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">021</span>4       -<span style="color: #BB0000;">0.568</span>  0.000<span style="text-decoration: underline;">000</span>779</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> RPL23 Down               2 4.00<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 0.034<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">040</span>0       -<span style="color: #BB0000;">1.51</span>   0.000<span style="text-decoration: underline;">033</span>7  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> RPL14 Down               2 5.71<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 0.034<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">057</span>1       -<span style="color: #BB0000;">1.47</span>   0.000<span style="text-decoration: underline;">001</span>41 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> SMU1  Down               2 6.02<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 0.034<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">026</span>0       -<span style="color: #BB0000;">3.34</span>   0.000<span style="text-decoration: underline;">060</span>2  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> CKAP5 Down               2 6.19<span style="color: #949494;">e</span><span style="color: #BB0000;">-5</span> 0.034<span style="text-decoration: underline;">6</span>  0.000<span style="text-decoration: underline;">057</span>4       -<span style="color: #BB0000;">1.75</span>   0.000<span style="text-decoration: underline;">061</span>9  </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: Log2FC_Day18 &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Only 15 genes pass 5% FDR, because at day 3 the depletion is only
+beginning and FRY, which uses the variability of the replicates, has
+little power there. The genes found (13 of them are core essential) are
+those whose loss stops the growth of the cells immediately, such as the
+ribosomal proteins. <code><a href="../reference/combine_consistent_hits.html">combine_consistent_hits()</a></code> does the same
+with tables of p-values computed beforehand, for example with different
+methods for each contrast.</p>
+<p>A dropout screen has no treatment, so the methods that compare
+treated and control samples over time, <code><a href="../reference/find_time_hit.html">find_time_hit()</a></code> and
+<code><a href="../reference/filter_by_slope.html">filter_by_slope()</a></code>, are not used here; they are useful in
+screens with a drug and a vehicle arm at several time points (see <a href="Tutorial_3_Finding_hits.html">Tutorial 3</a>).</p>
+</div>
+<div class="section level3">
+<h3 id="looking-at-single-genes">Looking at single genes<a class="anchor" aria-label="anchor" href="#looking-at-single-genes"></a>
+</h3>
+<p>Before validating a hit, look at its sgRNAs: a convincing knockout
+has all its sgRNAs depleted, not only one. Take the ten best genes found
+by all the methods that are not in the reference lists:</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">candidates</span> <span class="op">&lt;-</span> <span class="va">hits</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">NMethods</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">hit_list</span><span class="op">)</span>,</span>
+<span>        <span class="op">!</span><span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">essential</span>, <span class="va">nonessential</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">MaxFDR</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">Gene</span><span class="op">)</span></span>
+<span><span class="va">candidates</span></span>
+<span><span class="co">#&gt;  [1] "ATP6V1F" "PPP6C"   "DUT"     "EIF1AD"  "SLC30A9" "UBE2S"   "NDNL2"  </span></span>
+<span><span class="co">#&gt;  [8] "NAA25"   "MRPL13"  "COX7C"</span></span></code></pre></div>
+<p><code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code> ranks all the sgRNAs by their log2
+fold change (day 18 against T0, from the model) and marks the sgRNAs of
+the gene (vertical lines): lines on the left side mean that the gene is
+depleted. As in the hit-finding functions,
+<code>number_barcode = 2</code> accepts genes with 3 sgRNAs:</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_hit.html">plot_barcode_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast</span>,</span>
+<span>    number_barcode <span class="op">=</span> <span class="fl">2</span>, gene <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/barcode-hit-1.png" class="r-plt" alt="" width="672"></p>
+<p><code><a href="../reference/plot_barcode_trend.html">plot_barcode_trend()</a></code> follows the log2 fold change of
+each sgRNA at day 3 and day 18 (from the tables of
+<code><a href="../reference/compute_metrics.html">compute_metrics()</a></code>, in the order of the list). With
+<code>n_col</code> larger than 1 it combines the plots of the genes (a
+patchwork object, so <code>&amp;</code> applies a theme to all of them),
+here the first three; each line is an sgRNA, and the long sgRNA names of
+the legend are hidden:</p>
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_trend.html">plot_barcode_trend</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">day3</span>, <span class="va">day18</span><span class="op">)</span>, genes <span class="op">=</span> <span class="va">candidates</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, n_col <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/barcode-trend-1.png" class="r-plt" alt="" width="864"></p>
+<p><code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code> shows the sgRNAs of all ten genes
+in every sample, next to a core essential gene for comparison:</p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap</a></span><span class="op">(</span><span class="va">object</span>, genes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">candidates</span>, <span class="st">"POLR2L"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span>guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_axis.html" class="external-link">guide_axis</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Tutorial_4_CRISPR_screens_files/figure-html/candidates-heatmap-1.png" class="r-plt" alt="" width="672"></p>
+<p><code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code> lists the sgRNAs that behave
+very differently from the other sgRNAs of their gene (distance from the
+median of the gene in units of its MAD). With 3 or 4 sgRNAs per gene the
+MAD is unstable, so many sgRNAs pass the default threshold: use it to
+look at the hits, not to filter the library, and do not remove sgRNAs
+before the tests.</p>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">discordant</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes</a></span><span class="op">(</span><span class="va">day18</span>, threshold <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">discordant</span>, <span class="va">Gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">common</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 73 × 5</span></span></span>
+<span><span class="co">#&gt;    Barcode                     Gene    Log2FC GeneLog2FC Deviation</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> MRPL53_GGCGGTGAGCATTTCCAGAG MRPL53 -<span style="color: #BB0000;">7.10</span>        -<span style="color: #BB0000;">4.02</span>     -<span style="color: #BB0000;">27.4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> CCT8_TTTGCCCAGATGCTCAAGGA   CCT8   -<span style="color: #BB0000;">4.19</span>        -<span style="color: #BB0000;">1.70</span>     -<span style="color: #BB0000;">24.4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> MRPL39_GAGGAGGTACGACTCAGGCG MRPL39  0.062<span style="text-decoration: underline;">1</span>      -<span style="color: #BB0000;">3.39</span>      21.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DKC1_ACAAGGATGAGAGTTACCTG   DKC1   -<span style="color: #BB0000;">4.67</span>        -<span style="color: #BB0000;">2.93</span>     -<span style="color: #BB0000;">20.1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> PPP1R8_TTGGGCAGTCGAACAGCGGG PPP1R8 -<span style="color: #BB0000;">0.774</span>       -<span style="color: #BB0000;">3.28</span>      19.0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> SYMPK_CATGACCCAGCTCTACAAGG  SYMPK  -<span style="color: #BB0000;">5.07</span>        -<span style="color: #BB0000;">2.41</span>     -<span style="color: #BB0000;">17.8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> GEMIN5_AAACAATCTTCACCAGGCAG GEMIN5 -<span style="color: #BB0000;">0.988</span>       -<span style="color: #BB0000;">3.90</span>      16.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> RPP21_CTGGAGCGCGGCGGTGATGG  RPP21  -<span style="color: #BB0000;">2.74</span>        -<span style="color: #BB0000;">4.86</span>      13.3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CDK9_GCACCGCAAGACCGGCCAGA   CDK9   -<span style="color: #BB0000;">8.22</span>        -<span style="color: #BB0000;">2.07</span>     -<span style="color: #BB0000;">12.9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ELP2_CAAGATAGTGATCTTCCAGA   ELP2   -<span style="color: #BB0000;">3.01</span>        -<span style="color: #BB0000;">1.94</span>     -<span style="color: #BB0000;">11.5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 63 more rows</span></span></span></code></pre></div>
+<p><code><a href="../reference/filter_by_variance.html">filter_by_variance()</a></code> keeps the genes whose sgRNAs agree
+(variance of the sgRNA log2 fold changes, from the model, below
+<code>variance</code>):</p>
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/filter_by_variance.html">filter_by_variance</a></span><span class="op">(</span><span class="va">object</span>,</span>
+<span>    genes <span class="op">=</span> <span class="va">candidates</span>, matrix_model <span class="op">=</span> <span class="va">design</span>, contrast <span class="op">=</span> <span class="va">contrast</span>,</span>
+<span>    variance <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">Gene</span>, <span class="va">Variance</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 10 × 2</span></span></span>
+<span><span class="co">#&gt;    Gene    Variance</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> EIF1AD    2.28  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> NAA25     1.10  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> NDNL2     3.57  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> DUT      10.3   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> UBE2S     1.14  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> SLC30A9   0.073<span style="text-decoration: underline;">4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> COX7C     1.02  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ATP6V1F   1.99  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> MRPL13   12.9   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> PPP6C     1.05</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="comparable-fold-changes">Comparable fold changes<a class="anchor" aria-label="anchor" href="#comparable-fold-changes"></a>
 </h3>
 <p><code><a href="../reference/scale_by_reference.html">scale_by_reference()</a></code> scales the fold changes so that the
 non-essential genes are at 0 and the essential genes at -1. Scaled
 values can be compared between screens of different strength, for
 example between cell lines or time points:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scale_by_reference.html">scale_by_reference</a></span><span class="op">(</span><span class="va">day18</span>, <span class="va">essential</span>, <span class="va">nonessential</span><span class="op">)</span></span>
 <span><span class="va">scaled</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Gene</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -922,7 +1295,7 @@ example between cell lines or time points:</p>
 genes are <strong>enriched</strong>: their knockout makes the cells
 survive. Every hit-finding function takes
 <code>direction = "Up"</code>:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/find_gene_zscore_hit.html">find_gene_zscore_hit</a></span><span class="op">(</span><span class="va">statistics</span>, direction <span class="op">=</span> <span class="st">"Up"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">design</span>, <span class="va">contrast</span>, direction <span class="op">=</span> <span class="st">"Up"</span><span class="op">)</span></span></code></pre></div>
 <p>The reference genes are not useful there (they describe fitness, not
@@ -947,8 +1320,8 @@ effect on the selection.</p>
 <tbody>
 <tr class="odd">
 <td>Create the object</td>
-<td>describe time points with a <code>sample_table</code>
-</td>
+<td>time points in the Day column of a <code>sample_table</code>, one
+Treatment for all the samples</td>
 <td><code><a href="../reference/create_screenr_object.html">create_screenr_object()</a></code></td>
 </tr>
 <tr class="even">
@@ -958,12 +1331,34 @@ effect on the selection.</p>
 <td><code><a href="../reference/barcodes_per_gene.html">barcodes_per_gene()</a></code></td>
 </tr>
 <tr class="odd">
-<td>Quality control</td>
-<td>check the separation of essential and non-essential genes</td>
+<td>Compare time points</td>
+<td><code>condition_column = "Day"</code></td>
 <td>
+<code><a href="../reference/compute_metrics.html">compute_metrics()</a></code>,
+<code><a href="../reference/plot_treatment_separation.html">plot_treatment_separation()</a></code>
+</td>
+</tr>
+<tr class="even">
+<td>Quality control</td>
+<td>lost sgRNAs at the late time point are expected; check the
+separation of essential and non-essential genes</td>
+<td>
+<code><a href="../reference/barcode_lost.html">barcode_lost()</a></code>, <code><a href="../reference/plot_barcode_lost.html">plot_barcode_lost()</a></code>,
+<code><a href="../reference/plot_barcode_lost_for_gene.html">plot_barcode_lost_for_gene()</a></code>,
 <code><a href="../reference/compute_screen_quality.html">compute_screen_quality()</a></code>,
-<code><a href="../reference/plot_reference_separation.html">plot_reference_separation()</a></code>, <code><a href="../reference/plot_trend.html">plot_trend()</a></code>,
+<code><a href="../reference/plot_reference_separation.html">plot_reference_separation()</a></code>,
+<code><a href="../reference/plot_zscore_distribution.html">plot_zscore_distribution()</a></code>, <code><a href="../reference/plot_trend.html">plot_trend()</a></code>,
+<code><a href="../reference/compute_slope.html">compute_slope()</a></code>, <code><a href="../reference/plot_treatment_separation.html">plot_treatment_separation()</a></code>,
 <code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code>
+</td>
+</tr>
+<tr class="odd">
+<td>sgRNA efficiency</td>
+<td>the sgRNAs of the essential genes estimate it; check that it is
+reproducible and relate it to the sequence</td>
+<td>
+<code><a href="../reference/compute_metrics.html">compute_metrics()</a></code>,
+<code><a href="../reference/get_normalized_count_table.html">get_normalized_count_table()</a></code>
 </td>
 </tr>
 <tr class="even">
@@ -980,15 +1375,26 @@ the empirical null</td>
 <code>find_gene_zscore_hit(reference = "empirical")</code>,
 <code><a href="../reference/plot_empirical_null.html">plot_empirical_null()</a></code>, <code><a href="../reference/find_camera_hit.html">find_camera_hit()</a></code>,
 <code><a href="../reference/find_roast_hit.html">find_roast_hit()</a></code>, <code><a href="../reference/summarise_hits.html">summarise_hits()</a></code>,
-<code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code>
+<code><a href="../reference/plot_common_hit.html">plot_common_hit()</a></code>, <code><a href="../reference/find_common_hit.html">find_common_hit()</a></code>,
+<code><a href="../reference/find_consistent_hit.html">find_consistent_hit()</a></code>
 </td>
 </tr>
 <tr class="even">
+<td>Single genes</td>
+<td>check that all the sgRNAs of a hit agree</td>
+<td>
+<code><a href="../reference/plot_barcode_hit.html">plot_barcode_hit()</a></code>, <code><a href="../reference/plot_barcode_trend.html">plot_barcode_trend()</a></code>,
+<code><a href="../reference/plot_barcode_heatmap.html">plot_barcode_heatmap()</a></code>,
+<code><a href="../reference/find_discordant_barcodes.html">find_discordant_barcodes()</a></code>,
+<code><a href="../reference/filter_by_variance.html">filter_by_variance()</a></code>
+</td>
+</tr>
+<tr class="odd">
 <td>Compare screens</td>
 <td>scale to the reference genes</td>
 <td><code><a href="../reference/scale_by_reference.html">scale_by_reference()</a></code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Positive selection</td>
 <td>look for enriched genes</td>
 <td><code>direction = "Up"</code></td>
@@ -1000,6 +1406,12 @@ the empirical null</td>
 <h2 id="literature">Literature<a class="anchor" aria-label="anchor" href="#literature"></a>
 </h2>
 <ul>
+<li>Doench JG, Hartenian E, Graham DB et al. (2014). Rational design of
+highly active sgRNAs for CRISPR-Cas9-mediated gene inactivation. Nat
+Biotechnol 32:1262-1267.</li>
+<li>Doench JG, Fusi N, Sullender M et al. (2016). Optimized sgRNA design
+to maximize activity and minimize off-target effects of CRISPR-Cas9. Nat
+Biotechnol 34:184-191.</li>
 <li>Hart T, Tong AHY, Chan K et al. (2017). Evaluation and design of
 genome-wide CRISPR/SpCas9 knockout screens. G3 7:2719-2727.</li>
 <li>Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014).
@@ -1013,7 +1425,7 @@ BMC Genomics 19:604.</li>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>

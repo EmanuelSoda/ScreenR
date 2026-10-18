@@ -403,8 +403,8 @@ data(k562_annotation_table)
 data(k562_reference_genes)
 samples <- data.frame(
     Sample = c("Plasmid", "T14_A", "T14_B"),
-    Day = "Screen",
-    Treatment = c("Plasmid", "T14", "T14")
+    Day = c("Plasmid", "T14", "T14"),
+    Treatment = "Untreated"
 )
 k562 <- create_screenr_object(
     table = k562_count_table, annotation = k562_annotation_table,
@@ -434,7 +434,7 @@ gene, so that the methods can be evaluated at any threshold.
 design <- create_design_matrix(k562)
 contrast <- create_contrast(design, treatment = "T14", control = "Plasmid")
 metrics <- compute_metrics(k562,
-    control = "Plasmid", treatment = "T14", day = "Screen"
+    control = "Plasmid", treatment = "T14", condition_column = "Day"
 )
 results <- list(
     `ScreenR_CAMERA` = find_camera_hit(k562, design, contrast,

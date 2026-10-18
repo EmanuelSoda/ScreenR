@@ -39,7 +39,10 @@ plot_treatment_separation(
 
 - treatment, control:
 
-  The two distinct values of condition_column to compare.
+  The two distinct values of condition_column to compare. When
+  condition_column and time_column are the same variable (a time course
+  without treatment, such as a dropout screen), control is the reference
+  time point and treatment one or more later time points.
 
 - condition_column:
 
@@ -100,15 +103,21 @@ Label and Condition. Missing comparisons are retained as NA rows.
 
 ## Details
 
-Only stages with both conditions have a comparison. Other stages have
-missing values, never fabricated zero effects; lines break at missing
-comparisons. A single comparable stage can also be plotted. This is a
-descriptive ratio of arithmetic means, not the median barcode log2 fold
-change reported by hit-finding methods, a confidence interval, or a test
-of temporal change. Samples are averaged without pairing or adjustment
-for covariates. The plot is independent of the hit-calling method and
-accepts normalized barcode screens supported by ScreenR. No theme is
-applied; choose appearance with theme_set() in user code.
+When condition_column and time_column are the same variable, every
+selected time point (control and treatment) is on the x axis and is
+compared with the control time point: the control is the reference, at
+0, and is not labelled. Points are colored by time point and joined by a
+grey line.
+
+Otherwise only stages with both conditions have a comparison. Other
+stages have missing values, never fabricated zero effects; lines break
+at missing comparisons. A single comparable stage can also be plotted.
+This is a descriptive ratio of arithmetic means, not the median barcode
+log2 fold change reported by hit-finding methods, a confidence interval,
+or a test of temporal change. Samples are averaged without pairing or
+adjustment for covariates. The plot is independent of the hit-calling
+method and accepts normalized barcode screens supported by ScreenR. No
+theme is applied; choose appearance with theme_set() in user code.
 
 ## See also
 
@@ -121,4 +130,9 @@ applied; choose appearance with theme_set() in user code.
 object <- get0("object", envir = asNamespace("ScreenR"))
 plot_treatment_separation(object, "Gene_42", treatment = "TRT",
     control = "Time3", time_column = "Day")
+
+
+# A time course: each time point compared with the first one
+plot_treatment_separation(object, "Gene_42", treatment = "Time4",
+    control = "Time3", condition_column = "Day", time_column = "Day")
 ```

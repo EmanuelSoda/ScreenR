@@ -100,7 +100,10 @@ then samples are averaged within condition and time point.</p>
 
 
 <dt id="arg-treatment-control">treatment, control<a class="anchor" aria-label="anchor" href="#arg-treatment-control"></a></dt>
-<dd><p>The two distinct values of condition_column to compare.</p></dd>
+<dd><p>The two distinct values of condition_column to compare.
+When condition_column and time_column are the same variable (a time
+course without treatment, such as a dropout screen), control is the
+reference time point and treatment one or more later time points.</p></dd>
 
 
 <dt id="arg-condition-column">condition_column<a class="anchor" aria-label="anchor" href="#arg-condition-column"></a></dt>
@@ -162,7 +165,12 @@ available, falling back to ggplot2 colors.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Only stages with both conditions have a comparison. Other stages
+    <p>When condition_column and time_column are the same variable,
+    every selected time point (control and treatment) is on the x axis and
+    is compared with the control time point: the control is the reference,
+    at 0, and is not labelled. Points are colored by time point and joined
+    by a grey line.</p>
+<p>Otherwise only stages with both conditions have a comparison. Other stages
     have missing values, never fabricated zero effects; lines break at missing
     comparisons. A single comparable stage can also be plotted.
     This is a descriptive ratio of arithmetic means, not the median barcode
@@ -183,6 +191,11 @@ available, falling back to ggplot2 colors.</p></dd>
 <span class="r-in"><span><span class="fu">plot_treatment_separation</span><span class="op">(</span><span class="va">object</span>, <span class="st">"Gene_42"</span>, treatment <span class="op">=</span> <span class="st">"TRT"</span>,</span></span>
 <span class="r-in"><span>    control <span class="op">=</span> <span class="st">"Time3"</span>, time_column <span class="op">=</span> <span class="st">"Day"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_treatment_separation-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A time course: each time point compared with the first one</span></span></span>
+<span class="r-in"><span><span class="fu">plot_treatment_separation</span><span class="op">(</span><span class="va">object</span>, <span class="st">"Gene_42"</span>, treatment <span class="op">=</span> <span class="st">"Time4"</span>,</span></span>
+<span class="r-in"><span>    control <span class="op">=</span> <span class="st">"Time3"</span>, condition_column <span class="op">=</span> <span class="st">"Day"</span>, time_column <span class="op">=</span> <span class="st">"Day"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot_treatment_separation-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

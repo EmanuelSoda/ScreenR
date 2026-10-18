@@ -737,8 +737,8 @@ not.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">k562_reference_genes</span><span class="op">)</span></span>
 <span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"T14_A"</span>, <span class="st">"T14_B"</span><span class="op">)</span>,</span>
-<span>    Day <span class="op">=</span> <span class="st">"Screen"</span>,</span>
-<span>    Treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"T14"</span>, <span class="st">"T14"</span><span class="op">)</span></span>
+<span>    Day <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Plasmid"</span>, <span class="st">"T14"</span>, <span class="st">"T14"</span><span class="op">)</span>,</span>
+<span>    Treatment <span class="op">=</span> <span class="st">"Untreated"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">k562</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_screenr_object.html">create_screenr_object</a></span><span class="op">(</span></span>
 <span>    table <span class="op">=</span> <span class="va">k562_count_table</span>, annotation <span class="op">=</span> <span class="va">k562_annotation_table</span>,</span>
@@ -767,7 +767,7 @@ threshold.</p>
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_design_matrix.html">create_design_matrix</a></span><span class="op">(</span><span class="va">k562</span><span class="op">)</span></span>
 <span><span class="va">contrast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_contrast.html">create_contrast</a></span><span class="op">(</span><span class="va">design</span>, treatment <span class="op">=</span> <span class="st">"T14"</span>, control <span class="op">=</span> <span class="st">"Plasmid"</span><span class="op">)</span></span>
 <span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_metrics.html">compute_metrics</a></span><span class="op">(</span><span class="va">k562</span>,</span>
-<span>    control <span class="op">=</span> <span class="st">"Plasmid"</span>, treatment <span class="op">=</span> <span class="st">"T14"</span>, day <span class="op">=</span> <span class="st">"Screen"</span></span>
+<span>    control <span class="op">=</span> <span class="st">"Plasmid"</span>, treatment <span class="op">=</span> <span class="st">"T14"</span>, condition_column <span class="op">=</span> <span class="st">"Day"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    `ScreenR_CAMERA` <span class="op">=</span> <span class="fu"><a href="../reference/find_camera_hit.html">find_camera_hit</a></span><span class="op">(</span><span class="va">k562</span>, <span class="va">design</span>, <span class="va">contrast</span>,</span>

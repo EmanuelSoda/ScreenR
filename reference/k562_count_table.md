@@ -73,11 +73,12 @@ head(k562_count_table)
 #> 6 0_H01__01278     141   105   180
 
 # The sample names do not follow the Day_Treatment_Replicate convention,
-# so the samples are described with a sample table
+# so the samples are described with a sample table: the plasmid and day 14
+# are the time points, and the screen has no treatment
 samples <- data.frame(
     Sample = c("Plasmid", "T14_A", "T14_B"),
-    Day = "Screen",
-    Treatment = c("Plasmid", "T14", "T14")
+    Day = c("Plasmid", "T14", "T14"),
+    Treatment = "Untreated"
 )
 object <- create_screenr_object(
     table = k562_count_table, annotation = k562_annotation_table,
