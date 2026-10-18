@@ -663,7 +663,7 @@ consistent <- find_consistent_hit(object, design,
 # Keep all genes for the following summaries and classification.
 genes <- consistent$Gene
 both <- consistent %>%
-    rename(P_T3 = PValue_T3, P_T4 = PValue_T4,
+    dplyr::rename(P_T3 = PValue_T3, P_T4 = PValue_T4,
         PValue_both = PValue, FDR_both = FDR) %>%
     mutate(FDR_average = tests$Average$FDR[match(Gene, tests$Average$Gene)])
 head(both, 5)
