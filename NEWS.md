@@ -14,6 +14,9 @@
   `find_consistent_hit()`, and inspects the sgRNAs of ten hits with
   `plot_barcode_hit()`, `plot_barcode_trend()`, `plot_barcode_heatmap()`,
   `find_discordant_barcodes()` and `filter_by_variance()`.
+* Tutorial 4 estimates the efficiency of the sgRNAs from the depletion of the
+  core essential genes, checks that it is reproducible between independent
+  cultures and relates it to the GC content and the nucleotide next to the PAM.
 * Tutorial 3 (finding and validating hits) uses the current functions: a
   sample table and palettes at creation, `theme_set()`, TMM normalization,
   FRY as the recommended test, the empirical null, `plot_common_hit()` with
