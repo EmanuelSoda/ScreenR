@@ -880,30 +880,47 @@ html.sr-refraction .navbar.fixed-top {
   margin: 0;
 }
 
-/* Only the DNA is cut: the helix region of the logo is covered with the
-   background colour of the logo, and two pieces of the helix move apart
-   inside it. The hexagon, the text and the R stay intact. */
+/* Only the DNA is cut: a patch in the background colour of the logo covers
+   the helix, and two pieces of the helix snap apart over it. The hexagon,
+   the text and the R stay intact. */
+.sr-logo {
+  --sr-helix: polygon(4% 38%, 28% 22%, 33% 28%, 39% 35%, 40% 42%, 44% 47%,
+    50% 49%, 52% 55%, 57% 59%, 61% 64%, 63% 70%, 72% 74%, 72% 79%, 52% 92%,
+    46% 93%, 40% 91%, 32% 80%, 22% 66%, 13% 53%, 12% 45%, 5% 43%);
+}
+
 .sr-logo .sr-dna {
   position: absolute;
   inset: 0;
   opacity: 0;
   pointer-events: none;
-  clip-path: polygon(4% 38%, 28% 22%, 33% 28%, 39% 35%, 40% 42%, 44% 47%,
-    50% 49%, 52% 55%, 57% 59%, 61% 64%, 63% 70%, 72% 74%, 72% 79%, 52% 92%,
-    46% 93%, 40% 91%, 32% 80%, 22% 66%, 13% 53%, 12% 45%, 5% 43%);
 }
 
 .sr-logo .sr-patch {
   position: absolute;
   inset: 0;
   background: rgb(141, 180, 165);
+  clip-path: var(--sr-helix);
 }
 
+/* Each piece is one side of the cut (on .sr-half) of the DNA alone
+   (.sr-strand: pkgdown/assets/dna.png, the helix of the logo on a
+   transparent background); the clip turns with the piece, so its ends are
+   not cut off and the text stays visible when it bends */
 .sr-logo .sr-half {
   position: absolute;
   inset: 0;
-  background: var(--sr-logo) center / contain no-repeat;
-  transition: transform 0.45s cubic-bezier(.2, .8, .2, 1);
+  /* The hinge: where the cut leaves the helix on its left side, so that
+     the ends swing away from the text and the R */
+  transform-origin: 22% 64%;
+  /* Healing: slow and smooth */
+  transition: transform 0.7s cubic-bezier(.45, 0, .2, 1);
+}
+
+.sr-logo .sr-strand {
+  position: absolute;
+  inset: 0;
+  background: var(--sr-dna) center / contain no-repeat;
 }
 
 /* A double-strand break: the cut crosses the helix through its middle */
@@ -911,18 +928,51 @@ html.sr-refraction .navbar.fixed-top {
 .sr-logo .sr-half-b { clip-path: polygon(0 78%, 100% 15.7%, 100% 100%, 0 100%); }
 
 .sr-logo.sr-cut .sr-dna { opacity: 1; }
-.sr-logo.sr-split .sr-half-a { transform: translate(-4px, -6px) rotate(-3deg); }
-.sr-logo.sr-split .sr-half-b { transform: translate(4px, 6px) rotate(2deg); }
+
+/* The snap: the two pieces turn around the hinge in opposite directions and
+   the break opens into a wide V, with a spring that overshoots */
+.sr-logo.sr-split .sr-half {
+  transition: transform 0.55s cubic-bezier(.3, 1.9, .5, 1);
+}
+
+.sr-logo.sr-split .sr-half-a { transform: rotate(-9deg); }
+.sr-logo.sr-split .sr-half-b { transform: rotate(9deg); }
+
+/* A spark where the DNA snaps */
+.sr-logo .sr-spark {
+  position: absolute;
+  /* On the cut, where the crack opens */
+  left: 40%;
+  top: 53%;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 12%,
+    rgba(255, 236, 200, 0.6) 25%, transparent 60%);
+}
+
+.sr-logo.sr-split .sr-spark {
+  animation: sr-spark 0.5s ease-out;
+}
+
+@keyframes sr-spark {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+}
 
 .sr-scissors {
   position: absolute;
-  left: 0;
-  top: 78%;
+  left: 46%;
+  top: 49%;
   width: 42%;
   opacity: 0;
   pointer-events: none;
-  /* Across the helix, along the cut */
-  transform: translate(-60%, -50%) rotate(-35deg);
+  /* Along the cut, from the side where the DNA opens towards the hinge */
+  transform: translate(-50%, -50%) rotate(145deg);
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
@@ -943,11 +993,13 @@ html.sr-refraction .navbar.fixed-top {
   transform-origin: 30px 20px;
 }
 
+/* From the end of the cut on the right of the helix (where the DNA will
+   open) down to the hinge on its left */
 @keyframes sr-scissors-path {
-  0% { opacity: 0; left: -10%; top: 84%; }
-  15% { opacity: 1; }
-  80% { opacity: 1; left: 37%; top: 55%; }
-  100% { opacity: 0; left: 50%; top: 47%; }
+  0% { opacity: 0; left: 49%; top: 47%; }
+  12% { opacity: 1; left: 46%; top: 49%; }
+  85% { opacity: 1; left: 22%; top: 64%; }
+  100% { opacity: 0; left: 18%; top: 66.5%; }
 }
 
 @keyframes sr-snip-a {
@@ -973,6 +1025,7 @@ html.sr-refraction .navbar.fixed-top {
     transition: none;
   }
   .sr-scissors,
+  .sr-spark,
   .sr-reveal {
     animation: none;
     transition: none;

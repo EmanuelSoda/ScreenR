@@ -267,7 +267,9 @@
     var wrap = document.createElement("span");
     wrap.className = "sr-logo";
     wrap.setAttribute("title", "Cas9 at work");
-    wrap.style.setProperty("--sr-logo", 'url("' + logo.src + '")');
+    // The DNA of the logo alone, next to the logo in the site
+    wrap.style.setProperty("--sr-dna",
+      'url("' + logo.src.replace(/logo\.png$/, "dna.png") + '")');
     logo.parentNode.insertBefore(wrap, logo);
     wrap.appendChild(logo);
     var blade = function (cls, y, ring) {
@@ -280,7 +282,9 @@
     };
     wrap.insertAdjacentHTML("beforeend",
       '<span class="sr-dna"><span class="sr-patch"></span>' +
-      '<span class="sr-half sr-half-a"></span><span class="sr-half sr-half-b"></span></span>' +
+      '<span class="sr-half sr-half-a"><span class="sr-strand"></span></span>' +
+      '<span class="sr-half sr-half-b"><span class="sr-strand"></span></span>' +
+      '<span class="sr-spark"></span></span>' +
       '<svg class="sr-scissors" viewBox="0 0 100 40" aria-hidden="true">' +
       blade("sr-blade-a", 15, 9) + blade("sr-blade-b", 25, 31) +
       '<circle cx="30" cy="20" r="2.4" fill="#1F5F55"/></svg>');
@@ -289,13 +293,13 @@
       if (running) return;
       running = true;
       wrap.classList.add("sr-cutting");
-      // The two ends come apart once the scissors reach the middle of the helix
-      setTimeout(function () { wrap.classList.add("sr-cut", "sr-split"); }, 1050);
-      setTimeout(function () { wrap.classList.remove("sr-split"); }, 2300);
+      // The DNA snaps into a V when the scissors reach the hinge
+      setTimeout(function () { wrap.classList.add("sr-cut", "sr-split"); }, 1300);
+      setTimeout(function () { wrap.classList.remove("sr-split"); }, 2500);
       setTimeout(function () {
         wrap.classList.remove("sr-cut", "sr-cutting");
         running = false;
-      }, 2800);
+      }, 3300);
     };
     wrap.addEventListener("mouseenter", cut);
     wrap.addEventListener("click", cut);
