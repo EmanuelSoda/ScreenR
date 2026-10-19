@@ -1,5 +1,17 @@
 # ScreenR 1.15.16
 
+* New `plot_volcano()`: every gene with the mean log2 fold change of its
+  barcodes and its -log10 FDR, from the table of one method or of
+  `summarise_hits()` (with the barcode statistics); the most significant hits
+  are labelled and `genes` circles the genes to follow. Used in Tutorials 3
+  and 4.
+* New ScreenR app, `run_screenr_app()`: the analysis of a screen in the web
+  browser without writing code, for the people who did the experiment. It
+  loads an example screen, a count table or a MAGeCK count file, describes
+  the samples, shows the quality control, finds the hits with FRY, CAMERA and
+  the Z-score tests, and shows each hit at the level of its barcodes; tables
+  and an R script that repeats the analysis can be downloaded. It needs
+  shiny, bslib and DT (suggested packages). See Tutorial 5.
 * New design of the pkgdown site: frosted glass panels and a floating navbar
   over a soft colour field, with a light that follows the cursor and a
   light/dark/auto switch. The home page has highlights and buttons, the

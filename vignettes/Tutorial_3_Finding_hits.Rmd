@@ -414,6 +414,20 @@ summary %>%
     knitr::kable(digits = 3)
 ```
 
+`plot_volcano()` shows every gene with its effect (x) and its significance
+(y): the hits are above the dashed line, and the most significant are
+labelled. Here the 12 genes that FRY finds at 10% FDR:
+
+```{r volcano, fig.height = 4.5}
+plot_volcano(fry, fdr = 0.1)
+```
+
+With the table of `summarise_hits()` the significance is the largest FDR of
+the methods, so the genes above the line are found by every method; give the
+barcode statistics, from which the mean log2 fold change of each gene is
+computed: `plot_volcano(summary, statistics = barcode_statistics)`. None of
+the genes of this screen is found by all five methods at 10% FDR.
+
 The combined list has no guaranteed false discovery rate: treat it as a short
 list of candidates to check and validate.
 
@@ -613,7 +627,7 @@ filter_by_variance(object,
 | 1 | `create_design_matrix()` and `create_contrast()` for the comparison |
 | 2 | `find_roast_hit(method = "fry")`; `find_camera_hit()` for a competitive test |
 | 3 | `compute_barcode_statistics()` + `find_gene_zscore_hit()`, with `reference = "empirical"` for shRNA libraries |
-| 4 | `plot_common_hit()`, `find_common_hit()` and `summarise_hits()` |
+| 4 | `plot_common_hit()`, `find_common_hit()`, `summarise_hits()` and `plot_volcano()` |
 | 5 | `find_consistent_hit()` (every time point) and `find_time_hit()` (an effect that changes over time) |
 | 6 | `plot_trend()`, `plot_treatment_separation()`, `plot_boxplot()`, `plot_barcode_heatmap()`, `plot_barcode_hit()`, `find_discordant_barcodes()` |
 

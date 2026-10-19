@@ -51,7 +51,10 @@ Suggests:
     knitr (>= 1.37),
     testthat (>= 3.0.0),
     BiocStyle (>= 2.22.0),
-    covr (>= 3.5)
+    covr (>= 3.5),
+    shiny (>= 1.8.0),
+    bslib (>= 0.6.0),
+    DT
 Config/testthat/edition: 3
 Depends: 
     R (>= 4.3)
@@ -62,6 +65,7 @@ URL: https://emanuelsoda.github.io/ScreenR/
 Collate: 
     'ScreenR-package.R'
     'annotation_table.R'
+    'app.R'
     'barcode_lost.R'
     'camera_method.R'
     'compute_data_table.R'
@@ -95,9 +99,11 @@ Collate:
     'plot_mds.R'
     'plot_treatment_separation.R'
     'plot_trend.R'
+    'plot_volcano.R'
     'plot_zscore_distribution.R'
     'quality_control.R'
     'reference_data.R'
     'reference_genes.R'
+    'run_screenr_app.R'
     'screenr-class.R'
     'zzz.R'

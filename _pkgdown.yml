@@ -52,6 +52,8 @@ navbar:
         href: articles/Tutorial_3_Finding_hits.html
       - text: "4. CRISPR-Cas9 screens"
         href: articles/Tutorial_4_CRISPR_screens.html
+      - text: "5. The ScreenR app (no code)"
+        href: articles/Tutorial_5_ScreenR_app.html
     articles:
       text: Articles
       menu:
@@ -78,6 +80,7 @@ articles:
   - Tutorial_2_Quality_control
   - Tutorial_3_Finding_hits
   - Tutorial_4_CRISPR_screens
+  - Tutorial_5_ScreenR_app
 - title: Articles
   contents:
   - Analysis_Example
@@ -153,6 +156,7 @@ reference:
   desc: Compare the methods and check the hits at the barcode level.
   contents:
   - summarise_hits
+  - plot_volcano
   - find_common_hit
   - plot_common_hit
   - find_discordant_barcodes
@@ -179,6 +183,12 @@ reference:
   - correct_crispr_bias
   - crisprcleanr_available
   - hart_reference_genes
+
+- title: Interactive app
+  desc: >
+    Analyse a screen in the browser, without writing code.
+  contents:
+  - run_screenr_app
 
 - title: Legacy hit rules
   desc: >
