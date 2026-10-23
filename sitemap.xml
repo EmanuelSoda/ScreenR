@@ -11,6 +11,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/articles/Tutorial_5_ScreenR_app.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/articles/index.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/authors.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/index.html</loc></url>
@@ -125,6 +126,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_replicate_correlation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_trend.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_volcano.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/plot_zscore_distribution.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/random_set_scores.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/rebuild_screenr_object.html</loc></url>
@@ -135,6 +137,7 @@
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/resolve_duplicated_barcodes.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/restore_random_state.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/run_camera.html</loc></url>
+<url><loc>https://emanuelsoda.github.io/ScreenR/reference/run_screenr_app.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/sample_groups.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/scale_by_reference.html</loc></url>
 <url><loc>https://emanuelsoda.github.io/ScreenR/reference/screenr_object-class.html</loc></url>

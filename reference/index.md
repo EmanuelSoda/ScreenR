@@ -147,6 +147,8 @@ Compare the methods and check the hits at the barcode level.
 
 - [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
   : Summarise the hits of several methods
+- [`plot_volcano()`](https://emanuelsoda.github.io/ScreenR/reference/plot_volcano.md)
+  : Volcano plot of the genes
 - [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md)
   : Find the hits in common between methods
 - [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
@@ -193,6 +195,14 @@ copy-number bias with CRISPRcleanR.
 - [`hart_reference_genes`](https://emanuelsoda.github.io/ScreenR/reference/hart_reference_genes.md)
   : Reference essential and non-essential human genes
 
+## Interactive app
+
+Analyse a screen in the browser, without writing code.
+
+- [`run_screenr_app()`](https://emanuelsoda.github.io/ScreenR/reference/run_screenr_app.md)
+  [`screenr_app()`](https://emanuelsoda.github.io/ScreenR/reference/run_screenr_app.md)
+  : Analyse a screen in the browser with the ScreenR app
+
 ## Legacy hit rules
 
 Rules of earlier versions of ScreenR, kept for compatibility. They do
@@ -228,4 +238,4 @@ screen with known essential genes.
 
 - [`ScreenR-package`](https://emanuelsoda.github.io/ScreenR/reference/ScreenR-package.md)
   [`ScreenR`](https://emanuelsoda.github.io/ScreenR/reference/ScreenR-package.md)
-  : ScreenR: analysis of pooled shRNA screens
+  : ScreenR: analysis of pooled shRNA and CRISPR-Cas9 screens

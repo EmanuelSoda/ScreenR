@@ -572,11 +572,11 @@ filter(discordant, Gene %in% head(summary$Gene, 10))
 sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.5 LTS
+#> Running under: Ubuntu 26.04.1 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 #> 
 #> locale:
 #>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -596,39 +596,40 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
 #>  [3] xfun_0.62                   bslib_0.12.0               
-#>  [5] Biobase_2.72.0              lattice_0.22-9             
-#>  [7] vctrs_0.7.3                 tools_4.6.1                
-#>  [9] generics_0.1.4              stats4_4.6.1               
-#> [11] tibble_3.3.1                pkgconfig_2.0.3            
-#> [13] Matrix_1.7-5                RColorBrewer_1.1-3         
-#> [15] S7_0.2.2                    desc_1.4.3                 
-#> [17] S4Vectors_0.50.3            lifecycle_1.0.5            
-#> [19] compiler_4.6.1              farver_2.1.2               
-#> [21] stringr_1.6.0               textshaping_1.0.5          
-#> [23] statmod_1.5.2               Seqinfo_1.2.0              
-#> [25] htmltools_0.5.9             sass_0.4.10                
-#> [27] yaml_2.3.12                 pillar_1.11.1              
-#> [29] pkgdown_2.2.1               jquerylib_0.1.4            
-#> [31] tidyr_1.3.2                 DelayedArray_0.38.2        
-#> [33] cachem_1.1.0                limma_3.68.5               
-#> [35] abind_1.4-8                 nlme_3.1-169               
-#> [37] tidyselect_1.2.1            locfit_1.5-9.12            
-#> [39] digest_0.6.39               stringi_1.8.9              
-#> [41] purrr_1.2.2                 bookdown_0.48              
-#> [43] splines_4.6.1               labeling_0.4.3             
-#> [45] fastmap_1.2.0               grid_4.6.1                 
-#> [47] cli_3.6.6                   SparseArray_1.12.3         
-#> [49] magrittr_2.0.5              patchwork_1.3.2            
-#> [51] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [53] withr_3.0.3                 edgeR_4.10.6               
-#> [55] scales_1.4.0                rmarkdown_2.32             
-#> [57] XVector_0.52.0              matrixStats_1.5.0          
-#> [59] otel_0.2.0                  ragg_1.5.2                 
-#> [61] evaluate_1.0.5              knitr_1.52                 
-#> [63] GenomicRanges_1.64.0        IRanges_2.46.0             
-#> [65] mgcv_1.9-4                  rlang_1.3.0                
-#> [67] glue_1.8.1                  BiocManager_1.30.27        
-#> [69] BiocGenerics_0.58.1         jsonlite_2.0.0             
-#> [71] R6_2.6.1                    MatrixGenerics_1.24.0      
-#> [73] systemfonts_1.3.2           fs_2.1.0
+#>  [5] htmlwidgets_1.6.4           Biobase_2.72.0             
+#>  [7] lattice_0.22-9              vctrs_0.7.3                
+#>  [9] tools_4.6.1                 generics_0.1.4             
+#> [11] stats4_4.6.1                tibble_3.3.1               
+#> [13] pkgconfig_2.0.3             Matrix_1.7-5               
+#> [15] RColorBrewer_1.1-3          S7_0.2.2                   
+#> [17] desc_1.4.3                  S4Vectors_0.50.3           
+#> [19] lifecycle_1.0.5             compiler_4.6.1             
+#> [21] farver_2.1.2                stringr_1.6.0              
+#> [23] textshaping_1.0.5           statmod_1.5.2              
+#> [25] Seqinfo_1.2.0               htmltools_0.5.9            
+#> [27] sass_0.4.10                 yaml_2.3.12                
+#> [29] tidyr_1.3.2                 pillar_1.11.1              
+#> [31] pkgdown_2.2.1               jquerylib_0.1.4            
+#> [33] DelayedArray_0.38.2         cachem_1.1.0               
+#> [35] limma_3.68.5                abind_1.4-8                
+#> [37] nlme_3.1-169                tidyselect_1.2.1           
+#> [39] locfit_1.5-9.12             digest_0.6.39              
+#> [41] stringi_1.8.9               purrr_1.2.2                
+#> [43] bookdown_0.48               splines_4.6.1              
+#> [45] labeling_0.4.3              fastmap_1.2.0              
+#> [47] grid_4.6.1                  cli_3.6.6                  
+#> [49] SparseArray_1.12.3          magrittr_2.0.5             
+#> [51] patchwork_1.3.2             S4Arrays_1.12.1            
+#> [53] utf8_1.2.6                  withr_3.0.3                
+#> [55] edgeR_4.10.7                scales_1.4.0               
+#> [57] rmarkdown_2.32              XVector_0.52.0             
+#> [59] matrixStats_1.5.0           otel_0.2.0                 
+#> [61] ragg_1.5.2                  evaluate_1.0.5             
+#> [63] knitr_1.52                  GenomicRanges_1.64.0       
+#> [65] IRanges_2.46.0              mgcv_1.9-4                 
+#> [67] rlang_1.3.0                 glue_1.8.1                 
+#> [69] BiocManager_1.30.27         BiocGenerics_0.58.1        
+#> [71] jsonlite_2.0.0              R6_2.6.1                   
+#> [73] MatrixGenerics_1.24.0       systemfonts_1.3.2          
+#> [75] fs_2.1.0
 ```

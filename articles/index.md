@@ -12,6 +12,8 @@ Step-by-step guides, from the count table to the list of hits.
   hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.md):
 - [Tutorial 4: CRISPR-Cas9
   screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.md):
+- [Tutorial 5: the ScreenR
+  app](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_5_ScreenR_app.md):
 
 ### Articles
 

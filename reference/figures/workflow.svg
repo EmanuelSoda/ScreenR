@@ -11,25 +11,25 @@
     <!-- 1 -->
     <rect x="25" y="40" width="190" height="150" rx="14" fill="#93B5A3"/>
     <text x="120" y="70" text-anchor="middle" font-weight="bold" font-size="17" fill="#13332D">1. Your data</text>
-    <text x="120" y="100" text-anchor="middle" fill="#13332D">count table</text>
+    <text x="120" y="100" text-anchor="middle" fill="#13332D">shRNA or sgRNA counts</text>
     <text x="120" y="122" text-anchor="middle" fill="#13332D">+ barcode annotation</text>
-    <text x="120" y="144" text-anchor="middle" fill="#13332D">any column names</text>
+    <text x="120" y="144" text-anchor="middle" fill="#13332D">treatment or time points</text>
     <text x="120" y="172" text-anchor="middle" font-family="Menlo, monospace" font-size="13" fill="#13332D">create_screenr_object()</text>
 
     <!-- 2 -->
     <rect x="260" y="40" width="190" height="150" rx="14" fill="#93B5A3"/>
     <text x="355" y="70" text-anchor="middle" font-weight="bold" font-size="17" fill="#13332D">2. Quality control</text>
-    <text x="355" y="100" text-anchor="middle" fill="#13332D">mapped reads, Gini</text>
-    <text x="355" y="122" text-anchor="middle" fill="#13332D">replicate correlation</text>
-    <text x="355" y="144" text-anchor="middle" fill="#13332D">MDS, lost barcodes</text>
-    <text x="355" y="172" text-anchor="middle" font-family="Menlo, monospace" font-size="13" fill="#13332D">plot_gini(), plot_mds()</text>
+    <text x="355" y="100" text-anchor="middle" fill="#13332D">reads, Gini index</text>
+    <text x="355" y="122" text-anchor="middle" fill="#13332D">lost barcodes, MDS</text>
+    <text x="355" y="144" text-anchor="middle" fill="#13332D">reference genes (CRISPR)</text>
+    <text x="355" y="172" text-anchor="middle" font-family="Menlo, monospace" font-size="12" fill="#13332D">compute_screen_quality()</text>
 
     <!-- 3 -->
     <rect x="495" y="40" width="190" height="150" rx="14" fill="#93B5A3"/>
     <text x="590" y="70" text-anchor="middle" font-weight="bold" font-size="17" fill="#13332D">3. Normalize</text>
     <text x="590" y="100" text-anchor="middle" fill="#13332D">CPM, TMM or</text>
     <text x="590" y="122" text-anchor="middle" fill="#13332D">control barcodes</text>
-    <text x="590" y="144" text-anchor="middle" fill="#13332D">log2 fold changes</text>
+    <text x="590" y="144" text-anchor="middle" fill="#13332D">CRISPRcleanR (CRISPR)</text>
     <text x="590" y="172" text-anchor="middle" font-family="Menlo, monospace" font-size="13" fill="#13332D">normalize_data()</text>
 
     <!-- 4: hit finding, highlighted -->
@@ -37,17 +37,17 @@
     <text x="952" y="50" text-anchor="middle" font-weight="bold" font-size="17" fill="#FFFFFF">4. Find hits — every gene gets a p-value and an FDR</text>
     <g fill="#FFFFFF">
       <rect x="745" y="66" width="200" height="60" rx="10" fill="#2E7D6E"/>
-      <text x="845" y="91" text-anchor="middle" font-weight="bold">Z-score permutation</text>
-      <text x="845" y="113" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_gene_zscore_hit()</text>
+      <text x="845" y="91" text-anchor="middle" font-weight="bold">FRY / ROAST (limma)</text>
+      <text x="845" y="113" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_roast_hit()</text>
       <rect x="960" y="66" width="200" height="60" rx="10" fill="#2E7D6E"/>
       <text x="1060" y="91" text-anchor="middle" font-weight="bold">CAMERA (limma)</text>
       <text x="1060" y="113" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_camera_hit()</text>
       <rect x="745" y="136" width="200" height="60" rx="10" fill="#2E7D6E"/>
-      <text x="845" y="161" text-anchor="middle" font-weight="bold">ROAST / FRY (limma)</text>
-      <text x="845" y="183" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_roast_hit()</text>
+      <text x="845" y="161" text-anchor="middle" font-weight="bold">Z-score, empirical null</text>
+      <text x="845" y="183" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_gene_zscore_hit()</text>
       <rect x="960" y="136" width="200" height="60" rx="10" fill="#2E7D6E"/>
-      <text x="1060" y="161" text-anchor="middle" font-weight="bold">Time course (edgeR)</text>
-      <text x="1060" y="183" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_time_hit()</text>
+      <text x="1060" y="161" text-anchor="middle" font-weight="bold">Across time points</text>
+      <text x="1060" y="183" text-anchor="middle" font-family="Menlo, monospace" font-size="12">find_consistent_hit()</text>
     </g>
   </g>
 
@@ -69,9 +69,10 @@
 
     <rect x="555" y="268" width="310" height="135" rx="14" fill="#C9836A"/>
     <text x="710" y="298" text-anchor="middle" font-weight="bold" font-size="17" fill="#FFFFFF">6. Validate the hits</text>
-    <text x="710" y="326" text-anchor="middle" fill="#FFFFFF">barcode-level plots and trends</text>
-    <text x="710" y="348" text-anchor="middle" fill="#FFFFFF">discordant barcodes, filters</text>
-    <text x="710" y="380" text-anchor="middle" font-family="Menlo, monospace" font-size="13" fill="#FFFFFF">plot_barcode_hit(), plot_trend()</text>
+    <text x="710" y="326" text-anchor="middle" fill="#FFFFFF">every barcode of each hit</text>
+    <text x="710" y="348" text-anchor="middle" fill="#FFFFFF">separation over time</text>
+    <text x="710" y="374" text-anchor="middle" font-family="Menlo, monospace" font-size="12" fill="#FFFFFF">plot_barcode_heatmap(),</text>
+    <text x="710" y="391" text-anchor="middle" font-family="Menlo, monospace" font-size="12" fill="#FFFFFF">plot_treatment_separation()</text>
 
     <rect x="910" y="268" width="265" height="135" rx="14" fill="#FFFFFF" stroke="#1F5F55" stroke-width="2"/>
     <text x="1042" y="298" text-anchor="middle" font-weight="bold" font-size="17" fill="#1F5F55">Candidate genes</text>

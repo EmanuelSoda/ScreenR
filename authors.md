@@ -15,12 +15,12 @@
 Source:
 [`DESCRIPTION`](https://github.com/EmanuelSoda/ScreenR/blob/master/DESCRIPTION)
 
-Soda E, Ceccacci E (2026). *ScreenR: Package to Perform High Throughput
-Biological Screening*. R package version 1.15.16,
+Soda E, Ceccacci E (2026). *ScreenR: Hit Identification in Pooled shRNA
+and CRISPR-Cas9 Screens*. R package version 1.15.16,
 <https://emanuelsoda.github.io/ScreenR/>.
 
     @Manual{,
-      title = {ScreenR: Package to Perform High Throughput Biological Screening},
+      title = {ScreenR: Hit Identification in Pooled shRNA and CRISPR-Cas9 Screens},
       author = {Emanuel Michele Soda and Elena Ceccacci},
       year = {2026},
       note = {R package version 1.15.16},

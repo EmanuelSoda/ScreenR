@@ -1412,11 +1412,11 @@ covered by ScreenR at present:
 sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.5 LTS
+#> Running under: Ubuntu 26.04.1 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 #> 
 #> locale:
 #>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -1443,23 +1443,23 @@ sessionInfo()
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] gtable_0.3.6        xfun_0.62           bslib_0.12.0       
-#>  [4] lattice_0.22-9      vctrs_0.7.3         tools_4.6.1        
-#>  [7] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-5       
-#> [10] RColorBrewer_1.1-3  S7_0.2.2            desc_1.4.3         
-#> [13] lifecycle_1.0.5     compiler_4.6.1      farver_2.1.2       
-#> [16] stringr_1.6.0       textshaping_1.0.5   statmod_1.5.2      
-#> [19] htmltools_0.5.9     sass_0.4.10         yaml_2.3.12        
-#> [22] pillar_1.11.1       pkgdown_2.2.1       jquerylib_0.1.4    
-#> [25] tidyr_1.3.2         DelayedArray_0.38.2 cachem_1.1.0       
-#> [28] limma_3.68.5        abind_1.4-8         tidyselect_1.2.1   
-#> [31] locfit_1.5-9.12     digest_0.6.39       stringi_1.8.9      
-#> [34] purrr_1.2.2         bookdown_0.48       labeling_0.4.3     
-#> [37] fastmap_1.2.0       grid_4.6.1          cli_3.6.6          
-#> [40] SparseArray_1.12.3  magrittr_2.0.5      S4Arrays_1.12.1    
-#> [43] utf8_1.2.6          withr_3.0.3         edgeR_4.10.6       
-#> [46] scales_1.4.0        rmarkdown_2.32      XVector_0.52.0     
-#> [49] otel_0.2.0          ragg_1.5.2          evaluate_1.0.5     
-#> [52] knitr_1.52          rlang_1.3.0         glue_1.8.1         
-#> [55] BiocManager_1.30.27 jsonlite_2.0.0      R6_2.6.1           
-#> [58] systemfonts_1.3.2   fs_2.1.0
+#>  [4] htmlwidgets_1.6.4   lattice_0.22-9      vctrs_0.7.3        
+#>  [7] tools_4.6.1         tibble_3.3.1        pkgconfig_2.0.3    
+#> [10] Matrix_1.7-5        RColorBrewer_1.1-3  S7_0.2.2           
+#> [13] desc_1.4.3          lifecycle_1.0.5     compiler_4.6.1     
+#> [16] farver_2.1.2        stringr_1.6.0       textshaping_1.0.5  
+#> [19] statmod_1.5.2       htmltools_0.5.9     sass_0.4.10        
+#> [22] yaml_2.3.12         tidyr_1.3.2         pillar_1.11.1      
+#> [25] pkgdown_2.2.1       jquerylib_0.1.4     DelayedArray_0.38.2
+#> [28] cachem_1.1.0        limma_3.68.5        abind_1.4-8        
+#> [31] tidyselect_1.2.1    locfit_1.5-9.12     digest_0.6.39      
+#> [34] stringi_1.8.9       purrr_1.2.2         bookdown_0.48      
+#> [37] labeling_0.4.3      fastmap_1.2.0       grid_4.6.1         
+#> [40] cli_3.6.6           SparseArray_1.12.3  magrittr_2.0.5     
+#> [43] S4Arrays_1.12.1     utf8_1.2.6          withr_3.0.3        
+#> [46] edgeR_4.10.7        scales_1.4.0        rmarkdown_2.32     
+#> [49] XVector_0.52.0      otel_0.2.0          ragg_1.5.2         
+#> [52] evaluate_1.0.5      knitr_1.52          rlang_1.3.0        
+#> [55] glue_1.8.1          BiocManager_1.30.27 jsonlite_2.0.0     
+#> [58] R6_2.6.1            systemfonts_1.3.2   fs_2.1.0
 ```

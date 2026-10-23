@@ -1,13 +1,14 @@
 # ScreenR
 
-**Find the genes that matter in pooled shRNA screens — with p-values you
-can trust, quality control built in and publication-ready plots.**
+**Find the genes that matter in pooled shRNA and CRISPR-Cas9 screens —
+with p-values you can trust, quality control built in and
+publication-ready plots.**
 
-ScreenR takes the barcode counts of a pooled shRNA screen and tells you
-which genes are depleted or enriched by your treatment, how confident
-you can be in each of them, and whether the result holds up at the level
-of the single barcodes. It is built on the statistics of
-[edgeR](https://bioconductor.org/packages/edgeR) and
+ScreenR takes the barcode counts (shRNAs or sgRNAs) of a pooled screen
+and tells you which genes are depleted or enriched, by a treatment or
+over time, how confident you can be in each of them, and whether the
+result holds up at the level of the single barcodes. It is built on the
+statistics of [edgeR](https://bioconductor.org/packages/edgeR) and
 [limma](https://bioconductor.org/packages/limma), stores the data in a
 Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 
@@ -24,9 +25,9 @@ Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
   gscreend and plain edgeR/limma workflows, keeps the FDR below the
   nominal level and runs in seconds
   ([benchmark](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html)).
-- **Several complementary methods, one table.** A permutation test on
-  the barcode Z-scores, limma CAMERA, ROAST and FRY, and an edgeR model
-  for time courses;
+- **Several complementary methods, one table.** limma FRY, ROAST and
+  CAMERA, a gene-level Z-score test with an empirical null (no reference
+  genes needed), and tests across time points;
   [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
   combines them and
   [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md)
@@ -39,8 +40,9 @@ Bioconductor `SummarizedExperiment`, and draws every plot with ggplot2.
 - **Works with your files as they are.** Any column names, sample
   descriptions from a table, helpful messages when something does not
   match.
-- **shRNA and CRISPR.** Works with shRNA and CRISPR-Cas9 libraries,
-  checks the screen with essential and non-essential reference genes
+- **shRNA and CRISPR.** Treated vs control screens and dropout screens
+  with only time points; checks the screen with essential and
+  non-essential reference genes
   ([`compute_screen_quality()`](https://emanuelsoda.github.io/ScreenR/reference/compute_screen_quality.md)),
   and corrects CRISPR copy-number bias through
   [CRISPRcleanR](https://github.com/francescojm/CRISPRcleanR)
@@ -71,46 +73,61 @@ BiocManager::install("EmanuelSoda/ScreenR")
 
 ## Quick start
 
-The package includes an example screen: shRNA counts for treated (`TRT`)
-and control (`CTRL`) cells at several time points, with three
-replicates.
+### A treated vs control shRNA screen
+
+The package includes an example screen: shRNA counts of treated (`TRT`)
+and control (`CTRL`) cells 7 and 14 days after the selection (`Time3`
+and `Time4`), with three replicates, and two samples taken before the
+treatment. ScreenR plots have no theme of their own: choose one once
+with
+[`theme_set()`](https://ggplot2.tidyverse.org/reference/get_theme.html).
 
 ``` r
 
 library(ScreenR)
+library(ggplot2)
+theme_set(theme_light())
 ```
+
+Describe the samples with a `sample_table`, give the `groups` used by
+the statistical models, and the colors of the conditions:
 
 ``` r
 
 data(count_table)
 data(annotation_table)
+samples <- data.frame(
+    Sample = c("Time1", "Time2", paste0(rep(c("Time3", "Time4"), each = 6),
+        "_", rep(rep(c("TRT", "CTRL"), each = 3), 2), "_", c("A", "B", "C"))),
+    Day = c("Time1", "Time2", rep(c("Time3", "Time4"), each = 6)),
+    Treatment = c("Time1", "Time2", rep(rep(c("TRT", "CTRL"), each = 3), 2))
+)
 counts <- count_table[count_table$Barcode != "*", ]
-colnames(counts) <- c(
-    "Barcode", "Time1", "Time2", "Time3_TRT_A", "Time3_TRT_B", "Time3_TRT_C",
-    "Time3_CTRL_A", "Time3_CTRL_B", "Time3_CTRL_C",
-    "Time4_TRT_A", "Time4_TRT_B", "Time4_TRT_C",
-    "Time4_CTRL_A", "Time4_CTRL_B", "Time4_CTRL_C"
-)
-groups <- factor(c(
-    "T1/T2", "T1/T2", rep("Time3_TRT", 3), rep("Time3_CTRL", 3),
-    rep("Time4_TRT", 3), rep("Time4_CTRL", 3)
-))
+colnames(counts) <- c("Barcode", samples$Sample)
+groups <- factor(ifelse(samples$Day %in% c("Time1", "Time2"), "T1/T2",
+    paste(samples$Day, samples$Treatment, sep = "_")))
 
-# 1. Create the object and normalize the counts
 object <- create_screenr_object(
-    table = counts, annotation = annotation_table, groups = groups
+    table = counts, annotation = annotation_table, groups = groups,
+    sample_table = samples,
+    palettes = list(
+        Treatment = c(Time1 = "#CCCCCC", Time2 = "#999999",
+            CTRL = "#1B9E77", TRT = "#D95F02"),
+        Group = c(`T1/T2` = "#999999", Time3_CTRL = "#66C2A5",
+            Time3_TRT = "#FC8D62", Time4_CTRL = "#1B9E77", Time4_TRT = "#D95F02")
+    )
 )
-object <- compute_data_table(normalize_data(remove_all_zero_row(object)))
+object <- normalize_data(remove_all_zero_row(object), method = "tmm")
 object
 #> class: screenr_object 
 #> dim: 5317 14 
-#> metadata(0):
-#> assays(2): counts normalized
+#> metadata(3): screenr_layout palettes normalization
+#> assays(1): counts
 #> rownames(5317): 10208 10502 ... 13876 13995
 #> rowData names(5): Barcode Gene Gene_ID Sequence Library
 #> colnames(14): Time1 Time2 ... Time4_CTRL_B Time4_CTRL_C
-#> colData names(4): Sample Day Treatment Group
-#> data table: 74438 rows, 9 columns
+#> colData names(5): Sample Day Treatment Group EffectiveLibSize
+#> normalization: tmm (effective library sizes in colData(object)$EffectiveLibSize)
 ```
 
 Check the samples before looking for hits: replicates should cluster
@@ -118,56 +135,104 @@ together.
 
 ``` r
 
-plot_mds(object) + ggplot2::theme_bw()
+plot_mds(object)
 ```
 
 ![](reference/figures/README-qc-1.png)
 
-Compare treated and control cells at the last time point with two
-independent tests, and combine them:
+Compare treated and control cells at the last time point with three
+complementary tests, and combine them:
 
 ``` r
 
-# 2. Define the comparison
 design <- create_design_matrix(object)
 contrast <- create_contrast(design, treatment = "Time4_TRT", control = "Time4_CTRL")
 
-# 3. Gene-level permutation test on replicate-aware barcode statistics
-barcode_statistics <- compute_barcode_statistics(object, design, contrast)
-zscore <- find_gene_zscore_hit(barcode_statistics, fdr = 1, seed = 1)
-
-# 4. limma CAMERA on the barcodes of each gene
+# Do the barcodes of each gene change? (limma FRY, recommended first test)
+fry <- find_roast_hit(object, design, contrast, method = "fry", fdr = 1)
+# Do they change more than the barcodes of the other genes? (limma CAMERA)
 camera <- find_camera_hit(object, design, contrast, fdr = 1)
+# Is the mean barcode score extreme? (Z-score test with an empirical null)
+statistics <- compute_barcode_statistics(object, design, contrast)
+zscore <- find_gene_zscore_hit(statistics, reference = "empirical", fdr = 1)
 
-# 5. One table with the FDR of both methods, best supported genes first
-#    (the example screen has a weak effect, so we use a lenient FDR of 25%)
-hits <- summarise_hits(list(zscore = zscore, camera = camera), fdr = 0.25)
+# One table with the FDR of every method, best supported genes first
+# (the example screen has a weak effect, so a lenient FDR of 25% is used)
+hits <- summarise_hits(list(fry = fry, camera = camera, zscore = zscore),
+    fdr = 0.25)
 head(hits)
-#> # A tibble: 6 x 6
-#>   Gene     FDR_zscore FDR_camera NMethods MaxFDR Hit  
-#>   <chr>         <dbl>      <dbl>    <dbl>  <dbl> <lgl>
-#> 1 Gene_173      0.128     0.0882        2  0.128 TRUE 
-#> 2 Gene_422      0.187     0.0882        2  0.187 TRUE 
-#> 3 Gene_15       0.233     0.232         2  0.233 TRUE 
-#> 4 Gene_296      0.250     0.0882        2  0.250 TRUE 
-#> 5 Gene_370      0.280     0.232         1  0.280 FALSE
-#> 6 Gene_352      0.280     0.232         1  0.280 FALSE
+#> # A tibble: 6 × 7
+#>   Gene     FDR_fry FDR_camera FDR_zscore NMethods MaxFDR Hit  
+#>   <chr>      <dbl>      <dbl>      <dbl>    <dbl>  <dbl> <lgl>
+#> 1 Gene_173  0.0200     0.0878      0.154        3  0.154 TRUE 
+#> 2 Gene_422  0.0200     0.0878      0.154        3  0.154 TRUE 
+#> 3 Gene_296  0.0210     0.0878      0.154        3  0.154 TRUE 
+#> 4 Gene_15   0.0210     0.227       0.172        3  0.227 TRUE 
+#> 5 Gene_370  0.130      0.227       0.273        2  0.273 FALSE
+#> 6 Gene_168  0.0738     0.371       0.276        1  0.371 FALSE
 ```
 
-Look at the barcodes of the top candidate before trusting it:
+Look at the top candidates in the data before trusting them: how far
+treated and control cells separate at each time point after the
+treatment.
 
 ``` r
 
-top_gene <- as.character(hits$Gene[1])
-plot_boxplot(object,
-    genes = top_gene, group_var = c("TRT", "CTRL"), fill_var = "Treatment"
-) +
-    ggplot2::scale_fill_manual(values = c(CTRL = "#93B5A3", TRT = "#C9836A")) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+treated_days <- samples$Sample[samples$Day %in% c("Time3", "Time4")]
+plot_treatment_separation(object, genes = hits$Gene[1:3],
+    treatment = "TRT", control = "CTRL", samples = treated_days, nrow = 1)
 ```
 
 ![](reference/figures/README-top-gene-1.png)
+
+### A CRISPR-Cas9 dropout screen
+
+A dropout screen has no treatment: the time points go in the `Day`
+column and `compute_metrics(condition_column = "Day")` compares them.
+The core essential genes of Hart et al. should be depleted, the
+non-essential genes not:
+
+``` r
+
+data(hap1_count_table)
+data(hap1_annotation_table)
+data(hart_reference_genes)
+days <- c("T0", "T3", "T3", "T3", "T18", "T18", "T18")
+crispr <- create_screenr_object(
+    table = hap1_count_table, annotation = hap1_annotation_table,
+    groups = factor(days, levels = c("T0", "T3", "T18")),
+    sample_table = data.frame(Sample = colnames(hap1_count_table)[-1],
+        Day = days, Treatment = "Untreated"),
+    palettes = list(Day = c(T0 = "#999999", T3 = "#7570B3", T18 = "#D95F02"))
+)
+crispr <- normalize_data(remove_all_zero_row(crispr))
+day18 <- compute_metrics(crispr,
+    control = "T0", treatment = "T18", condition_column = "Day")
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+compute_screen_quality(day18, essential, nonessential)
+#> # A tibble: 1 × 7
+#>   NEssential NNonessential MeanEssential MeanNonessential  NNMD CohenD   AUC
+#>        <int>         <int>         <dbl>            <dbl> <dbl>  <dbl> <dbl>
+#> 1        646           797         -2.35            0.358 -7.20  -3.87 0.998
+```
+
+``` r
+
+plot_treatment_separation(crispr, genes = c("POLR2L", "RPL14", "EGFP"),
+    treatment = c("T3", "T18"), control = "T0", condition_column = "Day",
+    time = c(T0 = 0, T3 = 3, T18 = 18), nrow = 1) +
+    labs(x = "Days")
+```
+
+![](reference/figures/README-crispr-trend-1.png)
+
+[Tutorial
+4](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html)
+continues with the hits, the efficiency of the sgRNAs and the
+copy-number correction.
 
 ## Which method should I use?
 
@@ -177,11 +242,12 @@ resistance screen).
 
 | Question | Function | Notes |
 |----|----|----|
-| Which genes are depleted or enriched? | [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) | Permutation test on the barcode scores; robust default. Use `statistic = "median"` against off-target effects. |
-| Do the barcodes of a gene change more than the others? | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) | limma CAMERA, competitive test; works with a single control sample. |
-| Do the barcodes of a gene change at all? | [`find_roast_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_roast_hit.md) | limma ROAST or FRY (`method = "fry"`), self-contained; needs replicates in both groups. |
-| Does the effect change over time? | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) | edgeR model of the whole time course. |
-| Which genes are supported by several methods? | [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) | One table with the FDR of every method. |
+| Do the barcodes of a gene change? | `find_roast_hit(method = "fry")` | limma FRY, self-contained; the recommended first test. Needs replicates. |
+| Do they change more than the barcodes of the other genes? | [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) | limma CAMERA, competitive; works with a single control sample. |
+| Is the mean barcode score of a gene extreme? | [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) + [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md) | Use `reference = "empirical"` when no reference genes are known, `control_genes =` with the non-essential genes of a CRISPR screen, and `statistic = "median"` against off-target effects. |
+| Does the gene change at every time point? | [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md) | Runs the same test for several contrasts. |
+| Does the effect change over time? | [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) | Model of the whole time course, treated vs control. |
+| Which genes are supported by several methods? | [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md), [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md), [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md) | One table with the FDR of every method. |
 
 ## How ScreenR compares
 
@@ -203,7 +269,7 @@ has all the details and reruns the ScreenR side of the comparison.
 | [Tutorial 1: Getting your data into ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_1_Creating_the_object.html) | Count tables, annotations, sample descriptions and the ScreenR object |
 | [Tutorial 2: Quality control](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_2_Quality_control.html) | Sequencing depth, library evenness, replicates, normalization |
 | [Tutorial 3: Finding and validating hits](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_3_Finding_hits.html) | All the hit-finding methods, combining them and checking the hits |
-| [Tutorial 4: CRISPR-Cas9 screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html) | sgRNA thresholds, quality with reference genes, copy-number correction with CRISPRcleanR, hits |
+| [Tutorial 4: CRISPR-Cas9 screens](https://emanuelsoda.github.io/ScreenR/articles/Tutorial_4_CRISPR_screens.html) | Dropout screens over time, sgRNA thresholds and efficiency, quality with reference genes, copy-number correction with CRISPRcleanR, hits |
 | [Statistics in ScreenR](https://emanuelsoda.github.io/ScreenR/articles/Improved_Statistics.html) | How the tests work and why |
 | [Choosing the reference of the gene-level test](https://emanuelsoda.github.io/ScreenR/articles/Empirical_null.html) | Why we suggest `find_gene_zscore_hit(reference = "empirical")` |
 | [Benchmark against MAGeCK and other tools](https://emanuelsoda.github.io/ScreenR/articles/Benchmark_MAGeCK.html) | Simulations, an shRNA and a CRISPR screen with known hits, compared with MAGeCK, BAGEL2, gscreend and edgeR/limma |
@@ -222,8 +288,8 @@ has all the details and reruns the ScreenR side of the comparison.
 print(citation("ScreenR"), bibtex = FALSE)
 To cite package 'ScreenR' in publications use:
 
-  Soda E, Ceccacci E (2022). _ScreenR: Package to Perform High
-  Throughput Biological Screening_. R package version 1.15.14,
+  Soda E, Ceccacci E (2022). _ScreenR: Hit Identification in Pooled
+  shRNA and CRISPR-Cas9 Screens_. R package version 1.15.16,
   <https://emanuelsoda.github.io/ScreenR/>.
 ```
 

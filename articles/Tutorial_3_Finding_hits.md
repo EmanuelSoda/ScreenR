@@ -544,6 +544,26 @@ summary %>%
 | Gene_87 | 0.261 | 0.267 | 0.230 | 0.271 | 0.223 | 0 |
 | Gene_349 | 0.032 | 0.076 | 0.254 | 0.363 | 0.311 | 2 |
 
+[`plot_volcano()`](https://emanuelsoda.github.io/ScreenR/reference/plot_volcano.md)
+shows every gene with its effect (x) and its significance (y): the hits
+are above the dashed line, and the most significant are labelled. Here
+the 12 genes that FRY finds at 10% FDR:
+
+``` r
+
+plot_volcano(fry, fdr = 0.1)
+```
+
+![](Tutorial_3_Finding_hits_files/figure-html/volcano-1.png)
+
+With the table of
+[`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md)
+the significance is the largest FDR of the methods, so the genes above
+the line are found by every method; give the barcode statistics, from
+which the mean log2 fold change of each gene is computed:
+`plot_volcano(summary, statistics = barcode_statistics)`. None of the
+genes of this screen is found by all five methods at 10% FDR.
+
 The combined list has no guaranteed false discovery rate: treat it as a
 short list of candidates to check and validate.
 
@@ -817,7 +837,7 @@ filter_by_variance(object,
 | 1 | [`create_design_matrix()`](https://emanuelsoda.github.io/ScreenR/reference/create_design_matrix.md) and [`create_contrast()`](https://emanuelsoda.github.io/ScreenR/reference/create_contrast.md) for the comparison |
 | 2 | `find_roast_hit(method = "fry")`; [`find_camera_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_camera_hit.md) for a competitive test |
 | 3 | [`compute_barcode_statistics()`](https://emanuelsoda.github.io/ScreenR/reference/compute_barcode_statistics.md) + [`find_gene_zscore_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_gene_zscore_hit.md), with `reference = "empirical"` for shRNA libraries |
-| 4 | [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md), [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md) and [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) |
+| 4 | [`plot_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_common_hit.md), [`find_common_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_common_hit.md), [`summarise_hits()`](https://emanuelsoda.github.io/ScreenR/reference/summarise_hits.md) and [`plot_volcano()`](https://emanuelsoda.github.io/ScreenR/reference/plot_volcano.md) |
 | 5 | [`find_consistent_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_consistent_hit.md) (every time point) and [`find_time_hit()`](https://emanuelsoda.github.io/ScreenR/reference/find_time_hit.md) (an effect that changes over time) |
 | 6 | [`plot_trend()`](https://emanuelsoda.github.io/ScreenR/reference/plot_trend.md), [`plot_treatment_separation()`](https://emanuelsoda.github.io/ScreenR/reference/plot_treatment_separation.md), [`plot_boxplot()`](https://emanuelsoda.github.io/ScreenR/reference/plot_boxplot.md), [`plot_barcode_heatmap()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_heatmap.md), [`plot_barcode_hit()`](https://emanuelsoda.github.io/ScreenR/reference/plot_barcode_hit.md), [`find_discordant_barcodes()`](https://emanuelsoda.github.io/ScreenR/reference/find_discordant_barcodes.md) |
 
@@ -832,11 +852,11 @@ validate.
 sessionInfo()
 #> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 24.04.5 LTS
+#> Running under: Ubuntu 26.04.1 LTS
 #> 
 #> Matrix products: default
 #> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
 #> 
 #> locale:
 #>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -856,38 +876,38 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>  [1] SummarizedExperiment_1.42.0 gtable_0.3.6               
 #>  [3] xfun_0.62                   bslib_0.12.0               
-#>  [5] Biobase_2.72.0              lattice_0.22-9             
-#>  [7] vctrs_0.7.3                 tools_4.6.1                
-#>  [9] generics_0.1.4              stats4_4.6.1               
-#> [11] tibble_3.3.1                pkgconfig_2.0.3            
-#> [13] Matrix_1.7-5                RColorBrewer_1.1-3         
-#> [15] S7_0.2.2                    desc_1.4.3                 
-#> [17] S4Vectors_0.50.3            lifecycle_1.0.5            
-#> [19] compiler_4.6.1              farver_2.1.2               
-#> [21] stringr_1.6.0               textshaping_1.0.5          
-#> [23] statmod_1.5.2               Seqinfo_1.2.0              
-#> [25] htmltools_0.5.9             sass_0.4.10                
-#> [27] yaml_2.3.12                 pillar_1.11.1              
-#> [29] pkgdown_2.2.1               jquerylib_0.1.4            
-#> [31] tidyr_1.3.2                 DelayedArray_0.38.2        
-#> [33] cachem_1.1.0                limma_3.68.5               
-#> [35] abind_1.4-8                 tidyselect_1.2.1           
-#> [37] locfit_1.5-9.12             digest_0.6.39              
-#> [39] stringi_1.8.9               purrr_1.2.2                
-#> [41] bookdown_0.48               labeling_0.4.3             
-#> [43] fastmap_1.2.0               grid_4.6.1                 
-#> [45] cli_3.6.6                   SparseArray_1.12.3         
-#> [47] magrittr_2.0.5              patchwork_1.3.2            
-#> [49] S4Arrays_1.12.1             utf8_1.2.6                 
-#> [51] withr_3.0.3                 edgeR_4.10.6               
-#> [53] scales_1.4.0                rmarkdown_2.32             
-#> [55] XVector_0.52.0              matrixStats_1.5.0          
-#> [57] otel_0.2.0                  ragg_1.5.2                 
-#> [59] evaluate_1.0.5              knitr_1.52                 
-#> [61] GenomicRanges_1.64.0        IRanges_2.46.0             
-#> [63] rlang_1.3.0                 glue_1.8.1                 
-#> [65] BiocManager_1.30.27         BiocGenerics_0.58.1        
-#> [67] jsonlite_2.0.0              R6_2.6.1                   
-#> [69] MatrixGenerics_1.24.0       systemfonts_1.3.2          
-#> [71] fs_2.1.0
+#>  [5] htmlwidgets_1.6.4           Biobase_2.72.0             
+#>  [7] lattice_0.22-9              vctrs_0.7.3                
+#>  [9] tools_4.6.1                 generics_0.1.4             
+#> [11] stats4_4.6.1                tibble_3.3.1               
+#> [13] pkgconfig_2.0.3             Matrix_1.7-5               
+#> [15] RColorBrewer_1.1-3          S7_0.2.2                   
+#> [17] desc_1.4.3                  S4Vectors_0.50.3           
+#> [19] lifecycle_1.0.5             compiler_4.6.1             
+#> [21] farver_2.1.2                stringr_1.6.0              
+#> [23] textshaping_1.0.5           statmod_1.5.2              
+#> [25] Seqinfo_1.2.0               htmltools_0.5.9            
+#> [27] sass_0.4.10                 yaml_2.3.12                
+#> [29] tidyr_1.3.2                 pillar_1.11.1              
+#> [31] pkgdown_2.2.1               jquerylib_0.1.4            
+#> [33] DelayedArray_0.38.2         cachem_1.1.0               
+#> [35] limma_3.68.5                abind_1.4-8                
+#> [37] tidyselect_1.2.1            locfit_1.5-9.12            
+#> [39] digest_0.6.39               stringi_1.8.9              
+#> [41] purrr_1.2.2                 bookdown_0.48              
+#> [43] labeling_0.4.3              fastmap_1.2.0              
+#> [45] grid_4.6.1                  cli_3.6.6                  
+#> [47] SparseArray_1.12.3          magrittr_2.0.5             
+#> [49] patchwork_1.3.2             S4Arrays_1.12.1            
+#> [51] utf8_1.2.6                  withr_3.0.3                
+#> [53] edgeR_4.10.7                scales_1.4.0               
+#> [55] rmarkdown_2.32              XVector_0.52.0             
+#> [57] matrixStats_1.5.0           otel_0.2.0                 
+#> [59] ragg_1.5.2                  evaluate_1.0.5             
+#> [61] knitr_1.52                  GenomicRanges_1.64.0       
+#> [63] IRanges_2.46.0              rlang_1.3.0                
+#> [65] glue_1.8.1                  BiocManager_1.30.27        
+#> [67] BiocGenerics_0.58.1         jsonlite_2.0.0             
+#> [69] R6_2.6.1                    MatrixGenerics_1.24.0      
+#> [71] systemfonts_1.3.2           fs_2.1.0
 ```
