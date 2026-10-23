@@ -50,13 +50,15 @@
 #' @examples
 #' data(count_table)
 #' data(annotation_table)
+#' # The unmapped reads "*" appear several times: remove them
+#' counts <- count_table[count_table$Barcode != "*", ]
 #' groups <- factor(c(
 #'     "T1/T2", "T1/T2", "Time3_TRT", "Time3_TRT", "Time3_TRT",
 #'     "Time3_CTRL", "Time3_CTRL", "Time3_CTRL", "Time4_TRT", "Time4_TRT",
 #'     "Time4_TRT", "Time4_CTRL", "Time4_CTRL", "Time4_CTRL"
 #' ))
 #' object <- create_screenr_object(
-#'     table = count_table, annotation = annotation_table, groups = groups
+#'     table = counts, annotation = annotation_table, groups = groups
 #' )
 #' object <- normalize_data(object)
 #' design <- create_design_matrix(object)
