@@ -756,6 +756,14 @@ head(hits)
 table(hits$NMethods)
 ```
 
+`plot_volcano()` shows all the genes: the hits found by every method are
+above the dashed line, on the left (depleted). The core essential gene
+POLR2L is circled:
+
+```{r volcano, fig.height = 4.5}
+plot_volcano(hits, statistics = statistics, fdr = 0.05, genes = "POLR2L")
+```
+
 `plot_common_hit()` shows how the hits of the methods overlap (an UpSet
 plot, since there are more than three methods; each column counts the genes
 found by exactly the combination of methods marked below it):
@@ -951,7 +959,7 @@ genes known to have no effect on the selection.
 | Quality control | lost sgRNAs at the late time point are expected; check the separation of essential and non-essential genes | `barcode_lost()`, `plot_barcode_lost()`, `plot_barcode_lost_for_gene()`, `compute_screen_quality()`, `plot_reference_separation()`, `plot_zscore_distribution()`, `plot_trend()`, `compute_slope()`, `plot_treatment_separation()`, `plot_barcode_heatmap()` |
 | sgRNA efficiency | the sgRNAs of the essential genes estimate it; check that it is reproducible and relate it to the sequence | `compute_metrics()`, `get_normalized_count_table()` |
 | Copy-number bias | correct with CRISPRcleanR on the complete library | `correct_crispr_bias()` |
-| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, `plot_empirical_null()`, `find_camera_hit()`, `find_roast_hit()`, `summarise_hits()`, `plot_common_hit()`, `find_common_hit()`, `find_consistent_hit()` |
+| Hits | use the non-essential genes as reference when available, otherwise the empirical null | `find_gene_zscore_hit(control_genes = )`, `find_gene_zscore_hit(reference = "empirical")`, `plot_empirical_null()`, `find_camera_hit()`, `find_roast_hit()`, `summarise_hits()`, `plot_volcano()`, `plot_common_hit()`, `find_common_hit()`, `find_consistent_hit()` |
 | Single genes | check that all the sgRNAs of a hit agree | `plot_barcode_hit()`, `plot_barcode_trend()`, `plot_barcode_heatmap()`, `find_discordant_barcodes()`, `filter_by_variance()` |
 | Compare screens | scale to the reference genes | `scale_by_reference()` |
 | Positive selection | look for enriched genes | `direction = "Up"` |

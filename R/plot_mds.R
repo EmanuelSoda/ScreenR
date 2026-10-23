@@ -58,6 +58,8 @@ plot_mds <- function(screenR_Object, groups = NULL, alpha = 0.8, size = 2.5,
             x = mds_axis_label(plotMDS, 1), y = mds_axis_label(plotMDS, 2),
             fill = groups$label
         ) +
+        # Room for the labels of the samples at the edges
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = .15)) +
         palette_scale(object, groups$variable, groups$values, palette)
 
     return(plot)
@@ -291,6 +293,7 @@ plot_pca <- function(screenR_Object, groups = NULL, components = c(1, 2),
         ) +
         ggplot2::labs(x = axis_label(components[1]),
             y = axis_label(components[2]), fill = groups$label) +
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = .15)) +
         palette_scale(object, groups$variable, groups$values, palette)
 }
 

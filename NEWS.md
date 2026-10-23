@@ -1,5 +1,31 @@
 # ScreenR 1.15.16
-
+* New `plot_volcano()`: every gene with the mean log2 fold change of its
+  barcodes and its -log10 FDR, from the table of one method or of
+  `summarise_hits()` (with the barcode statistics); the most significant hits
+  are labelled and `genes` circles the genes to follow. Used in Tutorials 3
+  and 4.
+* New ScreenR app, `run_screenr_app()`: the analysis of a screen in the web
+  browser without writing code, for the people who did the experiment. It
+  loads an example screen, a count table or a MAGeCK count file, describes
+  the samples, shows the quality control, finds the hits with FRY, CAMERA and
+  the Z-score tests, and shows each hit at the level of its barcodes; tables
+  and an R script that repeats the analysis can be downloaded. It needs
+  shiny, bslib and DT (suggested packages). See Tutorial 5.
+* New design of the pkgdown site: frosted glass panels and a floating navbar
+  over a soft colour field, with a light that follows the cursor and a
+  light/dark/auto switch. The home page has highlights and buttons, the
+  tutorials a progress indicator with previous/next links, the articles a
+  reading progress bar; figures can be enlarged, Cmd/Ctrl + K opens the
+  search, the reference index is grouped in cards, and a pair of scissors
+  cuts the DNA of the logo. Animations stop with the reduced motion setting
+  of the system, and the site has a card for links shared on social media.
+* The README, the pkgdown home page, the DESCRIPTION and the package help
+  describe shRNA and CRISPR-Cas9 screens. The README quick start uses a
+  sample table, palettes, `theme_set()`, FRY, CAMERA and the empirical null,
+  and adds a CRISPR dropout example; its method table follows Tutorial 3. The
+  workflow diagram shows the CRISPR steps and the tests across time points.
+* `plot_mds()` and `plot_pca()` leave room for the labels of the samples at
+  the edges of the plot.
 * `plot_treatment_separation()` plots a time course: when
   `condition_column` and `time_column` are the same variable (for example
   "Day" in a dropout screen), `treatment` can be several time points and each
@@ -11,7 +37,7 @@
   treatment; `day` is then not used. The default compares a treatment and a
   control at the time point `day`, as before.
 * Dropout screens (Tutorial 4, the empirical null and the MAGeCK benchmark
-  vignettes, the examples) are described with the time points in the Day
+  vignettes, the examples) are described with the time points in the Daya
   column and a single Treatment, `"Untreated"`, for all the samples.
 * Tutorial 4 checks the lost sgRNAs (`barcode_lost()`, `plot_barcode_lost()`,
   `plot_barcode_lost_for_gene()`), compares the time points with

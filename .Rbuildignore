@@ -15,3 +15,4 @@
 ^README\.Rmd$
 ^README\.knit\.md$
 ^benchmark$
+^man/figures/card\.png$

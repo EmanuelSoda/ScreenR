@@ -1,0 +1,583 @@
+/* ==========================================================================
+   ScreenR app: the frosted glass design of the ScreenR website
+   (pkgdown/extra.css) applied to a bslib page.
+   ========================================================================== */
+
+:root {
+  --sr-teal: #1F5F55;
+  --sr-teal-rgb: 31, 95, 85;
+  --sr-sage: #93B5A3;
+  --sr-clay: #C9836A;
+  --sr-clay-rgb: 201, 131, 106;
+  --sr-ink: #13332D;
+
+  --sr-page: #EEF4F1;
+  --sr-heading: var(--sr-teal);
+  --sr-glass: rgba(255, 255, 255, 0.5);
+  --sr-glass-strong: rgba(255, 255, 255, 0.74);
+  --sr-glass-border: rgba(255, 255, 255, 0.7);
+  --sr-glass-highlight: rgba(255, 255, 255, 0.85);
+  --sr-hairline: rgba(19, 51, 45, 0.1);
+  --sr-shadow: 0 1px 2px rgba(19, 51, 45, 0.06),
+    0 12px 32px -12px rgba(19, 51, 45, 0.22);
+  --sr-shadow-hover: 0 2px 4px rgba(19, 51, 45, 0.08),
+    0 20px 44px -14px rgba(19, 51, 45, 0.32);
+  --sr-field: rgba(255, 255, 255, 0.62);
+  --sr-blur: blur(22px) saturate(170%);
+  --sr-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --sr-radius: 1.25rem;
+  --sr-radius-sm: 0.75rem;
+
+  --sr-light: rgba(255, 255, 255, 0.8);
+  --sr-light-edge: rgba(var(--sr-teal-rgb), 0.55);
+
+  --sr-blob-1: rgba(var(--sr-teal-rgb), 0.42);
+  --sr-blob-2: rgba(var(--sr-clay-rgb), 0.38);
+  --sr-blob-3: rgba(147, 181, 163, 0.6);
+}
+
+[data-bs-theme="dark"] {
+  --sr-page: #0A1714;
+  --sr-heading: #A8D8C9;
+  --sr-glass: rgba(20, 38, 34, 0.55);
+  --sr-glass-strong: rgba(20, 38, 34, 0.78);
+  --sr-glass-border: rgba(255, 255, 255, 0.09);
+  --sr-glass-highlight: rgba(255, 255, 255, 0.12);
+  --sr-hairline: rgba(255, 255, 255, 0.08);
+  --sr-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 14px 36px -14px rgba(0, 0, 0, 0.6);
+  --sr-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.35),
+    0 22px 48px -14px rgba(0, 0, 0, 0.7);
+  --sr-field: rgba(0, 0, 0, 0.28);
+
+  --sr-light: rgba(168, 216, 201, 0.16);
+  --sr-light-edge: rgba(168, 216, 201, 0.75);
+
+  --sr-blob-1: rgba(46, 125, 110, 0.55);
+  --sr-blob-2: rgba(var(--sr-clay-rgb), 0.3);
+  --sr-blob-3: rgba(46, 125, 110, 0.4);
+
+  --bs-body-bg: #0A1714;
+  --bs-primary: #5FB3A1;
+  --bs-primary-rgb: 95, 179, 161;
+  --bs-link-color: #8FD0BD;
+  --bs-link-color-rgb: 143, 208, 189;
+}
+
+/* Colour field behind the glass -------------------------------------------- */
+
+html {
+  background-color: var(--sr-page);
+}
+
+body {
+  background: transparent !important;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -6vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(40vmax 34vmax at 18% 18%, var(--sr-blob-1), transparent 70%),
+    radial-gradient(36vmax 32vmax at 88% 30%, var(--sr-blob-2), transparent 70%),
+    radial-gradient(46vmax 36vmax at 50% 95%, var(--sr-blob-3), transparent 70%);
+  animation: sr-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes sr-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2vmax, -1.5vmax, 0) scale(1.04); }
+  100% { transform: translate3d(-1.5vmax, 1vmax, 0) scale(1.02); }
+}
+
+::selection {
+  background: rgba(var(--sr-clay-rgb), 0.35);
+}
+
+/* Glass surfaces ----------------------------------------------------------- */
+
+.navbar,
+.card,
+.bslib-value-box,
+.bslib-sidebar-layout > .sidebar,
+.dropdown-menu,
+.selectize-dropdown,
+.sr-hero {
+  position: relative;
+  background: var(--sr-grain), var(--sr-glass) !important;
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
+  border: 1px solid var(--sr-glass-border) !important;
+  box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
+  color: var(--bs-body-color);
+}
+
+.card,
+.bslib-value-box,
+.sr-hero {
+  border-radius: var(--sr-radius) !important;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  animation: sr-rise 0.5s ease-out both;
+}
+
+.card:hover {
+  box-shadow: var(--sr-shadow-hover), inset 0 1px 0 var(--sr-glass-highlight);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--sr-hairline);
+  font-weight: 650;
+  color: var(--sr-heading);
+  letter-spacing: -0.01em;
+}
+
+@keyframes sr-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Light that follows the cursor (set by screenr-app.js) */
+.sr-glow::before,
+.sr-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.sr-glow::before {
+  z-index: -1;
+  background: radial-gradient(420px circle at var(--sr-px, 50%) var(--sr-py, 50%),
+    var(--sr-light), transparent 65%);
+}
+
+.sr-glow::after {
+  padding: 1px;
+  background: radial-gradient(260px circle at var(--sr-px, 50%) var(--sr-py, 50%),
+    var(--sr-light-edge), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.sr-glow.sr-lit::before,
+.sr-glow.sr-lit::after {
+  opacity: 1;
+}
+
+/* Floating navbar ---------------------------------------------------------- */
+
+.navbar {
+  margin: 0.75rem 0.75rem 0;
+  border-radius: var(--sr-radius);
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+  position: sticky !important;
+  top: 0.75rem;
+  z-index: 1030;
+}
+
+.sr-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--sr-heading);
+}
+
+.sr-brand img {
+  height: 2.6rem;
+  filter: drop-shadow(0 6px 10px rgba(19, 51, 45, 0.25));
+  transition: transform 0.5s cubic-bezier(.3, 1.6, .5, 1);
+}
+
+.sr-brand:hover img {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.sr-version {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(var(--sr-clay-rgb), 0.16);
+  color: var(--bs-body-color);
+}
+
+.navbar .nav-link {
+  border-radius: 999px;
+  padding-left: 0.9rem !important;
+  padding-right: 0.9rem !important;
+  color: var(--bs-body-color) !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+  background: rgba(var(--sr-teal-rgb), 0.12);
+  color: var(--sr-heading) !important;
+}
+
+.navbar .nav-link.active {
+  font-weight: 650;
+}
+
+[data-bs-theme="dark"] .navbar .nav-link:hover,
+[data-bs-theme="dark"] .navbar .nav-link.active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Page ----------------------------------------------------------------------- */
+
+.container-fluid {
+  padding: 1.25rem 1.5rem 2rem;
+}
+
+h1, h2, h3, h4 {
+  color: var(--sr-heading);
+  letter-spacing: -0.015em;
+}
+
+.sr-hero {
+  padding: 2rem 2.25rem 1.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.sr-hero h1 {
+  display: inline-block;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, var(--sr-teal) 10%, #2E7D6E 45%, var(--sr-clay) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-bs-theme="dark"] .sr-hero h1 {
+  background-image: linear-gradient(120deg, #A8D8C9 10%, #8FD0BD 45%, #E3A894 95%);
+}
+
+.sr-hero p {
+  font-size: 1.1rem;
+  max-width: 46rem;
+  opacity: 0.85;
+}
+
+.sr-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.sr-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.65rem;
+  align-items: center;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--sr-radius-sm);
+  background: var(--sr-field);
+  border: 1px solid var(--sr-hairline);
+}
+
+.sr-step span:last-child {
+  grid-column: 2;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.sr-step-n {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E);
+  box-shadow: 0 4px 12px -4px rgba(var(--sr-teal-rgb), 0.6);
+}
+
+.sr-hint {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  opacity: 0.78;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.sr-hint .fa, .sr-hint svg {
+  color: var(--sr-clay);
+  flex: none;
+}
+
+.sr-empty {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--sr-radius-sm);
+  border: 1px dashed rgba(var(--sr-clay-rgb), 0.6);
+  background: rgba(var(--sr-clay-rgb), 0.1);
+}
+
+/* Value boxes ------------------------------------------------------------- */
+
+.bslib-value-box {
+  --bslib-color-bg: transparent;
+}
+
+.bslib-value-box .value-box-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.bslib-value-box .value-box-value {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--sr-heading);
+}
+
+/* Controls ----------------------------------------------------------------- */
+
+.form-control,
+.form-select,
+.selectize-input {
+  border-radius: var(--sr-radius-sm) !important;
+  border: 1px solid var(--sr-hairline) !important;
+  background: var(--sr-field) !important;
+  color: var(--bs-body-color) !important;
+  box-shadow: none !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+.selectize-input.focus {
+  border-color: rgba(var(--sr-teal-rgb), 0.45) !important;
+  box-shadow: 0 0 0 4px rgba(var(--sr-teal-rgb), 0.15) !important;
+}
+
+.selectize-input input {
+  color: var(--bs-body-color) !important;
+}
+
+.selectize-dropdown {
+  border-radius: var(--sr-radius-sm);
+}
+
+.btn {
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary {
+  border: none;
+  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E);
+  box-shadow: 0 8px 20px -10px rgba(var(--sr-teal-rgb), 0.9);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, #24705F, #339684);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -10px rgba(var(--sr-teal-rgb), 0.9);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-outline-primary {
+  color: var(--sr-heading);
+  border-color: rgba(var(--sr-teal-rgb), 0.35);
+}
+
+.btn-outline-primary:hover {
+  background: var(--sr-teal);
+  border-color: var(--sr-teal);
+}
+
+.form-check-input:checked {
+  background-color: var(--sr-teal);
+  border-color: var(--sr-teal);
+}
+
+.irs--shiny .irs-bar,
+.irs--shiny .irs-single,
+.irs--shiny .irs-handle {
+  background: var(--sr-teal) !important;
+  border-color: var(--sr-teal) !important;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, var(--sr-teal), var(--sr-clay));
+}
+
+.shiny-notification {
+  border-radius: var(--sr-radius-sm);
+  background: var(--sr-glass-strong);
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
+  border: 1px solid var(--sr-glass-border);
+  box-shadow: var(--sr-shadow-hover);
+  color: var(--bs-body-color);
+}
+
+/* Tables -------------------------------------------------------------------- */
+
+table.dataTable,
+.table {
+  --bs-table-bg: transparent;
+  color: var(--bs-body-color) !important;
+}
+
+table.dataTable thead th {
+  border-bottom: 1px solid var(--sr-hairline) !important;
+  font-weight: 650;
+  color: var(--sr-heading);
+}
+
+table.dataTable tbody tr,
+table.dataTable tbody td {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+table.dataTable tbody tr:hover td {
+  background: rgba(var(--sr-teal-rgb), 0.08) !important;
+  cursor: pointer;
+}
+
+table.dataTable tbody tr.selected td {
+  background: rgba(var(--sr-clay-rgb), 0.22) !important;
+  color: var(--bs-body-color) !important;
+}
+
+table.dataTable td.dt-edit,
+#samples_table td:not(:first-child) {
+  cursor: text;
+}
+
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select,
+table.dataTable thead input {
+  border-radius: 999px;
+  border: 1px solid var(--sr-hairline);
+  background: var(--sr-field);
+  color: var(--bs-body-color);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  border-radius: 999px;
+  background: var(--sr-teal) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Gene explorer ------------------------------------------------------------ */
+
+.sr-gene-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sr-gene-bar .form-group {
+  margin-bottom: 0;
+}
+
+.sr-gene-bar .selectize-input {
+  font-size: 1.1rem;
+  font-weight: 650;
+  padding: 0.6rem 1rem;
+  border-radius: 999px !important;
+}
+
+.sr-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  margin-right: 0.35rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--sr-glass);
+  border: 1px solid var(--sr-glass-border);
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
+}
+
+.sr-badge.sr-hit {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--sr-clay), #B5674E);
+}
+
+/* Plots fade in when they are redrawn */
+.shiny-plot-output img {
+  animation: sr-fade 0.4s ease-out;
+}
+
+.recalculating {
+  opacity: 0.45;
+  filter: blur(1px);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+@keyframes sr-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .card,
+  .bslib-value-box,
+  .sr-hero,
+  .shiny-plot-output img {
+    animation: none;
+  }
+}
+
+/* bslib paints the value box icons with a blue gradient and underlines
+   the active tab */
+.bslib-value-box .value-box-showcase i {
+  background-image: linear-gradient(140deg, var(--sr-teal) 25%, var(--sr-clay) 110%) !important;
+}
+
+[data-bs-theme="dark"] .bslib-value-box .value-box-showcase i {
+  background-image: linear-gradient(140deg, #8FD0BD 25%, #E3A894 110%) !important;
+}
+
+.navbar .nav-link,
+.navbar .nav-link.active {
+  border: 0 !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.navbar .nav-link::after,
+.navbar .nav-link::before {
+  display: none !important;
+}

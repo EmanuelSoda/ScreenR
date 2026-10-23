@@ -1,6 +1,6 @@
 Package: ScreenR
 Type: Package
-Title: Package to Perform High Throughput Biological Screening
+Title: Hit Identification in Pooled shRNA and CRISPR-Cas9 Screens
 Version: 1.15.16
 Date: 2022-04-01 
 Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
@@ -12,13 +12,17 @@ Authors@R: c(person("Emanuel Michele", "Soda", role = c("aut", "cre"),
             person("Saverio", "Minucci", role = c("fnd", "ths"),
                    email = "saverio.minucci@ieo.it", 
                    comment = c(ORCID = "0000-0001-5678-536X")))
-Description: ScreenR is a package suitable to perform hit identification in loss 
-            of function High Throughput Biological Screenings performed using 
-            barcoded shRNA-based  libraries. ScreenR combines the computing 
-            power of software such as  edgeR with the simplicity of use of the 
-            Tidyverse metapackage. ScreenR executes a pipeline able to find 
-            candidate hits from barcode counts, and integrates a wide range of 
-            visualization modes for each step of the analysis.
+Description: ScreenR finds the genes that are depleted or enriched in
+            pooled loss-of-function screens performed with barcoded shRNA or
+            CRISPR-Cas9 sgRNA libraries, comparing a treatment with a control
+            or the time points of a dropout screen. Gene-level tests based on
+            edgeR and limma (FRY, ROAST, CAMERA, a Z-score test with an
+            empirical null, tests across time points) give every gene a
+            p-value and a false discovery rate. ScreenR includes quality
+            control, the evaluation of CRISPR screens with essential and
+            non-essential reference genes, the correction of the CRISPR-Cas9
+            copy-number bias with CRISPRcleanR, and plots to check each hit
+            at the level of its barcodes.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.2
@@ -47,7 +51,10 @@ Suggests:
     knitr (>= 1.37),
     testthat (>= 3.0.0),
     BiocStyle (>= 2.22.0),
-    covr (>= 3.5)
+    covr (>= 3.5),
+    shiny (>= 1.8.0),
+    bslib (>= 0.6.0),
+    DT
 Config/testthat/edition: 3
 Depends: 
     R (>= 4.3)
@@ -58,6 +65,7 @@ URL: https://emanuelsoda.github.io/ScreenR/
 Collate: 
     'ScreenR-package.R'
     'annotation_table.R'
+    'app.R'
     'barcode_lost.R'
     'camera_method.R'
     'compute_data_table.R'
@@ -91,9 +99,11 @@ Collate:
     'plot_mds.R'
     'plot_treatment_separation.R'
     'plot_trend.R'
+    'plot_volcano.R'
     'plot_zscore_distribution.R'
     'quality_control.R'
     'reference_data.R'
     'reference_genes.R'
+    'run_screenr_app.R'
     'screenr-class.R'
     'zzz.R'

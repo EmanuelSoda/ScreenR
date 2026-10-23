@@ -1,0 +1,223 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1792330274189,
+  "projectRoot": "/Users/emanuel.soda/ScreenR",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "R": {
+      "path": "R",
+      "purpose": null,
+      "fileCount": 43,
+      "lastAccessed": 1792330274178,
+      "keyFiles": [
+        "ScreenR-package.R",
+        "annotation_table.R",
+        "barcode_lost.R",
+        "camera_method.R",
+        "compute_data_table.R"
+      ]
+    },
+    "benchmark": {
+      "path": "benchmark",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1792330274179,
+      "keyFiles": [
+        "README.md",
+        "install_mageck.sh",
+        "make_extdata.R",
+        "setup_environment.sh",
+        "summarise_results.R"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 8,
+      "lastAccessed": 1792330274179,
+      "keyFiles": [
+        "annotation_table.rda",
+        "count_table.rda",
+        "hap1_annotation_table.rda",
+        "hap1_count_table.rda",
+        "hart_reference_genes.rda"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 20,
+      "lastAccessed": 1792330274179,
+      "keyFiles": [
+        "LICENSE-text.html",
+        "LICENSE.html",
+        "apple-touch-icon-120x120.png",
+        "apple-touch-icon-152x152.png",
+        "apple-touch-icon-180x180.png"
+      ]
+    },
+    "inst": {
+      "path": "inst",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1792330274180,
+      "keyFiles": [
+        "LICENSES_data.txt",
+        "WORDLIST"
+      ]
+    },
+    "man": {
+      "path": "man",
+      "purpose": null,
+      "fileCount": 141,
+      "lastAccessed": 1792330274180,
+      "keyFiles": [
+        "ScreenR-package.Rd",
+        "adjust_p.Rd",
+        "annotation_for.Rd",
+        "annotation_frame.Rd",
+        "annotation_table.Rd"
+      ]
+    },
+    "pkgdown": {
+      "path": "pkgdown",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1792330274181,
+      "keyFiles": []
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 1,
+      "lastAccessed": 1792330274181,
+      "keyFiles": [
+        "testthat.R"
+      ]
+    },
+    "vignettes": {
+      "path": "vignettes",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1792330274181,
+      "keyFiles": [
+        "Analysis_Example.Rmd",
+        "Benchmark_MAGeCK.Rmd",
+        "Empirical_null.Rmd",
+        "Improved_Statistics.Rmd",
+        "Longitudinal_Screen_Analysis.Rmd"
+      ]
+    },
+    "inst/scripts": {
+      "path": "inst/scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 4,
+      "lastAccessed": 1792330274182,
+      "keyFiles": [
+        "hap1_crispr_screen.R",
+        "hart_reference_genes.R",
+        "k562_essential_screen.R"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "vignettes/Tutorial_3_Finding_hits.Rmd",
+      "accessCount": 3,
+      "lastAccessed": 1792331832153,
+      "type": "file"
+    },
+    {
+      "path": "vignettes/Tutorial_4_CRISPR_screens.Rmd",
+      "accessCount": 2,
+      "lastAccessed": 1792346776390,
+      "type": "file"
+    },
+    {
+      "path": "man/figures/README-qc-1.png",
+      "accessCount": 2,
+      "lastAccessed": 1792352029233,
+      "type": "file"
+    },
+    {
+      "path": "man/figures/README-top-gene-1.png",
+      "accessCount": 2,
+      "lastAccessed": 1792352029584,
+      "type": "file"
+    },
+    {
+      "path": "pkgdown/extra.css",
+      "accessCount": 2,
+      "lastAccessed": 1792354365179,
+      "type": "file"
+    },
+    {
+      "path": "NEWS.md",
+      "accessCount": 1,
+      "lastAccessed": 1792347308980,
+      "type": "file"
+    },
+    {
+      "path": "README.Rmd",
+      "accessCount": 1,
+      "lastAccessed": 1792351711184,
+      "type": "file"
+    },
+    {
+      "path": "man/figures/workflow.svg",
+      "accessCount": 1,
+      "lastAccessed": 1792351711448,
+      "type": "file"
+    },
+    {
+      "path": "man/figures/README-crispr-trend-1.png",
+      "accessCount": 1,
+      "lastAccessed": 1792352030018,
+      "type": "file"
+    },
+    {
+      "path": "pkgdown/extra.js",
+      "accessCount": 1,
+      "lastAccessed": 1792352401926,
+      "type": "file"
+    },
+    {
+      "path": "man/figures/logo.png",
+      "accessCount": 1,
+      "lastAccessed": 1792353273811,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
