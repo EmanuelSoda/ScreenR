@@ -1,5 +1,4 @@
 # ScreenR 1.15.16
-
 * New `plot_volcano()`: every gene with the mean log2 fold change of its
   barcodes and its -log10 FDR, from the table of one method or of
   `summarise_hits()` (with the barcode statistics); the most significant hits
@@ -38,7 +37,7 @@
   treatment; `day` is then not used. The default compares a treatment and a
   control at the time point `day`, as before.
 * Dropout screens (Tutorial 4, the empirical null and the MAGeCK benchmark
-  vignettes, the examples) are described with the time points in the Day
+  vignettes, the examples) are described with the time points in the Daya
   column and a single Treatment, `"Untreated"`, for all the samples.
 * Tutorial 4 checks the lost sgRNAs (`barcode_lost()`, `plot_barcode_lost()`,
   `plot_barcode_lost_for_gene()`), compares the time points with
