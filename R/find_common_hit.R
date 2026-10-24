@@ -401,11 +401,12 @@ upset_plot <- function(sets, n_intersections, text_size, color, title) {
     set_sizes <- ggplot2::ggplot(sizes, ggplot2::aes(x = .data$Size,
         y = .data$Method)) +
         ggplot2::geom_col(fill = "grey50", width = 0.6) +
-        ggplot2::scale_x_reverse(name = "Hits of the method",
-            expand = ggplot2::expansion(mult = c(0.15, 0))) +
+        ggplot2::scale_x_reverse(name = "Hits", n.breaks = 3,
+            expand = ggplot2::expansion(mult = c(0.15, 0)),
+            guide = ggplot2::guide_axis(check.overlap = TRUE)) +
         ggplot2::scale_y_discrete(breaks = NULL, name = NULL)
 
     patchwork::wrap_plots(A = bars, B = matrix_plot, C = set_sizes,
-        design = "#A\nCB", widths = c(1, 3), heights = c(2, 1)) +
+        design = "#A\nCB", widths = c(1.3, 3), heights = c(2, 1)) +
         patchwork::plot_annotation(title = if (nzchar(title)) title)
 }
