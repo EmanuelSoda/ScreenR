@@ -212,12 +212,14 @@
     root.classList.add("sr-refraction");
   };
 
-  // Light that follows the cursor over the navbar, the glass of the page
+  // Light that follows the cursor, and a slight tilt of figures and cards
   var cursor = function () {
     if (!mouse || still) return;
-    var glass = ".navbar";
+    var glass = ".navbar, .row > main, .row > aside > *, footer, .sr-card";
+    var tiltable = ".row > aside > *, main img.sr-zoomable";
     var event = null;
     var lit = null;
+    var tilted = null;
     var paint = function () {
       var e = event;
       event = null;
@@ -233,6 +235,16 @@
         panel.classList.add("sr-lit");
       }
       lit = panel;
+      var tilt = target ? target.closest(tiltable) : null;
+      if (tilted && tilted !== tilt) tilted.style.removeProperty("transform");
+      if (tilt) {
+        var r = tilt.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        tilt.style.transform = "perspective(900px) rotateX(" + (-y * 4).toFixed(2) +
+          "deg) rotateY(" + (x * 4).toFixed(2) + "deg) translateY(-2px)";
+      }
+      tilted = tilt;
     };
     document.addEventListener("pointermove", function (e) {
       if (!event) window.requestAnimationFrame(paint);
@@ -242,7 +254,8 @@
     root.addEventListener("mouseleave", function () {
       document.body.classList.remove("sr-pointer");
       if (lit) lit.classList.remove("sr-lit");
-      lit = null;
+      if (tilted) tilted.style.removeProperty("transform");
+      lit = tilted = null;
     });
   };
 
@@ -293,20 +306,7 @@
     if (document.querySelector(".template-home")) setTimeout(cut, 1200);
   };
 
-  // Assistive technology: links without a name are hidden from it (the
-  // anchors of the lines of code) or removed (an email that is not there)
-  var names = function () {
-    document.querySelectorAll("pre a[href^='#cb']").forEach(function (a) {
-      a.setAttribute("aria-hidden", "true");
-      a.setAttribute("tabindex", "-1");
-    });
-    document.querySelectorAll("a.author_email[href$='mailto:#']").forEach(function (a) {
-      a.remove();
-    });
-  };
-
   document.addEventListener("DOMContentLoaded", function () {
-    names();
     hero();
     scissors();
     tutorialNav();

@@ -10,17 +10,11 @@
   --sr-clay: #C9836A;
   --sr-clay-rgb: 201, 131, 106;
   --sr-ink: #13332D;
-  /* Clay dark enough for white text (5.9:1) */
-  --sr-clay-deep: #9C4F38;
-  /* Secondary text: 6.7:1 on the page, instead of a faded body colour */
-  --sr-muted: #3F5A53;
 
   --sr-page: #EEF4F1;
   --sr-heading: var(--sr-teal);
   --sr-glass: rgba(255, 255, 255, 0.5);
   --sr-glass-strong: rgba(255, 255, 255, 0.74);
-  /* The content layer is not glass: near-opaque, text is always legible */
-  --sr-solid: rgba(255, 255, 255, 0.9);
   --sr-glass-border: rgba(255, 255, 255, 0.7);
   --sr-glass-highlight: rgba(255, 255, 255, 0.85);
   --sr-hairline: rgba(19, 51, 45, 0.1);
@@ -47,8 +41,6 @@
   --sr-heading: #A8D8C9;
   --sr-glass: rgba(20, 38, 34, 0.55);
   --sr-glass-strong: rgba(20, 38, 34, 0.78);
-  --sr-solid: rgba(18, 35, 31, 0.92);
-  --sr-muted: #B7C9C3;
   --sr-glass-border: rgba(255, 255, 255, 0.09);
   --sr-glass-highlight: rgba(255, 255, 255, 0.12);
   --sr-hairline: rgba(255, 255, 255, 0.08);
@@ -93,6 +85,13 @@ body::before {
     radial-gradient(40vmax 34vmax at 18% 18%, var(--sr-blob-1), transparent 70%),
     radial-gradient(36vmax 32vmax at 88% 30%, var(--sr-blob-2), transparent 70%),
     radial-gradient(46vmax 36vmax at 50% 95%, var(--sr-blob-3), transparent 70%);
+  animation: sr-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes sr-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2vmax, -1.5vmax, 0) scale(1.04); }
+  100% { transform: translate3d(-1.5vmax, 1vmax, 0) scale(1.02); }
 }
 
 ::selection {
@@ -101,27 +100,17 @@ body::before {
 
 /* Glass surfaces ----------------------------------------------------------- */
 
-/* Glass is for the functional layer: the navbar, the sidebar with the
-   controls and the menus that float above the page. The content layer
-   (cards, value boxes, the hero) is a near-opaque surface. */
 .navbar,
+.card,
+.bslib-value-box,
 .bslib-sidebar-layout > .sidebar,
 .dropdown-menu,
-.selectize-dropdown {
+.selectize-dropdown,
+.sr-hero {
   position: relative;
   background: var(--sr-grain), var(--sr-glass) !important;
   -webkit-backdrop-filter: var(--sr-blur);
   backdrop-filter: var(--sr-blur);
-  border: 1px solid var(--sr-glass-border) !important;
-  box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
-  color: var(--bs-body-color);
-}
-
-.card,
-.bslib-value-box,
-.sr-hero {
-  position: relative;
-  background: var(--sr-solid) !important;
   border: 1px solid var(--sr-glass-border) !important;
   box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
   color: var(--bs-body-color);
@@ -187,11 +176,6 @@ body::before {
 
 /* Floating navbar ---------------------------------------------------------- */
 
-/* The page padding below is for the page, not for the bar inside the navbar */
-.navbar > .container-fluid {
-  padding: 0 0.75rem;
-}
-
 .navbar {
   margin: 0.75rem 0.75rem 0;
   border-radius: var(--sr-radius);
@@ -222,7 +206,7 @@ body::before {
 }
 
 .sr-version {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
@@ -230,80 +214,16 @@ body::before {
   color: var(--bs-body-color);
 }
 
-/* bslib pads the bottom of the links twice as much as the top, and the sides
-   with 5px, for its tab underline: the longer selector wins over its
-   !important */
-.navbar .nav-link,
-.navbar .nav-underline .nav-link:not(:empty) {
-  padding: 0.5rem 0.9rem !important;
-  margin-bottom: 0 !important;
-}
-
-.navbar .nav-link,
-.navbar .bslib-nav-item > a {
-  display: block;
+.navbar .nav-link {
   border-radius: 999px;
+  padding-left: 0.9rem !important;
+  padding-right: 0.9rem !important;
   color: var(--bs-body-color) !important;
-  text-decoration: none;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* The links of the bar that are not tabs (Tutorial) look like the tabs, on
-   the same line */
-/* Tutorial and the appearance switch: in their own list, after the tabs */
-.navbar .sr-side {
-  display: flex;
-  flex-grow: 0 !important;
-  gap: 0.25rem;
-}
-
-/* Below 992px the bar collapses to a column that starts on the left; from
-   992px it is a row: the items share a line and the second list goes to
-   the right */
-@media (min-width: 992px) {
-  .navbar .navbar-nav {
-    align-items: center;
-  }
-  .navbar .sr-side {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 991.98px) {
-  .navbar .sr-side {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-.navbar .bslib-nav-item {
-  margin: 0 !important;
-}
-
-.navbar .bslib-nav-item > a,
-.navbar .nav-underline .bslib-nav-item > a:not(:empty) {
-  display: flex;
-  align-items: center;
-  gap: 0.3em;
-  padding: 0.5rem 0.9rem !important;
-  margin: 0 !important;
-  line-height: 1.5;
-  /* The height of a tab: 21px of text and 2 x 8px of padding */
-  height: 37px;
-}
-
-/* The message of an empty plot: what to do, in the voice of the page */
-.shiny-output-error-validation {
-  color: var(--sr-muted) !important;
-  font-size: 0.9rem;
-  padding: 1rem 0.25rem;
-}
-
 .navbar .nav-link:hover,
-.navbar .nav-link.active,
-.navbar .bslib-nav-item > a:hover {
+.navbar .nav-link.active {
   background: rgba(var(--sr-teal-rgb), 0.12);
   color: var(--sr-heading) !important;
 }
@@ -313,8 +233,7 @@ body::before {
 }
 
 [data-bs-theme="dark"] .navbar .nav-link:hover,
-[data-bs-theme="dark"] .navbar .nav-link.active,
-[data-bs-theme="dark"] .navbar .bslib-nav-item > a:hover {
+[data-bs-theme="dark"] .navbar .nav-link.active {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -351,7 +270,7 @@ h1, h2, h3, h4 {
 .sr-hero p {
   font-size: 1.1rem;
   max-width: 46rem;
-  color: var(--sr-muted);
+  opacity: 0.85;
 }
 
 .sr-steps {
@@ -375,7 +294,7 @@ h1, h2, h3, h4 {
 .sr-step span:last-child {
   grid-column: 2;
   font-size: 0.85rem;
-  color: var(--sr-muted);
+  opacity: 0.75;
 }
 
 .sr-step-n {
@@ -395,9 +314,9 @@ h1, h2, h3, h4 {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   line-height: 1.45;
-  color: var(--sr-muted);
+  opacity: 0.78;
   margin: 0.25rem 0 0.75rem;
 }
 
@@ -428,7 +347,7 @@ h1, h2, h3, h4 {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--sr-muted);
+  opacity: 0.7;
 }
 
 .bslib-value-box .value-box-value {
@@ -479,7 +398,7 @@ h1, h2, h3, h4 {
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background: linear-gradient(135deg, #1F5F55, #2E7D6E);
+  background: linear-gradient(135deg, #24705F, #339684);
   transform: translateY(-1px);
   box-shadow: 0 12px 24px -10px rgba(var(--sr-teal-rgb), 0.9);
 }
@@ -511,7 +430,7 @@ h1, h2, h3, h4 {
 }
 
 .progress-bar {
-  background: var(--sr-teal);
+  background: linear-gradient(90deg, var(--sr-teal), var(--sr-clay));
 }
 
 .shiny-notification {
@@ -603,14 +522,16 @@ table.dataTable thead input {
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
-  background: var(--sr-solid);
-  border: 1px solid var(--sr-hairline);
+  background: var(--sr-glass);
+  border: 1px solid var(--sr-glass-border);
+  -webkit-backdrop-filter: var(--sr-blur);
+  backdrop-filter: var(--sr-blur);
 }
 
 .sr-badge.sr-hit {
   color: #fff;
   border-color: transparent;
-  background: var(--sr-clay-deep);
+  background: linear-gradient(135deg, var(--sr-clay), #B5674E);
 }
 
 /* Plots fade in when they are redrawn */
@@ -637,98 +558,16 @@ table.dataTable thead input {
   .shiny-plot-output img {
     animation: none;
   }
-  .btn,
-  .sr-brand img,
-  .recalculating {
-    transition: none;
-    transform: none;
-  }
-}
-
-/* A visible focus ring on everything that can be reached with the keyboard */
-a:focus-visible,
-button:focus-visible,
-.btn:focus-visible,
-.nav-link:focus-visible,
-.form-check-input:focus-visible,
-table.dataTable tbody tr:focus-visible {
-  outline: 2px solid var(--sr-teal);
-  outline-offset: 2px;
-}
-
-[data-bs-theme="dark"] a:focus-visible,
-[data-bs-theme="dark"] button:focus-visible,
-[data-bs-theme="dark"] .btn:focus-visible,
-[data-bs-theme="dark"] .nav-link:focus-visible,
-[data-bs-theme="dark"] .form-check-input:focus-visible {
-  outline-color: #A8D8C9;
-}
-
-/* Touch: controls of at least 44 by 44 points */
-@media (pointer: coarse) {
-  .btn,
-  .navbar .nav-link,
-  .form-select,
-  .form-control {
-    min-height: 44px;
-  }
-}
-
-/* Reduce Transparency: opaque panels */
-@media (prefers-reduced-transparency: reduce) {
-  :root { --sr-glass: #F7FAF8; --sr-glass-strong: #FFFFFF; --sr-solid: #FFFFFF; }
-  [data-bs-theme="dark"] {
-    --sr-glass: #142622; --sr-glass-strong: #18302B; --sr-solid: #12231F;
-  }
-  .navbar,
-  .bslib-sidebar-layout > .sidebar,
-  .dropdown-menu,
-  .selectize-dropdown,
-  .shiny-notification {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
-
-/* Increase Contrast: opaque panels, stronger borders, full-strength text */
-@media (prefers-contrast: more) {
-  :root {
-    --sr-glass: #FFFFFF; --sr-glass-strong: #FFFFFF; --sr-solid: #FFFFFF;
-    --sr-field: #FFFFFF;
-    --sr-glass-border: rgba(19, 51, 45, 0.7);
-    --sr-hairline: rgba(19, 51, 45, 0.6);
-    --sr-muted: #13332D;
-  }
-  [data-bs-theme="dark"] {
-    --sr-glass: #0A1714; --sr-glass-strong: #0A1714; --sr-solid: #0A1714;
-    --sr-field: #0A1714;
-    --sr-glass-border: rgba(255, 255, 255, 0.7);
-    --sr-hairline: rgba(255, 255, 255, 0.6);
-    --sr-muted: #FFFFFF;
-  }
-  .navbar,
-  .bslib-sidebar-layout > .sidebar,
-  .dropdown-menu,
-  .selectize-dropdown,
-  .shiny-notification {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :root { --sr-glass: rgba(255, 255, 255, 0.92); --sr-glass-strong: #FFFFFF; }
-  [data-bs-theme="dark"] { --sr-glass: rgba(20, 38, 34, 0.94); }
 }
 
 /* bslib paints the value box icons with a blue gradient and underlines
    the active tab */
 .bslib-value-box .value-box-showcase i {
-  background-image: linear-gradient(140deg, var(--sr-teal), var(--sr-teal)) !important;
+  background-image: linear-gradient(140deg, var(--sr-teal) 25%, var(--sr-clay) 110%) !important;
 }
 
 [data-bs-theme="dark"] .bslib-value-box .value-box-showcase i {
-  background-image: linear-gradient(140deg, #8FD0BD, #8FD0BD) !important;
+  background-image: linear-gradient(140deg, #8FD0BD 25%, #E3A894 110%) !important;
 }
 
 .navbar .nav-link,

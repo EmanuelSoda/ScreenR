@@ -12,17 +12,11 @@
   --sr-clay: #C9836A;
   --sr-clay-rgb: 201, 131, 106;
   --sr-ink: #13332D;
-  /* Clay dark enough for white text (5.9:1) and for gradient titles */
-  --sr-clay-deep: #9C4F38;
-  /* Secondary text: 6.7:1 on the page, instead of a faded body colour */
-  --sr-muted: #3F5A53;
 
   --sr-page: #EEF4F1;
   --sr-heading: var(--sr-teal);
   --sr-glass: rgba(255, 255, 255, 0.5);
   --sr-glass-strong: rgba(255, 255, 255, 0.74);
-  /* The content layer is not glass: near-opaque, text is always legible */
-  --sr-solid: rgba(255, 255, 255, 0.9);
   --sr-glass-border: rgba(255, 255, 255, 0.7);
   --sr-glass-highlight: rgba(255, 255, 255, 0.85);
   --sr-hairline: rgba(19, 51, 45, 0.1);
@@ -51,8 +45,6 @@
   --sr-heading: #A8D8C9;
   --sr-glass: rgba(20, 38, 34, 0.55);
   --sr-glass-strong: rgba(20, 38, 34, 0.78);
-  --sr-solid: rgba(18, 35, 31, 0.92);
-  --sr-muted: #B7C9C3;
   --sr-glass-border: rgba(255, 255, 255, 0.09);
   --sr-glass-highlight: rgba(255, 255, 255, 0.12);
   --sr-hairline: rgba(255, 255, 255, 0.08);
@@ -98,30 +90,30 @@ body::before {
     radial-gradient(40vmax 34vmax at 18% 18%, var(--sr-blob-1), transparent 70%),
     radial-gradient(36vmax 32vmax at 88% 30%, var(--sr-blob-2), transparent 70%),
     radial-gradient(46vmax 36vmax at 50% 95%, var(--sr-blob-3), transparent 70%);
+  animation: sr-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes sr-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2vmax, -1.5vmax, 0) scale(1.04); }
+  100% { transform: translate3d(-1.5vmax, 1vmax, 0) scale(1.02); }
 }
 
 ::selection {
   background: rgba(var(--sr-clay-rgb), 0.35);
 }
 
-/* Glass is for the functional layer: the navbar and the menus that float
-   above the page. The content layer (text, sidebar cards, footer) is a
-   near-opaque surface. */
+/* Shared glass surface ----------------------------------------------------- */
 
 .navbar,
+.row > main,
+.row > aside > *,
 .dropdown-menu,
+footer,
 .algolia-autocomplete .aa-dropdown-menu {
   background: var(--sr-grain), var(--sr-glass);
   -webkit-backdrop-filter: var(--sr-blur);
   backdrop-filter: var(--sr-blur);
-  border: 1px solid var(--sr-glass-border);
-  box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
-}
-
-.row > main,
-.row > aside > *,
-footer {
-  background: var(--sr-solid);
   border: 1px solid var(--sr-glass-border);
   box-shadow: var(--sr-shadow), inset 0 1px 0 var(--sr-glass-highlight);
 }
@@ -156,7 +148,7 @@ body.sr-scrolled .navbar.fixed-top {
 }
 
 .navbar .nav-text.text-muted {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   background: rgba(var(--sr-clay-rgb), 0.16);
@@ -248,11 +240,11 @@ body.sr-scrolled .navbar.fixed-top {
 }
 
 aside h2 {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--sr-muted);
+  color: RGBA(var(--bs-body-color-rgb), 0.6);
 }
 
 #toc > .nav a.nav-link.active {
@@ -268,10 +260,6 @@ aside h2 {
 @media (max-width: 767.98px) {
   .row > main {
     padding: 1.25rem;
-    /* Margins at the edge of the screen, so that the corners show */
-    width: calc(100% - 1.5rem);
-    margin-left: auto;
-    margin-right: auto;
   }
   .row > aside {
     padding-left: calc(var(--bs-gutter-x) * 0.5);
@@ -304,7 +292,7 @@ h2 {
   box-decoration-break: clone;
   font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(120deg, var(--sr-teal) 10%, #2E7D6E 45%, var(--sr-clay-deep) 95%);
+  background: linear-gradient(120deg, var(--sr-teal) 10%, #2E7D6E 45%, var(--sr-clay) 95%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -465,7 +453,7 @@ footer p {
   margin: 0;
 }
 
-/* Light that follows the cursor over the navbar (pkgdown/extra.js) ---------- */
+/* Light that follows the cursor (pkgdown/extra.js) -------------------------- */
 
 /* Ambient light on the colour field */
 body::after {
@@ -484,13 +472,29 @@ body.sr-pointer::after {
   opacity: 1;
 }
 
-.navbar {
+.navbar,
+.row > main,
+.row > aside > *,
+footer {
   isolation: isolate;
 }
 
-/* Sheen on the glass, under the content, and glow on its edge */
+.row > main,
+.row > aside > *,
+footer {
+  position: relative;
+}
+
+/* Sheen on the glass, under the content */
 .navbar::before,
-.navbar::after {
+.row > main::before,
+.row > aside > *::before,
+footer::before,
+/* Glow on the edge of the glass */
+.navbar::after,
+.row > main::after,
+.row > aside > *::after,
+footer::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -500,13 +504,19 @@ body.sr-pointer::after {
   transition: opacity 0.35s ease;
 }
 
-.navbar::before {
+.navbar::before,
+.row > main::before,
+.row > aside > *::before,
+footer::before {
   z-index: -1;
   background: radial-gradient(420px circle at var(--sr-px, 50%) var(--sr-py, 50%),
     var(--sr-light), transparent 65%);
 }
 
-.navbar::after {
+.navbar::after,
+.row > main::after,
+.row > aside > *::after,
+footer::after {
   padding: 1px;
   background: radial-gradient(260px circle at var(--sr-px, 50%) var(--sr-py, 50%),
     var(--sr-light-edge), transparent 70%);
@@ -516,8 +526,9 @@ body.sr-pointer::after {
   mask-composite: exclude;
 }
 
-.navbar.sr-lit::before,
-.navbar.sr-lit::after {
+/* :is() gives these the specificity of the panel selectors above */
+:is(.navbar, .row > main, .row > aside > *, footer).sr-lit::before,
+:is(.navbar, .row > main, .row > aside > *, footer).sr-lit::after {
   opacity: 1;
 }
 
@@ -592,15 +603,15 @@ body.sr-pointer::after {
 .sr-btn-primary {
   color: #fff !important;
   border-color: transparent;
-  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E 60%, var(--sr-clay-deep));
+  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E 60%, var(--sr-clay));
 }
 
 .sr-btn small {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 /* Tutorials: progress and previous/next ------------------------------------ */
@@ -643,7 +654,7 @@ body.sr-pointer::after {
 .sr-step-current {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(135deg, var(--sr-teal), #2E7D6E);
+  background: linear-gradient(135deg, var(--sr-teal), var(--sr-clay));
   box-shadow: 0 0 0 5px rgba(var(--sr-teal-rgb), 0.15);
 }
 
@@ -706,10 +717,10 @@ pre[data-lang]::before {
   top: 0.45rem;
   right: 0.75rem;
   font-family: var(--bs-font-sans-serif);
-  font-size: 0.8rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--sr-muted);
+  color: RGBA(var(--bs-body-color-rgb), 0.45);
   transition: opacity 0.2s ease;
 }
 
@@ -802,6 +813,14 @@ img.sr-zoomable {
 
 @keyframes sr-sweep {
   to { transform: translateX(120%); }
+}
+
+/* Tilt of figures and sidebar cards ---------------------------------------- */
+
+.row > aside > *,
+main img.sr-zoomable {
+  transition: transform 0.25s ease-out, box-shadow 0.3s ease;
+  will-change: transform;
 }
 
 /* Refraction of the navbar (Chromium, see extra.js) ------------------------ */
@@ -993,42 +1012,6 @@ html.sr-refraction .navbar.fixed-top {
 
 /* Accessibility and fallbacks ---------------------------------------------- */
 
-/* A visible focus ring on everything that can be reached with the keyboard */
-a:focus-visible,
-button:focus-visible,
-summary:focus-visible,
-.sr-btn:focus-visible,
-.sr-step:focus-visible,
-img.sr-zoomable:focus-visible {
-  outline: 2px solid var(--sr-teal);
-  outline-offset: 2px;
-  border-radius: 0.4rem;
-}
-
-[data-bs-theme="dark"] a:focus-visible,
-[data-bs-theme="dark"] button:focus-visible,
-[data-bs-theme="dark"] summary:focus-visible,
-[data-bs-theme="dark"] .sr-btn:focus-visible,
-[data-bs-theme="dark"] .sr-step:focus-visible,
-[data-bs-theme="dark"] img.sr-zoomable:focus-visible {
-  outline-color: #A8D8C9;
-}
-
-/* Touch: controls of at least 44 by 44 points */
-@media (pointer: coarse) {
-  .sr-btn,
-  .sr-step,
-  .navbar .nav-link,
-  .dropdown-item {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  .sr-step {
-    width: 2.75rem;
-    height: 2.75rem;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   body::before,
   body::after,
@@ -1050,49 +1033,8 @@ img.sr-zoomable:focus-visible {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root { --sr-glass: #F7FAF8; --sr-glass-strong: #FFFFFF; --sr-solid: #FFFFFF; }
-  [data-bs-theme="dark"] {
-    --sr-glass: #142622; --sr-glass-strong: #18302B; --sr-solid: #12231F;
-  }
-  .navbar,
-  .dropdown-menu,
-  .sr-btn,
-  .sr-zoom {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  html.sr-refraction .navbar.fixed-top {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
-
-/* Increase Contrast: opaque panels, stronger borders, full-strength text */
-@media (prefers-contrast: more) {
-  :root {
-    --sr-glass: #FFFFFF; --sr-glass-strong: #FFFFFF; --sr-solid: #FFFFFF;
-    --sr-glass-border: rgba(19, 51, 45, 0.7);
-    --sr-hairline: rgba(19, 51, 45, 0.6);
-    --sr-muted: #13332D;
-    --sr-code-bg: #FFFFFF;
-  }
-  [data-bs-theme="dark"] {
-    --sr-glass: #0A1714; --sr-glass-strong: #0A1714; --sr-solid: #0A1714;
-    --sr-glass-border: rgba(255, 255, 255, 0.7);
-    --sr-hairline: rgba(255, 255, 255, 0.6);
-    --sr-muted: #FFFFFF;
-    --sr-code-bg: #0A1714;
-  }
-  .navbar,
-  .dropdown-menu,
-  .sr-btn,
-  .sr-zoom {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  main a:not(.anchor):not(.btn):not(.nav-link) {
-    text-decoration-color: currentColor;
-  }
+  :root { --sr-glass: #F7FAF8; --sr-glass-strong: #FFFFFF; }
+  [data-bs-theme="dark"] { --sr-glass: #142622; --sr-glass-strong: #18302B; }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

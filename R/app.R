@@ -234,7 +234,7 @@ app_ui <- function() {
         shiny::tags$span(class = "sr-version",
             as.character(utils::packageVersion("ScreenR"))))
     bslib::page_navbar(
-        id = "page", title = brand, theme = theme, lang = "en",
+        id = "page", title = brand, theme = theme,
         window_title = "ScreenR app", fillable = FALSE,
         header = shiny::tags$head(
             shiny::tags$link(rel = "stylesheet",
@@ -253,7 +253,7 @@ app_ui <- function() {
             href = paste0("https://emanuelsoda.github.io/ScreenR/",
                 "articles/Tutorial_5_ScreenR_app.html"),
             target = "_blank")),
-        bslib::nav_item(bslib::input_dark_mode(id = "dark"))
+        bslib::nav_item(bslib::input_dark_mode(id = "dark", mode = "light"))
     )
 }
 
@@ -805,14 +805,11 @@ app_server <- function(initial = NULL) {
         # Gene explorer -----------------------------------------------------
 
         gene <- shiny::reactive({
-            shiny::req(state$object)
-            shiny::validate(shiny::need(nzchar(input$gene %||% ""),
-                "Pick a gene above, or click one in the Hits tab."))
+            shiny::req(state$object, input$gene)
             input$gene
         })
 
         output$gene_badges <- shiny::renderUI({
-            shiny::req(input$gene)
             gene <- gene()
             if (is.null(state$results)) {
                 return(shiny::span(class = "sr-badge",
@@ -835,41 +832,32 @@ app_server <- function(initial = NULL) {
         })
 
         output$gene_barcode_hit <- render({
-            g <- gene()
             if (is.null(state$results)) {
                 stop("Run Find hits first: the plot uses the comparison")
             }
             plot_barcode_hit(state$object, state$results$design,
                 state$results$contrast,
                 number_barcode = state$results$min_barcodes - 1L,
-                gene = g)
+                gene = gene())
         })
         # Long barcode names (sgRNA sequences) would leave no room for the
         # heatmap
-        output$gene_heatmap <- render({
-            g <- gene()
-            plot_barcode_heatmap(state$object, genes = g,
-                barcode_labels = max(nchar(rownames(
-                    state$object)[SummarizedExperiment::rowData(
-                    state$object)$Gene == g])) <= 16) +
-                ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(
-                    angle = 45))
-        })
+        output$gene_heatmap <- render(plot_barcode_heatmap(state$object,
+            genes = gene(), barcode_labels = max(nchar(rownames(
+                state$object)[SummarizedExperiment::rowData(
+                state$object)$Gene == gene()])) <= 16) +
+            ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(angle = 45)))
         output$gene_trend <- render({
-            g <- gene()
             treatments <- unique(get_sample_table(state$object)$Treatment)
-            plot_trend(state$object, genes = g, group_var = treatments,
+            plot_trend(state$object, genes = gene(), group_var = treatments,
                 trend = "mean",
                 color_by = if (length(treatments) > 1) "Treatment")
         })
-        output$gene_boxplot <- render({
-            g <- gene()
-            plot_boxplot(state$object, genes = g,
-                group_var = unique(get_sample_table(state$object)$Treatment),
-                fill_var = "Day") +
-                ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(
-                    angle = 45))
-        })
+        output$gene_boxplot <- render(plot_boxplot(state$object,
+            genes = gene(),
+            group_var = unique(get_sample_table(state$object)$Treatment),
+            fill_var = "Day") +
+            ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(angle = 45)))
     }
 }
 
