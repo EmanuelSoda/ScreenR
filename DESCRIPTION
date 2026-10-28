@@ -89,6 +89,7 @@ Collate:
     'k562_data.R'
     'library_checks.R'
     'mapped_reads.R'
+    'mixture_null.R'
     'normalize_data.R'
     'palettes.R'
     'plot_barcode_heatmap.R'

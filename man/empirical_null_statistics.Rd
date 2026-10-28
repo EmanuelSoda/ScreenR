@@ -10,7 +10,9 @@ empirical_null_statistics(
   direction = "Down",
   statistic = "mean",
   min_barcodes = 3,
-  empirical_fit = "central"
+  empirical_fit = "central",
+  seed = NULL,
+  n_folds = 5
 )
 }
 \arguments{
@@ -25,12 +27,16 @@ Log2FC and score.}
 
 \item{min_barcodes}{Genes with fewer barcodes are not tested.}
 
-\item{empirical_fit}{"central" or "one-sided".}
+\item{empirical_fit}{"central", "one-sided" or "mixture".}
+
+\item{seed}{Optional seed for mixture cross-fitting.}
+
+\item{n_folds}{Number of mixture cross-fitting folds (default 5).}
 }
 \value{
 A tibble with the columns Gene, NBarcodes, Score, Log2FC,
     Statistic and PValue, with the attribute "null" (mean and sd of the
-    fitted null).
+    fitted null), or per-fold mixture fits and diagnostics.
 }
 \description{
 Internal function used by \code{\link{find_gene_zscore_hit}}
