@@ -172,8 +172,17 @@ fit estimates one normal distribution around the mode. The mixture fits a
 skew-normal neutral component and normal depleted and enriched components.
 The neutral location and log scale depend linearly on
 `x = log2(T0) - mean(log2(T0))`, with a constant shape parameter `alpha`.
-Its neutral CDF uses the `sn` package, and its density is checked against
-`sn::dsn()`. The normal alternatives are wider
+Its neutral CDF uses `sn::psn()` and its density uses `sn::dsn()`.
+Amendment A4 fits a deterministic profile in `alpha`: a grid of step 0.25
+starts at [-4, 4] and extends toward [-10, 10] if needed. At each shape the
+other ten parameters are optimized using continuation and deterministic
+starts; the best grid point is refined to obtain `alpha_hat`. The 95%
+profile interval contains shapes whose log likelihood is within
+`qchisq(0.95, 1) / 2` of the maximum. Default p-values use a conservative
+alpha envelope: the largest directional neutral tail probability over the
+grid points within that interval and the refined MLE. The MLE-only p-values
+are retained for diagnostics. Thus the plotted density is at `alpha_hat`,
+while p-values account for uncertainty in shape. The normal alternatives are wider
 than the neutral component and centred at least three neutral standard
 deviations from its mean. This is a different model and fitting procedure
 from gscreend, although both allow a skew-normal neutral distribution.
@@ -196,7 +205,10 @@ guide_table$p_mixture <- ScreenR:::mixture_null_cdf(
 central
 mixture$weights
 mixture$theta
-data.frame(convergence = mixture$convergence, fallback = mixture$fallback,
+data.frame(alpha_hat = mixture$alpha_hat,
+    alpha_ci_lower = mixture$alpha_ci[["lower"]],
+    alpha_ci_upper = mixture$alpha_ci[["upper"]],
+    convergence = mixture$convergence, fallback = mixture$fallback,
     at_bound = paste(mixture$at_bound, collapse = ", "))
 ```
 
@@ -232,15 +244,18 @@ ggplot(guide_table, aes(LFC)) +
         fill = "grey80", colour = "grey60") +
     geom_line(data = curves, aes(t, density, colour = Fit), linewidth = 0.8) +
     coord_cartesian(xlim = c(-6, 3)) +
-    labs(x = "Mean log2 before/after ratio", y = "Density", colour = NULL) +
+    labs(x = "Mean log2 before/after ratio", y = "Density", colour = NULL,
+        subtitle = "Density at alpha_hat; p-values use the conservative alpha envelope") +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 2))
 ```
 
 These guide-level fits use the same guides for fitting and evaluation, so
 their p-values are descriptive. We inspect both tails for the non-essential
-guides, with controls alongside them. Under a calibrated continuous null the
-p-values would be uniform, with the indicated fraction in each tail.
+guides, with controls alongside them. MLE-only p-values would be uniform
+under a correctly specified continuous null. The conservative envelope can
+increase the lower-tail p-values; it need not be uniform, and its two
+directional tails need not sum to one.
 
 ```{r guide-p-values, fig.height = 4}
 guide_p <- guide_table %>%
@@ -293,12 +308,22 @@ once across all tested genes. `fdr = 1` retains every tested gene so that
 non-essential p-values can be evaluated as well as hits.
 
 ```{r gene-tests}
+# Derive the MLE-only comparison without fitting the same folds again.
 gene_results <- lapply(c("central", "mixture"), function(fit) {
     find_gene_zscore_hit(day18, reference = "empirical",
         empirical_fit = fit, direction = "Down", fdr = 1,
         fdr_method = "BH", seed = 2017, n_folds = 5)
 })
-names(gene_results) <- c("central", "mixture")
+names(gene_results) <- c("central", "mixture conservative")
+with_mle_pvalues <- function(results) {
+    mle <- results[["mixture conservative"]]
+    null <- attr(mle, "null")
+    mle$PValue <- null$p_down_mle[match(mle$Gene, null$genes)]
+    mle$FDR <- p.adjust(mle$PValue, method = "BH")
+    list(central = results$central, `mixture MLE-only` = mle,
+        `mixture conservative` = results[["mixture conservative"]])
+}
+gene_results <- with_mle_pvalues(gene_results)
 evaluate_genes <- function(result) {
     class <- class_of(result$Gene)
     hit <- result$FDR <= 0.05
@@ -318,7 +343,10 @@ Among the tested genes, there are
 `r sum(gene_results$central$Gene %in% nonessential)` non-essentials. At a
 nominal BH FDR threshold of 0.05, the central fit calls
 `r gene_summary$Hits[gene_summary$Fit == "central"]` genes and the mixture
-calls `r gene_summary$Hits[gene_summary$Fit == "mixture"]`. The non-essential
+conservative envelope calls
+`r gene_summary$Hits[gene_summary$Fit == "mixture conservative"]`.
+The MLE-only mixture calls
+`r gene_summary$Hits[gene_summary$Fit == "mixture MLE-only"]`. The non-essential
 p-value fraction is a marginal calibration diagnostic, not an estimate of
 the FDR among all hits: the reference lists do not classify every gene.
 
@@ -329,8 +357,8 @@ plot_empirical_null(day18, empirical_fit = "central",
 ```
 
 ```{r gene-null-mixture}
-plot_empirical_null(day18, empirical_fit = "mixture",
-    direction = "Down", seed = 2017, n_folds = 5) +
+ScreenR:::plot_mixture_null(gene_results[["mixture conservative"]],
+    attr(gene_results[["mixture conservative"]], "null"), bins = 60) +
     ggtitle("Gene statistic: mixture empirical null")
 ```
 
@@ -341,11 +369,12 @@ convergence does not establish calibration, and a parameter at a bound can
 signal that a component is weakly identified.
 
 ```{r fold-diagnostics}
-gene_null <- attr(gene_results$mixture, "null")
+gene_null <- attr(gene_results[["mixture conservative"]], "null")
 per_fold <- gene_null$diagnostics$per_fold
 knitr::kable(per_fold[, c("fold", "n_train", "n_test", "convergence",
     "fallback", "starts_converged", "at_bound")])
-knitr::kable(per_fold[, c("fold", "mu0", "s", "alpha", "pi0", "pi_down", "pi_up")],
+knitr::kable(per_fold[, c("fold", "mu0", "s", "alpha_hat",
+    "alpha_ci_lower", "alpha_ci_upper", "pi0", "pi_down", "pi_up")],
     digits = 4)
 knitr::kable(data.frame(Parameter = names(gene_null$diagnostics$spread),
     `Across-fold SD` = unname(gene_null$diagnostics$spread),
@@ -353,7 +382,8 @@ knitr::kable(data.frame(Parameter = names(gene_null$diagnostics$spread),
 ```
 
 Here `mu0` is the skew-normal location at centred covariate zero, `s` its log
-scale, `alpha` its shape, and `pi0`, `pi_down` and `pi_up` the component
+scale, `alpha_hat` its fitted shape, `alpha_ci_lower` and
+`alpha_ci_upper` its 95% profile interval endpoints, and `pi0`, `pi_down` and `pi_up` the component
 proportions. With nonzero shape, location and scale differ from the neutral
 mean and standard deviation. There
 are `r sum(per_fold$convergence == 0)` converged folds,
@@ -367,14 +397,14 @@ validated.
 
 We now repeat the comparison with each T18 replicate on its own. The first
 table uses the same non-essential guides with positive T0 counts for all
-inputs. `Mean of three` is the mean of the three **log ratios** used in the
+inputs. `Mean of 3` is the mean of the three **log ratios** used in the
 guide analysis above. The tail fractions are calculated after subtracting
 the median of each input.
 
 ```{r single-replicate-ratios}
 ratio_inputs <- c(setNames(lapply(replicates, function(replicate) {
     guide_table[[replicate]]
-}), replicates), list(`Mean of three` = guide_table$LFC))
+}), replicates), list(`Mean of 3` = guide_table$LFC))
 single_spread <- bind_rows(lapply(ratio_inputs, function(ratio) {
     values <- ratio[guide_table$Class == "Non-essential"]
     centred <- values - median(values)
@@ -388,9 +418,9 @@ knitr::kable(single_spread, digits = 3)
 ```
 
 The SDs of the individual replicates are
-`r paste(sprintf("%.3f", single_spread$SD[single_spread$Input != "Mean of three"]), collapse = ", ")`,
+`r paste(sprintf("%.3f", single_spread$SD[single_spread$Input != "Mean of 3"]), collapse = ", ")`,
 compared with
-`r sprintf("%.3f", single_spread$SD[single_spread$Input == "Mean of three"])`
+`r sprintf("%.3f", single_spread$SD[single_spread$Input == "Mean of 3"])`
 for their mean. Averaging can reduce spread while leaving asymmetry, so we
 also inspect calibration after fitting each input separately.
 
@@ -399,7 +429,7 @@ guide_fits <- lapply(ratio_inputs[replicates], function(ratio) {
     list(central = ScreenR:::fit_null_central(ratio),
         mixture = ScreenR:::mixture_null_fit(ratio, x))
 })
-guide_fits[["Mean of three"]] <- list(central = central, mixture = mixture)
+guide_fits[["Mean of 3"]] <- list(central = central, mixture = mixture)
 single_guide_calibration <- bind_rows(lapply(names(ratio_inputs), function(input) {
     ratio <- ratio_inputs[[input]]
     fits <- guide_fits[[input]]
@@ -435,10 +465,10 @@ single_gene_results <- lapply(replicates, function(replicate) {
             empirical_fit = fit, direction = "Down", fdr = 1,
             fdr_method = "BH", seed = 2017, n_folds = 5)
     })
-    setNames(fits, c("central", "mixture"))
+    with_mle_pvalues(setNames(fits, c("central", "mixture conservative")))
 })
 names(single_gene_results) <- replicates
-single_gene_results[["All three"]] <- gene_results
+single_gene_results[["Mean of 3"]] <- gene_results
 single_gene_summary <- bind_rows(lapply(single_gene_results, function(results) {
     bind_rows(lapply(results, evaluate_genes), .id = "Fit")
 }), .id = "Input")
@@ -450,6 +480,47 @@ same Hart reference lists. The non-essential p-value fractions and false
 calls should be considered alongside essential recovery; a larger hit list
 alone does not establish better calibration. Neither the single-replicate
 comparison nor averaging replaces the pending FDR calibration gate.
+
+```{r all-fold-profiles}
+all_folds <- bind_rows(lapply(single_gene_results, function(results) {
+    attr(results[["mixture conservative"]], "null")$diagnostics$per_fold
+}), .id = "Input")
+knitr::kable(all_folds[, c("Input", "fold", "alpha_hat", "alpha_ci_lower",
+    "alpha_ci_upper", "pi0", "convergence", "fallback")], digits = 3)
+```
+
+At the same statistic (-2.5) and centred covariate zero, we compare the
+largest and smallest depletion p-values across the five training fits.
+This isolates fold disagreement from differences between genes or covariates.
+
+```{r fold-tail-stability}
+fold_stability <- bind_rows(lapply(c("Mean of 3", "T18_B"), function(input) {
+    null <- attr(single_gene_results[[input]][["mixture conservative"]], "null")
+    mle <- vapply(null$fits, function(fit) {
+        ScreenR:::mixture_null_cdf(fit, -2.5, 0, conservative = FALSE)
+    }, numeric(1))
+    conservative <- vapply(null$fits, function(fit) {
+        ScreenR:::mixture_null_cdf(fit, -2.5, 0, conservative = TRUE)
+    }, numeric(1))
+    data.frame(Input = input, MLE_spread = max(mle) / min(mle),
+        Conservative_spread = max(conservative) / min(conservative),
+        Alpha_span = diff(range(vapply(null$fits, function(fit) fit$alpha_hat,
+            numeric(1)))))
+}))
+knitr::kable(fold_stability, digits = 2)
+```
+
+`r if (any(fold_stability$Alpha_span > 0.5)) "Fold disagreement in the fitted shape remains." else "The fitted shapes agree closely across folds."`
+For Mean of 3, the envelope changes the fold-to-fold p-value spread from
+`r sprintf("%.1f", fold_stability$MLE_spread[1])` times to
+`r sprintf("%.1f", fold_stability$Conservative_spread[1])` times, a
+`r sprintf("%.0f", 100 * (1 - fold_stability$Conservative_spread[1] / fold_stability$MLE_spread[1]))`%
+reduction in the largest/smallest ratio. For T18_B it changes from
+`r sprintf("%.1f", fold_stability$MLE_spread[2])` times to
+`r sprintf("%.1f", fold_stability$Conservative_spread[2])` times, a
+`r sprintf("%.0f", 100 * (1 - fold_stability$Conservative_spread[2] / fold_stability$MLE_spread[2]))`%
+reduction. The envelope reduces the consequence of weak shape identification;
+it does not eliminate uncertainty or replace the pending calibration gate.
 
 # Literature
 

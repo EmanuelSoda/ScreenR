@@ -4,7 +4,7 @@
 \alias{mixture_null_gradient}
 \title{Gradient of the log-likelihood of the mixture null}
 \usage{
-mixture_null_gradient(theta, t, x)
+mixture_null_gradient(theta, t, x, parts = NULL)
 }
 \arguments{
 \item{theta}{The vector c(mu0, beta, s, gamma, alpha, a, b, dD, kD, dU, kU).}
@@ -13,6 +13,10 @@ mixture_null_gradient(theta, t, x)
 
 \item{x}{The covariate of the genes (the centred log of the number of
 barcodes).}
+
+\item{parts}{The result of \code{\link{mixture_null_components}} at theta,
+when it has already been computed (the optimiser evaluates the
+log-likelihood and the gradient at the same point).}
 }
 \value{
 A named vector of length 11.

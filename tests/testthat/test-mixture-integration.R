@@ -31,13 +31,25 @@ test_that("mixture cross-fitting holds out genes and pools p-values once", {
     expect_equal(down$FDR, stats::p.adjust(down$PValue, "BH"))
     expect_equal(nrow(null$diagnostics$per_fold), 5)
     expect_true(all(c("convergence", "fallback", "at_bound", "alpha", "pi0",
-        "pi_down", "pi_up") %in% names(null$diagnostics$per_fold)))
+        "pi_down", "pi_up", "alpha_hat", "alpha_ci_lower", "alpha_ci_upper") %in% names(null$diagnostics$per_fold)))
     expect_named(null$diagnostics$spread, c("mu0", "s"))
     up <- find_gene_zscore_hit(table, reference = "empirical",
         empirical_fit = "mixture", seed = 17, direction = "Up", fdr = 1)
     expect_identical(attr(up, "null"), null)
-    expect_equal(down$PValue + up$PValue[match(down$Gene, up$Gene)],
-        rep(1, nrow(down)))
+    expect_true(all(down$PValue + up$PValue[match(down$Gene, up$Gene)] >=
+        1 - 1e-14))
+    expect_equal(null$p_down_mle + null$p_up_mle, rep(1, nrow(down)))
+    expect_true(all(ordered$PValue >= null$p_down_mle))
+    for (k in seq_along(null$fits)) {
+        keep <- null$fold == k
+        expect_equal(null$p_down_mle[keep], mixture_null_cdf(null$fits[[k]],
+            ordered$Statistic[keep], null$x[keep], conservative = FALSE))
+        expect_equal(null$diagnostics$per_fold$alpha_hat[k],
+            null$fits[[k]]$alpha_hat)
+        expect_equal(unname(unlist(null$diagnostics$per_fold[k,
+            c("alpha_ci_lower", "alpha_ci_upper")])),
+            unname(null$fits[[k]]$alpha_ci))
+    }
     storey <- find_gene_zscore_hit(table, reference = "empirical",
         empirical_fit = "mixture", seed = 17, fdr_method = "storey", fdr = 1)
     expect_equal(storey$FDR, adjust_p(storey$PValue, "storey"))
@@ -93,7 +105,7 @@ test_that("one-fold diagnostics, plot and fold validation work", {
     plot <- plot_empirical_null(table, empirical_fit = "mixture",
         seed = 17, n_folds = 1)
     expect_true(ggplot2::is_ggplot(plot))
-    expect_match(plot$labels$subtitle, "Mixture empirical null")
+    expect_match(plot$labels$subtitle, "conservative alpha envelope")
     expect_equal(nrow(ggplot2::ggplot_build(plot)$data[[2]]), 512)
     for (folds in list(0, -1, 1.5, NA_real_, Inf, 301, c(2, 3))) {
         expect_error(find_gene_zscore_hit(table, reference = "empirical",
@@ -107,7 +119,7 @@ test_that("mixture diagnostics warn when a fold falls back", {
         fallback = TRUE, n = 20L, starts_converged = 0L,
         at_bound = "beta", message = "test fallback")
     local_mocked_bindings(mixture_null_fit = function(...) fit,
-        mixture_null_cdf = function(fit, t, x, lower.tail) {
+        mixture_null_cdf = function(fit, t, x, lower.tail, conservative) {
             stats::pnorm(t, lower.tail = lower.tail)
         })
     expect_warning(result <- cross_fit_mixture_null(seq(-2, 2, length.out = 20),

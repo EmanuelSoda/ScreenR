@@ -4,7 +4,7 @@
 \alias{mixture_null_fit}
 \title{Fit the mixture null by maximum likelihood}
 \usage{
-mixture_null_fit(t, x, n_starts = 5L, control = list())
+mixture_null_fit(t, x, n_starts = 2L, control = list())
 }
 \arguments{
 \item{t}{The gene statistics.}
@@ -12,15 +12,22 @@ mixture_null_fit(t, x, n_starts = 5L, control = list())
 \item{x}{The covariate of the genes (the centred log of the number of
 barcodes).}
 
-\item{n_starts}{The number of starting values (default 5).}
+\item{n_starts}{The number of default starts at each grid point (default 2:
+more starts cost time and, on the gene-level HAP1 data, did not change
+the log-likelihood of the profile by more than 0.003).}
 
 \item{control}{A list with maxit (default 500) and factr (default 1e7), as
 in \code{\link[stats]{optim}}.}
 }
 \value{
-A list of class "screenr_mixture_fit" with theta (named parameters),
-    weights (null, down, up), loglik, convergence (0 when ok), message, n,
-    starts_converged, at_bound (the parameters on a bound) and fallback.
+A list of class "screenr_mixture_fit" with theta (named parameters,
+    the profiled maximum likelihood estimate), weights (null, down, up),
+    loglik, convergence (0 when ok), message, n, starts_converged (the
+    number of converged optimisations), at_bound (the parameters on a
+    bound), fallback, alpha_hat (the shape of theta), alpha_ci (the 95\%
+    profile interval of alpha, c(lower, upper); NA for the fallback) and
+    profile (data.frame with alpha, loglik and the other ten parameters
+    profiled at each grid point; NULL for the fallback).
 }
 \description{
 Internal function used by the cross-fitting of
@@ -29,11 +36,20 @@ Internal function used by the cross-fitting of
     pi_U f_U(t | x) of the gene statistics t, where f_0 is the skew-normal
     null whose location and scale depend on the covariate x, and f_D and f_U
     are the normal depleted and enriched genes (see
-    \code{\link{mixture_null_unpack}}). The log-likelihood is maximised with
-    L-BFGS-B, the analytic gradient and the box bounds of
-    \code{\link{mixture_null_bounds}}, from n_starts deterministic starting
-    values; the best converged fit is kept. When no start converges, the fit
-    falls back to central matching (\code{\link{fit_null_central}}, a normal
-    null with alpha = 0) with a warning.
+    \code{\link{mixture_null_unpack}}). The shape alpha of the null is weakly
+    identified at gene level, so the fit is a deterministic profile fit
+    (\code{\link{mixture_null_profile}}): the log-likelihood is maximised
+    over the other parameters (L-BFGS-B, analytic gradient, box bounds of
+    \code{\link{mixture_null_bounds}}) on a grid of alpha with continuation
+    warm starts and n_starts default starts at each point, and the maximum
+    is refined in one dimension. There is no random start, and the
+    statistics are sorted internally by (t, x), so the result does not depend
+    on the order of the genes (it is identical, not only equal, for any
+    permutation of them). \code{theta} is the profiled maximum likelihood
+    estimate; the profile and its 95\% interval are kept for the
+    conservative p-values of \code{\link{mixture_null_cdf}}. When no grid
+    point converges, or there are fewer than 10 genes, the fit falls back to
+    central matching (\code{\link{fit_null_central}}, a normal null with
+    alpha = 0) with a warning, and has no profile.
 }
 \keyword{internal}

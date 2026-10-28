@@ -18,6 +18,7 @@ A ggplot object.
 }
 \description{
 Averages the neutral density over held-out covariates and
-    folds, weighted by each fitted null proportion.
+    folds at each fold's alpha_hat, weighted by its fitted null proportion.
+    The p-values use the conservative alpha envelope instead.
 }
 \keyword{internal}

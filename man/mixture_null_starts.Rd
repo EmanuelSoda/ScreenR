@@ -4,12 +4,22 @@
 \alias{mixture_null_starts}
 \title{Starting values of the mixture null}
 \usage{
-mixture_null_starts(t, n_starts)
+mixture_null_starts(
+  t,
+  n_starts,
+  alpha = NULL,
+  setup = mixture_null_start_setup(t)
+)
 }
 \arguments{
 \item{t}{The gene statistics.}
 
 \item{n_starts}{The number of starting values.}
+
+\item{alpha}{The shape of all the starts, or NULL for the shapes above.}
+
+\item{setup}{The result of \code{\link{mixture_null_start_setup}} (computed
+from t when missing).}
 }
 \value{
 A list of vectors of length 11, or NULL when the central fit is not
@@ -25,6 +35,7 @@ Internal function: deterministic starting values for the
     the null are those of the central fit. The start k has beta = gamma = 0,
     pi_0 in 0.95, 0.9, 0.8, ... and different shifts and widths of the
     alternatives (always at least three null sd from the centre of the
-    null).
+    null). When alpha is given, all the starts have that shape (the starts
+    of the profile fit, where alpha is fixed).
 }
 \keyword{internal}

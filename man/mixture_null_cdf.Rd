@@ -4,7 +4,14 @@
 \alias{mixture_null_cdf}
 \title{Neutral cumulative distribution function of the mixture null}
 \usage{
-mixture_null_cdf(fit, t, x, lower.tail = TRUE, log.p = FALSE)
+mixture_null_cdf(
+  fit,
+  t,
+  x,
+  lower.tail = TRUE,
+  log.p = FALSE,
+  conservative = TRUE
+)
 }
 \arguments{
 \item{fit}{A fit returned by \code{\link{mixture_null_fit}}.}
@@ -17,6 +24,9 @@ mixture_null_cdf(fit, t, x, lower.tail = TRUE, log.p = FALSE)
 
 \item{log.p}{If TRUE the logarithm of the probability is returned (-Inf
 when the probability underflows to 0).}
+
+\item{conservative}{If TRUE (default) the maximum over the shapes inside the
+95\% profile interval, otherwise the maximum likelihood estimate only.}
 }
 \value{
 A vector with one value for each gene.
@@ -43,5 +53,17 @@ Internal function: the cumulative distribution function of the
     (-Inf with log.p) well before 1e-308 for the smaller shapes (below about
     1e-24 for |alpha| = 1). The p-values used to call hits (above 1e-10) are
     not affected.
+
+    With \code{conservative = TRUE} (default) the shape alpha is not taken
+    at its maximum likelihood estimate only. At gene level the profile
+    likelihood of alpha is almost flat, and the tail p-values depend on it,
+    so the p-value of a gene is the maximum, over the grid values of alpha
+    inside the 95\% profile interval \code{fit$alpha_ci} and the maximum
+    likelihood estimate, of the tail probability in the requested direction,
+    each computed with the other parameters profiled at that alpha
+    (\code{fit$profile}). It is therefore never smaller than the
+    \code{conservative = FALSE} value, which uses \code{fit$theta} (the
+    profiled maximum likelihood estimate) only. A fit without a profile
+    (the fallback, or a hand made fit) has the same value in both cases.
 }
 \keyword{internal}

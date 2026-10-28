@@ -48,3 +48,40 @@ test_that("calibration gates are strict and smoke runs cannot certify release", 
     expect_true(benchmark$summarise_calibration(results, 500)$gate$fdp_pass)
     expect_true(benchmark$summarise_calibration(results, 500)$gate$ks_pass)
 })
+
+test_that("parallel calibration preserves replicate seeds and results", {
+    skip_on_os("windows")
+    benchmark <- calibration_environment()
+    # Exercise dispatch and pooling cheaply; statistical fitting is tested
+    # separately. Forked workers inherit this binding and explicit seeds.
+    benchmark$calibration_gene_test <- function(table, seed,
+        direction, ...) {
+        genes <- sort(unique(table$Gene))
+        set.seed(seed)
+        p <- runif(length(genes))
+        if (direction == "Up") p <- 1 - p
+        data.frame(Gene = genes, PValue = p, FDR = p.adjust(p, "BH"))
+    }
+    # system.time() normally forces a full GC before every call. Timing is
+    # not under test here, and hundreds of GCs are costly in the full suite.
+    benchmark$system.time <- function(expr) {
+        force(expr)
+        c(elapsed = 0.001)
+    }
+    serial <- tempfile("calibration-serial-")
+    parallel <- tempfile("calibration-parallel-")
+    on.exit(unlink(c(serial, parallel), recursive = TRUE), add = TRUE)
+    suppressMessages(benchmark$run_fdr_calibration(2L, serial, cores = 1L))
+    suppressMessages(benchmark$run_fdr_calibration(2L, parallel, cores = 2L))
+    first <- readRDS(file.path(serial, "calibration.rds"))
+    second <- readRDS(file.path(parallel, "calibration.rds"))
+    keep <- setdiff(names(first$results), "runtime_seconds")
+    expect_identical(first$results[keep], second$results[keep])
+    expect_identical(first$gate, second$gate)
+    expect_equal(nrow(second$results), 48L * 2L * 8L)
+    expect_equal(second$results$seed, 20261028L +
+        (second$results$scenario - 1L) * 500L + second$results$replicate)
+    expect_equal(second$timing$cores, 2L)
+    expect_gt(second$timing$projected_full_seconds, 0)
+    expect_false(second$gate$full_run)
+})

@@ -23,6 +23,11 @@ Internal function: the density of the components of the fitted
     mixture at the statistics t, weighted by the weights of the mixture
     (pi_0 f_0, pi_D f_D, pi_U f_U), so that the three curves add up to the
     density of the mixture. Used by the plots, which therefore never
-    re-implement the densities.
+    re-implement the densities. The null component is evaluated by
+    \code{sn::dsn}, the reference implementation of the skew-normal density
+    (the closed form inside the likelihood and the gradient is checked
+    against it in the tests). The plots draw the null at the maximum
+    likelihood estimate of the shape (\code{fit$alpha_hat}); the p-values
+    use the conservative envelope of \code{\link{mixture_null_cdf}}.
 }
 \keyword{internal}

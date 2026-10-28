@@ -16,7 +16,10 @@ cross_fit_mixture_null(statistic, x, n_folds = 5, seed = NULL)
 \item{seed}{Optional random seed.}
 }
 \value{
-A list with fits, fold assignment, both p-value tails and diagnostics.
+A list with fits, fold assignment, conservative p-value tails
+    (p_down, p_up), MLE-only tails (p_down_mle, p_up_mle) for diagnostics,
+    and per-fold diagnostics including alpha_hat and the lower and upper
+    endpoints of its 95\% profile interval.
 }
 \description{
 Fits each null on the genes outside its fold and evaluates

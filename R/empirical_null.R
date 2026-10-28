@@ -205,7 +205,10 @@ plot_empirical_null <- function(table_treate_vs_control,
 #' @param x Numeric vector of centred log barcode counts.
 #' @param n_folds Number of folds; 1 means an in-sample diagnostic fit.
 #' @param seed Optional random seed.
-#' @return A list with fits, fold assignment, both p-value tails and diagnostics.
+#' @return A list with fits, fold assignment, conservative p-value tails
+#'     (p_down, p_up), MLE-only tails (p_down_mle, p_up_mle) for diagnostics,
+#'     and per-fold diagnostics including alpha_hat and the lower and upper
+#'     endpoints of its 95\% profile interval.
 #' @keywords internal
 cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
     n <- length(statistic)
@@ -228,7 +231,7 @@ cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
         sample(rep(seq_len(n_folds), length.out = n))
     }
     fits <- vector("list", n_folds)
-    p_down <- p_up <- numeric(n)
+    p_down <- p_up <- p_down_mle <- p_up_mle <- numeric(n)
     for (k in seq_len(n_folds)) {
         held_out <- fold == k
         training <- if (n_folds == 1) rep(TRUE, n) else !held_out
@@ -240,9 +243,13 @@ cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
         }
         fits[[k]] <- fit
         p_down[held_out] <- mixture_null_cdf(fit, statistic[held_out],
-            x[held_out], lower.tail = TRUE)
+            x[held_out], lower.tail = TRUE, conservative = TRUE)
         p_up[held_out] <- mixture_null_cdf(fit, statistic[held_out],
-            x[held_out], lower.tail = FALSE)
+            x[held_out], lower.tail = FALSE, conservative = TRUE)
+        p_down_mle[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = TRUE, conservative = FALSE)
+        p_up_mle[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = FALSE, conservative = FALSE)
     }
     per_fold <- do.call(rbind, lapply(seq_len(n_folds), function(k) {
         fit <- fits[[k]]
@@ -252,6 +259,11 @@ cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
             mu0 = unname(fit$theta["mu0"]),
             s = unname(fit$theta["s"]),
             alpha = unname(fit$theta["alpha"]),
+            alpha_hat = if (is.null(fit$alpha_hat)) NA_real_ else fit$alpha_hat,
+            alpha_ci_lower = if (is.null(fit$alpha_ci)) NA_real_ else
+                unname(fit$alpha_ci["lower"]),
+            alpha_ci_upper = if (is.null(fit$alpha_ci)) NA_real_ else
+                unname(fit$alpha_ci["upper"]),
             pi0 = unname(fit$weights["null"]),
             pi_down = unname(fit$weights["down"]),
             pi_up = unname(fit$weights["up"]),
@@ -262,12 +274,14 @@ cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
         c(mu0 = stats::sd(per_fold$mu0), s = stats::sd(per_fold$s))
     }
     list(fits = fits, fold = fold, p_down = p_down, p_up = p_up,
+        p_down_mle = p_down_mle, p_up_mle = p_up_mle,
         diagnostics = list(per_fold = per_fold, spread = spread))
 }
 
 #' @title Plot the cross-fitted mixture null
 #' @description Averages the neutral density over held-out covariates and
-#'     folds, weighted by each fitted null proportion.
+#'     folds at each fold's alpha_hat, weighted by its fitted null proportion.
+#'     The p-values use the conservative alpha envelope instead.
 #' @param genes Gene statistics returned by empirical_null_statistics.
 #' @param null The mixture null attribute of genes.
 #' @param bins Number of histogram bins.
@@ -296,7 +310,8 @@ plot_mixture_null <- function(genes, null, bins) {
             colour = "#b2182b", linewidth = 0.8) +
         ggplot2::labs(x = "Gene statistic", y = "Density",
             subtitle = sprintf(
-                "Mixture empirical null: %d folds, mean null share %.0f%%",
+                paste0("Mixture empirical null: %d folds, mean null share %.0f%%\n",
+                    "Density at alpha_hat; p-values use the conservative alpha envelope"),
                 length(null$fits), 100 * stats::weighted.mean(diagnostics$pi0,
                     diagnostics$n_test)))
 }
