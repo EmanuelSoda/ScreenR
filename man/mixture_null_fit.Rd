@@ -26,13 +26,14 @@ A list of class "screenr_mixture_fit" with theta (named parameters),
 Internal function used by the cross-fitting of
     \code{\link{find_gene_zscore_hit}} (empirical_fit = "mixture"). It fits
     the three components mixture pi_0 f_0(t | x) + pi_D f_D(t | x) +
-    pi_U f_U(t | x) of the gene statistics t, where f_0 is the normal null
-    whose centre and spread depend on the covariate x, and f_D and f_U are
-    the depleted and enriched genes (see \code{\link{mixture_null_unpack}}).
-    The log-likelihood is maximised with L-BFGS-B, the analytic gradient
-    and the box bounds of \code{\link{mixture_null_bounds}}, from n_starts
-    deterministic starting values; the best converged fit is kept. When no
-    start converges, the fit falls back to central matching
-    (\code{\link{fit_null_central}}) with a warning.
+    pi_U f_U(t | x) of the gene statistics t, where f_0 is the skew-normal
+    null whose location and scale depend on the covariate x, and f_D and f_U
+    are the normal depleted and enriched genes (see
+    \code{\link{mixture_null_unpack}}). The log-likelihood is maximised with
+    L-BFGS-B, the analytic gradient and the box bounds of
+    \code{\link{mixture_null_bounds}}, from n_starts deterministic starting
+    values; the best converged fit is kept. When no start converges, the fit
+    falls back to central matching (\code{\link{fit_null_central}}, a normal
+    null with alpha = 0) with a warning.
 }
 \keyword{internal}

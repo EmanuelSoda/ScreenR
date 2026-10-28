@@ -12,7 +12,7 @@ A list with the parameter names, the lower and the upper bounds.
 \description{
 Internal function: the parameters of the mixture null, in the
     order used by \code{\link{mixture_null_fit}}, and the box bounds used by
-    the optimiser. mu0 and s (the centre and the log spread of the null)
+    the optimiser. mu0 and s (the location and the log scale of the null)
     are not bounded.
 }
 \keyword{internal}

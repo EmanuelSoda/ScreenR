@@ -7,7 +7,7 @@
 mixture_null_loglik(theta, t, x)
 }
 \arguments{
-\item{theta}{The vector c(mu0, beta, s, gamma, a, b, dD, kD, dU, kU).}
+\item{theta}{The vector c(mu0, beta, s, gamma, alpha, a, b, dD, kD, dU, kU).}
 
 \item{t}{The gene statistics.}
 

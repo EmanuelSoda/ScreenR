@@ -15,16 +15,33 @@ mixture_null_cdf(fit, t, x, lower.tail = TRUE, log.p = FALSE)
 
 \item{lower.tail}{If TRUE (default) P(T <= t), otherwise P(T > t).}
 
-\item{log.p}{If TRUE the logarithm of the probability is returned.}
+\item{log.p}{If TRUE the logarithm of the probability is returned (-Inf
+when the probability underflows to 0).}
 }
 \value{
 A vector with one value for each gene.
 }
 \description{
 Internal function: the cumulative distribution function of the
-    null component, F_0(t | x) = Phi((t - m0(x)) / s0(x)), used for the
-    p-values of the depleted (lower tail) and enriched (upper tail) genes.
-    The upper tail is computed directly and not as 1 - F_0, and log.p gives
-    the logarithm of the p-value, so the far tails are accurate.
+    skew-normal null component, F_0(t | x), with location
+    xi(x) = mu0 + beta x, scale omega(x) = exp(s + gamma x) and shape alpha,
+    used for the p-values of the depleted (lower tail) and enriched (upper
+    tail) genes. It is computed by \code{sn::psn}, the reference
+    implementation of the skew-normal distribution of the sn package. The
+    lower tail is \code{sn::psn(t, xi, omega, alpha)}. \code{sn::psn} has
+    no \code{lower.tail} and no \code{log.p}, so the upper tail is obtained
+    by symmetry, 1 - F_0(t) = \code{sn::psn(-t, -xi, omega, -alpha)} (never
+    as 1 - \code{sn::psn(...)}, which would lose all the digits in the
+    tail), and the logarithm of the p-value is the log of that value.
+    Limits of \code{sn::psn}: a probability that underflows to 0 gives a
+    log.p of -Inf (probabilities below about 1e-308, for instance a normal
+    null more than 37 sd from the centre); and in the tail that is light
+    (the upper tail when alpha < 0, the lower tail when alpha > 0) the
+    value is computed as a difference, so it keeps about 6 significant digits
+    only down to about 1e-13 for |alpha| = 1, 1e-28 for |alpha| = 0.5, 1e-49
+    for |alpha| = 3 and 1e-79 for |alpha| = 5, and it can be exactly 0
+    (-Inf with log.p) well before 1e-308 for the smaller shapes (below about
+    1e-24 for |alpha| = 1). The p-values used to call hits (above 1e-10) are
+    not affected.
 }
 \keyword{internal}

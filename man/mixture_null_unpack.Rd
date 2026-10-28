@@ -7,23 +7,27 @@
 mixture_null_unpack(theta)
 }
 \arguments{
-\item{theta}{The vector c(mu0, beta, s, gamma, a, b, dD, kD, dU, kU).}
+\item{theta}{The vector c(mu0, beta, s, gamma, alpha, a, b, dD, kD, dU, kU).}
 }
 \value{
 A list with the named parameters and the weights.
 }
 \description{
 Internal function: transforms the unconstrained parameters
-    theta into the centre, the spread, the shifts and the widths of the
-    components and the weights of the mixture. The null is
-    N(mu0 + beta x, exp(s + gamma x)^2); the depleted and the enriched
-    components are centred at least three null sd below and above the null
-    (at m0(x) -/+ s0(x) (3 + exp(d))) and are wider than the null. The
-    minimum distance of three null sd makes the null identifiable: with a
-    smaller one, a pure null sample is split between the components and the
-    null spread is underestimated. Effects smaller than about three null sd
-    are therefore absorbed by the null (wider spread, conservative
-    p-values) and never the reverse. The weights are pi_0 = 0.5 + 0.5 plogis(a),
-    pi_D = (1 - pi_0) plogis(b) and pi_U = 1 - pi_0 - pi_D.
+    theta into the location, the scale and the shape of the null, the
+    shifts and the widths of the alternatives and the weights of the
+    mixture. The null is the skew-normal distribution with location
+    xi(x) = mu0 + beta x, scale omega(x) = exp(s + gamma x) and shape alpha,
+    whose mean m0(x) and standard deviation sd0(x) are given by
+    \code{\link{mixture_null_skew_constants}}. The depleted and the
+    enriched components are normal, centred at least three null sd below and
+    above the mean of the null (at m0(x) -/+ sd0(x) (3 + exp(d))) and wider
+    than the null (sd0(x) (1 + exp(k))). The minimum distance of three null
+    sd makes the null identifiable: with a smaller one, a pure null sample
+    is split between the components and the null spread is underestimated.
+    Effects smaller than about three null sd are therefore absorbed by the
+    null (wider spread, conservative p-values) and never the reverse. The
+    weights are pi_0 = 0.5 + 0.5 plogis(a), pi_D = (1 - pi_0) plogis(b) and
+    pi_U = 1 - pi_0 - pi_D.
 }
 \keyword{internal}

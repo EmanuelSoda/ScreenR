@@ -7,7 +7,7 @@
 mixture_null_gradient(theta, t, x)
 }
 \arguments{
-\item{theta}{The vector c(mu0, beta, s, gamma, a, b, dD, kD, dU, kU).}
+\item{theta}{The vector c(mu0, beta, s, gamma, alpha, a, b, dD, kD, dU, kU).}
 
 \item{t}{The gene statistics.}
 
@@ -15,10 +15,15 @@ mixture_null_gradient(theta, t, x)
 barcodes).}
 }
 \value{
-A named vector of length 10.
+A named vector of length 11.
 }
 \description{
 Internal function: the analytic gradient of
-    \code{\link{mixture_null_loglik}} with respect to theta.
+    \code{\link{mixture_null_loglik}} with respect to theta. The centres and
+    the widths of the alternatives are proportional to the mean and the sd
+    of the null, so mu0, beta, s, gamma and alpha act on all the components.
+    The derivative of log Phi(alpha z) is alpha phi(alpha z) / Phi(alpha z),
+    computed as exp(log phi - log Phi) so that it is stable when alpha z is
+    very negative.
 }
 \keyword{internal}

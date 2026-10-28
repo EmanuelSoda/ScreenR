@@ -15,11 +15,17 @@ mixture_null_components(theta, t, x)
 }
 \value{
 A list with the matrix of the log weighted densities (columns null,
-    down, up) and the standardized values, centres and spreads.
+    down, up) and the standardized values and scales used by the gradient.
 }
 \description{
 Internal function: the log of the weight times the density of
     each component, for each gene, with the intermediate values needed by
-    the gradient.
+    the gradient. The log of the skew-normal density is
+    log 2 - log omega + log phi(z) + log Phi(alpha z), with
+    z = (t - xi) / omega, and log Phi comes from \code{pnorm(log.p = TRUE)}.
+    It is the same density as \code{sn::dsn(log = TRUE)} (checked in the
+    tests); it is written out here because the gradient needs log Phi and
+    because \code{pnorm(log.p = TRUE)} stays finite when alpha z is very
+    negative.
 }
 \keyword{internal}

@@ -12,14 +12,19 @@ mixture_null_starts(t, n_starts)
 \item{n_starts}{The number of starting values.}
 }
 \value{
-A list of vectors of length 10, or NULL when the central fit is not
+A list of vectors of length 11, or NULL when the central fit is not
     usable.
 }
 \description{
 Internal function: deterministic starting values for the
     optimiser, derived from the central matching fit of the statistics.
-    The start k has beta = gamma = 0, pi_0 in 0.95, 0.9, 0.8, ... and
-    different shifts and widths of the alternatives (the alternatives are
-    always at least three null sd from the centre of the null).
+    The shape alpha of the first start is estimated from the sample
+    skewness of the central part of the statistics (within 2.5 sd of the
+    centre), the second start is symmetric (alpha = 0) and the others mix
+    them; the location and the scale are set so that the mean and the sd of
+    the null are those of the central fit. The start k has beta = gamma = 0,
+    pi_0 in 0.95, 0.9, 0.8, ... and different shifts and widths of the
+    alternatives (always at least three null sd from the centre of the
+    null).
 }
 \keyword{internal}

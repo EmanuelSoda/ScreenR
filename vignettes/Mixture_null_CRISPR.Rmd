@@ -172,7 +172,8 @@ fit estimates one normal distribution around the mode. The mixture fits a
 skew-normal neutral component and normal depleted and enriched components.
 The neutral location and log scale depend linearly on
 `x = log2(T0) - mean(log2(T0))`, with a constant shape parameter `alpha`.
-Its density and CDF use the `sn` package. The normal alternatives are wider
+Its neutral CDF uses the `sn` package, and its density is checked against
+`sn::dsn()`. The normal alternatives are wider
 than the neutral component and centred at least three neutral standard
 deviations from its mean. This is a different model and fitting procedure
 from gscreend, although both allow a skew-normal neutral distribution.
