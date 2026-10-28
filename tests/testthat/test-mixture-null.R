@@ -14,8 +14,8 @@ rskewnormal <- function(n, xi, omega, alpha) {
     xi + omega * (delta * abs(rnorm(n)) + sqrt(1 - delta^2) * rnorm(n))
 }
 
-# Skew-normal density of the standard distribution
-dskewnormal <- function(z, alpha) 2 * dnorm(z) * pnorm(alpha * z)
+# Skew-normal density of the standard distribution, from the sn package
+dskewnormal <- function(z, alpha) sn::dsn(z, 0, 1, alpha)
 
 simulate_mixture <- function(n = 2000, theta = true_theta(), seed = 1) {
     set.seed(seed)
@@ -184,82 +184,154 @@ test_that("the mean and the sd of the skew-normal null are m0 and sd0", {
     }
 })
 
-test_that("Owen's T function matches the numerical integral", {
-    integrand <- function(h, a) {
-        integrate(function(y) exp(-h^2 * (1 + y^2) / 2) / (1 + y^2), 0, a,
-            rel.tol = 1e-12, abs.tol = 0)$value / (2 * pi)
+test_that("the log density equals sn::dsn", {
+    set.seed(1)
+    for (alpha in c(-10, -3, -0.5, 0, 0.5, 3, 10)) {
+        theta <- true_theta()
+        theta[["alpha"]] <- alpha
+        theta[["beta"]] <- 0.3
+        theta[["gamma"]] <- -0.2
+        t <- c(rnorm(200, 0, 3), -40, 40)
+        x <- c(rnorm(200, 0, 0.5), 0.5, -0.5)
+        parts <- mixture_null_components(theta, t, x)
+        p <- mixture_null_unpack(theta)
+        expected <- sn::dsn(t, p$mu0 + p$beta * x, exp(p$s + p$gamma * x),
+            alpha, log = TRUE) + log(p$weights[["null"]])
+        expect_equal(unname(parts$log_f[, "null"]), expected,
+            tolerance = 1e-12, info = paste("alpha", alpha))
     }
-    for (a in c(0.05, 0.5, 1, 2, 5, 10)) {
-        h <- c(0, 0.01, 0.3, 1, 2.5, 5, 10, 20)
-        expected <- vapply(h, integrand, numeric(1), a = a)
-        expect_equal(owens_t(h, a), expected, tolerance = 1e-9,
-            info = paste("a", a))
-        # Even in h and odd in a
-        expect_equal(owens_t(-h, a), owens_t(h, a))
-        expect_equal(owens_t(h, -a), -owens_t(h, a))
-    }
-    expect_equal(owens_t(c(-1, 0, 2), 0), c(0, 0, 0))
-    # Closed forms: T(0, a) = atan(a) / (2 pi), T(h, 1) = Phi(h) Phi(-h) / 2
-    expect_equal(owens_t(0, 7), atan(7) / (2 * pi), tolerance = 1e-12)
-    h <- c(0.2, 1, 3, 6)
-    expect_equal(owens_t(h, 1), pnorm(h) * pnorm(-h) / 2, tolerance = 1e-12)
-    # T(h, Inf) = Phi(-h) / 2 is approached for a large
-    expect_equal(owens_t(2, 10), pnorm(-2) / 2, tolerance = 5e-3)
+    # and the closed form 2 phi(z) Phi(alpha z)
+    expect_equal(dskewnormal(c(-2, 0.3, 4), 3),
+        2 * dnorm(c(-2, 0.3, 4)) * pnorm(3 * c(-2, 0.3, 4)))
 })
 
-test_that("the skew-normal CDF matches the numerical integral of its density", {
+test_that("the neutral CDF agrees with sn::psn in both tails", {
+    # Moderate z: the lower tail is sn::psn, the upper tail is its mirror image
+    z <- c(-6, -4, -2.5, -1, -0.2, 0, 0.2, 1, 2.5, 4, 6)
+    for (alpha in c(-10, -5, -3, -1, -0.3, 0, 0.1, 0.5, 1, 2, 3, 5, 10)) {
+        fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0,
+            alpha = alpha, a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
+        lower <- mixture_null_cdf(fit, z, 0)
+        upper <- mixture_null_cdf(fit, z, 0, lower.tail = FALSE)
+        expect_equal(lower, sn::psn(z, 0, 1, alpha), info = paste(alpha))
+        expect_equal(upper, sn::psn(-z, 0, 1, -alpha), info = paste(alpha))
+        # The two tails add up to 1
+        expect_equal(lower + upper, rep(1, length(z)), info = paste(alpha))
+        # The log of the p-value is the log of the value
+        expect_equal(mixture_null_cdf(fit, z, 0, log.p = TRUE), log(lower))
+        expect_equal(mixture_null_cdf(fit, z, 0, lower.tail = FALSE,
+            log.p = TRUE), log(upper))
+    }
+})
+
+test_that("the symmetry identity of the skew-normal tails holds", {
+    # 1 - F(t; xi, omega, alpha) = F(-t; -xi, omega, -alpha), for the upper
+    # tail by sn::psn and for the mixture_null_cdf of the mirrored fit
+    t <- c(-3, -0.7, 0.4, 2.2, 5)
+    x <- c(-1, 0.3, 0, 0.8, 1.5)
+    for (alpha in c(-4, -0.8, 0.8, 4)) {
+        theta <- c(mu0 = 0.4, beta = 0.3, s = 0.2, gamma = -0.1,
+            alpha = alpha, a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0)
+        mirrored <- theta
+        mirrored[c("mu0", "beta", "alpha")] <- -theta[c("mu0", "beta", "alpha")]
+        fit <- list(theta = theta)
+        expect_equal(mixture_null_cdf(fit, t, x, lower.tail = FALSE),
+            mixture_null_cdf(list(theta = mirrored), -t, x))
+        xi <- 0.4 + 0.3 * x
+        omega <- exp(0.2 - 0.1 * x)
+        expect_equal(mixture_null_cdf(fit, t, x, lower.tail = FALSE),
+            sn::psn(-t, -xi, omega, -alpha))
+        expect_equal(mixture_null_cdf(fit, t, x, lower.tail = FALSE),
+            1 - sn::psn(t, xi, omega, alpha))
+    }
+})
+
+test_that("the neutral CDF matches the numerical integral of the density", {
+    # Independent of sn: integral of the density, computed relative to its
+    # maximum so that it does not underflow
     worst <- 0
-    for (alpha in c(-10, -5, -3, -1, -0.3, 0.1, 0.5, 1, 2, 3, 5, 10)) {
-        for (z in c(-12, -8, -5, -3, -1, -0.1, 0, 0.1, 1, 3, 5, 8)) {
+    for (alpha in c(-10, -3, -1, 0.5, 2, 5, 10)) {
+        fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0,
+            alpha = alpha, a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
+        # z near 0 is included: a quadrature of Owen's T truncated there lost
+        # 1e-5 of the upper tail of a negative alpha
+        for (z in c(-6, -3, -1, -1e-3, 0, 1e-5, 1e-3, 1, 3, 6)) {
             for (lower in c(TRUE, FALSE)) {
-                expected <- log_tail_integral(z, alpha, lower)
-                got <- skew_normal_log_cdf(z, alpha, lower.tail = lower)
-                worst <- max(worst, abs(got - expected) /
-                    max(1, abs(expected)))
+                expected <- exp(log_tail_integral(z, alpha, lower))
+                got <- mixture_null_cdf(fit, z, 0, lower.tail = lower)
+                # Relative error, where sn::psn is accurate (see below for
+                # the tail that it loses beyond 1e-10)
+                if (expected > 1e-10) {
+                    worst <- max(worst, abs(got / expected - 1))
+                }
             }
         }
     }
-    expect_lt(worst, 1e-9)
-    # The two tails add up to 1 where neither is small
-    z <- seq(-1.5, 1.5, 0.5)
-    for (alpha in c(-8, -2, 0, 2, 8)) {
-        expect_equal(exp(skew_normal_log_cdf(z, alpha)) +
-            exp(skew_normal_log_cdf(z, alpha, lower.tail = FALSE)), rep(1, 7))
-    }
-    # alpha = 0 is the normal distribution
-    expect_equal(skew_normal_log_cdf(c(-30, -2, 4), 0),
-        pnorm(c(-30, -2, 4), log.p = TRUE))
-    expect_equal(skew_normal_log_cdf(c(-2, 4), 1e-9),
-        pnorm(c(-2, 4), log.p = TRUE), tolerance = 1e-8)
+    expect_lt(worst, 1e-6)
 })
 
-test_that("the skew-normal CDF is accurate and finite in the far tails", {
-    for (alpha in c(-10, -3, 3, 10)) {
-        z <- c(-60, -40, -20, 20, 40, 60)
-        lower <- skew_normal_log_cdf(z, alpha)
-        upper <- skew_normal_log_cdf(z, alpha, lower.tail = FALSE)
-        expect_true(all(is.finite(lower)))
-        expect_true(all(is.finite(upper)))
-        expect_true(all(lower <= 0) && all(upper <= 0))
-        # Monotone: the lower tail increases, the upper tail decreases
-        expect_true(all(diff(lower[1:3]) > 0))
-        expect_true(all(diff(upper[4:6]) < 0))
+test_that("the neutral CDF of a normal null is accurate in the far tails", {
+    fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0, alpha = 0,
+        a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
+    # Asymptotic expansion of log Phi(-z)
+    log_tail <- function(z) {
+        -z^2 / 2 - log(z) - 0.5 * log(2 * pi) +
+            log(1 - 1 / z^2 + 3 / z^4 - 15 / z^6)
     }
-    # Against the integral of the density, 40 sd away from the centre
-    for (alpha in c(-10, -3, 3, 10)) {
-        for (z in c(-40, 40)) {
-            for (lower in c(TRUE, FALSE)) {
-                expect_equal(skew_normal_log_cdf(z, alpha, lower),
-                    log_tail_integral(z, alpha, lower), tolerance = 1e-9)
+    expect_equal(mixture_null_cdf(fit, -30, 0, log.p = TRUE), log_tail(30),
+        tolerance = 1e-8)
+    expect_equal(mixture_null_cdf(fit, 30, 0, lower.tail = FALSE,
+        log.p = TRUE), log_tail(30), tolerance = 1e-8)
+    expect_gt(mixture_null_cdf(fit, 10, 0, lower.tail = FALSE), 0)
+    expect_equal(mixture_null_cdf(fit, 10, 0, lower.tail = FALSE),
+        7.619853e-24, tolerance = 1e-6)
+    expect_equal(mixture_null_cdf(fit, 0.3, 0) +
+        mixture_null_cdf(fit, 0.3, 0, lower.tail = FALSE), 1)
+    # Same as pnorm
+    expect_equal(mixture_null_cdf(fit, c(-12, -2, 4), 0),
+        pnorm(c(-12, -2, 4)))
+})
+
+test_that("the log of an underflowing p-value is -Inf, never NaN", {
+    fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0, alpha = 0,
+        a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
+    # pnorm underflows to 0 beyond about 38 sd
+    expect_equal(mixture_null_cdf(fit, -40, 0), 0)
+    expect_equal(mixture_null_cdf(fit, -40, 0, log.p = TRUE), -Inf)
+    expect_equal(mixture_null_cdf(fit, 40, 0, lower.tail = FALSE,
+        log.p = TRUE), -Inf)
+    # A skew-normal tail that psn loses before the double range ends: the
+    # value is finite, in [0, 1], and the log is finite or -Inf
+    fit$theta[["alpha"]] <- 3
+    z <- c(-60, -30, -12, -8, -5, 5, 30, 60)
+    for (lower in c(TRUE, FALSE)) {
+        p <- mixture_null_cdf(fit, z, 0, lower.tail = lower)
+        expect_true(all(is.finite(p)) && all(p >= 0 & p <= 1))
+        expect_false(anyNA(mixture_null_cdf(fit, z, 0, lower.tail = lower,
+            log.p = TRUE)))
+    }
+    # The heavy tails stay accurate far out (alpha = 3: lower tail of the
+    # negative side is the light one)
+    expect_gt(mixture_null_cdf(fit, 5, 0, lower.tail = FALSE), 0)
+})
+
+test_that("sn::psn is accurate in the tails used to call hits", {
+    # Probabilities down to 1e-10, in the light tail of every shape: the
+    # relative error against the numerical integral stays below 1e-6
+    for (alpha in c(-5, -1, -0.5, 0.5, 1, 5)) {
+        fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0,
+            alpha = alpha, a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
+        light_is_lower <- alpha > 0
+        zs <- if (light_is_lower) -(3:6) else 3:6
+        for (z in zs) {
+            expected <- exp(log_tail_integral(z, alpha, light_is_lower))
+            got <- mixture_null_cdf(fit, z, 0, lower.tail = light_is_lower)
+            if (expected > 1e-10) {
+                expect_equal(got, expected, tolerance = 1e-6,
+                    info = paste("alpha", alpha, "z", z))
             }
         }
     }
-    # No 1 - F cancellation: the upper tail at z = 12 is 3.55e-33 (alpha = 10)
-    expect_gt(exp(skew_normal_log_cdf(12, 10, lower.tail = FALSE)), 0)
-    expect_equal(exp(skew_normal_log_cdf(12, 10, lower.tail = FALSE)),
-        exp(skew_normal_log_cdf(-12, -10)))
-    expect_equal(exp(skew_normal_log_cdf(12, 10, lower.tail = FALSE)),
-        3.552964e-33, tolerance = 1e-6)
 })
 
 test_that("the parameters are recovered from a simulated screen", {
@@ -452,37 +524,20 @@ test_that("more starts never give a worse likelihood", {
     expect_gte(many$starts_converged, one$starts_converged)
 })
 
-test_that("the neutral CDF of a normal null is accurate in the far tails", {
-    fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0, alpha = 0,
-        a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
-    # Asymptotic expansion of log Phi(-z)
-    log_tail <- function(z) {
-        -z^2 / 2 - log(z) - 0.5 * log(2 * pi) +
-            log(1 - 1 / z^2 + 3 / z^4 - 15 / z^6)
-    }
-    expect_equal(mixture_null_cdf(fit, -40, 0, log.p = TRUE), log_tail(40),
-        tolerance = 1e-8)
-    expect_equal(mixture_null_cdf(fit, 40, 0, lower.tail = FALSE,
-        log.p = TRUE), log_tail(40), tolerance = 1e-8)
-    expect_gt(mixture_null_cdf(fit, 10, 0, lower.tail = FALSE), 0)
-    expect_equal(mixture_null_cdf(fit, 10, 0, lower.tail = FALSE),
-        7.619853e-24, tolerance = 1e-6)
-    expect_equal(mixture_null_cdf(fit, 0.3, 0) +
-        mixture_null_cdf(fit, 0.3, 0, lower.tail = FALSE), 1)
-})
-
-test_that("the neutral CDF of a skew-normal null is accurate in the far tails", {
+test_that("the neutral CDF of a skew-normal null is finite where it should be", {
     for (alpha in c(-10, -3, 3, 10)) {
         fit <- list(theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0,
             alpha = alpha, a = 1, b = 0, dD = 0, kD = 0, dU = 0, kU = 0))
-        t <- c(-40, -15, 15, 40)
-        for (lower in c(TRUE, FALSE)) {
-            lp <- mixture_null_cdf(fit, t, 0, lower.tail = lower, log.p = TRUE)
-            expect_true(all(is.finite(lp)))
-            expect_equal(lp, skew_normal_log_cdf(t, alpha, lower))
-            expect_equal(mixture_null_cdf(fit, t, 0, lower.tail = lower),
-                exp(lp))
-        }
+        # The heavy tail (the lower one for alpha < 0) is finite far out,
+        # up to the underflow of the double (about 37 sd)
+        t <- if (alpha < 0) c(-30, -15) else c(15, 30)
+        lp <- mixture_null_cdf(fit, t, 0, lower.tail = alpha < 0, log.p = TRUE)
+        expect_true(all(is.finite(lp)))
+        expect_equal(exp(lp), mixture_null_cdf(fit, t, 0,
+            lower.tail = alpha < 0))
+        # Beyond the double range the log is -Inf, as documented
+        expect_equal(mixture_null_cdf(fit, 40 * sign(alpha), 0,
+            lower.tail = alpha < 0, log.p = TRUE), -Inf)
     }
     # The heavy side of the skew-normal null at the same distance from the
     # mean is more probable than the light side

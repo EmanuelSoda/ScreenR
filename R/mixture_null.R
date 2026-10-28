@@ -108,6 +108,10 @@ mixture_null_skew_constants <- function(alpha) {
 #'     the gradient. The log of the skew-normal density is
 #'     log 2 - log omega + log phi(z) + log Phi(alpha z), with
 #'     z = (t - xi) / omega, and log Phi comes from \code{pnorm(log.p = TRUE)}.
+#'     It is the same density as \code{sn::dsn(log = TRUE)} (checked in the
+#'     tests); it is written out here because the gradient needs log Phi and
+#'     because \code{pnorm(log.p = TRUE)} stays finite when alpha z is very
+#'     negative.
 #' @param theta The parameters of the mixture null.
 #' @param t The gene statistics.
 #' @param x The covariate of the genes.
@@ -435,184 +439,47 @@ mixture_null_fit <- function(t, x, n_starts = 5L, control = list()) {
     fit
 }
 
-#' @title Gauss-Legendre nodes and weights
-#' @description Internal function: the nodes and the weights of the
-#'     Gauss-Legendre rule on [-1, 1] (Golub-Welsch algorithm), computed once
-#'     for each number of nodes.
-#' @param n The number of nodes.
-#' @return A list with the nodes x and the weights w.
-#' @keywords internal
-gauss_legendre_rule <- function(n = 100L) {
-    key <- as.character(n)
-    if (!is.null(.gauss_legendre_cache[[key]])) {
-        return(.gauss_legendre_cache[[key]])
-    }
-    i <- seq_len(n - 1L)
-    off <- i / sqrt(4 * i^2 - 1)
-    jacobi <- matrix(0, n, n)
-    jacobi[cbind(i, i + 1L)] <- off
-    jacobi[cbind(i + 1L, i)] <- off
-    e <- eigen(jacobi, symmetric = TRUE)
-    ord <- order(e$values)
-    rule <- list(x = e$values[ord], w = 2 * e$vectors[1L, ord]^2)
-    .gauss_legendre_cache[[key]] <- rule
-    rule
-}
-.gauss_legendre_cache <- new.env(parent = emptyenv())
-
-#' @title Log of an integral with the Gauss-Legendre rule
-#' @description Internal function: the log of the integral of exp(log_f(y))
-#'     over [lo, lo + width] for each element of lo, computed relative to the
-#'     value ref (the log of the maximum of the integrand) so that it does not
-#'     under- or overflow.
-#' @param log_f A function of a matrix of points, returning the log of the
-#'     integrand (the rows are the elements of lo).
-#' @param lo,width The start and the length of the intervals.
-#' @param ref The log of the scale of the integrand, for each interval.
-#' @return A vector with the log of the integrals.
-#' @keywords internal
-log_gauss_legendre <- function(log_f, lo, width, ref) {
-    rule <- gauss_legendre_rule()
-    y <- lo + outer(width / 2, 1 + rule$x)
-    values <- exp(log_f(y) - ref)
-    ref + log(width / 2) + log(as.vector(values %*% rule$w))
-}
-
-#' @title Log of Owen's T function
-#' @description Internal function: log T(h, a) with
-#'     T(h, a) = 1 / (2 pi) int_0^a exp(-h^2 (1 + y^2) / 2) / (1 + y^2) dy,
-#'     for h >= 0 and a > 0, by Gauss-Legendre quadrature. The integrand
-#'     decreases from y = 0, so the integral is truncated where it has fallen
-#'     by exp(-50) relative to its start (y = 10 / h) and the log is computed
-#'     relative to its maximum: it is accurate in the far tails.
-#' @param h The (non negative) abscissae.
-#' @param a The (positive) shape, a single value.
-#' @return A vector with log T(h, a).
-#' @keywords internal
-owens_log_t <- function(h, a) {
-    width <- pmin(a, 10 / pmax(h, 1e-100))
-    log_f <- function(y) -h^2 * (1 + y^2) / 2 - log1p(y^2)
-    ref <- -h^2 / 2
-    log_gauss_legendre(log_f, rep(0, length(h)), width, ref) - log(2 * pi)
-}
-
-#' @title Log of the upper integral of Owen's T function
-#' @description Internal function: log of
-#'     1 / (2 pi) int_a^Inf exp(-h^2 (1 + y^2) / 2) / (1 + y^2) dy, which is
-#'     T(Inf, ...) - T(h, a) = Phi(-h) / 2 - T(h, a) for h >= 0, computed
-#'     directly so that there is no cancellation. The part above y = 1 uses
-#'     y = 1 / u; both parts are truncated where the integrand has fallen by
-#'     exp(-50) relative to its maximum.
-#' @param h The (non negative) abscissae.
-#' @param a The (positive) lower limit, a single value.
-#' @return A vector with the log of the integral.
-#' @keywords internal
-owens_log_t_tail <- function(h, a) {
-    n <- length(h)
-    eps <- 100 / pmax(h, 1e-100)^2
-    # Part above b = max(a, 1), in u = 1 / y: the integrand increases with u
-    b <- max(a, 1)
-    root_b <- sqrt(b^2 + eps)
-    width_u <- eps / ((root_b + b) * b * root_b)
-    log_f_u <- function(u) -h^2 * (1 + u^(-2)) / 2 - log1p(u^2)
-    ref_u <- -h^2 * (1 + b^2) / 2 - log1p(1 / b^2)
-    upper <- log_gauss_legendre(log_f_u, 1 / b - width_u, width_u, ref_u)
-    if (a >= 1) {
-        return(upper - log(2 * pi))
-    }
-    # Part between a and 1, in y: the integrand decreases with y
-    root_a <- sqrt(a^2 + eps)
-    width_y <- pmin(1 - a, eps / (root_a + a))
-    log_f_y <- function(y) -h^2 * (1 + y^2) / 2 - log1p(y^2)
-    ref_y <- -h^2 * (1 + a^2) / 2 - log1p(a^2)
-    lower <- log_gauss_legendre(log_f_y, rep(a, n), width_y, ref_y)
-    top <- pmax(lower, upper)
-    top + log(exp(lower - top) + exp(upper - top)) - log(2 * pi)
-}
-
-#' @title Owen's T function
-#' @description Internal function: Owen's T function
-#'     T(h, a) = 1 / (2 pi) int_0^a exp(-h^2 (1 + y^2) / 2) / (1 + y^2) dy,
-#'     even in h and odd in a. It is evaluated in-package (no dependency) by
-#'     \code{\link{owens_log_t}}, accurate for |a| <= 10 and for large |h|.
-#' @param h The abscissae.
-#' @param a The shape, a single value.
-#' @return A vector with T(h, a).
-#' @keywords internal
-owens_t <- function(h, a) {
-    if (a == 0) {
-        return(rep(0, length(h)))
-    }
-    sign(a) * exp(owens_log_t(abs(h), abs(a)))
-}
-
-#' @title Cumulative distribution function of the skew-normal distribution
-#' @description Internal function: the log of the cumulative distribution
-#'     function of the standard skew-normal distribution with shape alpha,
-#'     F(z) = Phi(z) - 2 T(z, alpha) with Owen's T function. The upper tail is
-#'     obtained by symmetry, P(Z > z; alpha) = F(-z; -alpha), and each case
-#'     is computed as a sum of positive terms (or as 2 T of the upper integral
-#'     in the lower tail of a positive alpha), so that there is no 1 - F
-#'     cancellation and the far tails are accurate.
-#' @param z The standardized values (t - xi) / omega.
-#' @param alpha The shape, a single value.
-#' @param lower.tail If TRUE (default) P(Z <= z), otherwise P(Z > z).
-#' @return A vector with the log of the probabilities.
-#' @keywords internal
-skew_normal_log_cdf <- function(z, alpha, lower.tail = TRUE) {
-    if (!lower.tail) {
-        z <- -z
-        alpha <- -alpha
-    }
-    if (alpha == 0) {
-        return(stats::pnorm(z, log.p = TRUE))
-    }
-    h <- abs(z)
-    out <- numeric(length(z))
-    if (alpha < 0) {
-        # F = Phi(z) + 2 T(|z|, |alpha|), a sum of positive terms
-        second <- log(2) + owens_log_t(h, -alpha)
-        first <- stats::pnorm(z, log.p = TRUE)
-        top <- pmax(first, second)
-        return(top + log(exp(first - top) + exp(second - top)))
-    }
-    left <- z <= 0
-    if (any(left)) {
-        # F = 2 (T(Inf) - T(h, alpha)) = 2 upper integral
-        out[left] <- log(2) + owens_log_t_tail(h[left], alpha)
-    }
-    if (any(!left)) {
-        # F = 1 - S with S = Phi(-z) + 2 T(z, alpha) <= 0.97
-        first <- stats::pnorm(-z[!left], log.p = TRUE)
-        second <- log(2) + owens_log_t(h[!left], alpha)
-        top <- pmax(first, second)
-        log_s <- top + log(exp(first - top) + exp(second - top))
-        out[!left] <- log1p(-exp(log_s))
-    }
-    out
-}
-
 #' @title Neutral cumulative distribution function of the mixture null
 #' @description Internal function: the cumulative distribution function of the
-#'     skew-normal null component, F_0(t | x) = Phi(z) - 2 T(z, alpha) with
-#'     z = (t - xi(x)) / omega(x) and T Owen's T function
-#'     (\code{\link{skew_normal_log_cdf}}), used for the p-values of the
-#'     depleted (lower tail) and enriched (upper tail) genes. The upper tail is
-#'     computed directly and not as 1 - F_0, and log.p gives the logarithm of
-#'     the p-value, so the far tails are accurate.
+#'     skew-normal null component, F_0(t | x), with location
+#'     xi(x) = mu0 + beta x, scale omega(x) = exp(s + gamma x) and shape alpha,
+#'     used for the p-values of the depleted (lower tail) and enriched (upper
+#'     tail) genes. It is computed by \code{sn::psn}, the reference
+#'     implementation of the skew-normal distribution of the sn package. The
+#'     lower tail is \code{sn::psn(t, xi, omega, alpha)}. \code{sn::psn} has
+#'     no \code{lower.tail} and no \code{log.p}, so the upper tail is obtained
+#'     by symmetry, 1 - F_0(t) = \code{sn::psn(-t, -xi, omega, -alpha)} (never
+#'     as 1 - \code{sn::psn(...)}, which would lose all the digits in the
+#'     tail), and the logarithm of the p-value is the log of that value.
+#'     Limits of \code{sn::psn}: a probability that underflows to 0 gives a
+#'     log.p of -Inf (probabilities below about 1e-308, for instance a normal
+#'     null more than 37 sd from the centre); and in the tail that is light
+#'     (the upper tail when alpha < 0, the lower tail when alpha > 0) the
+#'     value is computed as a difference, so it keeps about 6 significant digits
+#'     only down to about 1e-13 for |alpha| = 1, 1e-28 for |alpha| = 0.5, 1e-49
+#'     for |alpha| = 3 and 1e-79 for |alpha| = 5, and it can be exactly 0
+#'     (-Inf with log.p) well before 1e-308 for the smaller shapes (below about
+#'     1e-24 for |alpha| = 1). The p-values used to call hits (above 1e-10) are
+#'     not affected.
 #' @param fit A fit returned by \code{\link{mixture_null_fit}}.
 #' @param t The gene statistics.
 #' @param x The covariate of the genes.
 #' @param lower.tail If TRUE (default) P(T <= t), otherwise P(T > t).
-#' @param log.p If TRUE the logarithm of the probability is returned.
+#' @param log.p If TRUE the logarithm of the probability is returned (-Inf
+#'     when the probability underflows to 0).
 #' @return A vector with one value for each gene.
 #' @keywords internal
 mixture_null_cdf <- function(fit, t, x, lower.tail = TRUE, log.p = FALSE) {
     data <- mixture_null_check_data(t, x)
     p <- mixture_null_unpack(fit$theta)
-    z <- (data$t - (p$mu0 + p$beta * data$x)) / exp(p$s + p$gamma * data$x)
-    log_p <- skew_normal_log_cdf(z, p$alpha, lower.tail = lower.tail)
-    if (log.p) log_p else exp(log_p)
+    xi <- p$mu0 + p$beta * data$x
+    omega <- exp(p$s + p$gamma * data$x)
+    value <- if (lower.tail) {
+        sn::psn(data$t, xi, omega, p$alpha)
+    } else {
+        sn::psn(-data$t, -xi, omega, -p$alpha)
+    }
+    if (log.p) log(value) else value
 }
 
 #' @title Posterior probability of the components of the mixture null
