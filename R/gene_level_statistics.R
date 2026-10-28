@@ -73,14 +73,18 @@
 #'     reference = "empirical" for libraries with hundreds of genes, most of
 #'     them without effect.
 #'
-#'     With empirical_fit = "mixture", a three-component normal mixture
-#'     separates null, depleted and enriched genes. The null mean and log
-#'     standard deviation depend on centred log barcode count. The null is
-#'     central and narrower than the alternatives, with weight at least 0.5.
+#'     With empirical_fit = "mixture", a skew-normal null and normal depleted
+#'     and enriched components separate genes without effect from hits.
+#'     The null location and log scale depend on centred log barcode count;
+#'     its shape parameter is constant. The normal alternatives are wider
+#'     than the null and centred at least three null standard deviations
+#'     from its mean. The null has weight at least 0.5.
 #'     By default, five-fold cross-fitting fits the null on other genes and
 #'     computes each gene's p-value on its held-out fold; FDR is adjusted
 #'     once over all genes. A single fit supports both directions. Check
 #'     convergence, fallback and bounds in the null attribute.
+#'     This fit is experimental and opt-in; its FDR calibration gate has
+#'     not passed yet.
 #'
 #'     This replaces the rule of \code{\link{find_zscore_hit}} ("more than
 #'     number_barcode barcodes below the median"), which flags about 17\% of

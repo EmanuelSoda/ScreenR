@@ -30,7 +30,7 @@ test_that("mixture cross-fitting holds out genes and pools p-values once", {
     }
     expect_equal(down$FDR, stats::p.adjust(down$PValue, "BH"))
     expect_equal(nrow(null$diagnostics$per_fold), 5)
-    expect_true(all(c("convergence", "fallback", "at_bound", "pi0",
+    expect_true(all(c("convergence", "fallback", "at_bound", "alpha", "pi0",
         "pi_down", "pi_up") %in% names(null$diagnostics$per_fold)))
     expect_named(null$diagnostics$spread, c("mu0", "s"))
     up <- find_gene_zscore_hit(table, reference = "empirical",
@@ -41,6 +41,23 @@ test_that("mixture cross-fitting holds out genes and pools p-values once", {
     storey <- find_gene_zscore_hit(table, reference = "empirical",
         empirical_fit = "mixture", seed = 17, fdr_method = "storey", fdr = 1)
     expect_equal(storey$FDR, adjust_p(storey$PValue, "storey"))
+})
+
+test_that("mixture plots show the weighted skew-normal neutral density", {
+    fit <- list(
+        theta = c(mu0 = 0, beta = 0, s = 0, gamma = 0, alpha = 4,
+            a = stats::qlogis(0.6), b = 0, dD = 0, kD = 0, dU = 0, kU = 0),
+        weights = c(null = 0.8, down = 0.1, up = 0.1)
+    )
+    genes <- data.frame(Statistic = seq(-3, 3, length.out = 20))
+    null <- list(fits = list(fit), x = rep(0, nrow(genes)),
+        fold = rep(1L, nrow(genes)),
+        diagnostics = list(per_fold = data.frame(pi0 = 0.8, n_test = 20)))
+    plot <- plot_mixture_null(genes, null, bins = 10)
+    curve <- ggplot2::ggplot_build(plot)$data[[2]]
+    expect_equal(curve$y, 0.8 * sn::dsn(curve$x, xi = 0, omega = 1, alpha = 4))
+    expect_gt(curve$y[which.min(abs(curve$x - 1))],
+        curve$y[which.min(abs(curve$x + 1))])
 })
 
 test_that("mixture fold assignment is reproducible and preserves the RNG", {

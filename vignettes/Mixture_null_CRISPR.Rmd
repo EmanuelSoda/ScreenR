@@ -22,7 +22,8 @@ date: "`r Sys.Date()`"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4,
+    cache = FALSE
 )
 ```
 
@@ -167,13 +168,17 @@ ggplot(strata, aes(factor(Decile), LFC_sd)) +
 # Fitting the guide-level null
 
 Here both fits use the mean log ratio of **all** retained guides. The central
-fit estimates one normal distribution around the mode. The mixture fits
-neutral, depleted and enriched components, with neutral mean and log standard
-deviation depending linearly on `x = log2(T0) - mean(log2(T0))`. Its neutral
-component is conditionally normal; the mixture does not directly fit a
-skew-normal neutral distribution as gscreend does.
+fit estimates one normal distribution around the mode. The mixture fits a
+skew-normal neutral component and normal depleted and enriched components.
+The neutral location and log scale depend linearly on
+`x = log2(T0) - mean(log2(T0))`, with a constant shape parameter `alpha`.
+Its density and CDF use the `sn` package. The normal alternatives are wider
+than the neutral component and centred at least three neutral standard
+deviations from its mean. This is a different model and fitting procedure
+from gscreend, although both allow a skew-normal neutral distribution.
 
-`mixture_null_fit()` and `mixture_null_cdf()` are internal functions, accessed
+`mixture_null_fit()`, `mixture_null_cdf()` and `mixture_null_density()` are
+internal functions, accessed
 with `ScreenR:::` for this diagnostic example. The central helper is internal
 too. These helpers are not a stable public interface; the public gene-level
 interface is demonstrated in the next section.
@@ -189,6 +194,7 @@ guide_table$p_mixture <- ScreenR:::mixture_null_cdf(
     mixture, guide_table$LFC, x)
 central
 mixture$weights
+mixture$theta
 data.frame(convergence = mixture$convergence, fallback = mixture$fallback,
     at_bound = paste(mixture$at_bound, collapse = ", "))
 ```
@@ -202,23 +208,23 @@ component, not the probability of membership in that component.
 
 ```{r guide-density, fig.height = 5}
 grid <- seq(-6, 3, length.out = 600)
-theta <- mixture$theta
-mu0 <- theta[["mu0"]] + theta[["beta"]] * x
-sd0 <- exp(theta[["s"]] + theta[["gamma"]] * x)
-component <- function(mu, sigma) {
-    vapply(grid, function(value) mean(dnorm(value, mu, sigma)), numeric(1))
+plot_x <- unique(x)
+plot_weights <- tabulate(match(x, plot_x)) / length(x)
+component <- function(which) {
+    vapply(grid, function(value) {
+        sum(plot_weights * ScreenR:::mixture_null_density(mixture,
+            rep(value, length(plot_x)), plot_x, component = which))
+    }, numeric(1))
 }
 curves <- bind_rows(
     data.frame(t = grid, density = dnorm(grid, central[["mean"]],
         central[["sd"]]), Fit = "Central: normal"),
-    data.frame(t = grid, density = mixture$weights[["null"]] *
-        component(mu0, sd0), Fit = "Mixture: neutral (weighted)"),
-    data.frame(t = grid, density = mixture$weights[["down"]] *
-        component(mu0 - sd0 * (3 + exp(theta[["dD"]])),
-            sd0 * (1 + exp(theta[["kD"]]))), Fit = "Mixture: depleted"),
-    data.frame(t = grid, density = mixture$weights[["up"]] *
-        component(mu0 + sd0 * (3 + exp(theta[["dU"]])),
-            sd0 * (1 + exp(theta[["kU"]]))), Fit = "Mixture: enriched")
+    data.frame(t = grid, density = component("null"),
+        Fit = "Mixture: neutral (weighted)"),
+    data.frame(t = grid, density = component("down"),
+        Fit = "Mixture: depleted"),
+    data.frame(t = grid, density = component("up"),
+        Fit = "Mixture: enriched")
 )
 ggplot(guide_table, aes(LFC)) +
     geom_histogram(aes(y = after_stat(density)), bins = 120,
@@ -292,17 +298,17 @@ gene_results <- lapply(c("central", "mixture"), function(fit) {
         fdr_method = "BH", seed = 2017, n_folds = 5)
 })
 names(gene_results) <- c("central", "mixture")
-gene_summary <- bind_rows(lapply(names(gene_results), function(fit) {
-    result <- gene_results[[fit]]
+evaluate_genes <- function(result) {
     class <- class_of(result$Gene)
     hit <- result$FDR <= 0.05
-    data.frame(Fit = fit, Tested = nrow(result), Hits = sum(hit),
+    data.frame(Tested = nrow(result), Hits = sum(hit),
         `Core essentials found` = sum(hit & class == "Core essential"),
         `Non-essentials called` = sum(hit & class == "Non-essential"),
         `NE p < 0.05` = mean(result$PValue[class == "Non-essential"] < 0.05),
         `Unclassified called` = sum(hit & class == "Unclassified"),
         check.names = FALSE)
-}))
+}
+gene_summary <- bind_rows(lapply(gene_results, evaluate_genes), .id = "Fit")
 knitr::kable(gene_summary, digits = 3)
 ```
 
@@ -338,21 +344,111 @@ gene_null <- attr(gene_results$mixture, "null")
 per_fold <- gene_null$diagnostics$per_fold
 knitr::kable(per_fold[, c("fold", "n_train", "n_test", "convergence",
     "fallback", "starts_converged", "at_bound")])
-knitr::kable(per_fold[, c("fold", "mu0", "s", "pi0", "pi_down", "pi_up")],
+knitr::kable(per_fold[, c("fold", "mu0", "s", "alpha", "pi0", "pi_down", "pi_up")],
     digits = 4)
 knitr::kable(data.frame(Parameter = names(gene_null$diagnostics$spread),
     `Across-fold SD` = unname(gene_null$diagnostics$spread),
     check.names = FALSE), digits = 4)
 ```
 
-Here `mu0` is the neutral mean at centred covariate zero, `s` its log standard
-deviation, and `pi0`, `pi_down` and `pi_up` the component proportions. There
+Here `mu0` is the skew-normal location at centred covariate zero, `s` its log
+scale, `alpha` its shape, and `pi0`, `pi_down` and `pi_up` the component
+proportions. With nonzero shape, location and scale differ from the neutral
+mean and standard deviation. There
 are `r sum(per_fold$convergence == 0)` converged folds,
 `r sum(per_fold$fallback)` fallback fits and
 `r sum(nzchar(per_fold$at_bound))` folds with a parameter at a bound. These
 checks and the reference-gene results describe this screen only; the FDR
 calibration gate still needs to pass before the method can be treated as
 validated.
+
+# One replicate versus three
+
+We now repeat the comparison with each T18 replicate on its own. The first
+table uses the same non-essential guides with positive T0 counts for all
+inputs. `Mean of three` is the mean of the three **log ratios** used in the
+guide analysis above. The tail fractions are calculated after subtracting
+the median of each input.
+
+```{r single-replicate-ratios}
+ratio_inputs <- c(setNames(lapply(replicates, function(replicate) {
+    guide_table[[replicate]]
+}), replicates), list(`Mean of three` = guide_table$LFC))
+single_spread <- bind_rows(lapply(ratio_inputs, function(ratio) {
+    values <- ratio[guide_table$Class == "Non-essential"]
+    centred <- values - median(values)
+    data.frame(n = length(values), SD = sd(values),
+        `Below median - 1` = mean(centred < -1),
+        `Above median + 1` = mean(centred > 1),
+        Skewness = mean((values - mean(values))^3) / sd(values)^3,
+        check.names = FALSE)
+}), .id = "Input")
+knitr::kable(single_spread, digits = 3)
+```
+
+The SDs of the individual replicates are
+`r paste(sprintf("%.3f", single_spread$SD[single_spread$Input != "Mean of three"]), collapse = ", ")`,
+compared with
+`r sprintf("%.3f", single_spread$SD[single_spread$Input == "Mean of three"])`
+for their mean. Averaging can reduce spread while leaving asymmetry, so we
+also inspect calibration after fitting each input separately.
+
+```{r single-replicate-guide-calibration}
+guide_fits <- lapply(ratio_inputs[replicates], function(ratio) {
+    list(central = ScreenR:::fit_null_central(ratio),
+        mixture = ScreenR:::mixture_null_fit(ratio, x))
+})
+guide_fits[["Mean of three"]] <- list(central = central, mixture = mixture)
+single_guide_calibration <- bind_rows(lapply(names(ratio_inputs), function(input) {
+    ratio <- ratio_inputs[[input]]
+    fits <- guide_fits[[input]]
+    p_values <- list(
+        central = pnorm(ratio, fits$central[["mean"]], fits$central[["sd"]]),
+        mixture = ScreenR:::mixture_null_cdf(fits$mixture, ratio, x)
+    )
+    bind_rows(lapply(p_values, function(p) {
+        p <- p[guide_table$Class == "Non-essential"]
+        data.frame(`p < 0.01` = mean(p < 0.01),
+            `p < 0.05` = mean(p < 0.05), check.names = FALSE)
+    }), .id = "Fit") %>% mutate(Input = input, .before = 1)
+}))
+knitr::kable(single_guide_calibration, digits = 3)
+```
+
+For the gene comparison we subset the normalized ScreenR object to T0 and
+one T18 replicate before calling `compute_metrics()`. Subsetting retains the
+CPM effective library sizes; the other T18 replicates cannot contribute to
+that contrast. The three-replicate gene analysis averages normalized counts
+**before** taking the log ratio, as `compute_metrics()` normally does. It
+therefore differs from averaging log ratios in the descriptive guide
+analysis. This Z-score workflow does not estimate replicate variability;
+the comparison shows the effect of averaging counts on its gene statistics.
+
+```{r single-replicate-gene-calibration, message = FALSE}
+single_gene_results <- lapply(replicates, function(replicate) {
+    pair <- hap1[, c("T0", replicate)]
+    metrics <- compute_metrics(pair, control = "T0", treatment = "T18",
+        condition_column = "Day")
+    fits <- lapply(c("central", "mixture"), function(fit) {
+        find_gene_zscore_hit(metrics, reference = "empirical",
+            empirical_fit = fit, direction = "Down", fdr = 1,
+            fdr_method = "BH", seed = 2017, n_folds = 5)
+    })
+    setNames(fits, c("central", "mixture"))
+})
+names(single_gene_results) <- replicates
+single_gene_results[["All three"]] <- gene_results
+single_gene_summary <- bind_rows(lapply(single_gene_results, function(results) {
+    bind_rows(lapply(results, evaluate_genes), .id = "Fit")
+}), .id = "Input")
+knitr::kable(single_gene_summary, digits = 3)
+```
+
+Each row uses the same nominal BH FDR threshold of 0.05 and evaluates the
+same Hart reference lists. The non-essential p-value fractions and false
+calls should be considered alongside essential recovery; a larger hit list
+alone does not establish better calibration. Neither the single-replicate
+comparison nor averaging replaces the pending FDR calibration gate.
 
 # Literature
 

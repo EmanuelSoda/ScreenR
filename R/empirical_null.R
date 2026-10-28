@@ -251,6 +251,7 @@ cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
             starts_converged = fit$starts_converged,
             mu0 = unname(fit$theta["mu0"]),
             s = unname(fit$theta["s"]),
+            alpha = unname(fit$theta["alpha"]),
             pi0 = unname(fit$weights["null"]),
             pi_down = unname(fit$weights["down"]),
             pi_up = unname(fit$weights["up"]),
@@ -278,10 +279,12 @@ plot_mixture_null <- function(genes, null, bins) {
     for (k in seq_along(null$fits)) {
         fit <- null$fits[[k]]
         x <- null$x[null$fold == k]
-        mu <- fit$theta[["mu0"]] + fit$theta[["beta"]] * x
-        sigma <- exp(fit$theta[["s"]] + fit$theta[["gamma"]] * x)
-        y <- y + fit$weights[["null"]] * vapply(grid, function(t) {
-            sum(stats::dnorm(t, mean = mu, sd = sigma))
+        # Group repeated barcode counts without changing their weights.
+        unique_x <- unique(x)
+        frequency <- tabulate(match(x, unique_x))
+        y <- y + vapply(grid, function(t) {
+            sum(frequency * mixture_null_density(fit,
+                rep(t, length(unique_x)), unique_x, component = "null"))
         }, numeric(1)) / nrow(genes)
     }
     curve <- data.frame(x = grid, y = y)

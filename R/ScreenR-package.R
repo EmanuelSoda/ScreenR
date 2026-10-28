@@ -36,4 +36,5 @@
 #' @author Emanuel Michele Soda \email{emanuelsoda@@gmail.com}
 #' @aliases ScreenR ScreenR-package
 #' @keywords internal
+#' @importFrom sn dsn psn
 "_PACKAGE"
