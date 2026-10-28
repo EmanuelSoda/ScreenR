@@ -144,13 +144,14 @@ mixture_null_components <- function(theta, t, x) {
             stats::plogis(-p$b, log.p = TRUE)
     )
     half_log_2pi <- 0.5 * log(2 * pi)
-    log_density <- cbind(
-        null = log(2) - log(omega) - half_log_2pi - 0.5 * z^2 + log_big_phi,
-        down = -0.5 * w_d^2 - log(sd_d) - half_log_2pi,
-        up = -0.5 * w_u^2 - log(sd_u) - half_log_2pi
+    log_f <- cbind(
+        null = log(2) - log(omega) - half_log_2pi - 0.5 * z^2 + log_big_phi +
+            log_weight[["null"]],
+        down = -0.5 * w_d^2 - log(sd_d) - half_log_2pi + log_weight[["down"]],
+        up = -0.5 * w_u^2 - log(sd_u) - half_log_2pi + log_weight[["up"]]
     )
     list(
-        log_f = sweep(log_density, 2, log_weight, "+"),
+        log_f = log_f,
         z = z, u = u, log_big_phi = log_big_phi, w_d = w_d, w_u = w_u,
         xi = xi, omega = omega, m0 = m0, s0 = s0, sd_d = sd_d, sd_u = sd_u,
         c_d = c_d, v_d = v_d, c_u = c_u, v_u = v_u, k = k, params = p
@@ -164,7 +165,10 @@ mixture_null_components <- function(theta, t, x) {
 #' @return A vector with one value for each row.
 #' @keywords internal
 mixture_null_row_logsumexp <- function(m) {
-    top <- do.call(pmax, lapply(seq_len(ncol(m)), function(j) m[, j]))
+    top <- m[, 1L]
+    for (j in seq_len(ncol(m))[-1L]) {
+        top <- pmax(top, m[, j])
+    }
     top + log(rowSums(exp(m - top)))
 }
 
@@ -194,13 +198,18 @@ mixture_null_loglik <- function(theta, t, x) {
 #'     computed as exp(log phi - log Phi) so that it is stable when alpha z is
 #'     very negative.
 #' @inheritParams mixture_null_loglik
+#' @param parts The result of \code{\link{mixture_null_components}} at theta,
+#'     when it has already been computed (the optimiser evaluates the
+#'     log-likelihood and the gradient at the same point).
 #' @return A named vector of length 11.
 #' @keywords internal
-mixture_null_gradient <- function(theta, t, x) {
+mixture_null_gradient <- function(theta, t, x, parts = NULL) {
     data <- mixture_null_check_data(t, x)
     t <- data$t
     x <- data$x
-    parts <- mixture_null_components(theta, t, x)
+    if (is.null(parts)) {
+        parts <- mixture_null_components(theta, t, x)
+    }
     p <- parts$params
     k <- parts$k
     total <- mixture_null_row_logsumexp(parts$log_f)
@@ -257,23 +266,17 @@ mixture_null_gradient <- function(theta, t, x) {
     )
 }
 
-#' @title Starting values of the mixture null
-#' @description Internal function: deterministic starting values for the
-#'     optimiser, derived from the central matching fit of the statistics.
-#'     The shape alpha of the first start is estimated from the sample
-#'     skewness of the central part of the statistics (within 2.5 sd of the
-#'     centre), the second start is symmetric (alpha = 0) and the others mix
-#'     them; the location and the scale are set so that the mean and the sd of
-#'     the null are those of the central fit. The start k has beta = gamma = 0,
-#'     pi_0 in 0.95, 0.9, 0.8, ... and different shifts and widths of the
-#'     alternatives (always at least three null sd from the centre of the
-#'     null).
+#' @title Setup of the starting values of the mixture null
+#' @description Internal function: the quantities of the central matching fit
+#'     of the statistics that the starting values share (the centre and the
+#'     spread of the null, the log odds of the depleted genes and the shape
+#'     suggested by the skewness of the central part), computed once for all
+#'     the starts of a fit.
 #' @param t The gene statistics.
-#' @param n_starts The number of starting values.
-#' @return A list of vectors of length 11, or NULL when the central fit is not
-#'     usable.
+#' @return A list with centre, spread, b and alpha_skew, or NULL when the
+#'     central fit is not usable.
 #' @keywords internal
-mixture_null_starts <- function(t, n_starts) {
+mixture_null_start_setup <- function(t) {
     central <- fit_null_central(t)
     centre <- central[["mean"]]
     spread <- central[["sd"]]
@@ -286,10 +289,43 @@ mixture_null_starts <- function(t, n_starts) {
     }
     n_down <- sum(t < centre - 1.5 * spread)
     n_up <- sum(t > centre + 1.5 * spread)
-    b <- stats::qlogis((n_down + 1) / (n_down + n_up + 2))
-    alpha_skew <- mixture_null_alpha_from_skewness(
-        t[abs(t - centre) <= 2.5 * spread])
-    alphas <- c(alpha_skew, 0, alpha_skew, 0, -alpha_skew, 2 * alpha_skew)
+    list(centre = centre, spread = spread,
+        b = stats::qlogis((n_down + 1) / (n_down + n_up + 2)),
+        alpha_skew = mixture_null_alpha_from_skewness(
+            t[abs(t - centre) <= 2.5 * spread]))
+}
+
+#' @title Starting values of the mixture null
+#' @description Internal function: deterministic starting values for the
+#'     optimiser, derived from the central matching fit of the statistics.
+#'     The shape alpha of the first start is estimated from the sample
+#'     skewness of the central part of the statistics (within 2.5 sd of the
+#'     centre), the second start is symmetric (alpha = 0) and the others mix
+#'     them; the location and the scale are set so that the mean and the sd of
+#'     the null are those of the central fit. The start k has beta = gamma = 0,
+#'     pi_0 in 0.95, 0.9, 0.8, ... and different shifts and widths of the
+#'     alternatives (always at least three null sd from the centre of the
+#'     null). When alpha is given, all the starts have that shape (the starts
+#'     of the profile fit, where alpha is fixed).
+#' @param t The gene statistics.
+#' @param n_starts The number of starting values.
+#' @param alpha The shape of all the starts, or NULL for the shapes above.
+#' @param setup The result of \code{\link{mixture_null_start_setup}} (computed
+#'     from t when missing).
+#' @return A list of vectors of length 11, or NULL when the central fit is not
+#'     usable.
+#' @keywords internal
+mixture_null_starts <- function(t, n_starts, alpha = NULL,
+    setup = mixture_null_start_setup(t)) {
+    if (is.null(setup)) {
+        return(NULL)
+    }
+    alphas <- if (is.null(alpha)) {
+        a <- setup$alpha_skew
+        pmin(pmax(c(a, 0, a, 0, -a, 2 * a), -8), 8)
+    } else {
+        alpha
+    }
     pi_0 <- c(0.95, 0.9, 0.8, 0.7, 0.6, 0.99, 0.85, 0.75, 0.65, 0.55)
     d <- c(0, -0.5, 0.5, 0, -0.5, 0.5)
     k <- c(0, 0.5, -0.5, 0.5, 0, -0.5)
@@ -297,12 +333,12 @@ mixture_null_starts <- function(t, n_starts) {
     lapply(seq_len(n_starts), function(i) {
         j <- (i - 1L) %% length(pi_0) + 1L
         h <- (i - 1L) %% length(d) + 1L
-        alpha <- min(max(alphas[(i - 1L) %% length(alphas) + 1L], -8), 8)
-        constants <- mixture_null_skew_constants(alpha)
-        omega <- spread / constants$k2
-        theta <- c(mu0 = centre - omega * constants$k1, beta = 0,
-            s = log(omega), gamma = 0, alpha = alpha,
-            a = stats::qlogis(2 * pi_0[j] - 1), b = b,
+        alpha_i <- alphas[(i - 1L) %% length(alphas) + 1L]
+        constants <- mixture_null_skew_constants(alpha_i)
+        omega <- setup$spread / constants$k2
+        theta <- c(mu0 = setup$centre - omega * constants$k1, beta = 0,
+            s = log(omega), gamma = 0, alpha = alpha_i,
+            a = stats::qlogis(2 * pi_0[j] - 1), b = setup$b,
             dD = d[h], kD = k[h], dU = d[h], kU = k[h])
         pmin(pmax(theta, bounds$lower), bounds$upper)
     })
@@ -328,62 +364,61 @@ mixture_null_alpha_from_skewness <- function(v) {
     delta / sqrt(1 - delta^2)
 }
 
-#' @title Fit the mixture null by maximum likelihood
-#' @description Internal function used by the cross-fitting of
-#'     \code{\link{find_gene_zscore_hit}} (empirical_fit = "mixture"). It fits
-#'     the three components mixture pi_0 f_0(t | x) + pi_D f_D(t | x) +
-#'     pi_U f_U(t | x) of the gene statistics t, where f_0 is the skew-normal
-#'     null whose location and scale depend on the covariate x, and f_D and f_U
-#'     are the normal depleted and enriched genes (see
-#'     \code{\link{mixture_null_unpack}}). The log-likelihood is maximised with
-#'     L-BFGS-B, the analytic gradient and the box bounds of
-#'     \code{\link{mixture_null_bounds}}, from n_starts deterministic starting
-#'     values; the best converged fit is kept. When no start converges, the fit
-#'     falls back to central matching (\code{\link{fit_null_central}}, a normal
-#'     null with alpha = 0) with a warning.
-#' @param t The gene statistics.
-#' @param x The covariate of the genes (the centred log of the number of
-#'     barcodes).
-#' @param n_starts The number of starting values (default 5).
-#' @param control A list with maxit (default 500) and factr (default 1e7), as
-#'     in \code{\link[stats]{optim}}.
-#' @return A list of class "screenr_mixture_fit" with theta (named parameters),
-#'     weights (null, down, up), loglik, convergence (0 when ok), message, n,
-#'     starts_converged, at_bound (the parameters on a bound) and fallback.
-#' @importFrom stats optim plogis qlogis setNames sd
+#' @title Maximise the mixture null with the shape alpha fixed
+#' @description Internal function: the other ten parameters of the mixture
+#'     null are optimised by L-BFGS-B with the analytic gradient, from each of
+#'     the given starting values, while the shape alpha is kept at a fixed
+#'     value. The run with the best converged log-likelihood is kept.
+#' @param alpha The fixed shape.
+#' @param starts A list of starting vectors of length 11 (their alpha is
+#'     replaced by the fixed one).
+#' @param t,x The gene statistics and the covariate.
+#' @param settings A list with maxit and factr, as in \code{\link[stats]{optim}}.
+#' @return A list with theta (alpha included), loglik, n_converged and message,
+#'     or NULL when no start converged.
 #' @keywords internal
-mixture_null_fit <- function(t, x, n_starts = 5L, control = list()) {
-    data <- mixture_null_check_data(t, x)
-    t <- data$t
-    x <- data$x
-    n_starts <- as.integer(n_starts)
-    if (length(n_starts) != 1L || is.na(n_starts) || n_starts < 1L) {
-        stop("n_starts must be a positive integer.")
-    }
+mixture_null_fit_alpha <- function(alpha, starts, t, x, settings) {
     bounds <- mixture_null_bounds()
+    free <- bounds$names != "alpha"
     n <- length(t)
-    settings <- list(maxit = 500L, factr = 1e7)
-    settings[names(control)] <- control
-
+    expand <- function(par) {
+        theta <- numeric(11)
+        theta[free] <- par
+        theta[!free] <- alpha
+        stats::setNames(theta, bounds$names)
+    }
     # The objective is the negative mean log-likelihood; non finite values
-    # (the spread of the null going to 0 or Inf) are penalised
-    objective <- function(theta) {
-        value <- -mixture_null_loglik(theta, t, x) / n
+    # (the spread of the null going to 0 or Inf) are penalised. The optimiser
+    # asks for the value and the gradient at the same point: the components
+    # are computed once for both.
+    memo <- new.env(parent = emptyenv())
+    memo$par <- NULL
+    components_at <- function(par) {
+        if (is.null(memo$par) || !identical(memo$par, par)) {
+            memo$par <- par
+            memo$theta <- expand(par)
+            memo$parts <- mixture_null_components(memo$theta, t, x)
+        }
+        memo$parts
+    }
+    objective <- function(par) {
+        parts <- components_at(par)
+        value <- -sum(mixture_null_row_logsumexp(parts$log_f)) / n
         if (is.finite(value)) value else 1e10
     }
-    gradient <- function(theta) {
-        grad <- -mixture_null_gradient(theta, t, x) / n
+    gradient <- function(par) {
+        parts <- components_at(par)
+        grad <- -mixture_null_gradient(memo$theta, t, x, parts)[free] / n
         grad[!is.finite(grad)] <- 0
         unname(grad)
     }
-
-    starts <- if (n >= 10L) mixture_null_starts(t, n_starts) else NULL
     runs <- lapply(starts, function(start) {
+        par <- pmin(pmax(start[free], bounds$lower[free]), bounds$upper[free])
         tryCatch(
-            stats::optim(start, objective, gradient, method = "L-BFGS-B",
-                lower = bounds$lower, upper = bounds$upper,
-                control = list(maxit = settings$maxit,
-                    factr = settings$factr)),
+            stats::optim(unname(par), objective, gradient, method = "L-BFGS-B",
+                lower = unname(bounds$lower[free]),
+                upper = unname(bounds$upper[free]),
+                control = list(maxit = settings$maxit, factr = settings$factr)),
             error = function(e) NULL)
     })
     converged <- vapply(runs, function(run) {
@@ -393,27 +428,282 @@ mixture_null_fit <- function(t, x, n_starts = 5L, control = list()) {
     messages <- vapply(runs, function(run) {
         if (is.null(run)) "optimiser error" else as.character(run$message)
     }, character(1))
+    if (!any(converged)) {
+        return(list(theta = NULL, loglik = NA_real_, n_converged = 0L,
+            message = paste(unique(messages), collapse = "; ")))
+    }
+    values <- vapply(runs[converged], function(run) run$value, numeric(1))
+    best <- runs[converged][[which.min(values)]]
+    list(theta = expand(best$par), loglik = -best$value * n,
+        n_converged = sum(converged),
+        message = as.character(best$message))
+}
 
-    if (any(converged)) {
-        values <- vapply(runs[converged], function(run) run$value, numeric(1))
-        best <- runs[converged][[which.min(values)]]
-        theta <- stats::setNames(best$par, bounds$names)
+#' @title Profile log-likelihood of the shape of the mixture null
+#' @description Internal function: the profile fit of the mixture null. The
+#'     shape alpha of the skew-normal null is weakly identified (at gene level
+#'     the log-likelihood can be almost flat over a wide range of alpha, with
+#'     several shallow modes), so it is not optimised with the other
+#'     parameters from random or few starts. Instead alpha is fixed on a grid
+#'     (step 0.25 over -4 to 4, extended by whole steps toward -10 and 10 while
+#'     the 95\% interval touches the edge of the grid) and the other ten
+#'     parameters are optimised at each grid point, from the solutions of the
+#'     neighbouring grid points (continuation, outward from alpha = 0 and then
+#'     once more in each direction over the grid) and from the default
+#'     starts of \code{\link{mixture_null_starts}} with that alpha (grid
+#'     points more than 5 qchisq(0.95, 1) / 2, about 9.6, below the best
+#'     log-likelihood found, which are far outside the 95\% interval, are fitted
+#'     from the warm start alone and are left out of the second continuation).
+#'     There is no random start: the result depends on the data only. The maximum
+#'     likelihood estimate is the best grid point refined by a one dimensional
+#'     optimisation of alpha between its two neighbours.
+#' @param t,x The gene statistics and the covariate (the fit sorts them, see
+#'     \code{\link{mixture_null_fit}}).
+#' @param n_starts The number of default starts at each grid point.
+#' @param settings A list with maxit and factr.
+#' @return A list with the grid (data.frame alpha, loglik and the other ten
+#'     parameters, only the grid points where the optimisation converged),
+#'     theta, loglik and message of the maximum likelihood estimate, the number
+#'     of converged runs, or NULL when no grid point converged.
+#' @keywords internal
+mixture_null_profile <- function(t, x, n_starts, settings) {
+    step <- 0.25
+    k_max <- 40L
+    crit <- stats::qchisq(0.95, 1) / 2
+    setup <- mixture_null_start_setup(t)
+    if (is.null(setup)) {
+        return(NULL)
+    }
+    points <- list()
+    n_converged <- 0L
+    key <- function(k) as.character(k)
+    # Fit the grid point k from the warm starts and, optionally, the defaults
+    fit_point <- function(k, warm = list(), defaults = TRUE) {
+        alpha <- k * step
+        starts <- c(warm, if (defaults) {
+            mixture_null_starts(t, n_starts, alpha = alpha, setup = setup)
+        })
+        run <- mixture_null_fit_alpha(alpha, starts, t, x, settings)
+        n_converged <<- n_converged + run$n_converged
+        old <- points[[key(k)]]
+        if (!is.null(run$theta) &&
+            (is.null(old) || run$loglik > old$loglik)) {
+            points[[key(k)]] <<- run
+        }
+        invisible(NULL)
+    }
+    theta_at <- function(k) points[[key(k)]]$theta
+    # Continuation along the grid points ks: the warm start of each point is
+    # the closest fitted one already visited in the sweep (or `last`). Once a
+    # point is more than `far` below the best log-likelihood found so far, the
+    # points beyond it (the profile only goes down there) are fitted from the
+    # warm start alone: they are far outside the 95% interval.
+    far <- 5 * crit
+    best_ll <- function() max(vapply(points, function(p) p$loglik, numeric(1)))
+    sweep <- function(ks, defaults, last = NULL) {
+        for (k in ks) {
+            hopeless <- length(points) > 0L && !is.null(last) &&
+                last$loglik < best_ll() - far
+            fit_point(k, if (is.null(last)) list() else list(last$theta),
+                defaults && !hopeless)
+            if (!is.null(points[[key(k)]])) last <- points[[key(k)]]
+        }
+    }
+    extend <- function() {
+        repeat {
+            ks <- as.integer(names(points))
+            ll <- vapply(points, function(p) p$loglik, numeric(1))
+            cut <- max(ll) - crit
+            lo <- min(ks)
+            hi <- max(ks)
+            grown <- FALSE
+            if (hi < k_max && ll[[key(hi)]] >= cut) {
+                fit_point(hi + 1L, list(theta_at(hi)))
+                grown <- grown || !is.null(points[[key(hi + 1L)]])
+            }
+            if (lo > -k_max && ll[[key(lo)]] >= cut) {
+                fit_point(lo - 1L, list(theta_at(lo)))
+                grown <- grown || !is.null(points[[key(lo - 1L)]])
+            }
+            if (!grown) break
+        }
+    }
+    n_base <- as.integer(4 / step)
+    # Outward from alpha = 0, upward and downward
+    sweep(0L, TRUE)
+    sweep(seq_len(n_base), TRUE, points[[key(0L)]])
+    sweep(-seq_len(n_base), TRUE, points[[key(0L)]])
+    if (length(points) == 0L) {
+        return(NULL)
+    }
+    extend()
+    # One more continuation in each direction over the grid points that are
+    # not far below the maximum
+    ks <- sort(as.integer(names(points)))
+    ll <- vapply(ks, function(k) points[[key(k)]]$loglik, numeric(1))
+    ks <- ks[ll >= max(ll) - far]
+    sweep(ks, FALSE)
+    sweep(rev(ks), FALSE)
+    extend()
+
+    ks <- sort(as.integer(names(points)))
+    alphas <- ks * step
+    loglik <- vapply(ks, function(k) points[[key(k)]]$loglik, numeric(1))
+    best_k <- ks[which.max(loglik)]
+    best <- points[[key(best_k)]]
+
+    # Refine the maximum between the neighbours of the best grid point (the
+    # profile at an alpha is started from the three closest solutions)
+    close <- Filter(Negate(is.null), lapply(best_k + (-1:1), theta_at))
+    profile_at <- function(alpha) {
+        run <- mixture_null_fit_alpha(alpha, close, t, x, settings)
+        n_converged <<- n_converged + run$n_converged
+        run
+    }
+    refined <- NULL
+    lower <- max(-10, (best_k - 1) * step)
+    upper <- min(10, (best_k + 1) * step)
+    if (upper > lower) {
+        opt <- stats::optimize(function(a) {
+            run <- profile_at(a)
+            if (is.null(run$theta)) 1e10 else -run$loglik
+        }, c(lower, upper), tol = 1e-3)
+        run <- profile_at(opt$minimum)
+        if (!is.null(run$theta) && run$loglik > best$loglik) {
+            refined <- run
+        }
+    }
+    mle <- if (is.null(refined)) best else refined
+    grid <- data.frame(alpha = alphas, loglik = loglik)
+    other <- do.call(rbind, lapply(ks, function(k) points[[key(k)]]$theta))
+    grid <- cbind(grid, as.data.frame(other[, colnames(other) != "alpha",
+        drop = FALSE]))
+    rownames(grid) <- NULL
+    list(grid = grid, theta = mle$theta, loglik = mle$loglik,
+        message = mle$message, n_converged = n_converged, step = step)
+}
+
+#' @title Profile interval of the shape of the mixture null
+#' @description Internal function: the 95\% profile likelihood interval of
+#'     alpha, the set of the alpha whose profile log-likelihood is at least the
+#'     maximum minus qchisq(0.95, 1) / 2, from the grid of
+#'     \code{\link{mixture_null_profile}}. The ends of the interval are the
+#'     outermost grid points inside the set, extended to the crossing of the
+#'     threshold by linear interpolation toward the next grid point (or the
+#'     bound of alpha). If the set has several parts the interval is the hull.
+#'     The maximum likelihood estimate is always inside.
+#' @param grid The profile grid (alpha and loglik).
+#' @param alpha_hat,loglik The maximum likelihood estimate and its
+#'     log-likelihood.
+#' @param level The coverage (0.95).
+#' @return A named vector (lower, upper).
+#' @keywords internal
+mixture_null_alpha_interval <- function(grid, alpha_hat, loglik, level = 0.95) {
+    cut <- loglik - stats::qchisq(level, 1) / 2
+    inside <- which(grid$loglik >= cut)
+    bounds <- mixture_null_bounds()
+    edge <- function(i, j, limit) {
+        # i: outermost inside grid point, j: its outer neighbour (may not exist)
+        if (j < 1L || j > nrow(grid)) {
+            return(limit)
+        }
+        gap <- grid$loglik[i] - grid$loglik[j]
+        if (gap <= 0) {
+            return(grid$alpha[j])
+        }
+        grid$alpha[i] + (grid$alpha[j] - grid$alpha[i]) *
+            (grid$loglik[i] - cut) / gap
+    }
+    lo_i <- min(inside)
+    hi_i <- max(inside)
+    c(lower = min(alpha_hat, edge(lo_i, lo_i - 1L, bounds$lower[["alpha"]])),
+        upper = max(alpha_hat, edge(hi_i, hi_i + 1L, bounds$upper[["alpha"]])))
+}
+
+#' @title Fit the mixture null by maximum likelihood
+#' @description Internal function used by the cross-fitting of
+#'     \code{\link{find_gene_zscore_hit}} (empirical_fit = "mixture"). It fits
+#'     the three components mixture pi_0 f_0(t | x) + pi_D f_D(t | x) +
+#'     pi_U f_U(t | x) of the gene statistics t, where f_0 is the skew-normal
+#'     null whose location and scale depend on the covariate x, and f_D and f_U
+#'     are the normal depleted and enriched genes (see
+#'     \code{\link{mixture_null_unpack}}). The shape alpha of the null is weakly
+#'     identified at gene level, so the fit is a deterministic profile fit
+#'     (\code{\link{mixture_null_profile}}): the log-likelihood is maximised
+#'     over the other parameters (L-BFGS-B, analytic gradient, box bounds of
+#'     \code{\link{mixture_null_bounds}}) on a grid of alpha with continuation
+#'     warm starts and n_starts default starts at each point, and the maximum
+#'     is refined in one dimension. There is no random start, and the
+#'     statistics are sorted internally by (t, x), so the result does not depend
+#'     on the order of the genes (it is identical, not only equal, for any
+#'     permutation of them). \code{theta} is the profiled maximum likelihood
+#'     estimate; the profile and its 95\% interval are kept for the
+#'     conservative p-values of \code{\link{mixture_null_cdf}}. When no grid
+#'     point converges, or there are fewer than 10 genes, the fit falls back to
+#'     central matching (\code{\link{fit_null_central}}, a normal null with
+#'     alpha = 0) with a warning, and has no profile.
+#' @param t The gene statistics.
+#' @param x The covariate of the genes (the centred log of the number of
+#'     barcodes).
+#' @param n_starts The number of default starts at each grid point (default 2:
+#'     more starts cost time and, on the gene-level HAP1 data, did not change
+#'     the log-likelihood of the profile by more than 0.003).
+#' @param control A list with maxit (default 500) and factr (default 1e7), as
+#'     in \code{\link[stats]{optim}}.
+#' @return A list of class "screenr_mixture_fit" with theta (named parameters,
+#'     the profiled maximum likelihood estimate), weights (null, down, up),
+#'     loglik, convergence (0 when ok), message, n, starts_converged (the
+#'     number of converged optimisations), at_bound (the parameters on a
+#'     bound), fallback, alpha_hat (the shape of theta), alpha_ci (the 95\%
+#'     profile interval of alpha, c(lower, upper); NA for the fallback) and
+#'     profile (data.frame with alpha, loglik and the other ten parameters
+#'     profiled at each grid point; NULL for the fallback).
+#' @importFrom stats optim optimize plogis qchisq qlogis setNames sd
+#' @keywords internal
+mixture_null_fit <- function(t, x, n_starts = 2L, control = list()) {
+    data <- mixture_null_check_data(t, x)
+    n_starts <- as.integer(n_starts)
+    if (length(n_starts) != 1L || is.na(n_starts) || n_starts < 1L) {
+        stop("n_starts must be a positive integer.")
+    }
+    # A canonical order of the genes: the sums of the likelihood, and so the
+    # whole optimisation, do not depend on the order of the input
+    ord <- order(data$t, data$x)
+    t <- data$t[ord]
+    x <- data$x[ord]
+    bounds <- mixture_null_bounds()
+    n <- length(t)
+    settings <- list(maxit = 500L, factr = 1e7)
+    settings[names(control)] <- control
+
+    profile <- if (n >= 10L) {
+        mixture_null_profile(t, x, n_starts, settings)
+    } else {
+        NULL
+    }
+
+    if (!is.null(profile)) {
+        theta <- profile$theta
         tol <- 1e-6
         at_lower <- is.finite(bounds$lower) &
             theta - bounds$lower <= tol * pmax(1, abs(bounds$lower))
         at_upper <- is.finite(bounds$upper) &
             bounds$upper - theta <= tol * pmax(1, abs(bounds$upper))
-        at_bound <- bounds$names[at_lower | at_upper]
         fit <- list(theta = theta, convergence = 0L,
-            message = as.character(best$message), at_bound = at_bound,
-            fallback = FALSE)
+            message = profile$message,
+            at_bound = bounds$names[at_lower | at_upper], fallback = FALSE,
+            alpha_hat = theta[["alpha"]],
+            alpha_ci = mixture_null_alpha_interval(profile$grid,
+                theta[["alpha"]], profile$loglik),
+            profile = profile$grid)
+        starts_converged <- profile$n_converged
     } else {
         reason <- if (n < 10L) {
             "fewer than 10 genes"
-        } else if (length(messages) > 0L) {
-            paste(unique(messages), collapse = "; ")
-        } else {
+        } else if (is.null(mixture_null_start_setup(t))) {
             "the statistics have no spread"
+        } else {
+            "no profile optimisation converged"
         }
         warning("The mixture null did not converge (", reason, "): using ",
             "the central matching fit instead.")
@@ -427,16 +717,39 @@ mixture_null_fit <- function(t, x, n_starts = 5L, control = list()) {
             dD = 0, kD = 0, dU = 0, kU = 0)
         fit <- list(theta = theta, convergence = 1L,
             message = paste("fallback to central matching:", reason),
-            at_bound = character(0), fallback = TRUE)
+            at_bound = character(0), fallback = TRUE, alpha_hat = 0,
+            alpha_ci = c(lower = NA_real_, upper = NA_real_), profile = NULL)
+        starts_converged <- 0L
     }
     fit$weights <- mixture_null_weights(fit$theta[["a"]], fit$theta[["b"]])
     fit$loglik <- mixture_null_loglik(fit$theta, t, x)
     fit$n <- n
-    fit$starts_converged <- sum(converged)
+    fit$starts_converged <- starts_converged
     fit <- fit[c("theta", "weights", "loglik", "convergence", "message", "n",
-        "starts_converged", "at_bound", "fallback")]
+        "starts_converged", "at_bound", "fallback", "alpha_hat", "alpha_ci",
+        "profile")]
     class(fit) <- "screenr_mixture_fit"
     fit
+}
+
+#' @title Tail probability of the skew-normal null of one parameter vector
+#' @description Internal function: F_0(t | x) (lower tail) or 1 - F_0(t | x)
+#'     (upper tail) of the skew-normal null of theta, from \code{sn::psn}; the
+#'     upper tail by symmetry, never as 1 - \code{sn::psn(...)}.
+#' @param theta The parameters of the mixture null.
+#' @param t,x The statistics and the covariate (same length).
+#' @param lower.tail TRUE for P(T <= t), FALSE for P(T > t).
+#' @return A vector with one value for each gene.
+#' @keywords internal
+mixture_null_tail <- function(theta, t, x, lower.tail) {
+    p <- mixture_null_unpack(theta)
+    xi <- p$mu0 + p$beta * x
+    omega <- exp(p$s + p$gamma * x)
+    if (lower.tail) {
+        sn::psn(t, xi, omega, p$alpha)
+    } else {
+        sn::psn(-t, -xi, omega, -p$alpha)
+    }
 }
 
 #' @title Neutral cumulative distribution function of the mixture null
@@ -461,23 +774,42 @@ mixture_null_fit <- function(t, x, n_starts = 5L, control = list()) {
 #'     (-Inf with log.p) well before 1e-308 for the smaller shapes (below about
 #'     1e-24 for |alpha| = 1). The p-values used to call hits (above 1e-10) are
 #'     not affected.
+#'
+#'     With \code{conservative = TRUE} (default) the shape alpha is not taken
+#'     at its maximum likelihood estimate only. At gene level the profile
+#'     likelihood of alpha is almost flat, and the tail p-values depend on it,
+#'     so the p-value of a gene is the maximum, over the grid values of alpha
+#'     inside the 95\% profile interval \code{fit$alpha_ci} and the maximum
+#'     likelihood estimate, of the tail probability in the requested direction,
+#'     each computed with the other parameters profiled at that alpha
+#'     (\code{fit$profile}). It is therefore never smaller than the
+#'     \code{conservative = FALSE} value, which uses \code{fit$theta} (the
+#'     profiled maximum likelihood estimate) only. A fit without a profile
+#'     (the fallback, or a hand made fit) has the same value in both cases.
 #' @param fit A fit returned by \code{\link{mixture_null_fit}}.
 #' @param t The gene statistics.
 #' @param x The covariate of the genes.
 #' @param lower.tail If TRUE (default) P(T <= t), otherwise P(T > t).
 #' @param log.p If TRUE the logarithm of the probability is returned (-Inf
 #'     when the probability underflows to 0).
+#' @param conservative If TRUE (default) the maximum over the shapes inside the
+#'     95\% profile interval, otherwise the maximum likelihood estimate only.
 #' @return A vector with one value for each gene.
 #' @keywords internal
-mixture_null_cdf <- function(fit, t, x, lower.tail = TRUE, log.p = FALSE) {
+mixture_null_cdf <- function(fit, t, x, lower.tail = TRUE, log.p = FALSE,
+    conservative = TRUE) {
     data <- mixture_null_check_data(t, x)
-    p <- mixture_null_unpack(fit$theta)
-    xi <- p$mu0 + p$beta * data$x
-    omega <- exp(p$s + p$gamma * data$x)
-    value <- if (lower.tail) {
-        sn::psn(data$t, xi, omega, p$alpha)
-    } else {
-        sn::psn(-data$t, -xi, omega, -p$alpha)
+    value <- mixture_null_tail(fit$theta, data$t, data$x, lower.tail)
+    if (conservative && !is.null(fit$profile) && nrow(fit$profile) > 0L) {
+        cut <- fit$loglik - stats::qchisq(0.95, 1) / 2
+        inside <- fit$profile[fit$profile$loglik >= cut, , drop = FALSE]
+        names_theta <- mixture_null_bounds()$names
+        for (i in seq_len(nrow(inside))) {
+            theta <- stats::setNames(as.numeric(inside[i, names_theta]),
+                names_theta)
+            value <- pmax(value,
+                mixture_null_tail(theta, data$t, data$x, lower.tail))
+        }
     }
     if (log.p) log(value) else value
 }
@@ -503,7 +835,12 @@ mixture_null_posterior <- function(fit, t, x) {
 #'     mixture at the statistics t, weighted by the weights of the mixture
 #'     (pi_0 f_0, pi_D f_D, pi_U f_U), so that the three curves add up to the
 #'     density of the mixture. Used by the plots, which therefore never
-#'     re-implement the densities.
+#'     re-implement the densities. The null component is evaluated by
+#'     \code{sn::dsn}, the reference implementation of the skew-normal density
+#'     (the closed form inside the likelihood and the gradient is checked
+#'     against it in the tests). The plots draw the null at the maximum
+#'     likelihood estimate of the shape (\code{fit$alpha_hat}); the p-values
+#'     use the conservative envelope of \code{\link{mixture_null_cdf}}.
 #' @param fit A fit returned by \code{\link{mixture_null_fit}}.
 #' @param t The gene statistics (or a grid).
 #' @param x The covariate of the genes.
@@ -514,10 +851,19 @@ mixture_null_density <- function(fit, t, x,
     component = c("null", "down", "up", "all")) {
     component <- match.arg(component)
     data <- mixture_null_check_data(t, x)
-    parts <- mixture_null_components(fit$theta, data$t, data$x)
-    if (component == "all") {
-        exp(mixture_null_row_logsumexp(parts$log_f))
-    } else {
-        unname(exp(parts$log_f[, component]))
+    p <- mixture_null_unpack(fit$theta)
+    null <- function() {
+        p$weights[["null"]] * sn::dsn(data$t, p$mu0 + p$beta * data$x,
+            exp(p$s + p$gamma * data$x), p$alpha)
     }
+    alternative <- function(name) {
+        parts <- mixture_null_components(fit$theta, data$t, data$x)
+        exp(parts$log_f[, name])
+    }
+    value <- switch(component,
+        null = null(),
+        down = alternative("down"),
+        up = alternative("up"),
+        all = null() + alternative("down") + alternative("up"))
+    unname(value)
 }
