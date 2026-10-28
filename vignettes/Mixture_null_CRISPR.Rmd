@@ -1,0 +1,373 @@
+---
+title: "The mixture empirical null on a CRISPR-Cas9 dropout screen"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+author:
+- name: "Emanuel Michele Soda"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: emanuelsoda@gmail.com
+- name: "Elena Ceccacci"
+  affiliation: Istituto Europeo Oncologia (IEO),
+               Milano, Italy
+  email: elena.ceccacci@ieo.it
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{The mixture empirical null on a CRISPR-Cas9 dropout screen}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4
+)
+```
+
+# About this comparison
+
+This vignette compares `empirical_fit = "mixture"` with the older
+`empirical_fit = "central"` on the HAP1 CRISPR-Cas9 dropout screen shipped
+with ScreenR. We first inspect guide-level before/after ratios, then compare
+the fitted nulls and their p-values, and finally call depleted genes at day
+18 against T0. See [Choosing the reference](Empirical_null.html) for the
+gene-level test and [Tutorial 4](Tutorial_4_CRISPR_screens.html) for the screen.
+
+**Status:** the mixture method is experimental, opt-in, and not the default.
+Its FDR calibration gate has not passed yet. This dataset comparison is a
+diagnostic example; it does not establish FDR control or justify changing the
+default fit.
+
+```{r packages, message = FALSE, warning = FALSE}
+library(ScreenR)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r reference-genes}
+data(hap1_count_table)
+data(hap1_annotation_table)
+data(hart_reference_genes)
+essential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "core essential"]
+nonessential <- hart_reference_genes$Gene[
+    hart_reference_genes$Class == "non-essential"]
+controls <- c("EGFP", "LacZ", "luciferase")
+class_of <- function(gene) {
+    case_when(
+        gene %in% essential ~ "Core essential",
+        gene %in% nonessential ~ "Non-essential",
+        gene %in% controls ~ "Control",
+        TRUE ~ "Unclassified"
+    )
+}
+```
+
+The Hart reference lists are used only to evaluate the results, not to fit
+either null. The annotated control targets are shown separately: their
+behaviour need not match that of guides cutting non-essential human genes.
+Unclassified genes have no label in these reference lists, so calling one
+does not by itself imply a false positive.
+
+# Before/after ratios and asymmetry
+
+We follow the ratio construction used by Imkeller et al. (2020),
+[gscreend, Genome Biology 21:53](https://doi.org/10.1186/s13059-020-1939-1):
+scale each T18 replicate to the total count at T0, add a pseudocount of one,
+and calculate `log2((T18_scaled + 1) / (T0 + 1))`. Negative ratios indicate
+depletion. This reproduces the descriptive ratio analysis on HAP1; the
+gscreend statistical test is not run here.
+
+```{r guide-ratios}
+counts <- hap1_count_table
+t0 <- as.numeric(counts$T0)
+replicates <- c("T18_A", "T18_B", "T18_C")
+ratios <- sapply(replicates, function(replicate) {
+    after <- as.numeric(counts[[replicate]])
+    scaled <- after * sum(t0) / sum(after)
+    log2((scaled + 1) / (t0 + 1))
+})
+gene <- hap1_annotation_table$Gene[
+    match(counts$Barcode, hap1_annotation_table$Barcode)]
+guide_table <- data.frame(
+    Barcode = counts$Barcode, Gene = gene, Class = class_of(gene),
+    T0 = t0, ratios, LFC = rowMeans(ratios)
+)
+guide_table <- guide_table[t0 > 0, ]
+ratio_long <- pivot_longer(guide_table, all_of(replicates),
+    names_to = "Replicate", values_to = "Ratio")
+null_ratios <- filter(ratio_long, Class %in% c("Non-essential", "Control"))
+```
+
+Scaling uses all guides before removing those with zero T0 counts. There are
+`r nrow(guide_table)` guides with positive T0 counts, including
+`r sum(guide_table$Class == "Non-essential")` non-essential and
+`r sum(guide_table$Class == "Control")` control guides. Positive T0 is
+required for the abundance covariate below.
+
+```{r ratio-histograms, fig.height = 5}
+ggplot(null_ratios, aes(Ratio, fill = Class)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 80,
+        alpha = 0.6, position = "identity") +
+    geom_vline(xintercept = c(-1, 1), linetype = 2) +
+    facet_wrap(~Replicate) + coord_cartesian(xlim = c(-5, 3)) +
+    labs(x = "log2 before/after ratio (T18 / T0)", y = "Density") +
+    theme(legend.position = "bottom")
+```
+
+The raw tail fractions beyond -1 and +1 combine location and shape. We also
+subtract the median separately within each class and replicate before
+counting the tails, to distinguish a location shift from asymmetry. Skewness
+is `mean((Ratio - mean(Ratio))^3) / sd(Ratio)^3`; negative values indicate a
+longer left tail. It is unchanged by median centring.
+
+```{r ratio-tail-fractions}
+ratio_summary <- null_ratios %>%
+    group_by(Class, Replicate) %>%
+    summarise(n = n(), Median = median(Ratio),
+        Skewness = mean((Ratio - mean(Ratio))^3) / sd(Ratio)^3,
+        .groups = "drop")
+knitr::kable(ratio_summary, digits = 3)
+
+tail_summary <- null_ratios %>%
+    group_by(Class, Replicate) %>%
+    mutate(Centred = Ratio - median(Ratio)) %>%
+    pivot_longer(c(Ratio, Centred), names_to = "Scale", values_to = "Value") %>%
+    group_by(Class, Replicate, Scale) %>%
+    summarise(`Below -1` = mean(Value < -1),
+        `Above +1` = mean(Value > 1),
+        `Left / right` = `Below -1` / `Above +1`, .groups = "drop")
+knitr::kable(tail_summary, digits = 3)
+```
+
+For the spread analysis, we average the replicate log ratios for each guide
+and divide the non-essential guides into T0 abundance deciles. The table
+reports the median T0 count, median ratio, standard deviation and raw tail
+fractions in each decile. This checks whether a single spread is adequate
+across the abundance range.
+
+```{r abundance-deciles}
+strata <- guide_table %>%
+    filter(Class == "Non-essential") %>%
+    mutate(Decile = ntile(T0, 10)) %>%
+    group_by(Decile) %>%
+    summarise(T0_median = median(T0), LFC_median = median(LFC),
+        LFC_sd = sd(LFC), below_minus1 = mean(LFC < -1),
+        above_plus1 = mean(LFC > 1), .groups = "drop")
+knitr::kable(strata, digits = 3)
+ggplot(strata, aes(factor(Decile), LFC_sd)) +
+    geom_col(fill = "grey50") +
+    labs(x = "T0 abundance decile (non-essential guides)",
+        y = "SD of mean log2 ratio")
+```
+
+# Fitting the guide-level null
+
+Here both fits use the mean log ratio of **all** retained guides. The central
+fit estimates one normal distribution around the mode. The mixture fits
+neutral, depleted and enriched components, with neutral mean and log standard
+deviation depending linearly on `x = log2(T0) - mean(log2(T0))`. Its neutral
+component is conditionally normal; the mixture does not directly fit a
+skew-normal neutral distribution as gscreend does.
+
+`mixture_null_fit()` and `mixture_null_cdf()` are internal functions, accessed
+with `ScreenR:::` for this diagnostic example. The central helper is internal
+too. These helpers are not a stable public interface; the public gene-level
+interface is demonstrated in the next section.
+
+```{r guide-fits}
+x_raw <- log2(guide_table$T0)
+x <- x_raw - mean(x_raw)
+central <- ScreenR:::fit_null_central(guide_table$LFC)
+mixture <- ScreenR:::mixture_null_fit(guide_table$LFC, x)
+guide_table$p_central <- pnorm(guide_table$LFC,
+    mean = central[["mean"]], sd = central[["sd"]])
+guide_table$p_mixture <- ScreenR:::mixture_null_cdf(
+    mixture, guide_table$LFC, x)
+central
+mixture$weights
+data.frame(convergence = mixture$convergence, fallback = mixture$fallback,
+    at_bound = paste(mixture$at_bound, collapse = ", "))
+```
+
+The following curves average each mixture component over the observed T0
+covariates. Component densities include their fitted mixture weights, so
+their areas are their proportions of all guides. The central curve has unit
+area. The neutral CDF used for p-values is unweighted: a depleted-tail
+p-value is the probability below the observed ratio under the neutral
+component, not the probability of membership in that component.
+
+```{r guide-density, fig.height = 5}
+grid <- seq(-6, 3, length.out = 600)
+theta <- mixture$theta
+mu0 <- theta[["mu0"]] + theta[["beta"]] * x
+sd0 <- exp(theta[["s"]] + theta[["gamma"]] * x)
+component <- function(mu, sigma) {
+    vapply(grid, function(value) mean(dnorm(value, mu, sigma)), numeric(1))
+}
+curves <- bind_rows(
+    data.frame(t = grid, density = dnorm(grid, central[["mean"]],
+        central[["sd"]]), Fit = "Central: normal"),
+    data.frame(t = grid, density = mixture$weights[["null"]] *
+        component(mu0, sd0), Fit = "Mixture: neutral (weighted)"),
+    data.frame(t = grid, density = mixture$weights[["down"]] *
+        component(mu0 - sd0 * (3 + exp(theta[["dD"]])),
+            sd0 * (1 + exp(theta[["kD"]]))), Fit = "Mixture: depleted"),
+    data.frame(t = grid, density = mixture$weights[["up"]] *
+        component(mu0 + sd0 * (3 + exp(theta[["dU"]])),
+            sd0 * (1 + exp(theta[["kU"]]))), Fit = "Mixture: enriched")
+)
+ggplot(guide_table, aes(LFC)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 120,
+        fill = "grey80", colour = "grey60") +
+    geom_line(data = curves, aes(t, density, colour = Fit), linewidth = 0.8) +
+    coord_cartesian(xlim = c(-6, 3)) +
+    labs(x = "Mean log2 before/after ratio", y = "Density", colour = NULL) +
+    theme(legend.position = "bottom") +
+    guides(colour = guide_legend(nrow = 2))
+```
+
+These guide-level fits use the same guides for fitting and evaluation, so
+their p-values are descriptive. We inspect both tails for the non-essential
+guides, with controls alongside them. Under a calibrated continuous null the
+p-values would be uniform, with the indicated fraction in each tail.
+
+```{r guide-p-values, fig.height = 4}
+guide_p <- guide_table %>%
+    filter(Class %in% c("Non-essential", "Control")) %>%
+    pivot_longer(c(p_central, p_mixture), names_to = "Fit", values_to = "p") %>%
+    mutate(Fit = recode(Fit, p_central = "Central", p_mixture = "Mixture"))
+guide_calibration <- guide_p %>%
+    group_by(Class, Fit) %>%
+    summarise(n = n(), `p < 0.01` = mean(p < 0.01),
+        `p < 0.05` = mean(p < 0.05), `p > 0.95` = mean(p > 0.95),
+        `p > 0.99` = mean(p > 0.99), .groups = "drop")
+knitr::kable(guide_calibration, digits = 3)
+ggplot(filter(guide_p, Class == "Non-essential"), aes(p)) +
+    geom_histogram(breaks = seq(0, 1, 0.05), fill = "grey50") +
+    geom_hline(data = count(filter(guide_p, Class == "Non-essential"), Fit),
+        aes(yintercept = n / 20), linetype = 2, colour = "red") +
+    facet_wrap(~Fit) +
+    labs(x = "Depletion p-value of non-essential guides", y = "Guides",
+        subtitle = "Dashed line: expected count per bin under uniform p-values")
+```
+
+# Calling depleted genes
+
+The public test uses barcode Z-scores from `compute_metrics()`, rather than
+the descriptive count ratios above. We normalize the supplied count table
+and compare day 18 with T0. The gene statistic is the mean barcode Z-score,
+standardized using the barcode median and MAD and the number of guides per
+gene. Genes need at least three guides, the default `min_barcodes`.
+
+```{r gene-metrics, message = FALSE}
+samples <- data.frame(
+    Sample = colnames(hap1_count_table)[-1],
+    Day = c("T0", "T3", "T3", "T3", "T18", "T18", "T18"),
+    Treatment = "Untreated"
+)
+hap1 <- create_screenr_object(
+    table = hap1_count_table, annotation = hap1_annotation_table,
+    groups = factor(samples$Day, levels = c("T0", "T3", "T18")),
+    sample_table = samples
+)
+hap1 <- normalize_data(remove_all_zero_row(hap1))
+day18 <- compute_metrics(hap1, control = "T0", treatment = "T18",
+    condition_column = "Day")
+```
+
+For the gene-level mixture the covariate is centred **log number of guides
+per gene**, not T0 abundance. With five folds and seed 2017, each gene's
+p-value comes from a fit on the other folds. BH adjustment is then applied
+once across all tested genes. `fdr = 1` retains every tested gene so that
+non-essential p-values can be evaluated as well as hits.
+
+```{r gene-tests}
+gene_results <- lapply(c("central", "mixture"), function(fit) {
+    find_gene_zscore_hit(day18, reference = "empirical",
+        empirical_fit = fit, direction = "Down", fdr = 1,
+        fdr_method = "BH", seed = 2017, n_folds = 5)
+})
+names(gene_results) <- c("central", "mixture")
+gene_summary <- bind_rows(lapply(names(gene_results), function(fit) {
+    result <- gene_results[[fit]]
+    class <- class_of(result$Gene)
+    hit <- result$FDR <= 0.05
+    data.frame(Fit = fit, Tested = nrow(result), Hits = sum(hit),
+        `Core essentials found` = sum(hit & class == "Core essential"),
+        `Non-essentials called` = sum(hit & class == "Non-essential"),
+        `NE p < 0.05` = mean(result$PValue[class == "Non-essential"] < 0.05),
+        `Unclassified called` = sum(hit & class == "Unclassified"),
+        check.names = FALSE)
+}))
+knitr::kable(gene_summary, digits = 3)
+```
+
+Among the tested genes, there are
+`r sum(gene_results$central$Gene %in% essential)` core essentials and
+`r sum(gene_results$central$Gene %in% nonessential)` non-essentials. At a
+nominal BH FDR threshold of 0.05, the central fit calls
+`r gene_summary$Hits[gene_summary$Fit == "central"]` genes and the mixture
+calls `r gene_summary$Hits[gene_summary$Fit == "mixture"]`. The non-essential
+p-value fraction is a marginal calibration diagnostic, not an estimate of
+the FDR among all hits: the reference lists do not classify every gene.
+
+```{r gene-null-central}
+plot_empirical_null(day18, empirical_fit = "central",
+    direction = "Down", seed = 2017, n_folds = 5) +
+    ggtitle("Gene statistic: central empirical null")
+```
+
+```{r gene-null-mixture}
+plot_empirical_null(day18, empirical_fit = "mixture",
+    direction = "Down", seed = 2017, n_folds = 5) +
+    ggtitle("Gene statistic: mixture empirical null")
+```
+
+The mixture plot averages the neutral density over held-out covariates,
+weighted by each fold's fitted neutral proportion. The central plot uses a
+single fitted normal density. Inspect the diagnostics as well as the curves:
+convergence does not establish calibration, and a parameter at a bound can
+signal that a component is weakly identified.
+
+```{r fold-diagnostics}
+gene_null <- attr(gene_results$mixture, "null")
+per_fold <- gene_null$diagnostics$per_fold
+knitr::kable(per_fold[, c("fold", "n_train", "n_test", "convergence",
+    "fallback", "starts_converged", "at_bound")])
+knitr::kable(per_fold[, c("fold", "mu0", "s", "pi0", "pi_down", "pi_up")],
+    digits = 4)
+knitr::kable(data.frame(Parameter = names(gene_null$diagnostics$spread),
+    `Across-fold SD` = unname(gene_null$diagnostics$spread),
+    check.names = FALSE), digits = 4)
+```
+
+Here `mu0` is the neutral mean at centred covariate zero, `s` its log standard
+deviation, and `pi0`, `pi_down` and `pi_up` the component proportions. There
+are `r sum(per_fold$convergence == 0)` converged folds,
+`r sum(per_fold$fallback)` fallback fits and
+`r sum(nzchar(per_fold$at_bound))` folds with a parameter at a bound. These
+checks and the reference-gene results describe this screen only; the FDR
+calibration gate still needs to pass before the method can be treated as
+validated.
+
+# Literature
+
+* Imkeller K, Ambrosi G, Boutros M, Huber W (2020). gscreend: modelling
+  asymmetric count ratios in CRISPR screens to decrease experiment size and
+  improve phenotype detection. Genome Biology 21:53.
+  [doi:10.1186/s13059-020-1939-1](https://doi.org/10.1186/s13059-020-1939-1).
+* Hart T, Tong AHY, Chan K et al. (2017). Evaluation and design of
+  genome-wide CRISPR/SpCas9 knockout screens. G3 7:2719-2727.
+* Hart T, Brown KR, Sircoulomb F, Rottapel R, Moffat J (2014). Measuring
+  error rates in genomic perturbation screens: gold standards for human
+  functional genomics. Molecular Systems Biology 10:733.
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```

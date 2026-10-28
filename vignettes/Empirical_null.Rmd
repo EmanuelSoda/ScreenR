@@ -60,6 +60,12 @@ analyses do not change.
 
 Always look at `plot_empirical_null()` (see [Checking the fit](#checking-the-fit)).
 
+For an experimental, opt-in alternative, see
+[The mixture empirical null on a CRISPR-Cas9 dropout screen](Mixture_null_CRISPR.html),
+which compares `empirical_fit = "mixture"` with `"central"` on HAP1 guide
+ratios and gene-level calls. The mixture is not the default and its FDR
+calibration gate has not passed yet.
+
 ```{r packages, message = FALSE, warning = FALSE}
 library(ScreenR)
 library(dplyr)
