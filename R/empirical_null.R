@@ -10,15 +10,17 @@
 #' @param direction "Down" or "Up".
 #' @param statistic "mean" or "median".
 #' @param min_barcodes Genes with fewer barcodes are not tested.
-#' @param empirical_fit "central" or "one-sided".
+#' @param empirical_fit "central", "one-sided" or "mixture".
+#' @param seed Optional seed for mixture cross-fitting.
+#' @param n_folds Number of mixture cross-fitting folds (default 5).
 #' @return A tibble with the columns Gene, NBarcodes, Score, Log2FC,
 #'     Statistic and PValue, with the attribute "null" (mean and sd of the
-#'     fitted null).
+#'     fitted null), or per-fold mixture fits and diagnostics.
 #' @importFrom stats median mad density lm pnorm qnorm coef
 #' @keywords internal
 empirical_null_statistics <- function(table, score = "Zscore",
     direction = "Down", statistic = "mean", min_barcodes = 3,
-    empirical_fit = "central") {
+    empirical_fit = "central", seed = NULL, n_folds = 5) {
     missing_columns <- setdiff(c("Gene", "Log2FC", score), colnames(table))
     if (length(missing_columns) > 0) {
         stop("Missing column(s): ", paste(missing_columns, collapse = ", "))
@@ -51,6 +53,23 @@ empirical_null_statistics <- function(table, score = "Zscore",
     spread <- stats::mad(table[[score]])
     gene_table$Statistic <- (gene_table$Score - centre) /
         (spread / sqrt(gene_table$NBarcodes))
+
+    if (empirical_fit == "mixture") {
+        x <- log(gene_table$NBarcodes)
+        x <- x - mean(x)
+        null <- cross_fit_mixture_null(gene_table$Statistic, x,
+            n_folds = n_folds, seed = seed)
+        null$genes <- gene_table$Gene
+        null$x <- x
+        gene_table$PValue <- if (direction == "Down") {
+            null$p_down
+        } else {
+            null$p_up
+        }
+        null$p_down <- null$p_up <- NULL
+        attr(gene_table, "null") <- null
+        return(gene_table)
+    }
 
     null <- if (empirical_fit == "central") {
         fit_null_central(gene_table$Statistic)
@@ -123,7 +142,11 @@ fit_null_one_sided <- function(x, side = "right") {
 #' @param statistic The gene score: "mean" (default) or "median".
 #' @param min_barcodes Genes with fewer barcodes than this are not used
 #'     (default 3).
-#' @param empirical_fit "central" (default) or "one-sided".
+#' @param empirical_fit "central" (default), "one-sided" or "mixture".
+#' @param seed Optional seed for reproducible mixture folds. The session
+#'     random state is restored afterwards.
+#' @param n_folds Number of mixture cross-fitting folds (default 5). Using
+#'     1 is an in-sample diagnostic and risks anti-conservative p-values.
 #' @param bins The number of bins of the histogram. Default 60.
 #' @return A ggplot object.
 #' @seealso \code{\link{find_gene_zscore_hit}}
@@ -139,15 +162,20 @@ fit_null_one_sided <- function(x, side = "right") {
 plot_empirical_null <- function(table_treate_vs_control,
     score = c("Zscore", "ZscoreRobust"), direction = c("Down", "Up"),
     statistic = c("mean", "median"), min_barcodes = 3,
-    empirical_fit = c("central", "one-sided"), bins = 60) {
+    empirical_fit = c("central", "one-sided", "mixture"), bins = 60,
+    seed = NULL, n_folds = 5) {
     score <- match.arg(score)
     direction <- match.arg(direction)
     statistic <- match.arg(statistic)
     empirical_fit <- match.arg(empirical_fit)
     genes <- empirical_null_statistics(table_treate_vs_control, score = score,
         direction = direction, statistic = statistic,
-        min_barcodes = min_barcodes, empirical_fit = empirical_fit)
+        min_barcodes = min_barcodes, empirical_fit = empirical_fit,
+        seed = seed, n_folds = n_folds)
     null <- attr(genes, "null")
+    if (empirical_fit == "mixture") {
+        return(plot_mixture_null(genes, null, bins))
+    }
     # Share of genes described by the null: the density of the statistics at
     # the centre of the null, relative to that of the null
     density_at_mode <- stats::approx(
@@ -167,4 +195,123 @@ plot_empirical_null <- function(table_treate_vs_control,
             subtitle = sprintf(
                 "Empirical null: mean %.2f, sd %.2f (%.0f%% of the genes)",
                 null[["mean"]], null[["sd"]], 100 * share))
+}
+
+#' @title Cross-fit the mixture empirical null
+#' @description Fits each null on the genes outside its fold and evaluates
+#'     both neutral tails on the held-out genes. The random state is restored
+#'     even when seed is NULL, as the legacy empirical test uses no randomness.
+#' @param statistic Numeric vector of gene statistics.
+#' @param x Numeric vector of centred log barcode counts.
+#' @param n_folds Number of folds; 1 means an in-sample diagnostic fit.
+#' @param seed Optional random seed.
+#' @return A list with fits, fold assignment, conservative p-value tails
+#'     (p_down, p_up), MLE-only tails (p_down_mle, p_up_mle) for diagnostics,
+#'     and per-fold diagnostics including alpha_hat and the lower and upper
+#'     endpoints of its 95\% profile interval.
+#' @keywords internal
+cross_fit_mixture_null <- function(statistic, x, n_folds = 5, seed = NULL) {
+    n <- length(statistic)
+    if (!is.numeric(statistic) || !is.numeric(x) || length(x) != n ||
+        n < 3 || any(!is.finite(statistic)) || any(!is.finite(x))) {
+        stop("statistic and x must be finite numeric vectors of equal ",
+            "length, with at least 3 genes.")
+    }
+    if (!is.numeric(n_folds) || length(n_folds) != 1 ||
+        !is.finite(n_folds) || n_folds != floor(n_folds) ||
+        n_folds < 1 || n_folds > n) {
+        stop("n_folds must be a single integer between 1 and the ",
+            "number of tested genes.")
+    }
+    restore_random_state()
+    if (!is.null(seed)) {
+        set.seed(seed)
+    }
+    fold <- if (n_folds == 1) rep(1L, n) else {
+        sample(rep(seq_len(n_folds), length.out = n))
+    }
+    fits <- vector("list", n_folds)
+    p_down <- p_up <- p_down_mle <- p_up_mle <- numeric(n)
+    for (k in seq_len(n_folds)) {
+        held_out <- fold == k
+        training <- if (n_folds == 1) rep(TRUE, n) else !held_out
+        fit <- mixture_null_fit(statistic[training], x[training])
+        if (fit$convergence != 0 || isTRUE(fit$fallback)) {
+            warning("Mixture null fold ", k, ": convergence = ",
+                fit$convergence, ", fallback = ", fit$fallback, ". ",
+                fit$message)
+        }
+        fits[[k]] <- fit
+        p_down[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = TRUE, conservative = TRUE)
+        p_up[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = FALSE, conservative = TRUE)
+        p_down_mle[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = TRUE, conservative = FALSE)
+        p_up_mle[held_out] <- mixture_null_cdf(fit, statistic[held_out],
+            x[held_out], lower.tail = FALSE, conservative = FALSE)
+    }
+    per_fold <- do.call(rbind, lapply(seq_len(n_folds), function(k) {
+        fit <- fits[[k]]
+        data.frame(fold = k, n_train = fit$n, n_test = sum(fold == k),
+            convergence = fit$convergence, fallback = fit$fallback,
+            starts_converged = fit$starts_converged,
+            mu0 = unname(fit$theta["mu0"]),
+            s = unname(fit$theta["s"]),
+            alpha = unname(fit$theta["alpha"]),
+            alpha_hat = if (is.null(fit$alpha_hat)) NA_real_ else fit$alpha_hat,
+            alpha_ci_lower = if (is.null(fit$alpha_ci)) NA_real_ else
+                unname(fit$alpha_ci["lower"]),
+            alpha_ci_upper = if (is.null(fit$alpha_ci)) NA_real_ else
+                unname(fit$alpha_ci["upper"]),
+            pi0 = unname(fit$weights["null"]),
+            pi_down = unname(fit$weights["down"]),
+            pi_up = unname(fit$weights["up"]),
+            at_bound = paste(fit$at_bound, collapse = ", "),
+            message = paste(fit$message, collapse = "; "))
+    }))
+    spread <- if (n_folds == 1) c(mu0 = 0, s = 0) else {
+        c(mu0 = stats::sd(per_fold$mu0), s = stats::sd(per_fold$s))
+    }
+    list(fits = fits, fold = fold, p_down = p_down, p_up = p_up,
+        p_down_mle = p_down_mle, p_up_mle = p_up_mle,
+        diagnostics = list(per_fold = per_fold, spread = spread))
+}
+
+#' @title Plot the cross-fitted mixture null
+#' @description Averages the neutral density over held-out covariates and
+#'     folds at each fold's alpha_hat, weighted by its fitted null proportion.
+#'     The p-values use the conservative alpha envelope instead.
+#' @param genes Gene statistics returned by empirical_null_statistics.
+#' @param null The mixture null attribute of genes.
+#' @param bins Number of histogram bins.
+#' @return A ggplot object.
+#' @keywords internal
+plot_mixture_null <- function(genes, null, bins) {
+    grid <- seq(min(genes$Statistic), max(genes$Statistic), length.out = 512)
+    y <- numeric(length(grid))
+    for (k in seq_along(null$fits)) {
+        fit <- null$fits[[k]]
+        x <- null$x[null$fold == k]
+        # Group repeated barcode counts without changing their weights.
+        unique_x <- unique(x)
+        frequency <- tabulate(match(x, unique_x))
+        y <- y + vapply(grid, function(t) {
+            sum(frequency * mixture_null_density(fit,
+                rep(t, length(unique_x)), unique_x, component = "null"))
+        }, numeric(1)) / nrow(genes)
+    }
+    curve <- data.frame(x = grid, y = y)
+    diagnostics <- null$diagnostics$per_fold
+    ggplot2::ggplot(genes, aes(x = .data$Statistic)) +
+        ggplot2::geom_histogram(aes(y = ggplot2::after_stat(density)),
+            bins = bins, fill = "grey70", colour = "grey40") +
+        ggplot2::geom_line(data = curve, aes(x = .data$x, y = .data$y),
+            colour = "#b2182b", linewidth = 0.8) +
+        ggplot2::labs(x = "Gene statistic", y = "Density",
+            subtitle = sprintf(
+                paste0("Mixture empirical null: %d folds, mean null share %.0f%%\n",
+                    "Density at alpha_hat; p-values use the conservative alpha envelope"),
+                length(null$fits), 100 * stats::weighted.mean(diagnostics$pi0,
+                    diagnostics$n_test)))
 }

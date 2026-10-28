@@ -10,8 +10,10 @@ plot_empirical_null(
   direction = c("Down", "Up"),
   statistic = c("mean", "median"),
   min_barcodes = 3,
-  empirical_fit = c("central", "one-sided"),
-  bins = 60
+  empirical_fit = c("central", "one-sided", "mixture"),
+  bins = 60,
+  seed = NULL,
+  n_folds = 5
 )
 }
 \arguments{
@@ -30,9 +32,15 @@ at least the columns Gene, Log2FC and the score column, as returned by
 \item{min_barcodes}{Genes with fewer barcodes than this are not used
 (default 3).}
 
-\item{empirical_fit}{"central" (default) or "one-sided".}
+\item{empirical_fit}{"central" (default), "one-sided" or "mixture".}
 
 \item{bins}{The number of bins of the histogram. Default 60.}
+
+\item{seed}{Optional seed for reproducible mixture folds. The session
+random state is restored afterwards.}
+
+\item{n_folds}{Number of mixture cross-fitting folds (default 5). Using
+1 is an in-sample diagnostic and risks anti-conservative p-values.}
 }
 \value{
 A ggplot object.

@@ -34,6 +34,7 @@ Imports:
     patchwork (>= 1.1),
     tibble (>= 3.1.6),
     scales (>= 1.1.1),
+    sn (>= 2.1.1),
     purrr (>= 0.3.4),
     ggplot2 (>= 3.5.2),
     stats,
@@ -89,6 +90,7 @@ Collate:
     'k562_data.R'
     'library_checks.R'
     'mapped_reads.R'
+    'mixture_null.R'
     'normalize_data.R'
     'palettes.R'
     'plot_barcode_heatmap.R'

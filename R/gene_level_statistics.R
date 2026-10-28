@@ -73,6 +73,19 @@
 #'     reference = "empirical" for libraries with hundreds of genes, most of
 #'     them without effect.
 #'
+#'     With empirical_fit = "mixture", a skew-normal null and normal depleted
+#'     and enriched components separate genes without effect from hits.
+#'     The null location and log scale depend on centred log barcode count;
+#'     its shape parameter is constant. The normal alternatives are wider
+#'     than the null and centred at least three null standard deviations
+#'     from its mean. The null has weight at least 0.5.
+#'     By default, five-fold cross-fitting fits the null on other genes and
+#'     computes each gene's p-value on its held-out fold; FDR is adjusted
+#'     once over all genes. A single fit supports both directions. Check
+#'     convergence, fallback and bounds in the null attribute.
+#'     This fit is experimental and opt-in; its FDR calibration gate has
+#'     not passed yet.
+#'
 #'     This replaces the rule of \code{\link{find_zscore_hit}} ("more than
 #'     number_barcode barcodes below the median"), which flags about 17\% of
 #'     the genes without any effect when genes have 10 barcodes and
@@ -98,7 +111,7 @@
 #'     control_genes), or "empirical", an empirical null of the gene
 #'     statistics estimated from the data (see Details).
 #' @param empirical_fit With reference = "empirical", how the null is
-#'     fitted: "central" (default) or "one-sided" (see Details).
+#'     fitted: "central" (default), "one-sided" or "mixture" (see Details).
 #' @param n_permutations The number of random barcode sets used to compute
 #'     the p-values (default 1e5, at least 100). Not used with
 #'     reference = "empirical".
@@ -111,16 +124,24 @@
 #'     default) or "storey" (Benjamini-Hochberg multiplied by the estimated
 #'     proportion of genes without effect, less conservative when many genes
 #'     have an effect).
-#' @param seed An optional random seed, to make the permutations
-#'     reproducible. The random number state of the session is restored
-#'     afterwards.
+#' @param seed An optional random seed, to make the permutations or
+#'     mixture cross-fitting reproducible. The random number state of the
+#'     session is restored afterwards.
+#' @param n_folds Number of folds for empirical_fit = "mixture" (default
+#'     5). Each gene is tested using a null fitted to the other folds.
+#'     Using 1 fits and tests the same genes and risks anti-conservative
+#'     p-values. Ignored for the other fits and references.
 #' @importFrom stats median
 #' @return A tibble with one row for each hit and the columns Gene, NBarcodes
 #'     (number of barcodes), Score (mean or median score of the barcodes),
 #'     Log2FC (median log2 fold change of the barcodes), PValue and FDR,
 #'     ordered by p-value. With reference = "empirical" it also has the
 #'     column Statistic (the standardized gene score) and the attribute
-#'     "null", the mean and standard deviation of the fitted null.
+#'     "null", the mean and standard deviation of the fitted null. With
+#'     empirical_fit = "mixture", this attribute instead contains fits
+#'     (one per fold), fold (in the original Gene order), genes (that order),
+#'     x (centred log barcode counts) and diagnostics (per-fold convergence,
+#'     bounds, mixture weights and fold-to-fold spread of mu0 and s).
 #' @seealso \code{\link{plot_empirical_null}}, \code{\link{compute_metrics}},
 #'     \code{\link{compute_barcode_statistics}},
 #'     \code{\link{find_camera_hit}}, \code{\link{find_roast_hit}},
@@ -143,7 +164,7 @@ find_gene_zscore_hit <- function(table_treate_vs_control,
     n_permutations = 1e5, min_barcodes = 3, fdr = 0.05,
     fdr_method = c("BH", "storey"), seed = NULL,
     reference = c("random", "empirical"),
-    empirical_fit = c("central", "one-sided")) {
+    empirical_fit = c("central", "one-sided", "mixture"), n_folds = 5) {
     score <- match.arg(score)
     direction <- match.arg(direction)
     reference <- match.arg(reference)
@@ -157,7 +178,8 @@ find_gene_zscore_hit <- function(table_treate_vs_control,
         fdr_method <- match.arg(fdr_method)
         gene_table <- empirical_null_statistics(table_treate_vs_control,
             score = score, direction = direction, statistic = statistic,
-            min_barcodes = min_barcodes, empirical_fit = empirical_fit)
+            min_barcodes = min_barcodes, empirical_fit = empirical_fit,
+            seed = seed, n_folds = n_folds)
         null <- attr(gene_table, "null")
         gene_table$FDR <- adjust_p(gene_table$PValue, fdr_method)
         gene_table <- gene_table %>%
