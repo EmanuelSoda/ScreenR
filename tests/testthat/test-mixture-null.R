@@ -2,7 +2,7 @@
 
 # Parameters of the simulated truth, in the order of mixture_null_bounds():
 # a null N(0.2 + 0.1 x, exp(0.1 + 0.15 x)^2), pi_0 = 0.85 and two wide
-# alternatives 3 null sd away
+# alternatives at least 3 null sd away (offset 3 + exp(d))
 true_theta <- function() {
     c(mu0 = 0.2, beta = 0.1, s = 0.1, gamma = 0.15, a = qlogis(0.7), b = 0,
         dD = log(2), kD = 0, dU = log(2), kU = 0)
@@ -16,7 +16,7 @@ simulate_mixture <- function(n = 2000, theta = true_theta(), seed = 1) {
     component <- sample(1:3, n, replace = TRUE, prob = p$weights)
     m0 <- p$mu0 + p$beta * x
     s0 <- exp(p$s + p$gamma * x)
-    centre <- m0 + s0 * c(0, -(1 + exp(p$dD)), 1 + exp(p$dU))[component]
+    centre <- m0 + s0 * c(0, -(3 + exp(p$dD)), 3 + exp(p$dU))[component]
     spread <- s0 * c(1, 1 + exp(p$kD), 1 + exp(p$kU))[component]
     list(t = rnorm(n, centre, spread), x = x, component = component)
 }
@@ -87,9 +87,9 @@ test_that("the log-likelihood equals the log of the mixture density", {
     m0 <- p$mu0 + p$beta * data$x
     s0 <- exp(p$s + p$gamma * data$x)
     density <- p$weights[["null"]] * dnorm(data$t, m0, s0) +
-        p$weights[["down"]] * dnorm(data$t, m0 - s0 * (1 + exp(p$dD)),
+        p$weights[["down"]] * dnorm(data$t, m0 - s0 * (3 + exp(p$dD)),
             s0 * (1 + exp(p$kD))) +
-        p$weights[["up"]] * dnorm(data$t, m0 + s0 * (1 + exp(p$dU)),
+        p$weights[["up"]] * dnorm(data$t, m0 + s0 * (3 + exp(p$dU)),
             s0 * (1 + exp(p$kU)))
     expect_equal(mixture_null_loglik(theta, data$t, data$x),
         sum(log(density)))
@@ -130,6 +130,50 @@ test_that("the parameters are recovered across several simulations", {
     }, numeric(3))
     expect_lt(max(abs(rowMeans(errors))), 0.08)
     expect_lt(max(abs(errors)), 0.2)
+})
+
+test_that("a pure null sample is not split between the components", {
+    # Regression test of the amendment A1: with alternatives closer than three
+    # null sd the pure null was fitted with pi_0 ~ 0.5 and a null sd of 0.7
+    for (seed in 1:12) {
+        set.seed(seed)
+        n <- 2000
+        nbarcodes <- sample(3:10, n, replace = TRUE)
+        x <- log(nbarcodes) - mean(log(nbarcodes))
+        t <- rnorm(n)
+        fit <- mixture_null_fit(t, x)
+        expect_equal(fit$convergence, 0L, info = paste("seed", seed))
+        expect_gt(fit$weights[["null"]], 0.9)
+        null_sd <- exp(fit$theta[["s"]])
+        expect_gte(null_sd, 0.93)
+        expect_lte(null_sd, 1.07)
+        p <- mixture_null_cdf(fit, t, x)
+        expect_gt(suppressWarnings(stats::ks.test(p, "punif")$p.value), 0.001)
+    }
+})
+
+test_that("the null is recovered when 10% of the genes are strong hits", {
+    for (seed in 1:5) {
+        set.seed(seed)
+        n <- 2000
+        nbarcodes <- sample(3:10, n, replace = TRUE)
+        x <- log(nbarcodes) - mean(log(nbarcodes))
+        hit <- seq_len(n) <= 0.1 * n
+        t <- rnorm(n) + ifelse(hit, -5, 0)
+        fit <- mixture_null_fit(t, x)
+        expect_equal(fit$convergence, 0L, info = paste("seed", seed))
+        expect_lt(abs(fit$weights[["null"]] - 0.9), 0.04)
+        expect_lt(abs(fit$theta[["mu0"]]), 0.15)
+        null_sd <- exp(fit$theta[["s"]])
+        expect_gte(null_sd, 0.93)
+        expect_lte(null_sd, 1.07)
+        # The typical hit is far in the lower tail of the neutral distribution and the
+        # genes that are not hits have uniform p-values
+        p <- mixture_null_cdf(fit, t, x)
+        expect_lt(median(p[hit]), 1e-5)
+        expect_gt(suppressWarnings(stats::ks.test(p[!hit], "punif")$p.value),
+            0.001)
+    }
 })
 
 test_that("the fit respects the bounds and the constraints", {

@@ -45,8 +45,13 @@ mixture_null_check_data <- function(t, x) {
 #'     theta into the centre, the spread, the shifts and the widths of the
 #'     components and the weights of the mixture. The null is
 #'     N(mu0 + beta x, exp(s + gamma x)^2); the depleted and the enriched
-#'     components are centred at least one null sd below and above the null
-#'     and are wider than the null. The weights are pi_0 = 0.5 + 0.5 plogis(a),
+#'     components are centred at least three null sd below and above the null
+#'     (at m0(x) -/+ s0(x) (3 + exp(d))) and are wider than the null. The
+#'     minimum distance of three null sd makes the null identifiable: with a
+#'     smaller one, a pure null sample is split between the components and the
+#'     null spread is underestimated. Effects smaller than about three null sd
+#'     are therefore absorbed by the null (wider spread, conservative
+#'     p-values) and never the reverse. The weights are pi_0 = 0.5 + 0.5 plogis(a),
 #'     pi_D = (1 - pi_0) plogis(b) and pi_U = 1 - pi_0 - pi_D.
 #' @param theta The vector c(mu0, beta, s, gamma, a, b, dD, kD, dU, kU).
 #' @return A list with the named parameters and the weights.
@@ -88,9 +93,9 @@ mixture_null_components <- function(theta, t, x) {
     p <- mixture_null_unpack(theta)
     m0 <- p$mu0 + p$beta * x
     s0 <- exp(p$s + p$gamma * x)
-    c_d <- 1 + exp(p$dD)
+    c_d <- 3 + exp(p$dD)
     v_d <- 1 + exp(p$kD)
-    c_u <- 1 + exp(p$dU)
+    c_u <- 3 + exp(p$dU)
     v_u <- 1 + exp(p$kU)
     mean <- cbind(null = m0, down = m0 - s0 * c_d, up = m0 + s0 * c_u)
     sd <- cbind(null = s0, down = s0 * v_d, up = s0 * v_u)
@@ -192,7 +197,8 @@ mixture_null_gradient <- function(theta, t, x) {
 #' @description Internal function: deterministic starting values for the
 #'     optimiser, derived from the central matching fit of the statistics.
 #'     The start k has beta = gamma = 0, pi_0 in 0.95, 0.9, 0.8, ... and
-#'     different shifts and widths of the alternatives.
+#'     different shifts and widths of the alternatives (the alternatives are
+#'     always at least three null sd from the centre of the null).
 #' @param t The gene statistics.
 #' @param n_starts The number of starting values.
 #' @return A list of vectors of length 10, or NULL when the central fit is not
