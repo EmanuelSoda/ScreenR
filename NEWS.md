@@ -1,4 +1,12 @@
 # ScreenR 1.15.16
+* New `get_depmap_reference()`: the essential and non-essential reference
+  genes, and a table with the dependency probability and gene effect of
+  every gene, of one cell line of one pinned DepMap release (CRISPR
+  dependencies), for `compute_screen_quality()`, `plot_reference_separation()`
+  and `scale_by_reference()` and to annotate a table of hits. Genes without
+  a measurement, in between the two cutoffs or with an ambiguous identifier
+  stay unclassified. The cutoffs select reference genes: they are not
+  p-values. It needs the suggested Bioconductor package depmap (>= 1.19.1).
 * New `plot_volcano()`: every gene with the mean log2 fold change of its
   barcodes and its -log10 FDR, from the table of one method or of
   `summarise_hits()` (with the barcode statistics); the most significant hits

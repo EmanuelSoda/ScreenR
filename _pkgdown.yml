@@ -183,6 +183,7 @@ reference:
   - compute_screen_quality
   - plot_reference_separation
   - scale_by_reference
+  - get_depmap_reference
   - correct_crispr_bias
   - crisprcleanr_available
   - hart_reference_genes

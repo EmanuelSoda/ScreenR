@@ -1,0 +1,225 @@
+#' @title Essential and non-essential reference genes of a DepMap cell line
+#' @description Builds the reference genes of
+#'     \code{\link{compute_screen_quality}},
+#'     \code{\link{plot_reference_separation}} and
+#'     \code{\link{scale_by_reference}} from the CRISPR dependency data of
+#'     one cell line of the DepMap project (Broad Institute), and a table
+#'     with the dependency of every gene to annotate a table of hits.
+#' @details The function reads three files of one public DepMap release:
+#'     \code{CRISPRGeneDependency.csv} (the probability that each gene is a
+#'     dependency of each cell line), \code{CRISPRGeneEffect.csv} (the
+#'     continuous gene effect, a Chronos score) and \code{Model.csv} (the
+#'     cell lines). They are retrieved and cached by the Bioconductor
+#'     package \pkg{depmap} (version 1.19.1 or later, a suggested package,
+#'     see \code{DepMapFiles()} and \code{dmget()}), and the release is
+#'     chosen with the identifier of its Figshare dataset
+#'     (\code{depmap::dmsets()$dataset_id}, or the Figshare page of the
+#'     release for a release newer than the installed package). The files
+#'     are large (about 400 MB each); only the row of the requested cell
+#'     line is read in memory.
+#'
+#'     A gene is \emph{essential} when its dependency probability is at least
+#'     \code{dependency_cutoff} and \emph{non-essential} when it is at most
+#'     \code{nondependency_cutoff}; the genes in between, the genes without a
+#'     measured probability and the genes with an ambiguous or missing
+#'     identifier are \emph{unclassified}: a missing value is never taken
+#'     as non-essential. The two cutoffs are choices to select reference
+#'     genes (0.5 is the convention of DepMap), \strong{not} p-values, false
+#'     discovery rates or a guarantee of calibration. These are the
+#'     dependencies of one cell line in one release: they are not the core
+#'     essential genes of \code{\link{hart_reference_genes}}, and they depend
+#'     on the cell line, the library and the version of the data.
+#'
+#'     The cell line is the DepMap model identifier (for example
+#'     \code{"ACH-000001"}) or its name (\code{CellLineName} or
+#'     \code{StrippedCellLineName} of \code{Model.csv}, without regard to
+#'     case). A name that does not match exactly one model is an error: no
+#'     other cell line, assay or release is used instead. A gene is
+#'     ambiguous when its symbol or Entrez identifier appears in more than
+#'     one column of the files.
+#' @param cell_line A DepMap model identifier or the name of the cell line.
+#' @param dataset_id The Figshare identifier of the DepMap release, for
+#'     example 25880521 for DepMap 24Q2 Public. There is no default: the
+#'     release must be chosen.
+#' @param dependency_cutoff The minimum probability of the essential genes
+#'     (default 0.5).
+#' @param nondependency_cutoff The maximum probability of the non-essential
+#'     genes (default 0.1); it must be lower than \code{dependency_cutoff}.
+#' @return A list with the elements
+#'     \describe{
+#'       \item{essential, nonessential}{unique and disjoint character
+#'             vectors of gene symbols, for the functions of the reference
+#'             genes.}
+#'       \item{genes}{a tibble with one row for each gene and the columns
+#'             Gene (symbol), EntrezID, DependencyProbability, GeneEffect
+#'             (\code{NA} when not measured) and Class ("essential",
+#'             "nonessential" or "unclassified"). Join it by Gene to a table
+#'             of hits.}
+#'       \item{provenance}{a list with the cell_line requested, model_id,
+#'             cell_line_name, release (the title of the dataset),
+#'             dataset_id, files (name, id and md5 of the files used), the
+#'             two cutoffs and the coverage: n_genes, n_probability,
+#'             n_effect, n_essential, n_nonessential, n_unclassified and
+#'             n_ambiguous.}
+#'     }
+#' @seealso \code{\link{compute_screen_quality}},
+#'     \code{\link{plot_reference_separation}},
+#'     \code{\link{scale_by_reference}}, \code{\link{hart_reference_genes}}
+#' @references Tsherniak A, Vazquez F, Montgomery PG, et al. (2017).
+#'     Defining a cancer dependency map. Cell 170:564-576.
+#'     \doi{10.1016/j.cell.2017.06.010}
+#' @concept compute
+#' @export
+#' @examples
+#' \dontrun{
+#' # downloads about 800 MB the first time
+#' reference <- get_depmap_reference("A549", dataset_id = 25880521)
+#' reference$provenance$release
+#' head(reference$genes)
+#' # compute_screen_quality(metrics, reference$essential, reference$nonessential)
+#' # merge(hits, reference$genes, by = "Gene", all.x = TRUE)
+#' }
+get_depmap_reference <- function(cell_line, dataset_id,
+    dependency_cutoff = 0.5, nondependency_cutoff = 0.1) {
+    if (!is.character(cell_line) || length(cell_line) != 1 ||
+        is.na(cell_line)) {
+        stop("`cell_line` must be one DepMap model ID or cell line name.")
+    }
+    if (!is.numeric(dataset_id) || length(dataset_id) != 1 ||
+        !is.finite(dataset_id) || dataset_id <= 0) {
+        stop("`dataset_id` must be the Figshare ID of one DepMap release.")
+    }
+    cutoffs <- c(dependency_cutoff, nondependency_cutoff)
+    if (!is.numeric(cutoffs) || length(cutoffs) != 2 ||
+        any(!is.finite(cutoffs)) || nondependency_cutoff < 0 ||
+        dependency_cutoff > 1 || nondependency_cutoff >= dependency_cutoff) {
+        stop("The cutoffs must satisfy 0 <= nondependency_cutoff < ",
+            "dependency_cutoff <= 1.")
+    }
+    release <- depmap_release_files(dataset_id)
+    model <- depmap_find_model(release$paths[["Model.csv"]], cell_line)
+    probability <- depmap_read_model(
+        release$paths[["CRISPRGeneDependency.csv"]], model$ModelID)
+    effect <- depmap_read_model(
+        release$paths[["CRISPRGeneEffect.csv"]], model$ModelID)
+    if (any(probability < 0 | probability > 1, na.rm = TRUE)) {
+        stop("CRISPRGeneDependency.csv has values outside [0, 1]: not ",
+            "dependency probabilities.")
+    }
+
+    labels <- union(names(probability), names(effect))
+    mapped <- regmatches(labels,
+        regexec("^(.+) \\(([0-9]+)\\)$", labels))
+    ok <- lengths(mapped) == 3
+    symbol <- ifelse(ok, vapply(mapped, `[`, "", 2), NA_character_)
+    entrez <- suppressWarnings(as.integer(
+        ifelse(ok, vapply(mapped, `[`, "", 3), NA_character_)))
+    ambiguous <- !ok | duplicated(symbol) | duplicated(symbol, fromLast = TRUE) |
+        duplicated(entrez) | duplicated(entrez, fromLast = TRUE)
+    p <- unname(probability[labels])
+    genes <- tibble::tibble(
+        Gene = ifelse(ok, symbol, labels), EntrezID = entrez,
+        DependencyProbability = p,
+        GeneEffect = unname(effect[labels]),
+        Class = ifelse(ambiguous | is.na(p), "unclassified",
+            ifelse(p >= dependency_cutoff, "essential",
+                ifelse(p <= nondependency_cutoff, "nonessential",
+                    "unclassified")))
+    )
+    provenance <- list(
+        cell_line = cell_line, model_id = model$ModelID,
+        cell_line_name = model$CellLineName, release = release$title,
+        dataset_id = dataset_id, files = release$files,
+        dependency_cutoff = dependency_cutoff,
+        nondependency_cutoff = nondependency_cutoff,
+        n_genes = nrow(genes), n_probability = sum(!is.na(p)),
+        n_effect = sum(!is.na(genes$GeneEffect)),
+        n_essential = sum(genes$Class == "essential"),
+        n_nonessential = sum(genes$Class == "nonessential"),
+        n_unclassified = sum(genes$Class == "unclassified"),
+        n_ambiguous = sum(ambiguous)
+    )
+    list(
+        essential = genes$Gene[genes$Class == "essential"],
+        nonessential = genes$Gene[genes$Class == "nonessential"],
+        genes = genes, provenance = provenance
+    )
+}
+
+# The three files of one release, downloaded or read from the cache of the
+# suggested package depmap. Separate from the parsing so the tests can use
+# small local files.
+depmap_release_files <- function(dataset_id) {
+    needed <- c("DepMapDataset", "DepMapFiles", "dmTitle", "dmget")
+    if (!requireNamespace("depmap", quietly = TRUE) ||
+        !all(needed %in% getNamespaceExports("depmap"))) {
+        stop("get_depmap_reference() needs the Bioconductor package ",
+            "'depmap' (>= 1.19.1, with DepMapFiles() and dmget()): ",
+            "install it with BiocManager::install(\"depmap\"). Older ",
+            "versions, for R < 4.5 for example, do not have these ",
+            "functions.", call. = FALSE)
+    }
+    dataset <- depmap::DepMapDataset(dataset_id)
+    files <- depmap::DepMapFiles(dataset)
+    wanted <- c("CRISPRGeneDependency.csv", "CRISPRGeneEffect.csv",
+        "Model.csv")
+    files <- files[files$name %in% wanted, ]
+    missing <- setdiff(wanted, files$name)
+    if (length(missing) > 0 || anyDuplicated(files$name)) {
+        stop("Release ", depmap::dmTitle(dataset), " (", dataset_id,
+            ") must have exactly one file each of ",
+            paste(wanted, collapse = ", "), "; missing: ",
+            paste(missing, collapse = ", "), ".", call. = FALSE)
+    }
+    paths <- depmap::dmget(files)
+    list(title = depmap::dmTitle(dataset),
+        paths = stats::setNames(paths, files$name),
+        files = files[, c("name", "id", "md5")])
+}
+
+depmap_find_model <- function(path, cell_line) {
+    models <- utils::read.csv(path, check.names = FALSE,
+        stringsAsFactors = FALSE)
+    required <- c("ModelID", "CellLineName", "StrippedCellLineName")
+    if (!all(required %in% names(models))) {
+        stop("Model.csv must have the columns ",
+            paste(required, collapse = ", "), ".")
+    }
+    key <- tolower(cell_line)
+    hit <- models$ModelID == cell_line |
+        tolower(models$CellLineName) %in% key |
+        tolower(models$StrippedCellLineName) %in% key
+    if (sum(hit) == 0) {
+        stop("Cell line '", cell_line, "' is not in Model.csv.")
+    }
+    if (sum(hit) > 1) {
+        stop("Cell line '", cell_line, "' is ambiguous: ",
+            paste(models$ModelID[hit], collapse = ", "),
+            ". Use the DepMap model ID.")
+    }
+    models[hit, c("ModelID", "CellLineName")]
+}
+
+# One named numeric vector (gene label -> value) for one model of a
+# DepMap matrix (rows models, columns genes). Only that row is kept: the
+# matrix is never reshaped to a table of all the cell lines.
+depmap_read_model <- function(path, model_id) {
+    labels <- scan(path, what = "", sep = ",", nlines = 1, quote = "\"",
+        quiet = TRUE)[-1]
+    if (anyDuplicated(labels)) {
+        stop(basename(path), " has duplicated gene columns.")
+    }
+    ids <- utils::read.csv(path, colClasses = c("character",
+        rep("NULL", length(labels))), header = TRUE)[[1]]
+    row <- which(ids == model_id)
+    if (length(row) != 1) {
+        stop("Model ", model_id, " is ", if (length(row) == 0) "not in " else
+            "duplicated in ", basename(path), ".")
+    }
+    values <- utils::read.csv(path, header = FALSE, skip = row, nrows = 1,
+        colClasses = c("NULL", rep("numeric", length(labels))),
+        na.strings = c("", "NA"))
+    values <- as.numeric(unlist(values))
+    values[!is.finite(values)] <- NA
+    stats::setNames(values, labels)
+}
