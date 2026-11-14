@@ -6,7 +6,10 @@
   and `scale_by_reference()` and to annotate a table of hits. Genes without
   a measurement, in between the two cutoffs or with an ambiguous identifier
   stay unclassified. The cutoffs select reference genes: they are not
-  p-values. It needs the suggested Bioconductor package depmap (>= 1.19.1).
+  p-values. The files of a release downloaded from the DepMap portal are
+  given with `files` (with the release and the source); an archived release
+  is retrieved from Figshare with `dataset_id`, which needs the suggested
+  Bioconductor package depmap (>= 1.19.1).
 * New `plot_volcano()`: every gene with the mean log2 fold change of its
   barcodes and its -log10 FDR, from the table of one method or of
   `summarise_hits()` (with the barcode statistics); the most significant hits

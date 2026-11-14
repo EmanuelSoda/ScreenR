@@ -1,40 +1,27 @@
 # SYNTHETIC data: tiny files in the schema of DepMap 24Q2 (first column the
-# model ID with an empty header, columns "SYMBOL (EntrezID)"), written to a
-# temporary directory. No network and no depmap package are needed: the
-# retrieval step is replaced.
-write_depmap_fixture <- function(dir) {
-    labels <- c("ESS1 (1)", "ESS2 (2)", "NON1 (3)", "NON2 (4)", "MID (5)",
-        "MISSING (6)", "DUP (7)", "DUP (8)", "NOENTREZ")
-    matrix_csv <- function(file, rows) {
-        m <- data.frame(id = names(rows), do.call(rbind, rows))
-        colnames(m) <- c("", labels)
-        utils::write.csv(m, file.path(dir, file), row.names = FALSE,
-            na = "")
-    }
-    matrix_csv("CRISPRGeneDependency.csv", list(
-        "ACH-000001" = c(0.95, 0.5, 0.02, 0.1, 0.3, NA, 0.9, 0.9, 0.9),
-        "ACH-000002" = c(0.1, 0.1, 0.9, 0.9, 0.9, 0.9, 0.1, 0.1, 0.1)))
-    matrix_csv("CRISPRGeneEffect.csv", list(
-        "ACH-000001" = c(-1.5, -0.9, 0.1, 0, -0.3, NA, -1, -1, -1),
-        "ACH-000002" = c(0, 0, -1, -1, -1, -1, 0, 0, 0)))
-    utils::write.csv(data.frame(
-        ModelID = c("ACH-000001", "ACH-000002", "ACH-000003"),
-        CellLineName = c("Line-A", "Line B", "line-a"),
-        StrippedCellLineName = c("LINEA", "LINEB", "LINEA2")),
-        file.path(dir, "Model.csv"), row.names = FALSE)
-    stats::setNames(file.path(dir, c("CRISPRGeneDependency.csv",
-        "CRISPRGeneEffect.csv", "Model.csv")),
-        c("CRISPRGeneDependency.csv", "CRISPRGeneEffect.csv", "Model.csv"))
+# model ID with an empty header, columns "SYMBOL (EntrezID)"), shipped in
+# inst/extdata/depmap-synthetic. No network and no depmap package are needed.
+files_names <- c("CRISPRGeneDependency.csv", "CRISPRGeneEffect.csv",
+    "Model.csv")
+fixture_files <- function() {
+    stats::setNames(file.path(system.file("extdata", "depmap-synthetic",
+        package = "ScreenR"), files_names), files_names)
 }
 
+# The Figshare route with the retrieval step replaced by the local files.
 mock_depmap <- function(env = parent.frame()) {
-    paths <- write_depmap_fixture(withr::local_tempdir(.local_envir = env))
+    paths <- fixture_files()
     testthat::local_mocked_bindings(
         depmap_release_files = function(dataset_id) list(
             title = "Synthetic release", paths = paths,
             files = tibble::tibble(name = names(paths), id = 1:3,
                 md5 = "synthetic")),
         .env = env)
+}
+
+local_ref <- function(cell_line, ...) {
+    get_depmap_reference(cell_line, files = fixture_files(),
+        release = "Synthetic local", source = "inst/extdata", ...)
 }
 
 test_that("genes are classified with disjoint cutoffs and absence stays unclassified", {
@@ -88,11 +75,16 @@ test_that("a model absent from a matrix is an error, not a fallback", {
 
 test_that("invalid arguments and cutoffs are rejected", {
     expect_error(get_depmap_reference(NA_character_, 1), "cell_line")
-    expect_error(get_depmap_reference("A549"), "dataset_id")
+    expect_error(get_depmap_reference("A549"), "either")
     expect_error(get_depmap_reference("A549", c(1, 2)), "dataset_id")
+    # a fractional or out-of-range ID must not be truncated by depmap
+    expect_error(get_depmap_reference("A549", 25880521.9), "integer")
+    expect_error(get_depmap_reference("A549", 2^31), "integer")
+    expect_error(get_depmap_reference("A549", 0), "integer")
     for (bad in list(c(0.5, 0.5), c(0.3, 0.4), c(1.2, 0.1), c(0.5, -0.1),
         c(NA, 0.1))) {
-        expect_error(get_depmap_reference("A549", 1, bad[1], bad[2]),
+        expect_error(get_depmap_reference("A549", 1, dependency_cutoff = bad[1],
+            nondependency_cutoff = bad[2]),
             "cutoff")
     }
 })
@@ -108,7 +100,7 @@ test_that("gene effect values are not accepted as probabilities", {
 test_that("a missing or old depmap package gives an actionable error", {
     skip_if(requireNamespace("depmap", quietly = TRUE) &&
         all(c("DepMapFiles", "dmget") %in% getNamespaceExports("depmap")))
-    expect_error(get_depmap_reference("A549", 1), "BiocManager::install")
+    expect_error(get_depmap_reference("A549", 1), "735fa8971fd79ec7")
 })
 
 test_that("the reference works with the reference-gene functions and hit tables", {
@@ -131,4 +123,72 @@ test_that("the reference works with the reference-gene functions and hit tables"
     annotated <- merge(hits, ref$genes, by = "Gene", all.x = TRUE)
     expect_equal(annotated$Class[match(c("ESS1", "MID", "OTHER"),
         annotated$Gene)], c("essential", "unclassified", NA))
+})
+
+test_that("a safe join by symbol keeps one row per hit and ambiguous symbols unknown", {
+    ref <- local_ref("ACH-000001")
+    # the raw table keeps both measurements of the ambiguous symbol DUP
+    expect_equal(sum(ref$genes$Gene == "DUP"), 2)
+    hits <- data.frame(Gene = c("ESS1", "DUP", "OTHER"))
+    genes <- ref$genes
+    safe <- genes[!(duplicated(genes$Gene) |
+        duplicated(genes$Gene, fromLast = TRUE)), ]
+    annotated <- dplyr::left_join(hits, safe, by = "Gene")
+    expect_equal(nrow(annotated), nrow(hits))
+    expect_equal(annotated$Class, c("essential", NA, NA))
+    # the unsafe merge shows what the safe join prevents
+    expect_equal(nrow(merge(hits, genes, by = "Gene", all.x = TRUE)), 4)
+})
+
+test_that("labels without a valid symbol and positive Entrez ID stay unclassified", {
+    dir <- withr::local_tempdir()
+    labels <- c("OK (10)", "OVERFLOW (999999999999)", "ZERO (0)", " (11)",
+        "NOID", "SPACE  (12)", "TRIM (13)", "(14)")
+    write_matrix <- function(file, value) {
+        m <- data.frame("ACH-000001", t(rep(value, length(labels))))
+        colnames(m) <- c("", labels)
+        utils::write.csv(m, file.path(dir, file), row.names = FALSE)
+    }
+    write_matrix("CRISPRGeneDependency.csv", 0.99)
+    write_matrix("CRISPRGeneEffect.csv", -2)
+    file.copy(fixture_files()[["Model.csv"]], dir)
+    ref <- get_depmap_reference("ACH-000001",
+        files = stats::setNames(file.path(dir, files_names), files_names),
+        release = "Synthetic", source = "tempdir")
+    expect_equal(ref$essential, c("OK", "SPACE", "TRIM"))
+    expect_equal(ref$nonessential, character(0))
+    expect_equal(nrow(ref$genes), length(labels))  # evidence rows are kept
+    expect_equal(ref$genes$GeneEffect, rep(-2, length(labels)))
+    expect_equal(ref$provenance$n_ambiguous, 5)
+})
+
+test_that("the local files route gives the same reference as the release route", {
+    mock_depmap()
+    local <- local_ref("ACH-000001")
+    release <- get_depmap_reference("ACH-000001", dataset_id = 1)
+    expect_equal(local$genes, release$genes)
+    expect_equal(local$essential, release$essential)
+    p <- local$provenance
+    expect_equal(c(p$release, p$source), c("Synthetic local", "inst/extdata"))
+    expect_true(is.na(p$dataset_id))
+    expect_equal(p$files$name, files_names)
+    expect_equal(p$files$md5, unname(tools::md5sum(fixture_files())))
+    expect_equal(release$provenance$dataset_id, 1L)
+    expect_equal(release$provenance$source, "Figshare dataset 1")
+})
+
+test_that("the local files route validates its inputs and does not need depmap", {
+    files <- fixture_files()
+    expect_error(get_depmap_reference("ACH-000001", dataset_id = 1,
+        files = files, release = "r", source = "s"), "either")
+    expect_error(get_depmap_reference("ACH-000001", files = files,
+        source = "s"), "release")
+    expect_error(get_depmap_reference("ACH-000001", files = files,
+        release = "r", source = " "), "source")
+    expect_error(get_depmap_reference("ACH-000001", files = files[1:2],
+        release = "r", source = "s"), "named by file name")
+    expect_error(get_depmap_reference("ACH-000001",
+        files = unname(files), release = "r", source = "s"), "named")
+    expect_error(get_depmap_reference("ACH-000009", files = files,
+        release = "r", source = "s"), "not in Model.csv")
 })

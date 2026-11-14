@@ -6,7 +6,10 @@
 \usage{
 get_depmap_reference(
   cell_line,
-  dataset_id,
+  dataset_id = NULL,
+  files = NULL,
+  release = NULL,
+  source = NULL,
   dependency_cutoff = 0.5,
   nondependency_cutoff = 0.1
 )
@@ -14,9 +17,20 @@ get_depmap_reference(
 \arguments{
 \item{cell_line}{A DepMap model identifier or the name of the cell line.}
 
-\item{dataset_id}{The Figshare identifier of the DepMap release, for
-example 25880521 for DepMap 24Q2 Public. There is no default: the
-release must be chosen.}
+\item{dataset_id}{The integer Figshare identifier of an archived DepMap
+release. There is no default: the release must be chosen. Not used
+with \code{files}.}
+
+\item{files}{The paths of \code{CRISPRGeneDependency.csv},
+\code{CRISPRGeneEffect.csv} and \code{Model.csv} of one release, a
+character vector named by the file names. Not used with
+\code{dataset_id}.}
+
+\item{release}{With \code{files}, the name of the release, for example
+"DepMap Public 26Q3".}
+
+\item{source}{With \code{files}, where the files come from (the portal
+page or URL).}
 
 \item{dependency_cutoff}{The minimum probability of the essential genes
 (default 0.5).}
@@ -33,14 +47,15 @@ A list with the elements
       \item{genes}{a tibble with one row for each gene and the columns
             Gene (symbol), EntrezID, DependencyProbability, GeneEffect
             (\code{NA} when not measured) and Class ("essential",
-            "nonessential" or "unclassified"). Join it by Gene to a table
-            of hits.}
+            "nonessential" or "unclassified").}
       \item{provenance}{a list with the cell_line requested, model_id,
-            cell_line_name, release (the title of the dataset),
-            dataset_id, files (name, id and md5 of the files used), the
-            two cutoffs and the coverage: n_genes, n_probability,
-            n_effect, n_essential, n_nonessential, n_unclassified and
-            n_ambiguous.}
+            cell_line_name, release (the title of the dataset or the
+            \code{release} given), source, dataset_id (\code{NA} with
+            \code{files}), files (name, id and md5 of the files used,
+            the id \code{NA} with \code{files}), the two cutoffs and the
+            coverage: n_genes, n_probability, n_effect, n_essential,
+            n_nonessential, n_unclassified and n_ambiguous (the genes
+            with an invalid or not unique identifier).}
     }
 }
 \description{
@@ -52,47 +67,86 @@ Builds the reference genes of
     with the dependency of every gene to annotate a table of hits.
 }
 \details{
-The function reads three files of one public DepMap release:
+The function reads three files of one DepMap release:
     \code{CRISPRGeneDependency.csv} (the probability that each gene is a
     dependency of each cell line), \code{CRISPRGeneEffect.csv} (the
     continuous gene effect, a Chronos score) and \code{Model.csv} (the
-    cell lines). They are retrieved and cached by the Bioconductor
-    package \pkg{depmap} (version 1.19.1 or later, a suggested package,
-    see \code{DepMapFiles()} and \code{dmget()}), and the release is
-    chosen with the identifier of its Figshare dataset
-    (\code{depmap::dmsets()$dataset_id}, or the Figshare page of the
-    release for a release newer than the installed package). The files
-    are large (about 400 MB each); only the row of the requested cell
-    line is read in memory.
+    cell lines). There are two ways to give them, and exactly one must be
+    used:
+    \itemize{
+      \item \code{files}: the three files downloaded by you from the
+            DepMap portal (\url{https://depmap.org/portal/data_page/}),
+            as a character vector named by the file names, with the
+            \code{release} label (for example "DepMap Public 26Q3") and
+            the \code{source} (for example the page or URL you
+            downloaded them from). The MD5 checksums of the files are
+            computed and returned. This route does not need the
+            \pkg{depmap} package, and is the route for the current
+            releases, which cannot be assumed to be on Figshare.
+      \item \code{dataset_id}: the integer Figshare identifier of an
+            archived release (\code{depmap::dmsets()$dataset_id}, for
+            example 25880521 for DepMap 24Q2 Public). The files are
+            retrieved and cached by the Bioconductor package
+            \pkg{depmap} (a suggested package, version 1.19.1 or later,
+            with \code{DepMapFiles()} and \code{dmget()}). On R 4.3,
+            \code{BiocManager::install("depmap")} installs version 1.16,
+            which does not have them: install the verified revision with
+            \code{remotes::install_github("UCLouvain-CBIO/depmap@735fa8971fd79ec746a43d354073701b3165e58d")},
+            or use a version of R and Bioconductor that has depmap 1.19.1
+            or later. Nothing is installed automatically.
+    }
+    The files are large (about 400 MB each); only the row of the
+    requested cell line is read in memory. The format of the files was
+    checked on DepMap 24Q2 (the first column the model ID, the other
+    columns "SYMBOL (EntrezID)"); the files of a newer release are
+    rejected, not guessed, if they differ.
 
     A gene is \emph{essential} when its dependency probability is at least
     \code{dependency_cutoff} and \emph{non-essential} when it is at most
     \code{nondependency_cutoff}; the genes in between, the genes without a
-    measured probability and the genes with an ambiguous or missing
-    identifier are \emph{unclassified}: a missing value is never taken
-    as non-essential. The two cutoffs are choices to select reference
-    genes (0.5 is the convention of DepMap), \strong{not} p-values, false
-    discovery rates or a guarantee of calibration. These are the
-    dependencies of one cell line in one release: they are not the core
-    essential genes of \code{\link{hart_reference_genes}}, and they depend
-    on the cell line, the library and the version of the data.
+    measured probability and the genes without a valid symbol and
+    positive Entrez identifier, or whose symbol or Entrez identifier
+    is not unique, are \emph{unclassified}: a missing value is never
+    taken as non-essential. The two cutoffs are choices to select
+    reference genes (0.5 is the convention of DepMap), \strong{not}
+    p-values, false discovery rates or a guarantee of calibration, and
+    the non-essential genes are not guaranteed to be neutral under a new
+    treatment. These are the dependencies of one cell line in one
+    release: they are not the core essential genes of
+    \code{\link{hart_reference_genes}}, and they depend on the cell line,
+    the library and the version of the data.
 
     The cell line is the DepMap model identifier (for example
     \code{"ACH-000001"}) or its name (\code{CellLineName} or
     \code{StrippedCellLineName} of \code{Model.csv}, without regard to
     case). A name that does not match exactly one model is an error: no
-    other cell line, assay or release is used instead. A gene is
-    ambiguous when its symbol or Entrez identifier appears in more than
-    one column of the files.
+    other cell line, assay or release is used instead.
+
+    \code{genes} keeps every measurement, also of the ambiguous symbols
+    (one row for each Entrez identifier). To annotate a table of hits by
+    symbol, first remove every occurrence of a duplicated symbol, so that
+    a hit never becomes two rows and an ambiguous symbol is unknown:
+    see the examples. If the hits have the Entrez identifier, join by
+    \code{c("Gene", "EntrezID")} instead.
 }
 \examples{
+# SYNTHETIC miniature files in the format of DepMap 24Q2 (not real data)
+dir <- system.file("extdata", "depmap-synthetic", package = "ScreenR")
+names <- c("CRISPRGeneDependency.csv", "CRISPRGeneEffect.csv", "Model.csv")
+reference <- get_depmap_reference("ACH-000001",
+    files = stats::setNames(file.path(dir, names), names),
+    release = "synthetic example", source = "ScreenR inst/extdata")
+reference$essential
+
+# annotate hits by symbol: drop the duplicated symbols, then left join
+hits <- data.frame(Gene = c("ESS1", "DUP", "OTHER"))
+safe <- reference$genes[!(duplicated(reference$genes$Gene) |
+    duplicated(reference$genes$Gene, fromLast = TRUE)), ]
+dplyr::left_join(hits, safe, by = "Gene")  # 3 rows; DUP and OTHER unknown
 \dontrun{
-# downloads about 800 MB the first time
+# archived release from Figshare (about 800 MB the first time)
 reference <- get_depmap_reference("A549", dataset_id = 25880521)
-reference$provenance$release
-head(reference$genes)
 # compute_screen_quality(metrics, reference$essential, reference$nonessential)
-# merge(hits, reference$genes, by = "Gene", all.x = TRUE)
 }
 }
 \references{
