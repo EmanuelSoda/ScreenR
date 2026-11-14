@@ -65,6 +65,8 @@ navbar:
         href: articles/Empirical_null.html
       - text: The mixture empirical null on a CRISPR-Cas9 dropout screen
         href: articles/Mixture_null_CRISPR.html
+      - text: DepMap references for a K562 screen
+        href: articles/DepMap_reference.html
       - text: Analysis of a longitudinal screen
         href: articles/Longitudinal_Screen_Analysis.html
       - text: Benchmark against MAGeCK and other tools
@@ -89,6 +91,7 @@ articles:
   - Improved_Statistics
   - Empirical_null
   - Mixture_null_CRISPR
+  - DepMap_reference
   - Longitudinal_Screen_Analysis
   - Benchmark_MAGeCK
 

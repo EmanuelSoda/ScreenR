@@ -1,0 +1,312 @@
+---
+title: "DepMap references for a K562 screen"
+output:
+    BiocStyle::html_document:
+        toc_float: true
+package: ScreenR
+vignette: >
+  %\VignetteIndexEntry{DepMap references for a K562 screen}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+    fig.height = 4)
+library(ScreenR)
+library(dplyr)
+```
+
+<style>
+.main-container table { display: block; overflow-x: auto; }
+.main-container th, .main-container td { white-space: nowrap; }
+</style>
+
+# A real model, release and assay
+
+DepMap provides evidence of genes required for cell growth. Here we match
+ScreenR's bundled K562 screen to **K-562, ACH-000551**, in **DepMap 24Q2
+Public**, Figshare dataset **25880521**. This is an explicitly pinned archived
+release, not a claim to have verified the current release.
+
+The ScreenR data are an **shRNA** dropout screen (Morgens et al., 2016),
+comparing the plasmid library with two replicates after 14 days. The DepMap
+reference is **CRISPR knockout** data. This is a cross-assay consistency check,
+not same-assay validation. Knockdown and knockout differ, and cell culture,
+libraries and release processing can also change the comparison. The bundled
+screen is a selected subset enriched for previously defined reference genes;
+its quality metrics do not estimate performance over an unselected genome.
+
+Dependencies are **positive references for dropout**: disrupting a gene
+needed for growth should deplete its barcodes. Genes with low dependency
+probability are **candidate non-dependent genes**, hence potential neutral
+references. They are not proven neutral under a new treatment: a baseline
+non-dependency may become a treatment-specific dependency, and baseline
+dependencies can change too.
+
+# Read the offline example and inspect provenance
+
+The package includes a small, real single-model subset of the three original
+release files. All 18,443 gene columns, including missing measurements, are
+retained. Only other models were removed and the files compressed. This lets
+all computations below run offline during ordinary package checks, without
+requiring the optional `depmap` package. It is not synthetic data.
+
+```{r reference}
+example_dir <- system.file("extdata", "depmap-24Q2-K562", package = "ScreenR")
+file_names <- c("CRISPRGeneDependency.csv", "CRISPRGeneEffect.csv", "Model.csv")
+files <- setNames(file.path(example_dir, paste0(file_names, ".gz")), file_names)
+reference <- get_depmap_reference(
+    "ACH-000551", files = files, release = "DepMap 24Q2 Public",
+    source = paste("Single-model subset of Figshare dataset 25880521;",
+        "https://doi.org/10.25452/figshare.plus.25880521")
+)
+reference$provenance[c("model_id", "cell_line_name", "release", "source")]
+```
+
+The helper returns `essential`, `nonessential`, `genes` and `provenance`.
+`GeneEffect` is a continuous Chronos score; `DependencyProbability` is a
+separate probability, **not a p-value or FDR**. Do not substitute the legacy
+`depmap_crispr()` column named `dependency`, which contains gene effects.
+
+With the default thresholds, probability >= 0.5 selects candidate essential
+genes and probability <= 0.1 selects candidate non-dependent genes. Values
+between the cutoffs, missing measurements, and invalid or ambiguous gene
+identifiers stay unclassified. These cutoffs select reference sets; they do
+not calibrate ScreenR's statistical tests.
+
+```{r reference-sets}
+knitr::kable(as.data.frame(table(reference$genes$Class)),
+    col.names = c("DepMap class", "Genes"))
+stopifnot(!anyDuplicated(c(reference$essential, reference$nonessential)),
+    all(reference$genes$Class[is.na(reference$genes$DependencyProbability)] ==
+        "unclassified"))
+head(reference$genes[reference$genes$Class == "essential", ])
+head(reference$genes[reference$genes$Class == "nonessential", ])
+```
+
+The original files were retrieved by the implementation's package-managed
+cache and reused here on 2026-11-14. Upstream attribution: **Broad DepMap,
+Broad Institute of Harvard and MIT (2024), DepMap 24Q2 Public**, licensed
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+[release DOI](https://doi.org/10.25452/figshare.plus.25880521).
+The accompanying `README.md` describes the extraction. The original source
+file IDs/checksums and derived subset checksums are deliberately separate:
+
+```{r file-provenance}
+manifest <- read.delim(file.path(example_dir, "provenance.tsv"),
+    colClasses = "character")
+stopifnot(identical(unname(tools::md5sum(files)), manifest$derived_md5),
+    identical(reference$provenance$files$md5, manifest$derived_md5))
+knitr::kable(manifest[c("source_name", "figshare_file_id", "source_md5")])
+knitr::kable(manifest[c("derived_file", "derived_md5")])
+```
+
+For `files=`, the returned `dataset_id` and file IDs are `NA`: this route
+computes checksums for the supplied subset, rather than claiming it read the
+original full matrices. The manifest above links those subsets to the source
+release. Save the object with `saveRDS(reference, "K562-24Q2-reference.rds")`
+and reuse it with `readRDS()` to avoid parsing the same files repeatedly.
+
+# Prepare the bundled shRNA screen
+
+```{r screen}
+data(k562_count_table)
+data(k562_annotation_table)
+samples <- data.frame(
+    Sample = c("Plasmid", "T14_A", "T14_B"),
+    Day = c("Plasmid", "T14", "T14"), Treatment = "Untreated"
+)
+k562 <- create_screenr_object(
+    table = k562_count_table, annotation = k562_annotation_table,
+    groups = factor(c("Plasmid", "T14", "T14")), sample_table = samples
+)
+k562 <- compute_data_table(normalize_data(k562))
+metrics <- compute_metrics(k562, control = "Plasmid", treatment = "T14",
+    condition_column = "Day")
+```
+
+# Match genes and report unknowns
+
+The helper preserves symbols and Entrez IDs. For a symbol join, remove
+**every occurrence** of a duplicated symbol: selecting its first occurrence
+would silently choose a biological identity. A hit with an ambiguous or
+absent symbol must retain unknown annotations. If the screen has verified
+current Entrez IDs, prefer a join on both `Gene` and `EntrezID`; investigate
+identifier disagreements rather than guessing aliases.
+
+```{r coverage}
+genes <- reference$genes
+safe <- genes[!(duplicated(genes$Gene) |
+    duplicated(genes$Gene, fromLast = TRUE)), ]
+screen_genes <- distinct(metrics, Gene)
+matched <- left_join(screen_genes, safe, by = "Gene")
+stopifnot(nrow(matched) == nrow(screen_genes))
+coverage <- matched %>%
+    mutate(Status = case_when(
+        is.na(Class) ~ "Absent or ambiguous symbol",
+        is.na(DependencyProbability) ~ "Matched; probability missing",
+        Class == "unclassified" ~ "Matched; unclassified",
+        TRUE ~ Class
+    )) %>% count(Status, name = "Screen gene labels")
+knitr::kable(coverage)
+head(matched %>% filter(is.na(Class) | Class == "unclassified"))
+```
+
+There are `r sum(!is.na(matched$Class))` unambiguous symbol matches among
+`r nrow(matched)` screen labels; `r sum(is.finite(matched$DependencyProbability))`
+have finite dependency probabilities. The screen's `non-targeting` label is
+a control, not a biological gene, and correctly has no DepMap annotation.
+Missing or unmatched genes never become non-dependent references.
+
+# Check reference separation and scale scores
+
+```{r quality}
+quality <- compute_screen_quality(metrics,
+    reference$essential, reference$nonessential)
+knitr::kable(data.frame(Metric = names(quality),
+    Value = unname(unlist(quality))), digits = 3)
+```
+
+These metrics use gene means of the barcode log2 fold changes, restricted to
+the references actually present in the screen. More negative NNMD and
+Cohen's d indicate stronger depletion of dependencies; AUC above 0.5 means
+dependencies tend to have lower scores. They describe separation, not a
+hypothesis test or proof of treatment neutrality.
+
+```{r separation, fig.alt="K562 shRNA gene score densities: DepMap CRISPR dependency candidates are more depleted than non-dependent candidates."}
+plot_reference_separation(metrics, reference$essential, reference$nonessential)
+```
+
+The plot's label "Non-essential" means the candidate non-dependent set
+selected above. In this example the essential median is below the
+non-dependent median, so a reference scale has the intended orientation:
+
+```{r scaling}
+gene_means <- metrics %>% group_by(Gene) %>%
+    summarise(Log2FC = mean(Log2FC[is.finite(Log2FC)]), .groups = "drop")
+anchors <- c(
+    essential = median(gene_means$Log2FC[
+        gene_means$Gene %in% reference$essential]),
+    nondependent = median(gene_means$Log2FC[
+        gene_means$Gene %in% reference$nonessential])
+)
+stopifnot(all(is.finite(anchors)), anchors[[1]] < anchors[[2]])
+scaled <- scale_by_reference(metrics, reference$essential, reference$nonessential)
+scaled_means <- scaled %>% group_by(Gene) %>%
+    summarise(ScaledLog2FC = mean(ScaledLog2FC), .groups = "drop")
+scaled_anchors <- c(
+    essential = median(scaled_means$ScaledLog2FC[
+        scaled_means$Gene %in% reference$essential]),
+    nondependent = median(scaled_means$ScaledLog2FC[
+        scaled_means$Gene %in% reference$nonessential])
+)
+knitr::kable(data.frame(Reference = names(anchors),
+    OriginalMedian = unname(anchors), ScaledMedian = unname(scaled_anchors)),
+    digits = 3)
+stopifnot(isTRUE(all.equal(unname(scaled_anchors), c(-1, 0), tolerance = 1e-8)))
+```
+
+A scaled score of -1 means depletion like the median of this essential set;
+0 anchors the median of the candidate non-dependent set. These are rescaled
+shRNA scores, not Chronos gene effects or probabilities. Use scaling only
+when the sets separate and their biological interpretation fits the contrast.
+Do not use a neutral anchor whose genes respond to the treatment.
+
+# Annotate ScreenR hits
+
+Call hits with ScreenR's existing method and defaults, then add DepMap
+annotations. Here CAMERA compares T14 with the plasmid library; DepMap does
+not change the test, barcode threshold or default FDR cutoff.
+
+```{r annotated-hits}
+design <- create_design_matrix(k562)
+contrast <- create_contrast(design, treatment = "T14", control = "Plasmid")
+hits <- find_camera_hit(k562, design, contrast)
+annotated_hits <- left_join(hits, safe, by = "Gene")
+stopifnot(nrow(annotated_hits) == nrow(hits))
+knitr::kable(head(annotated_hits %>%
+    select(Gene, PValue, FDR, DependencyProbability, GeneEffect, Class) %>%
+    mutate(across(c(PValue, FDR), ~ format(.x, scientific = TRUE, digits = 3))), 10),
+    digits = 4)
+knitr::kable(annotated_hits %>%
+    count(Class, name = "Hits", .drop = FALSE))
+```
+
+CAMERA returns `r nrow(hits)` hits with its defaults here;
+`r sum(is.na(annotated_hits$Class))` have unknown symbol annotations. A hit
+without a DepMap dependency remains a ScreenR hit. Different assays, release
+contexts and identifier changes can explain disagreement.
+
+The dependency set supplies positive references; it is not a null control
+set. A candidate non-dependent set may be considered for the existing
+`find_gene_zscore_hit(..., reference = "random", control_genes = ...)`
+interface only after assessing neutrality for that particular contrast.
+This vignette does not substitute it for the empirical null:
+`reference = "empirical"` continues to reject `control_genes`, and all
+hit-calling defaults remain intact. No dependency probability is interpreted
+as a ScreenR p-value.
+
+# Retrieve another release without repeated downloads
+
+The following optional acquisition recipes are **not run during rendering**;
+all analysis chunks above execute against real bundled data. An archived
+release can be retrieved once through the supported Bioconductor package's
+cache (approximately 830 MB for these three full files):
+
+```{r archived-download, eval=FALSE}
+# Requires depmap >= 1.19.1 with DepMapFiles() and dmget().
+full_reference <- get_depmap_reference("ACH-000551", dataset_id = 25880521)
+saveRDS(full_reference, "K562-24Q2-reference.rds")
+# In subsequent sessions:
+full_reference <- readRDS("K562-24Q2-reference.rds")
+full_reference$provenance
+```
+
+The package-managed download path records original Figshare file IDs and
+checksums. Repeated calls reuse the `depmap` file cache, but still scan the
+matrices; reusing the saved reference object avoids those scans too. Do not
+download guide-level or raw screens for this workflow.
+
+On R 4.3/Bioconductor 3.18, the standard Bioconductor installation supplies
+`depmap` 1.16, which lacks the required APIs. Use a newer compatible
+R/Bioconductor, the `files=` route above, or the source revision verified in
+this implementation environment:
+
+```{r optional-install, eval=FALSE}
+remotes::install_github(
+    "UCLouvain-CBIO/depmap@735fa8971fd79ec746a43d354073701b3165e58d"
+)
+```
+
+For a newer release, obtain its official files from the
+[DepMap portal](https://depmap.org/portal/data_page/), keep all three from the
+same release, and supply their actual paths, release label and source:
+
+```{r portal-files, eval=FALSE}
+# Set these to the files and release you actually downloaded.
+portal_files <- setNames(file.path("/path/to/release", file_names), file_names)
+portal_reference <- get_depmap_reference("ACH-000551", files = portal_files,
+    release = "YOUR VERIFIED RELEASE LABEL", source = "YOUR OFFICIAL SOURCE URL")
+portal_reference$provenance
+```
+
+**26Q3 file schemas were not verified in this run**: the official metadata
+endpoint required human verification. This example verifies the 24Q2 layout
+only, with models in rows and `SYMBOL (EntrezID)` gene columns. Inspect newer
+headers, model identity, coverage and checksums before using the result;
+a changed format requires checking compatibility rather than relabeling
+24Q2 as a newer release. No release or assay fallback occurs.
+
+# Sources and session
+
+- Broad DepMap (2024). [DepMap 24Q2 Public](https://doi.org/10.25452/figshare.plus.25880521).
+- Morgens DW et al. (2016). [Systematic comparison of CRISPR/Cas9 and RNAi
+  screens for essential genes](https://doi.org/10.1038/nbt.3567).
+- Tsherniak A et al. (2017). [Defining a cancer dependency map](https://doi.org/10.1016/j.cell.2017.06.010).
+- [depmap file retrieval and cache documentation](https://uclouvain-cbio.github.io/depmap/reference/DepMapFiles.html).
+- Broad's explanation of [dependency probabilities versus p-values](https://forum.depmap.org/t/crispr-ko-screens/4010).
+
+```{r session}
+sessionInfo()
+```

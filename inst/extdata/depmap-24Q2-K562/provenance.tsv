@@ -1,0 +1,4 @@
+source_name	figshare_file_id	source_md5	derived_file	derived_md5
+CRISPRGeneDependency.csv	46489021	6aaa6c239dfb4060e5a68906644d9f69	CRISPRGeneDependency.csv.gz	3dc37aa017952683139300427cebe4dd
+CRISPRGeneEffect.csv	46489063	d10d73692672380b3792231549e97d5a	CRISPRGeneEffect.csv.gz	b248d9d47a9926899c01225a9bf1cab5
+Model.csv	46489732	e5b60d1ce7636542d93f45494019eded	Model.csv.gz	bebb718e32d10f2195bb276a1489b3f2
